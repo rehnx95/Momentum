@@ -29,6 +29,7 @@ import ProfileSettings from "./components/ProfileSettings";
 import ActivityHeatmap from "./components/ActivityHeatmap";
 import TrackSheetBrand from "./components/TrackSheetBrand";
 import Tooltip from "./components/Tooltip";
+import DailyTracker from "./components/DailyTracker";
 import {
   countSheetProblems,
   parseSheet,
@@ -3020,6 +3021,8 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           className="dashboard-content flex-1 min-w-0 overflow-y-auto pr-2"
           style={{ maxHeight: "calc(100vh - 120px)" }}
         >
+          <DailyTracker user={user} />
+
           <div className="tracker-toolbar flex items-center gap-2 mb-4 flex-wrap">
             <div className="relative w-full sm:hidden">
               <Search
