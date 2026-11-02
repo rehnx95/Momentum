@@ -53,6 +53,9 @@ export default function DailyTracker({ user }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [viewMode, setViewMode] = useState("daily");
+  const [allLogs, setAllLogs] = useState([]);
+  const [allLogsLoading, setAllLogsLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -125,6 +128,47 @@ export default function DailyTracker({ user }) {
     }));
   };
 
+  useEffect(() => {
+    if (viewMode !== "full" || !user?.id) return undefined;
+    let active = true;
+    setAllLogsLoading(true);
+    supabase
+      .from("daily_logs")
+      .select("date, sleep_time, wake_time, dsa_slots, backend_slots, dsa_hours, backend_hours, updated_at")
+      .eq("user_id", user.id)
+      .order("date", { ascending: false })
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) throw error;
+        setAllLogs(data || []);
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error("Failed to load full daily log:", error);
+        setMessage("Could not load the full log.");
+      })
+      .finally(() => {
+        if (active) setAllLogsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [user.id, viewMode]);
+
+  const openDailyDate = (selectedDate) => {
+    setDate(selectedDate);
+    setViewMode("daily");
+  };
+
+  const formatSlots = (slots) => {
+    const normalized = normalizeSlots(slots);
+    if (!normalized.length) return "-";
+    return normalized
+      .filter((slot) => slot.start || slot.end)
+      .map((slot) => `${slot.start || "?"}-${slot.end || "?"}`)
+      .join(", ");
+  };
+
   const saveLog = async () => {
     setSaving(true);
     setMessage("");
@@ -174,20 +218,46 @@ export default function DailyTracker({ user }) {
       <div className="daily-tracker-header">
         <div>
           <p className="daily-eyebrow">Daily log</p>
-          <h2 id="daily-log-title">Sleep and study slots</h2>
+          <h2 id="daily-log-title">
+            {viewMode === "daily" ? "Sleep and study slots" : "Full study log"}
+          </h2>
         </div>
-        <label className="daily-date">
-          <CalendarDays size={16} />
-          <span className="sr-only">Log date</span>
-          <input
-            type="date"
-            value={date}
-            max={getLocalDateKey()}
-            onChange={(event) => setDate(event.target.value)}
-          />
-        </label>
+        <div className="daily-view-actions">
+          <div className="daily-view-switch" aria-label="Daily log view">
+            <button
+              type="button"
+              className={viewMode === "daily" ? "active" : ""}
+              aria-pressed={viewMode === "daily"}
+              onClick={() => setViewMode("daily")}
+            >
+              Day
+            </button>
+            <button
+              type="button"
+              className={viewMode === "full" ? "active" : ""}
+              aria-pressed={viewMode === "full"}
+              onClick={() => setViewMode("full")}
+            >
+              Full log
+            </button>
+          </div>
+          {viewMode === "daily" && (
+            <label className="daily-date">
+              <CalendarDays size={16} />
+              <span className="sr-only">Log date</span>
+              <input
+                type="date"
+                value={date}
+                max={getLocalDateKey()}
+                onChange={(event) => setDate(event.target.value)}
+              />
+            </label>
+          )}
+        </div>
       </div>
 
+      {viewMode === "daily" ? (
+        <>
       <div className="daily-grid">
         {field("Sleep", "sleep_time", "time")}
         {field("Wake", "wake_time", "time")}
@@ -249,7 +319,6 @@ export default function DailyTracker({ user }) {
           <button type="button" className="slot-add" onClick={() => addSlot("backend")}><Plus size={14} /> Add Backend slot</button>
         </div>
       </div>
-
       <div className="daily-tracker-footer">
         <p className={message ? "daily-message" : "daily-message is-empty"} role="status">
           {message || "\u00a0"}
@@ -259,6 +328,53 @@ export default function DailyTracker({ user }) {
           {saving ? "Saving..." : "Save daily log"}
         </button>
       </div>
+        </>
+      ) : (
+        <div className="daily-full-log">
+          {allLogsLoading ? (
+            <p className="daily-full-empty">Loading full log...</p>
+          ) : allLogs.length === 0 ? (
+            <p className="daily-full-empty">No saved daily logs yet.</p>
+          ) : (
+            <div className="daily-log-table-wrap">
+              <table className="daily-log-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Sleep</th>
+                    <th>Wake</th>
+                    <th>DSA slots</th>
+                    <th>DSA hours</th>
+                    <th>Backend slots</th>
+                    <th>Backend hours</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allLogs.map((row) => (
+                    <tr key={row.date}>
+                      <td>
+                        <button type="button" className="daily-log-date-link" onClick={() => openDailyDate(row.date)}>
+                          {new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </button>
+                      </td>
+                      <td>{row.sleep_time || "-"}</td>
+                      <td>{row.wake_time || "-"}</td>
+                      <td className="daily-log-slots">{formatSlots(row.dsa_slots)}</td>
+                      <td>{row.dsa_hours == null ? "-" : `${Number(row.dsa_hours)} hr`}</td>
+                      <td className="daily-log-slots">{formatSlots(row.backend_slots)}</td>
+                      <td>{row.backend_hours == null ? "-" : `${Number(row.backend_hours)} hr`}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }

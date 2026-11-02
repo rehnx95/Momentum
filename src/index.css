@@ -1454,9 +1454,102 @@ input:focus-visible {
   opacity: 0.6;
 }
 
+.daily-view-actions,
+.daily-view-switch {
+  display: flex;
+  align-items: center;
+}
+
+.daily-view-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.daily-view-switch {
+  border: 1px solid var(--border, #383838);
+  border-radius: 0.65rem;
+  padding: 0.2rem;
+}
+
+.daily-view-switch button {
+  min-height: 1.85rem;
+  border-radius: 0.45rem;
+  padding: 0 0.65rem;
+  color: var(--muted, #A1A1A1);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.daily-view-switch button.active {
+  background: var(--text, #EDEDED);
+  color: var(--page, #0A0A0A);
+}
+
+.daily-full-log {
+  margin-top: 0.25rem;
+}
+
+.daily-full-empty {
+  margin: 0;
+  border: 1px dashed var(--border, #383838);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  color: var(--muted, #A1A1A1);
+  text-align: center;
+  font-size: 0.78rem;
+}
+
+.daily-log-table-wrap {
+  overflow-x: auto;
+}
+
+.daily-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+}
+
+.daily-log-table th,
+.daily-log-table td {
+  border-bottom: 1px solid var(--border, #262626);
+  padding: 0.75rem 0.55rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.daily-log-table th {
+  color: var(--muted, #A1A1A1);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.daily-log-table td {
+  color: var(--text, #EDEDED);
+}
+
+.daily-log-slots {
+  white-space: normal;
+  min-width: 9rem;
+}
+
+.daily-log-date-link {
+  color: var(--accent, #EDEDED);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+}
+
+.daily-log-date-link:hover {
+  text-decoration-color: currentColor;
+}
+
 @media (max-width: 700px) {
   .daily-tracker-header {
     align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .daily-grid,
