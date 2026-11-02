@@ -48,6 +48,25 @@ function formatHours(hours) {
   return hours % 1 === 0 ? String(hours) : hours.toFixed(2).replace(/0$/, "");
 }
 
+function mergeTaskTemplates(savedTasks, templates) {
+  const savedMap = new Map(
+    (Array.isArray(savedTasks) ? savedTasks : []).map((task) => [task.id, task]),
+  );
+  return templates.map((template) => {
+    const saved = savedMap.get(template.id);
+    return {
+      id: template.id,
+      name: template.name,
+      slots: normalizeSlots(saved?.slots),
+    };
+  });
+}
+
+function createTaskId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 export default function DailyTracker({ user }) {
   const [date, setDate] = useState(() => getLocalDateKey());
   const [log, setLog] = useState(() => emptyLog(getLocalDateKey()));
@@ -111,7 +130,7 @@ export default function DailyTracker({ user }) {
                 ...data,
                 dsa_slots: normalizeSlots(data.dsa_slots),
                 backend_slots: normalizeSlots(data.backend_slots),
-                custom_tasks: Array.isArray(data.custom_tasks) ? data.custom_tasks : [],
+                custom_tasks: mergeTaskTemplates(data.custom_tasks, profileCustomTasks),
               }
             : {
                 ...emptyLog(date),
@@ -209,7 +228,7 @@ export default function DailyTracker({ user }) {
   const addCustomTask = () => {
     const name = newTaskName.trim();
     if (!name) return;
-    const id = crypto.randomUUID();
+    const id = createTaskId();
     setLog((current) => ({
       ...current,
       custom_tasks: [
@@ -244,6 +263,18 @@ export default function DailyTracker({ user }) {
         task.id === taskId ? update(task) : task,
       ),
     }));
+  };
+
+  const saveCustomTaskName = (taskId, name) => {
+    const nextName = name.trim();
+    if (!nextName) return;
+    const nextTemplates = profileCustomTasks.map((task) =>
+      task.id === taskId ? { ...task, name: nextName } : task,
+    );
+    setProfileCustomTasks(nextTemplates);
+    savePreferences({ custom_tasks: nextTemplates }).catch((error) =>
+      console.error("Failed to save custom task name:", error),
+    );
   };
 
   useEffect(() => {
@@ -478,6 +509,7 @@ export default function DailyTracker({ user }) {
                 aria-label="Custom task name"
                 value={task.name}
                 onChange={(event) => updateCustomTask(task.id, (current) => ({ ...current, name: event.target.value }))}
+                onBlur={(event) => saveCustomTaskName(task.id, event.target.value)}
               />
               <strong>{formatHours(totalSlots(task.slots || []))} hr</strong>
               <button type="button" className="track-delete" aria-label={`Delete ${task.name}`} onClick={() => removeCustomTask(task.id)}>
@@ -529,11 +561,14 @@ export default function DailyTracker({ user }) {
                     <th>Date</th>
                     <th>Sleep</th>
                     <th>Wake</th>
-                    <th>DSA slots</th>
-                    <th>DSA hours</th>
-                    <th>Backend slots</th>
-                    <th>Backend hours</th>
-                    <th>Custom tasks</th>
+                    {dsaEnabled && <><th>DSA slots</th><th>DSA hours</th></>}
+                    {backendEnabled && <><th>Backend slots</th><th>Backend hours</th></>}
+                    {profileCustomTasks.map((task) => (
+                      <th key={task.id}>{task.name} slots</th>
+                    ))}
+                    {profileCustomTasks.map((task) => (
+                      <th key={`${task.id}-hours`}>{task.name} hours</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -550,11 +585,37 @@ export default function DailyTracker({ user }) {
                       </td>
                       <td>{row.sleep_time || "-"}</td>
                       <td>{row.wake_time || "-"}</td>
-                      <td className="daily-log-slots">{formatSlots(row.dsa_slots)}</td>
-                      <td>{row.dsa_hours == null ? "-" : `${Number(row.dsa_hours)} hr`}</td>
-                      <td className="daily-log-slots">{formatSlots(row.backend_slots)}</td>
-                      <td>{row.backend_hours == null ? "-" : `${Number(row.backend_hours)} hr`}</td>
-                      <td className="daily-log-slots">{formatCustomTasks(row.custom_tasks)}</td>
+                      {dsaEnabled && (
+                        <>
+                          <td className="daily-log-slots">{formatSlots(row.dsa_slots)}</td>
+                          <td>{row.dsa_hours == null ? "-" : `${Number(row.dsa_hours)} hr`}</td>
+                        </>
+                      )}
+                      {backendEnabled && (
+                        <>
+                          <td className="daily-log-slots">{formatSlots(row.backend_slots)}</td>
+                          <td>{row.backend_hours == null ? "-" : `${Number(row.backend_hours)} hr`}</td>
+                        </>
+                      )}
+                      {profileCustomTasks.map((taskTemplate) => {
+                        const task = (Array.isArray(row.custom_tasks) ? row.custom_tasks : [])
+                          .find((item) => item.id === taskTemplate.id);
+                        return (
+                          <td className="daily-log-slots" key={taskTemplate.id}>
+                            {task ? formatSlots(task.slots) : "-"}
+                          </td>
+                        );
+                      })}
+                      {profileCustomTasks.map((taskTemplate) => {
+                        const task = (Array.isArray(row.custom_tasks) ? row.custom_tasks : [])
+                          .find((item) => item.id === taskTemplate.id);
+                        const hours = totalSlots(normalizeSlots(task?.slots));
+                        return (
+                          <td key={`${taskTemplate.id}-hours`}>
+                            {hours ? `${formatHours(hours)} hr` : "-"}
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))}
                 </tbody>
