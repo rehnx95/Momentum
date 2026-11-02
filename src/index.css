@@ -1500,50 +1500,86 @@ input:focus-visible {
   font-size: 0.78rem;
 }
 
-.daily-log-table-wrap {
-  overflow-x: auto;
+.daily-log-cards {
+  display: grid;
+  gap: 0.85rem;
 }
 
-.daily-log-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.76rem;
+.daily-log-card {
+  border: 1px solid var(--border, #262626);
+  border-radius: 0.85rem;
+  background: var(--surface, #0A0A0A);
+  padding: 0.85rem;
 }
 
-.daily-log-table th,
-.daily-log-table td {
-  border-bottom: 1px solid var(--border, #262626);
-  padding: 0.75rem 0.55rem;
-  text-align: left;
-  white-space: nowrap;
+.daily-log-card-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+  color: var(--text, #EDEDED);
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
-.daily-log-table th {
+.daily-log-card-date:hover {
+  text-decoration: underline;
+}
+
+.daily-log-basics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-bottom: 0.55rem;
+}
+
+.daily-log-basics div,
+.daily-log-task div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.daily-log-basics div {
+  border: 1px solid var(--border, #262626);
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.65rem;
+}
+
+.daily-log-basics span,
+.daily-log-task div span {
   color: var(--muted, #A1A1A1);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
-.daily-log-table td {
+.daily-log-basics strong,
+.daily-log-task div strong {
   color: var(--text, #EDEDED);
+  font-size: 0.76rem;
 }
 
-.daily-log-slots {
-  white-space: normal;
-  min-width: 9rem;
+.daily-log-task-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
 }
 
-.daily-log-date-link {
-  color: var(--accent, #EDEDED);
-  font-weight: 700;
-  text-decoration: underline;
-  text-decoration-color: transparent;
+.daily-log-task {
+  min-width: 0;
+  border: 1px solid var(--border, #262626);
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.65rem;
 }
 
-.daily-log-date-link:hover {
-  text-decoration-color: currentColor;
+.daily-log-task p {
+  margin: 0.45rem 0 0;
+  color: var(--text, #EDEDED);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .daily-hide-button,
@@ -1603,6 +1639,15 @@ input:focus-visible {
   border-bottom-color: var(--accent, #EDEDED);
 }
 
+.daily-new-task {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 5rem;
+  margin-bottom: 0.75rem;
+  box-sizing: border-box;
+}
+
 .daily-new-task label {
   display: block;
   margin-bottom: 0.35rem;
@@ -1648,6 +1693,20 @@ input:focus-visible {
   .daily-grid,
   .daily-study-grid {
     grid-template-columns: 1fr;
+  }
+
+  .daily-log-basics,
+  .daily-log-task-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .daily-new-task-row {
+    flex-direction: column;
+  }
+
+  .daily-new-task-row button {
+    justify-content: center;
+    min-height: 2.35rem;
   }
 
   .daily-slot-row {

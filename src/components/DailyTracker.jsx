@@ -433,6 +433,18 @@ export default function DailyTracker({ user }) {
         {field("Wake", "wake_time", "time")}
       </div>
 
+      <div className="daily-study-block daily-new-task">
+        <div>
+          <p className="daily-eyebrow">Create task</p>
+          <h3>Custom study track</h3>
+        </div>
+        <label htmlFor="new-daily-task" className="sr-only">Custom task name</label>
+        <div className="daily-new-task-row">
+          <input id="new-daily-task" type="text" value={newTaskName} onChange={(event) => setNewTaskName(event.target.value)} placeholder="e.g. System Design" onKeyDown={(event) => { if (event.key === "Enter") addCustomTask(); }} />
+          <button type="button" onClick={addCustomTask} disabled={!newTaskName.trim()}><Plus size={14} /> Add task</button>
+        </div>
+      </div>
+
       <div className="daily-study-grid">
         {dsaEnabled && (
         <div className="daily-study-block">
@@ -529,13 +541,6 @@ export default function DailyTracker({ user }) {
             <button type="button" className="slot-add" onClick={() => updateCustomTask(task.id, (current) => ({ ...current, slots: [...(current.slots || []), { start: "", end: "" }] }))}><Plus size={14} /> Add slot</button>
           </div>
         ))}
-        <div className="daily-study-block daily-new-task">
-          <label htmlFor="new-daily-task"><span>Custom task</span></label>
-          <div className="daily-new-task-row">
-            <input id="new-daily-task" type="text" value={newTaskName} onChange={(event) => setNewTaskName(event.target.value)} placeholder="e.g. System Design" onKeyDown={(event) => { if (event.key === "Enter") addCustomTask(); }} />
-            <button type="button" onClick={addCustomTask} disabled={!newTaskName.trim()}><Plus size={14} /> Add task</button>
-          </div>
-        </div>
       </div>
       <div className="daily-tracker-footer">
         <p className={message ? "daily-message" : "daily-message is-empty"} role="status">
@@ -554,72 +559,54 @@ export default function DailyTracker({ user }) {
           ) : allLogs.length === 0 ? (
             <p className="daily-full-empty">No saved daily logs yet.</p>
           ) : (
-            <div className="daily-log-table-wrap">
-              <table className="daily-log-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Sleep</th>
-                    <th>Wake</th>
-                    {dsaEnabled && <><th>DSA slots</th><th>DSA hours</th></>}
-                    {backendEnabled && <><th>Backend slots</th><th>Backend hours</th></>}
-                    {profileCustomTasks.map((task) => (
-                      <th key={task.id}>{task.name} slots</th>
-                    ))}
-                    {profileCustomTasks.map((task) => (
-                      <th key={`${task.id}-hours`}>{task.name} hours</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {allLogs.map((row) => (
-                    <tr key={row.date}>
-                      <td>
-                        <button type="button" className="daily-log-date-link" onClick={() => openDailyDate(row.date)}>
-                          {new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </button>
-                      </td>
-                      <td>{row.sleep_time || "-"}</td>
-                      <td>{row.wake_time || "-"}</td>
-                      {dsaEnabled && (
-                        <>
-                          <td className="daily-log-slots">{formatSlots(row.dsa_slots)}</td>
-                          <td>{row.dsa_hours == null ? "-" : `${Number(row.dsa_hours)} hr`}</td>
-                        </>
-                      )}
-                      {backendEnabled && (
-                        <>
-                          <td className="daily-log-slots">{formatSlots(row.backend_slots)}</td>
-                          <td>{row.backend_hours == null ? "-" : `${Number(row.backend_hours)} hr`}</td>
-                        </>
-                      )}
-                      {profileCustomTasks.map((taskTemplate) => {
-                        const task = (Array.isArray(row.custom_tasks) ? row.custom_tasks : [])
-                          .find((item) => item.id === taskTemplate.id);
-                        return (
-                          <td className="daily-log-slots" key={taskTemplate.id}>
-                            {task ? formatSlots(task.slots) : "-"}
-                          </td>
-                        );
+            <div className="daily-log-cards">
+              {allLogs.map((row) => (
+                <article className="daily-log-card" key={row.date}>
+                  <button type="button" className="daily-log-card-date" onClick={() => openDailyDate(row.date)}>
+                    <CalendarDays size={16} />
+                    <span>
+                      {new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
                       })}
-                      {profileCustomTasks.map((taskTemplate) => {
-                        const task = (Array.isArray(row.custom_tasks) ? row.custom_tasks : [])
-                          .find((item) => item.id === taskTemplate.id);
-                        const hours = totalSlots(normalizeSlots(task?.slots));
-                        return (
-                          <td key={`${taskTemplate.id}-hours`}>
-                            {hours ? `${formatHours(hours)} hr` : "-"}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                    </span>
+                  </button>
+
+                  <div className="daily-log-basics">
+                    <div><span>Sleep</span><strong>{row.sleep_time || "-"}</strong></div>
+                    <div><span>Wake</span><strong>{row.wake_time || "-"}</strong></div>
+                  </div>
+
+                  <div className="daily-log-task-grid">
+                    {dsaEnabled && (
+                      <div className="daily-log-task">
+                        <div><span>DSA</span><strong>{row.dsa_hours == null ? "0 hr" : `${Number(row.dsa_hours)} hr`}</strong></div>
+                        <p>{formatSlots(row.dsa_slots) === "-" ? "No slots recorded" : formatSlots(row.dsa_slots)}</p>
+                      </div>
+                    )}
+                    {backendEnabled && (
+                      <div className="daily-log-task">
+                        <div><span>Backend</span><strong>{row.backend_hours == null ? "0 hr" : `${Number(row.backend_hours)} hr`}</strong></div>
+                        <p>{formatSlots(row.backend_slots) === "-" ? "No slots recorded" : formatSlots(row.backend_slots)}</p>
+                      </div>
+                    )}
+                    {profileCustomTasks.map((taskTemplate) => {
+                      const task = (Array.isArray(row.custom_tasks) ? row.custom_tasks : [])
+                        .find((item) => item.id === taskTemplate.id);
+                      const slots = normalizeSlots(task?.slots);
+                      const hours = totalSlots(slots);
+                      return (
+                        <div className="daily-log-task" key={taskTemplate.id}>
+                          <div><span>{taskTemplate.name}</span><strong>{hours ? `${formatHours(hours)} hr` : "0 hr"}</strong></div>
+                          <p>{formatSlots(slots) === "-" ? "No slots recorded" : formatSlots(slots)}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </article>
+              ))}
             </div>
           )}
         </div>
