@@ -16,6 +16,7 @@ function emptyLog(date) {
     wake_time: "",
     dsa_slots: [],
     backend_slots: [],
+    custom_tasks: [],
   };
 }
 
@@ -56,6 +57,38 @@ export default function DailyTracker({ user }) {
   const [viewMode, setViewMode] = useState("daily");
   const [allLogs, setAllLogs] = useState([]);
   const [allLogsLoading, setAllLogsLoading] = useState(false);
+  const [dailyLogVisible, setDailyLogVisible] = useState(true);
+  const [dsaEnabled, setDsaEnabled] = useState(true);
+  const [backendEnabled, setBackendEnabled] = useState(true);
+  const [profileCustomTasks, setProfileCustomTasks] = useState([]);
+  const [newTaskName, setNewTaskName] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    supabase
+      .from("profiles")
+      .select("daily_log_visible, dsa_enabled, backend_enabled, custom_tasks")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) throw error;
+        if (data) {
+          setDailyLogVisible(data.daily_log_visible !== false);
+          setDsaEnabled(data.dsa_enabled !== false);
+          setBackendEnabled(data.backend_enabled !== false);
+          setProfileCustomTasks(
+            Array.isArray(data.custom_tasks)
+              ? data.custom_tasks.map((task) => ({ id: task.id, name: task.name }))
+              : [],
+          );
+        }
+      })
+      .catch((error) => console.error("Failed to load daily log preferences:", error));
+    return () => {
+      active = false;
+    };
+  }, [user.id]);
 
   useEffect(() => {
     let active = true;
@@ -78,8 +111,16 @@ export default function DailyTracker({ user }) {
                 ...data,
                 dsa_slots: normalizeSlots(data.dsa_slots),
                 backend_slots: normalizeSlots(data.backend_slots),
+                custom_tasks: Array.isArray(data.custom_tasks) ? data.custom_tasks : [],
               }
-            : emptyLog(date),
+            : {
+                ...emptyLog(date),
+                custom_tasks: profileCustomTasks.map((task) => ({
+                  id: task.id,
+                  name: task.name,
+                  slots: [],
+                })),
+              },
         );
       })
       .catch((error) => {
@@ -94,7 +135,7 @@ export default function DailyTracker({ user }) {
     return () => {
       active = false;
     };
-  }, [user.id, date]);
+  }, [user.id, date, profileCustomTasks]);
 
   const updateField = (field, value) => {
     setLog((current) => ({ ...current, [field]: value }));
@@ -128,13 +169,90 @@ export default function DailyTracker({ user }) {
     }));
   };
 
+  const savePreferences = async (changes) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update(changes)
+      .eq("id", user.id);
+    if (error) throw error;
+  };
+
+  const toggleVisibility = async () => {
+    const nextVisible = !dailyLogVisible;
+    setDailyLogVisible(nextVisible);
+    try {
+      await savePreferences({ daily_log_visible: nextVisible });
+    } catch (error) {
+      console.error("Failed to save daily log visibility:", error);
+      setDailyLogVisible(!nextVisible);
+    }
+  };
+
+  const toggleBuiltin = async (track) => {
+    if (track === "dsa") {
+      const nextEnabled = !dsaEnabled;
+      setDsaEnabled(nextEnabled);
+      await savePreferences({ dsa_enabled: nextEnabled }).catch((error) => {
+        console.error("Failed to save DSA preference:", error);
+        setDsaEnabled(!nextEnabled);
+      });
+    } else {
+      const nextEnabled = !backendEnabled;
+      setBackendEnabled(nextEnabled);
+      await savePreferences({ backend_enabled: nextEnabled }).catch((error) => {
+        console.error("Failed to save Backend preference:", error);
+        setBackendEnabled(!nextEnabled);
+      });
+    }
+  };
+
+  const addCustomTask = () => {
+    const name = newTaskName.trim();
+    if (!name) return;
+    const id = crypto.randomUUID();
+    setLog((current) => ({
+      ...current,
+      custom_tasks: [
+        ...current.custom_tasks,
+        { id, name, slots: [] },
+      ],
+    }));
+    const nextTemplates = [...profileCustomTasks, { id, name }];
+    setProfileCustomTasks(nextTemplates);
+    savePreferences({ custom_tasks: nextTemplates }).catch((error) =>
+      console.error("Failed to save custom task preference:", error),
+    );
+    setNewTaskName("");
+  };
+
+  const removeCustomTask = (taskId) => {
+    setLog((current) => ({
+      ...current,
+      custom_tasks: current.custom_tasks.filter((task) => task.id !== taskId),
+    }));
+    const nextTemplates = profileCustomTasks.filter((task) => task.id !== taskId);
+    setProfileCustomTasks(nextTemplates);
+    savePreferences({ custom_tasks: nextTemplates }).catch((error) =>
+      console.error("Failed to save custom task preference:", error),
+    );
+  };
+
+  const updateCustomTask = (taskId, update) => {
+    setLog((current) => ({
+      ...current,
+      custom_tasks: current.custom_tasks.map((task) =>
+        task.id === taskId ? update(task) : task,
+      ),
+    }));
+  };
+
   useEffect(() => {
     if (viewMode !== "full" || !user?.id) return undefined;
     let active = true;
     setAllLogsLoading(true);
     supabase
       .from("daily_logs")
-      .select("date, sleep_time, wake_time, dsa_slots, backend_slots, dsa_hours, backend_hours, updated_at")
+      .select("date, sleep_time, wake_time, dsa_slots, backend_slots, custom_tasks, dsa_hours, backend_hours, updated_at")
       .eq("user_id", user.id)
       .order("date", { ascending: false })
       .then(({ data, error }) => {
@@ -169,6 +287,16 @@ export default function DailyTracker({ user }) {
       .join(", ");
   };
 
+  const formatCustomTasks = (tasks) => {
+    if (!Array.isArray(tasks) || tasks.length === 0) return "-";
+    return tasks
+      .map((task) => {
+        const slots = formatSlots(task.slots);
+        return `${task.name}${slots === "-" ? "" : `: ${slots}`}`;
+      })
+      .join("; ");
+  };
+
   const saveLog = async () => {
     setSaving(true);
     setMessage("");
@@ -180,6 +308,7 @@ export default function DailyTracker({ user }) {
         wake_time: log.wake_time || null,
         dsa_slots: log.dsa_slots,
         backend_slots: log.backend_slots,
+        custom_tasks: log.custom_tasks,
         dsa_hours: totalSlots(log.dsa_slots) || null,
         backend_hours: totalSlots(log.backend_slots) || null,
       };
@@ -223,6 +352,9 @@ export default function DailyTracker({ user }) {
           </h2>
         </div>
         <div className="daily-view-actions">
+          <button type="button" className="daily-hide-button" onClick={toggleVisibility}>
+            {dailyLogVisible ? "Hide section" : "Show section"}
+          </button>
           <div className="daily-view-switch" aria-label="Daily log view">
             <button
               type="button"
@@ -256,7 +388,14 @@ export default function DailyTracker({ user }) {
         </div>
       </div>
 
-      {viewMode === "daily" ? (
+      {!dailyLogVisible ? (
+        <div className="daily-full-empty">
+          Daily log is hidden.{" "}
+          <button type="button" className="slot-add" onClick={toggleVisibility}>
+            Show section
+          </button>
+        </div>
+      ) : viewMode === "daily" ? (
         <>
       <div className="daily-grid">
         {field("Sleep", "sleep_time", "time")}
@@ -264,11 +403,13 @@ export default function DailyTracker({ user }) {
       </div>
 
       <div className="daily-study-grid">
+        {dsaEnabled && (
         <div className="daily-study-block">
           <div className="daily-study-title">
             <Clock3 size={15} />
             <span>DSA</span>
             <strong>{formatHours(totalSlots(log.dsa_slots))} hr</strong>
+            <button type="button" className="track-delete" aria-label="Delete DSA track" onClick={() => toggleBuiltin("dsa")}><Trash2 size={14} /></button>
           </div>
           <div className="daily-slot-list">
             {log.dsa_slots.map((slot, index) => (
@@ -291,11 +432,14 @@ export default function DailyTracker({ user }) {
           </div>
           <button type="button" className="slot-add" onClick={() => addSlot("dsa")}><Plus size={14} /> Add DSA slot</button>
         </div>
+        )}
+        {backendEnabled && (
         <div className="daily-study-block">
           <div className="daily-study-title">
             <Clock3 size={15} />
             <span>Backend</span>
             <strong>{formatHours(totalSlots(log.backend_slots))} hr</strong>
+            <button type="button" className="track-delete" aria-label="Delete Backend track" onClick={() => toggleBuiltin("backend")}><Trash2 size={14} /></button>
           </div>
           <div className="daily-slot-list">
             {log.backend_slots.map((slot, index) => (
@@ -317,6 +461,48 @@ export default function DailyTracker({ user }) {
             {log.backend_slots.length === 0 && <p className="slot-empty">No Backend slots added.</p>}
           </div>
           <button type="button" className="slot-add" onClick={() => addSlot("backend")}><Plus size={14} /> Add Backend slot</button>
+        </div>
+        )}
+        {!dsaEnabled && (
+          <button type="button" className="builtin-restore" onClick={() => toggleBuiltin("dsa")}><Plus size={14} /> Add DSA track</button>
+        )}
+        {!backendEnabled && (
+          <button type="button" className="builtin-restore" onClick={() => toggleBuiltin("backend")}><Plus size={14} /> Add Backend track</button>
+        )}
+        {log.custom_tasks.map((task) => (
+          <div className="daily-study-block custom-task-block" key={task.id}>
+            <div className="daily-study-title">
+              <Clock3 size={15} />
+              <input
+                className="custom-task-name"
+                aria-label="Custom task name"
+                value={task.name}
+                onChange={(event) => updateCustomTask(task.id, (current) => ({ ...current, name: event.target.value }))}
+              />
+              <strong>{formatHours(totalSlots(task.slots || []))} hr</strong>
+              <button type="button" className="track-delete" aria-label={`Delete ${task.name}`} onClick={() => removeCustomTask(task.id)}>
+                <Trash2 size={14} />
+              </button>
+            </div>
+            <div className="daily-slot-list">
+              {(task.slots || []).map((slot, index) => (
+                <div className="daily-slot-row" key={`${task.id}-${index}`}>
+                  <label><span>From</span><input type="time" value={slot.start} onChange={(event) => updateCustomTask(task.id, (current) => ({ ...current, slots: (current.slots || []).map((item, itemIndex) => itemIndex === index ? { ...item, start: event.target.value } : item) }))} /></label>
+                  <label><span>To</span><input type="time" value={slot.end} onChange={(event) => updateCustomTask(task.id, (current) => ({ ...current, slots: (current.slots || []).map((item, itemIndex) => itemIndex === index ? { ...item, end: event.target.value } : item) }))} /></label>
+                  <span className="slot-hours">{formatHours(Number(durationHours(slot.start, slot.end)) || 0)} hr</span>
+                  <button type="button" className="slot-remove" aria-label={`Remove ${task.name} slot`} onClick={() => updateCustomTask(task.id, (current) => ({ ...current, slots: (current.slots || []).filter((_, slotIndex) => slotIndex !== index) }))}><Trash2 size={14} /></button>
+                </div>
+              ))}
+            </div>
+            <button type="button" className="slot-add" onClick={() => updateCustomTask(task.id, (current) => ({ ...current, slots: [...(current.slots || []), { start: "", end: "" }] }))}><Plus size={14} /> Add slot</button>
+          </div>
+        ))}
+        <div className="daily-study-block daily-new-task">
+          <label htmlFor="new-daily-task"><span>Custom task</span></label>
+          <div className="daily-new-task-row">
+            <input id="new-daily-task" type="text" value={newTaskName} onChange={(event) => setNewTaskName(event.target.value)} placeholder="e.g. System Design" onKeyDown={(event) => { if (event.key === "Enter") addCustomTask(); }} />
+            <button type="button" onClick={addCustomTask} disabled={!newTaskName.trim()}><Plus size={14} /> Add task</button>
+          </div>
         </div>
       </div>
       <div className="daily-tracker-footer">
@@ -347,6 +533,7 @@ export default function DailyTracker({ user }) {
                     <th>DSA hours</th>
                     <th>Backend slots</th>
                     <th>Backend hours</th>
+                    <th>Custom tasks</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -367,6 +554,7 @@ export default function DailyTracker({ user }) {
                       <td>{row.dsa_hours == null ? "-" : `${Number(row.dsa_hours)} hr`}</td>
                       <td className="daily-log-slots">{formatSlots(row.backend_slots)}</td>
                       <td>{row.backend_hours == null ? "-" : `${Number(row.backend_hours)} hr`}</td>
+                      <td className="daily-log-slots">{formatCustomTasks(row.custom_tasks)}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -19,27 +19,53 @@ CREATE TABLE IF NOT EXISTS public.daily_logs (
 );
 
 ALTER TABLE public.daily_logs
+  ADD COLUMN IF NOT EXISTS custom_tasks JSONB NOT NULL DEFAULT '[]'::JSONB;
+
+ALTER TABLE public.daily_logs
   ADD COLUMN IF NOT EXISTS dsa_slots JSONB NOT NULL DEFAULT '[]'::JSONB,
   ADD COLUMN IF NOT EXISTS backend_slots JSONB NOT NULL DEFAULT '[]'::JSONB;
 
-UPDATE public.daily_logs
-SET dsa_slots = CASE
-  WHEN dsa_start IS NOT NULL OR dsa_end IS NOT NULL
-    THEN jsonb_build_array(jsonb_build_object(
-      'start', COALESCE(to_char(dsa_start, 'HH24:MI'), ''),
-      'end', COALESCE(to_char(dsa_end, 'HH24:MI'), '')
-    ))
-  ELSE '[]'::JSONB
-END,
-backend_slots = CASE
-  WHEN backend_start IS NOT NULL OR backend_end IS NOT NULL
-    THEN jsonb_build_array(jsonb_build_object(
-      'start', COALESCE(to_char(backend_start, 'HH24:MI'), ''),
-      'end', COALESCE(to_char(backend_end, 'HH24:MI'), '')
-    ))
-  ELSE '[]'::JSONB
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'daily_logs'
+      AND column_name = 'dsa_start'
+  ) THEN
+    UPDATE public.daily_logs
+    SET dsa_slots = CASE
+      WHEN dsa_start IS NOT NULL OR dsa_end IS NOT NULL
+        THEN jsonb_build_array(jsonb_build_object(
+          'start', COALESCE(to_char(dsa_start, 'HH24:MI'), ''),
+          'end', COALESCE(to_char(dsa_end, 'HH24:MI'), '')
+        ))
+      ELSE '[]'::JSONB
+    END
+    WHERE dsa_slots = '[]'::JSONB;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'daily_logs'
+      AND column_name = 'backend_start'
+  ) THEN
+    UPDATE public.daily_logs
+    SET backend_slots = CASE
+      WHEN backend_start IS NOT NULL OR backend_end IS NOT NULL
+        THEN jsonb_build_array(jsonb_build_object(
+          'start', COALESCE(to_char(backend_start, 'HH24:MI'), ''),
+          'end', COALESCE(to_char(backend_end, 'HH24:MI'), '')
+        ))
+      ELSE '[]'::JSONB
+    END
+    WHERE backend_slots = '[]'::JSONB;
+  END IF;
 END
-WHERE dsa_slots = '[]'::JSONB OR backend_slots = '[]'::JSONB;
+$$;
 
 ALTER TABLE public.daily_logs
   DROP COLUMN IF EXISTS height_cm,

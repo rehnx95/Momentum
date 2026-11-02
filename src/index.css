@@ -1546,6 +1546,99 @@ input:focus-visible {
   text-decoration-color: currentColor;
 }
 
+.daily-hide-button,
+.builtin-restore {
+  min-height: 2rem;
+  border: 1px solid var(--border, #383838);
+  border-radius: 0.55rem;
+  padding: 0 0.65rem;
+  color: var(--muted, #A1A1A1);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.daily-hide-button:hover,
+.builtin-restore:hover {
+  border-color: var(--border-strong, #666);
+  color: var(--text, #EDEDED);
+}
+
+.track-delete {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  margin-left: 0.15rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.45rem;
+  color: var(--muted, #A1A1A1);
+}
+
+.track-delete:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #F87171;
+}
+
+.builtin-restore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 4rem;
+}
+
+.custom-task-name {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--text, #EDEDED);
+  font-size: 0.78rem;
+  font-weight: 700;
+  outline: none;
+}
+
+.custom-task-name:focus {
+  border-bottom-color: var(--accent, #EDEDED);
+}
+
+.daily-new-task label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--muted, #A1A1A1);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.daily-new-task-row {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.daily-new-task-row input {
+  min-width: 0;
+  flex: 1;
+  height: 2.35rem;
+  border: 1px solid var(--border, #383838);
+  border-radius: 0.65rem;
+  padding: 0 0.55rem;
+}
+
+.daily-new-task-row button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 0.65rem;
+  background: var(--text, #EDEDED);
+  color: var(--page, #0A0A0A);
+  padding: 0 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 @media (max-width: 700px) {
   .daily-tracker-header {
     align-items: flex-start;
