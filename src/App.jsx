@@ -2578,6 +2578,8 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 </div>
               </div>
 
+              <DailyTracker user={user} />
+
               <section
                 className="surface-card mb-8 rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
                 aria-labelledby="profile-sheet-progress"
@@ -3021,8 +3023,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           className="dashboard-content flex-1 min-w-0 overflow-y-auto pr-2"
           style={{ maxHeight: "calc(100vh - 120px)" }}
         >
-          <DailyTracker user={user} />
-
           <div className="tracker-toolbar flex items-center gap-2 mb-4 flex-wrap">
             <div className="relative w-full sm:hidden">
               <Search

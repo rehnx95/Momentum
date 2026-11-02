@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CalendarDays, Clock3, Save } from "lucide-react";
+import { CalendarDays, Clock3, Plus, Save, Trash2 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 function getLocalDateKey(date = new Date()) {
@@ -14,13 +14,8 @@ function emptyLog(date) {
     date,
     sleep_time: "",
     wake_time: "",
-    dsa_start: "",
-    dsa_end: "",
-    dsa_hours: "",
-    backend_start: "",
-    backend_end: "",
-    backend_hours: "",
-    height_cm: "",
+    dsa_slots: [],
+    backend_slots: [],
   };
 }
 
@@ -31,6 +26,25 @@ function durationHours(start, end) {
   let minutes = endHour * 60 + endMinute - (startHour * 60 + startMinute);
   if (minutes < 0) minutes += 24 * 60;
   return (minutes / 60).toFixed(2).replace(/\.?0+$/, "");
+}
+
+function normalizeSlots(slots) {
+  if (!Array.isArray(slots)) return [];
+  return slots.map((slot) => ({
+    start: slot.start || "",
+    end: slot.end || "",
+  }));
+}
+
+function totalSlots(slots) {
+  return slots.reduce((total, slot) => {
+    const hours = Number(durationHours(slot.start, slot.end));
+    return total + (Number.isFinite(hours) ? hours : 0);
+  }, 0);
+}
+
+function formatHours(hours) {
+  return hours % 1 === 0 ? String(hours) : hours.toFixed(2).replace(/0$/, "");
 }
 
 export default function DailyTracker({ user }) {
@@ -59,9 +73,8 @@ export default function DailyTracker({ user }) {
             ? {
                 ...emptyLog(date),
                 ...data,
-                dsa_hours: data.dsa_hours ?? "",
-                backend_hours: data.backend_hours ?? "",
-                height_cm: data.height_cm ?? "",
+                dsa_slots: normalizeSlots(data.dsa_slots),
+                backend_slots: normalizeSlots(data.backend_slots),
               }
             : emptyLog(date),
         );
@@ -81,16 +94,35 @@ export default function DailyTracker({ user }) {
   }, [user.id, date]);
 
   const updateField = (field, value) => {
-    setLog((current) => {
-      const next = { ...current, [field]: value };
-      if (field === "dsa_start" || field === "dsa_end") {
-        next.dsa_hours = durationHours(next.dsa_start, next.dsa_end);
-      }
-      if (field === "backend_start" || field === "backend_end") {
-        next.backend_hours = durationHours(next.backend_start, next.backend_end);
-      }
-      return next;
-    });
+    setLog((current) => ({ ...current, [field]: value }));
+  };
+
+  const updateSlot = (track, index, fieldName, value) => {
+    setLog((current) => ({
+      ...current,
+      [`${track}_slots`]: current[`${track}_slots`].map((slot, slotIndex) =>
+        slotIndex === index ? { ...slot, [fieldName]: value } : slot,
+      ),
+    }));
+  };
+
+  const addSlot = (track) => {
+    setLog((current) => ({
+      ...current,
+      [`${track}_slots`]: [
+        ...current[`${track}_slots`],
+        { start: "", end: "" },
+      ],
+    }));
+  };
+
+  const removeSlot = (track, index) => {
+    setLog((current) => ({
+      ...current,
+      [`${track}_slots`]: current[`${track}_slots`].filter(
+        (_, slotIndex) => slotIndex !== index,
+      ),
+    }));
   };
 
   const saveLog = async () => {
@@ -102,14 +134,10 @@ export default function DailyTracker({ user }) {
         date,
         sleep_time: log.sleep_time || null,
         wake_time: log.wake_time || null,
-        dsa_start: log.dsa_start || null,
-        dsa_end: log.dsa_end || null,
-        dsa_hours: log.dsa_hours === "" ? null : Number(log.dsa_hours),
-        backend_start: log.backend_start || null,
-        backend_end: log.backend_end || null,
-        backend_hours:
-          log.backend_hours === "" ? null : Number(log.backend_hours),
-        height_cm: log.height_cm === "" ? null : Number(log.height_cm),
+        dsa_slots: log.dsa_slots,
+        backend_slots: log.backend_slots,
+        dsa_hours: totalSlots(log.dsa_slots) || null,
+        backend_hours: totalSlots(log.backend_slots) || null,
       };
       const { error } = await supabase
         .from("daily_logs")
@@ -146,7 +174,7 @@ export default function DailyTracker({ user }) {
       <div className="daily-tracker-header">
         <div>
           <p className="daily-eyebrow">Daily log</p>
-          <h2 id="daily-log-title">Sleep, study, and measurements</h2>
+          <h2 id="daily-log-title">Sleep and study slots</h2>
         </div>
         <label className="daily-date">
           <CalendarDays size={16} />
@@ -163,7 +191,6 @@ export default function DailyTracker({ user }) {
       <div className="daily-grid">
         {field("Sleep", "sleep_time", "time")}
         {field("Wake", "wake_time", "time")}
-        {field("Height", "height_cm", "number", "cm")}
       </div>
 
       <div className="daily-study-grid">
@@ -171,23 +198,55 @@ export default function DailyTracker({ user }) {
           <div className="daily-study-title">
             <Clock3 size={15} />
             <span>DSA</span>
+            <strong>{formatHours(totalSlots(log.dsa_slots))} hr</strong>
           </div>
-          <div className="daily-slot-row">
-            {field("D slot start", "dsa_start", "time")}
-            {field("D slot end", "dsa_end", "time")}
-            {field("D hours", "dsa_hours", "number", "hr")}
+          <div className="daily-slot-list">
+            {log.dsa_slots.map((slot, index) => (
+              <div className="daily-slot-row" key={`dsa-${index}`}>
+                <label>
+                  <span>From</span>
+                  <input type="time" value={slot.start} disabled={loading} onChange={(event) => updateSlot("dsa", index, "start", event.target.value)} />
+                </label>
+                <label>
+                  <span>To</span>
+                  <input type="time" value={slot.end} disabled={loading} onChange={(event) => updateSlot("dsa", index, "end", event.target.value)} />
+                </label>
+                <span className="slot-hours">{formatHours(Number(durationHours(slot.start, slot.end)) || 0)} hr</span>
+                <button type="button" className="slot-remove" aria-label={`Remove DSA slot ${index + 1}`} onClick={() => removeSlot("dsa", index)}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+            {log.dsa_slots.length === 0 && <p className="slot-empty">No DSA slots added.</p>}
           </div>
+          <button type="button" className="slot-add" onClick={() => addSlot("dsa")}><Plus size={14} /> Add DSA slot</button>
         </div>
         <div className="daily-study-block">
           <div className="daily-study-title">
             <Clock3 size={15} />
             <span>Backend</span>
+            <strong>{formatHours(totalSlots(log.backend_slots))} hr</strong>
           </div>
-          <div className="daily-slot-row">
-            {field("B slot start", "backend_start", "time")}
-            {field("B slot end", "backend_end", "time")}
-            {field("B hours", "backend_hours", "number", "hr")}
+          <div className="daily-slot-list">
+            {log.backend_slots.map((slot, index) => (
+              <div className="daily-slot-row" key={`backend-${index}`}>
+                <label>
+                  <span>From</span>
+                  <input type="time" value={slot.start} disabled={loading} onChange={(event) => updateSlot("backend", index, "start", event.target.value)} />
+                </label>
+                <label>
+                  <span>To</span>
+                  <input type="time" value={slot.end} disabled={loading} onChange={(event) => updateSlot("backend", index, "end", event.target.value)} />
+                </label>
+                <span className="slot-hours">{formatHours(Number(durationHours(slot.start, slot.end)) || 0)} hr</span>
+                <button type="button" className="slot-remove" aria-label={`Remove Backend slot ${index + 1}`} onClick={() => removeSlot("backend", index)}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+            {log.backend_slots.length === 0 && <p className="slot-empty">No Backend slots added.</p>}
           </div>
+          <button type="button" className="slot-add" onClick={() => addSlot("backend")}><Plus size={14} /> Add Backend slot</button>
         </div>
       </div>
 
