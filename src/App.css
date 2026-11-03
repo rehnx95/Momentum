@@ -53,6 +53,17 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
+:root[data-theme="balance"] {
+  --color-page: #1A1D23;
+  --color-panel: #23262D;
+  --color-row-hover: #343840;
+  --color-border: #3D414A;
+  --color-text: #F1F3F5;
+  --color-muted: #B2B7C0;
+  --color-accent: #C8CDD4;
+  --shadow-md: 0 4px 10px -2px rgba(0, 0, 0, 0.24);
+}
+
 /* Base styles */
 body {
   margin: 0;
