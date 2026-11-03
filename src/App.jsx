@@ -2868,41 +2868,18 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             <Users size={17} />
             <span className="hidden sm:inline">People</span>
           </button>
-          <div className="theme-switch" aria-label="Color theme">
-            <Tooltip label="Light theme">
-              <button
-                type="button"
-                onClick={() => setTheme("light")}
-                aria-label="Use light theme"
-                aria-pressed={theme === "light"}
-                className={theme === "light" ? "active" : ""}
-              >
-                <Sun size={15} />
-              </button>
-            </Tooltip>
-            <Tooltip label="Balanced theme">
-              <button
-                type="button"
-                onClick={() => setTheme("balance")}
-                aria-label="Use balanced theme"
-                aria-pressed={theme === "balance"}
-                className={theme === "balance" ? "active" : ""}
-              >
-                <Contrast size={15} />
-              </button>
-            </Tooltip>
-            <Tooltip label="Dark theme">
-              <button
-                type="button"
-                onClick={() => setTheme("dark")}
-                aria-label="Use dark theme"
-                aria-pressed={theme === "dark"}
-                className={theme === "dark" ? "active" : ""}
-              >
-                <Moon size={15} />
-              </button>
-            </Tooltip>
-          </div>
+          <Tooltip label={`${theme === "light" ? "Balanced" : theme === "balance" ? "Dark" : "Light"} theme`}>
+            <button
+              type="button"
+              onClick={() => setTheme((currentTheme) =>
+                currentTheme === "light" ? "balance" : currentTheme === "balance" ? "dark" : "light"
+              )}
+              aria-label={`Current theme: ${theme}. Switch theme`}
+              className="theme-cycle-button"
+            >
+              {theme === "light" ? <Sun size={18} /> : theme === "balance" ? <Contrast size={18} /> : <Moon size={18} />}
+            </button>
+          </Tooltip>
           <Tooltip label="Open your profile">
             <button
               onClick={() => navigateTo("/profile")}

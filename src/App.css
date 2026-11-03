@@ -54,13 +54,13 @@
 }
 
 :root[data-theme="balance"] {
-  --color-page: #1A1D23;
-  --color-panel: #23262D;
-  --color-row-hover: #343840;
-  --color-border: #3D414A;
-  --color-text: #F1F3F5;
-  --color-muted: #B2B7C0;
-  --color-accent: #C8CDD4;
+  --color-page: color-mix(in srgb, #0B0B0F 50%, #F6F8FB 50%);
+  --color-panel: color-mix(in srgb, #15151B 50%, #FFFFFF 50%);
+  --color-row-hover: color-mix(in srgb, #1C1C24 50%, #F8FAFC 50%);
+  --color-border: color-mix(in srgb, #26262F 50%, #E2E8F0 50%);
+  --color-text: color-mix(in srgb, #E8E8EE 50%, #1E293B 50%);
+  --color-muted: color-mix(in srgb, #8A8A98 50%, #64748B 50%);
+  --color-accent: color-mix(in srgb, #6D5BF6 50%, #6D5BF6 50%);
   --shadow-md: 0 4px 10px -2px rgba(0, 0, 0, 0.24);
 }
 
