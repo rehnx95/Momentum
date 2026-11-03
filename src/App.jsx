@@ -5,7 +5,6 @@ import {
   ChevronRight,
   Sun,
   Moon,
-  Contrast,
   User,
   CheckSquare,
   SkipForward,
@@ -2815,7 +2814,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
     <>
     <div
       className={`dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300`}
-      data-theme={theme === "dark" ? undefined : theme}
+      data-theme={theme === "light" ? "light" : undefined}
     >
       <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-4">
@@ -2868,18 +2867,13 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             <Users size={17} />
             <span className="hidden sm:inline">People</span>
           </button>
-          <Tooltip label={`${theme === "light" ? "Balanced" : theme === "balance" ? "Dark" : "Light"} theme`}>
-            <button
-              type="button"
-              onClick={() => setTheme((currentTheme) =>
-                currentTheme === "light" ? "balance" : currentTheme === "balance" ? "dark" : "light"
-              )}
-              aria-label={`Current theme: ${theme}. Switch theme`}
-              className="theme-cycle-button"
-            >
-              {theme === "light" ? <Sun size={18} /> : theme === "balance" ? <Contrast size={18} /> : <Moon size={18} />}
-            </button>
-          </Tooltip>
+          <button
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            className="p-1.5 rounded-lg hover:bg-[#1F1F1F] text-[#A1A1A1] hover:text-[#EDEDED] transition-colors"
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <Tooltip label="Open your profile">
             <button
               onClick={() => navigateTo("/profile")}

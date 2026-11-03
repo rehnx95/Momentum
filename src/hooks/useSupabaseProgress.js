@@ -29,10 +29,7 @@ export function useSupabaseProgress() {
     }
   });
 
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return ['light', 'balance', 'dark'].includes(savedTheme) ? savedTheme : 'dark';
-  });
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
 
   // Auth state listener
   useEffect(() => {
@@ -114,8 +111,6 @@ export function useSupabaseProgress() {
     localStorage.setItem('theme', theme);
     if (theme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
-    } else if (theme === 'balance') {
-      document.documentElement.setAttribute('data-theme', 'balance');
     } else {
       document.documentElement.removeAttribute('data-theme');
     }

@@ -19,10 +19,7 @@ export function useProgress(user) {
   const activityRef = useRef(activityLog);
   const [loading, setLoading] = useState(Boolean(user));
   const [error, setError] = useState('');
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return ['light', 'balance', 'dark'].includes(savedTheme) ? savedTheme : 'dark';
-  });
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   const writeQueue = useRef(Promise.resolve());
 
   const replaceProgress = useCallback((nextProgress) => {
@@ -119,8 +116,6 @@ export function useProgress(user) {
     localStorage.setItem('theme', theme);
     if (theme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
-    } else if (theme === 'balance') {
-      document.documentElement.setAttribute('data-theme', 'balance');
     } else {
       document.documentElement.removeAttribute('data-theme');
     }
