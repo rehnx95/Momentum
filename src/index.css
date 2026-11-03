@@ -51,25 +51,25 @@
 
 :root[data-theme="balance"] {
   color-scheme: dark;
-  --page: color-mix(in srgb, #000000 50%, #f5f5f5 50%);
-  --surface: color-mix(in srgb, #0a0a0a 50%, #ffffff 50%);
-  --surface-raised: color-mix(in srgb, #111111 50%, #fafafa 50%);
-  --surface-hover: color-mix(in srgb, #1f1f1f 50%, #f0f0f0 50%);
-  --border: color-mix(in srgb, #262626 50%, #e5e5e5 50%);
-  --border-strong: color-mix(in srgb, #383838 50%, #cfcfcf 50%);
-  --text: color-mix(in srgb, #ededed 50%, #171717 50%);
-  --muted: color-mix(in srgb, #a1a1a1 50%, #5f5f5f 50%);
+  --page: color-mix(in srgb, #000000 72%, #f5f5f5 28%);
+  --surface: color-mix(in srgb, #0a0a0a 72%, #ffffff 28%);
+  --surface-raised: color-mix(in srgb, #111111 72%, #fafafa 28%);
+  --surface-hover: color-mix(in srgb, #1f1f1f 72%, #f0f0f0 28%);
+  --border: color-mix(in srgb, #262626 72%, #e5e5e5 28%);
+  --border-strong: color-mix(in srgb, #383838 72%, #cfcfcf 28%);
+  --text: color-mix(in srgb, #ededed 88%, #171717 12%);
+  --muted: color-mix(in srgb, #a1a1a1 72%, #5f5f5f 28%);
   --page-overlay: var(--page);
   --shadow: rgba(0, 0, 0, 0.24);
-  --accent: color-mix(in srgb, #ededed 50%, #171717 50%);
-  --accent-hover: color-mix(in srgb, #ffffff 50%, #000000 50%);
-  --positive: color-mix(in srgb, #46a758 50%, #2f8a43 50%);
-  --warning: color-mix(in srgb, #f5a623 50%, #b45309 50%);
-  --heat-0: color-mix(in srgb, #171717 50%, #ebedf0 50%);
-  --heat-1: color-mix(in srgb, #0e4429 50%, #9be9a8 50%);
-  --heat-2: color-mix(in srgb, #006d32 50%, #40c463 50%);
-  --heat-3: color-mix(in srgb, #26a641 50%, #30a14e 50%);
-  --heat-4: color-mix(in srgb, #39d353 50%, #216e39 50%);
+  --accent: color-mix(in srgb, #ededed 88%, #171717 12%);
+  --accent-hover: color-mix(in srgb, #ffffff 88%, #000000 12%);
+  --positive: color-mix(in srgb, #46a758 72%, #2f8a43 28%);
+  --warning: color-mix(in srgb, #f5a623 72%, #b45309 28%);
+  --heat-0: color-mix(in srgb, #171717 72%, #ebedf0 28%);
+  --heat-1: color-mix(in srgb, #0e4429 72%, #9be9a8 28%);
+  --heat-2: color-mix(in srgb, #006d32 72%, #40c463 28%);
+  --heat-3: color-mix(in srgb, #26a641 72%, #30a14e 28%);
+  --heat-4: color-mix(in srgb, #39d353 72%, #216e39 28%);
 }
 
 * {
@@ -1054,7 +1054,7 @@ input:focus-visible {
 :root[data-theme="balance"] .text-\[\#858585\],
 :root[data-theme="balance"] .text-zinc-400,
 :root[data-theme="balance"] .text-zinc-500 { color: var(--muted); }
-:root[data-theme="balance"] .text-black { color: var(--page); }
+:root[data-theme="balance"] .text-black { color: #111111; }
 :root[data-theme="balance"] .text-green-300,
 :root[data-theme="balance"] .text-green-400 { color: var(--positive); }
 :root[data-theme="balance"] .text-red-300,
