@@ -2839,7 +2839,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
   return (
     <>
     <div
-      className={`dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300`}
+      className={`dashboard-shell tracker-dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300`}
       data-theme={theme === "light" ? "light" : undefined}
     >
       <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
@@ -2885,6 +2885,58 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </div>
           </div>
           <MainPageNavigation active="tracker" onNavigate={navigateTo} theme={theme} setTheme={setTheme} />
+        </div>
+        <div className="tracker-filter-row">
+          <div className="tracker-toolbar flex items-center gap-2 flex-wrap">
+            <div className="relative w-full sm:hidden">
+              <Search
+                size={15}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
+              />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                aria-label="Search problems"
+                placeholder="Search problems..."
+                className="h-12 w-full rounded-xl border border-[#383838] bg-[#0A0A0A] pl-11 pr-11 text-sm text-[#EDEDED] placeholder-[#A1A1A1] outline-none transition-colors focus:border-[#EDEDED] focus:outline-none"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  aria-label="Clear problem search"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A1A1A1] hover:text-white"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            {["all", "done", "skipped", "todo"].map((type) => (
+              <button
+                key={type}
+                onClick={() => setActiveFilter(type)}
+                aria-pressed={activeFilter === type}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${chipActive(type)}`}
+              >
+                {type === "all"
+                  ? "All"
+                  : type === "done"
+                    ? "Done"
+                    : type === "skipped"
+                      ? "Skipped"
+                      : "To do"}
+              </button>
+            ))}
+            <label className="flex items-center gap-1.5 text-xs text-[#A1A1A1] ml-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={hideSkipped}
+                onChange={(e) => setHideSkipped(e.target.checked)}
+                className="w-3.5 h-3.5 rounded border-[#262626] bg-[#0A0A0A] accent-[#EDEDED]"
+              />
+              Hide skipped
+            </label>
+          </div>
         </div>
       </header>
 
@@ -3025,57 +3077,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           className="dashboard-content flex-1 min-w-0 overflow-y-auto pr-2"
           style={{ maxHeight: "calc(100vh - 120px)" }}
         >
-          <div className="tracker-toolbar flex items-center gap-2 mb-4 flex-wrap">
-            <div className="relative w-full sm:hidden">
-              <Search
-                size={15}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
-              />
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                aria-label="Search problems"
-                placeholder="Search problems..."
-                className="h-12 w-full rounded-xl border border-[#383838] bg-[#0A0A0A] pl-11 pr-11 text-sm text-[#EDEDED] placeholder-[#A1A1A1] outline-none transition-colors focus:border-[#EDEDED] focus:outline-none"
-              />
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  aria-label="Clear problem search"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A1A1A1] hover:text-white"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-            {["all", "done", "skipped", "todo"].map((type) => (
-              <button
-                key={type}
-                onClick={() => setActiveFilter(type)}
-                aria-pressed={activeFilter === type}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${chipActive(type)}`}
-              >
-                {type === "all"
-                  ? "All"
-                  : type === "done"
-                    ? "Done"
-                    : type === "skipped"
-                      ? "Skipped"
-                      : "To do"}
-              </button>
-            ))}
-            <label className="flex items-center gap-1.5 text-xs text-[#A1A1A1] ml-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={hideSkipped}
-                onChange={(e) => setHideSkipped(e.target.checked)}
-                className="w-3.5 h-3.5 rounded border-[#262626] bg-[#0A0A0A] accent-[#EDEDED]"
-              />
-              Hide skipped
-            </label>
-          </div>
-
           <section
             className="mobile-progress-summary surface-card mb-4 rounded-xl border border-[#262626] bg-[#0A0A0A] p-4 lg:hidden"
             aria-label="Overall progress"

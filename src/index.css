@@ -453,6 +453,32 @@ input:focus-visible {
   padding-top: 5rem;
 }
 
+.tracker-dashboard-shell {
+  --tracker-header-height: 7.5rem;
+}
+
+.tracker-dashboard-shell > .dashboard-main {
+  padding-top: var(--tracker-header-height) !important;
+}
+
+.tracker-dashboard-shell .sheet-sidebar {
+  top: var(--tracker-header-height) !important;
+}
+
+.tracker-filter-row {
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.tracker-filter-row .tracker-toolbar {
+  min-height: 3.75rem;
+  align-content: center;
+  padding: 0.45rem 0;
+  border-top: 1px solid var(--border);
+}
+
 .dashboard-header button {
   border-radius: 0.6rem;
   flex: none;
@@ -578,23 +604,27 @@ input:focus-visible {
   backdrop-filter: blur(12px);
 }
 
-.dashboard-content .tracker-toolbar button {
+.tracker-filter-row .tracker-toolbar button {
   min-height: 2rem;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--muted);
 }
 
-.dashboard-content .tracker-toolbar button:hover {
+.tracker-filter-row .tracker-toolbar button:hover {
   border-color: var(--border-strong);
   background: var(--surface-hover);
   color: var(--text);
 }
 
-.dashboard-content .tracker-toolbar button[aria-pressed="true"] {
+.tracker-filter-row .tracker-toolbar button[aria-pressed="true"] {
   border-color: var(--accent);
   background: var(--accent);
   color: #000;
+}
+
+.tracker-filter-row input[type="checkbox"] {
+  accent-color: var(--accent);
 }
 
 .dashboard-content input[type="checkbox"] {
@@ -974,6 +1004,22 @@ input:focus-visible {
 }
 
 @media (max-width: 640px) {
+  .tracker-dashboard-shell {
+    --tracker-header-height: 12rem;
+  }
+
+  .tracker-dashboard-shell .unified-header-inner {
+    height: auto;
+  }
+
+  .tracker-filter-row {
+    padding-inline: 1rem;
+  }
+
+  .tracker-filter-row .tracker-toolbar {
+    row-gap: 0.4rem;
+  }
+
   .track-sheet-brand {
     left: 4rem;
     width: 10rem;
@@ -1011,7 +1057,7 @@ input:focus-visible {
     font-size: 0.68rem;
   }
 
-  .dashboard-shell > .dashboard-main,
+  .dashboard-shell:not(.tracker-dashboard-shell) > .dashboard-main,
   .dashboard-shell > main:not(.dashboard-main),
   .profile-shell main {
     padding-top: 7rem !important;
@@ -1029,13 +1075,6 @@ input:focus-visible {
 
   .dashboard-main {
     padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
-  }
-
-  .dashboard-content > .tracker-toolbar {
-    top: 4.75rem;
-    margin-inline: -0.1rem;
-    padding: 0.55rem 0 0.7rem;
-    background: var(--page-overlay);
   }
 
   .activity-scroll {
