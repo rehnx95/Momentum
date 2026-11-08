@@ -20,10 +20,23 @@ export default function ActivityCard({
   const [menuOpen, setMenuOpen] = useState(false);
   const [renameValue, setRenameValue] = useState(activityName);
   const menuRef = useRef(null);
+  const pendingSlotFocus = useRef(false);
+  const previousSlotCount = useRef(slots.length);
 
   useEffect(() => {
     setRenameValue(activityName);
   }, [activityName]);
+
+  useEffect(() => {
+    if (pendingSlotFocus.current && slots.length > previousSlotCount.current) {
+      document
+        .getElementById(`slot-${activityId}-${slots.length - 1}`)
+        ?.querySelector("input")
+        ?.focus({ preventScroll: true });
+      pendingSlotFocus.current = false;
+    }
+    previousSlotCount.current = slots.length;
+  }, [activityId, slots.length]);
 
   useEffect(() => {
     const closeOnOutsideClick = (event) => {
@@ -113,7 +126,15 @@ export default function ActivityCard({
         ))}
         {!slots.length && <p className="slot-empty">No time recorded yet.</p>}
       </div>
-      <button type="button" className="slot-add" onClick={onAddSlot} disabled={disabled}>
+      <button
+        type="button"
+        className="slot-add"
+        onClick={() => {
+          pendingSlotFocus.current = true;
+          onAddSlot();
+        }}
+        disabled={disabled}
+      >
         <Plus size={14} /> Add time
       </button>
     </section>

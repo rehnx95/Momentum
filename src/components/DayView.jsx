@@ -223,15 +223,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
         </section>
       </div>
 
-      <details className="daily-overview">
-        <summary>
-          Day overview
-          <span>
-            {formatDuration(daily.studiedMinutes)} studied
-            {" · "}
-            {daily.problemCounts[daily.date] || 0} problems
-          </span>
-        </summary>
+      <section className="daily-overview" aria-label="Day overview">
         <StatStrip
           items={[
             { label: "Studied", value: formatDuration(daily.studiedMinutes), icon: Timer },
@@ -245,13 +237,16 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             { label: "Streak", value: daily.currentStreak, unit: "days", icon: Flame },
           ]}
         />
-        <DayTimeline
-          log={daily.log}
-          tasks={activities}
-          date={daily.date}
-          onFocusSlot={focusSlot}
-        />
-      </details>
+        <details className="daily-timeline-details">
+          <summary>View 24-hour timeline</summary>
+          <DayTimeline
+            log={daily.log}
+            tasks={activities}
+            date={daily.date}
+            onFocusSlot={focusSlot}
+          />
+        </details>
+      </section>
 
       <div className="sleep-entry">
         <label>
