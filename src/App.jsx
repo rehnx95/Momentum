@@ -2360,6 +2360,30 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             />
             <div className="flex-1" />
             <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => navigateTo("/")}
+                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
+              >
+                <LayoutList size={17} />
+                <span className="hidden sm:inline">Tracker</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateTo("/daily-log")}
+                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
+              >
+                <ClipboardList size={17} />
+                <span className="hidden sm:inline">Daily Log</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateTo("/people")}
+                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
+              >
+                <Users size={17} />
+                <span className="hidden sm:inline">People</span>
+              </button>
               {userUsername && (
                 <button
                   type="button"
@@ -2811,7 +2835,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
       <>
         <div
           className="dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300"
-          data-theme={theme === "light" ? "light" : undefined}
+          data-theme={theme === "dark" ? undefined : theme}
         >
           <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
             <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-6">

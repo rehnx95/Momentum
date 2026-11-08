@@ -544,7 +544,7 @@ input:focus-visible {
 }
 
 .profile-shell main {
-  padding-top: clamp(1.5rem, 4vw, 3.25rem);
+  padding-top: 5.75rem;
   padding-bottom: 4rem;
 }
 
