@@ -2079,7 +2079,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
     return (
       <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
         <header className="dashboard-header sticky top-0 z-50 border-b">
-          <div className="unified-header-inner mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-4 md:px-6">
+          <div className="unified-header-inner mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 md:px-6">
             <TrackSheetBrand
               onNavigate={() => navigateTo("/")}
               subtitle="People"
@@ -2349,7 +2349,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
     return (
       <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
         <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
-          <div className="unified-header-inner max-w-[1440px] mx-auto px-4 md:px-6 py-4 flex items-center gap-4">
+          <div className="unified-header-inner max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center gap-4">
             <TrackSheetBrand
               onNavigate={() => navigateTo("/")}
               subtitle="Profile"
