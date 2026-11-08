@@ -2103,14 +2103,14 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             <MainPageNavigation active="people" onNavigate={navigateTo} />
             <div className="unified-header-actions">
               <ThemeToggle theme={theme} setTheme={setTheme} />
-              <button
-                type="button"
-                onClick={onCopyLink}
-                className="rounded-lg border border-[#383838] px-3 py-2 text-sm font-medium text-[#EDEDED] transition-colors hover:bg-[#1F1F1F]"
-              >
-                {copied ? "Link copied" : "Share profile"}
-              </button>
             </div>
+            <button
+              type="button"
+              onClick={onCopyLink}
+              className="unified-header-actions rounded-lg border border-[#383838] px-3 py-2 text-sm font-medium text-[#EDEDED] transition-colors hover:bg-[#1F1F1F]"
+            >
+              {copied ? "Link copied" : "Share profile"}
+            </button>
           </div>
         </header>
 
@@ -2375,7 +2375,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             />
             <MainPageNavigation active="profile" onNavigate={navigateTo} />
             <div className="unified-header-actions">
-              <ThemeToggle theme={theme} setTheme={setTheme} />
               <Tooltip label="Edit profile">
                 <button
                   onClick={openProfileSettings}
@@ -2805,8 +2804,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           onSaved={onProfileUpdated}
           navigation={<MainPageNavigation active="profile" onNavigate={navigateTo} />}
           onSignOut={onSignOut}
-          theme={theme}
-          setTheme={setTheme}
         />
         {renderDialog()}
       </>
@@ -2824,9 +2821,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             <div className="unified-header-inner mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-6">
               <TrackSheetBrand subtitle="Daily Log" onNavigate={() => navigateTo("/")} />
               <MainPageNavigation active="daily-log" onNavigate={navigateTo} />
-              <div className="unified-header-actions">
-                <ThemeToggle theme={theme} setTheme={setTheme} />
-              </div>
             </div>
           </header>
           <main className="mx-auto max-w-7xl px-4 py-6 md:px-6">
@@ -2874,7 +2868,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </button>
           </Tooltip>
           <div className="unified-header-actions">
-            <ThemeToggle theme={theme} setTheme={setTheme} />
             <div className="relative hidden sm:block">
             <Search
               size={15}
@@ -2895,6 +2888,13 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
               </button>
             )}
             </div>
+            <button
+              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              className="p-1.5 rounded-lg hover:bg-[#1F1F1F] text-[#A1A1A1] hover:text-[#EDEDED] transition-colors"
+            >
+              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
           </div>
           <MainPageNavigation active="tracker" onNavigate={navigateTo} />
         </div>

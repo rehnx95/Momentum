@@ -14,7 +14,7 @@ function TrackSheetBrand({ onNavigate, subtitle }) {
       <span className="track-sheet-brand-copy min-w-0">
         <span className="track-sheet-brand-name block font-bold tracking-tight">Track Sheet</span>
         {subtitle && (
-          <span className="track-sheet-brand-context block">
+          <span className="track-sheet-brand-context block truncate">
             {subtitle}
           </span>
         )}

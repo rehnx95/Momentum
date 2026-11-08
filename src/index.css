@@ -157,9 +157,10 @@ input:focus-visible {
 }
 
 .track-sheet-brand-context {
-  width: 6rem;
+  width: 5.25rem;
   height: 1rem;
-  flex: 0 0 6rem;
+  max-width: 100%;
+  overflow: hidden;
   margin-top: 0.15rem;
   padding: 0.12rem 0.4rem;
   border: 1px solid var(--border);
@@ -170,6 +171,7 @@ input:focus-visible {
   font-weight: 500;
   letter-spacing: 0.015em;
   line-height: 1.2;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -191,15 +193,16 @@ input:focus-visible {
 }
 
 .track-sheet-brand-copy {
-  width: 6rem;
+  width: 5.25rem;
   height: 2.75rem;
-  flex: 0 0 6rem;
+  flex: 0 0 5.25rem;
 }
 
 .track-sheet-brand-name {
-  width: 6rem;
   height: 1.25rem;
+  overflow: hidden;
   line-height: 1.25rem;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -492,24 +495,6 @@ input:focus-visible {
   z-index: 3;
 }
 
-.theme-toggle-button {
-  width: 2.25rem;
-  height: 2.25rem;
-  flex: 0 0 2.25rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.6rem;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--muted);
-}
-
-.theme-toggle-button:hover {
-  background: var(--surface-hover);
-  color: var(--text);
-}
-
 .tracker-sidebar-toggle {
   position: absolute;
   left: 1rem;
@@ -588,9 +573,8 @@ input:focus-visible {
 .dashboard-content > .tracker-toolbar {
   position: sticky;
   z-index: 10;
-  top: 3.75rem;
-  margin-top: -0.25rem;
-  padding: 0.45rem 0 0.55rem;
+  top: 4.75rem;
+  padding: 0.7rem 0 0.8rem;
   border-bottom: 1px solid var(--border);
   background: var(--page-overlay);
   backdrop-filter: blur(12px);
@@ -993,31 +977,19 @@ input:focus-visible {
 
 @media (max-width: 640px) {
   .track-sheet-brand {
-    position: static;
-    grid-column: 1;
-    grid-row: 1;
-    left: auto;
-    top: auto;
+    left: 4rem;
     width: 10rem;
-    margin-left: 3rem;
-    transform: none;
   }
 
-  .unified-header-inner {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: 3rem 2.5rem;
-    column-gap: 0.5rem;
-    row-gap: 0.25rem;
-    height: auto;
-    min-height: 6rem;
-    padding: 0.5rem 1rem !important;
-    align-items: center;
+  .dashboard-header > div {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
 
   .main-page-navigation {
-    grid-column: 1 / -1;
-    grid-row: 2;
+    order: 10;
     width: 100%;
     justify-content: space-between;
   }
@@ -1028,16 +1000,9 @@ input:focus-visible {
   }
 
   .unified-header-actions {
-    grid-area: 1 / 2;
     position: static;
-    margin: 0;
+    margin-left: auto;
     transform: none;
-    justify-self: end;
-  }
-
-  .tracker-sidebar-toggle {
-    left: 1rem;
-    top: 2rem;
   }
 
   .main-page-navigation button {
@@ -1069,7 +1034,7 @@ input:focus-visible {
   }
 
   .dashboard-content > .tracker-toolbar {
-    top: 4.25rem;
+    top: 4.75rem;
     margin-inline: -0.1rem;
     padding: 0.55rem 0 0.7rem;
     background: var(--page-overlay);
