@@ -993,19 +993,31 @@ input:focus-visible {
 
 @media (max-width: 640px) {
   .track-sheet-brand {
-    left: 4rem;
+    position: static;
+    grid-column: 1;
+    grid-row: 1;
+    left: auto;
+    top: auto;
     width: 10rem;
+    margin-left: 3rem;
+    transform: none;
   }
 
-  .dashboard-header > div {
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+  .unified-header-inner {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 3rem 2.5rem;
+    column-gap: 0.5rem;
+    row-gap: 0.25rem;
+    height: auto;
+    min-height: 6rem;
+    padding: 0.5rem 1rem !important;
+    align-items: center;
   }
 
   .main-page-navigation {
-    order: 10;
+    grid-column: 1 / -1;
+    grid-row: 2;
     width: 100%;
     justify-content: space-between;
   }
@@ -1016,9 +1028,16 @@ input:focus-visible {
   }
 
   .unified-header-actions {
+    grid-area: 1 / 2;
     position: static;
-    margin-left: auto;
+    margin: 0;
     transform: none;
+    justify-self: end;
+  }
+
+  .tracker-sidebar-toggle {
+    left: 1rem;
+    top: 2rem;
   }
 
   .main-page-navigation button {
