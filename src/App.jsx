@@ -27,6 +27,7 @@ import ActivityHeatmap from "./components/ActivityHeatmap";
 import TrackSheetBrand from "./components/TrackSheetBrand";
 import Tooltip from "./components/Tooltip";
 import DailyTracker from "./components/DailyTracker";
+import StatStrip from "./components/StatStrip";
 import {
   countSheetProblems,
   parseSheet,
@@ -2160,56 +2161,39 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 </aside>
 
                 <div className="profile-main">
-                <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-3">
-                  <div className="surface-card stat-card rounded-xl border border-[#262626] bg-[#0A0A0A] p-4">
-                    <div className="mb-1 flex items-center gap-2 text-[#A1A1A1]">
-                      <Calendar size={16} />
-                      <span className="text-xs font-medium">Current streak</span>
-                    </div>
-                    <div className="text-2xl font-bold text-[#FF6B35]">
-                      {Number(profile.current_streak || 0)}
-                    </div>
-                    <div className="mt-1 text-xs text-[#A1A1A1]">current days</div>
-                  </div>
-                  <div className="surface-card stat-card rounded-xl border border-[#262626] bg-[#0A0A0A] p-4">
-                    <div className="mb-1 flex items-center gap-2 text-[#A1A1A1]">
-                      <Trophy size={16} />
-                      <span className="text-xs font-medium">Best streak</span>
-                    </div>
-                    <div className="text-2xl font-bold text-[#EDEDED]">
-                      {Number(profile.longest_streak || 0)}
-                    </div>
-                    <div className="mt-1 text-xs text-[#A1A1A1]">longest streak</div>
-                  </div>
-                  <div className="surface-card stat-card col-span-2 rounded-xl border border-[#262626] bg-[#0A0A0A] p-4 md:col-span-1">
-                    <div className="mb-1 flex items-center gap-2 text-[#A1A1A1]">
-                      <Target size={16} />
-                      <span className="text-xs font-medium">Problems</span>
-                    </div>
-                    <div className="text-2xl font-bold text-[#46A758]">
-                      {profileProblemsSolved}
-                    </div>
-                    <div className="mt-1 text-xs text-[#A1A1A1]">
-                      of {profileProblemsTotal} across all sheets
-                    </div>
-                  </div>
-                </div>
-
-                <ActivityHeatmap
-                  activity={publicHeatmap.username === selectedPublicUsername ? publicHeatmap.activity : {}}
-                  years={publicHeatmap.years}
-                  todayKey={todayDateKey}
-                  selectedYear={publicHeatmapYear}
-                  onSelectYear={setPublicHeatmapYear}
-                  loading={
-                    publicHeatmap.username !== selectedPublicUsername ||
-                    publicHeatmap.year !== publicHeatmapYear
-                  }
+                <StatStrip
+                  items={[
+                    {
+                      label: "Current streak",
+                      value: Number(profile.current_streak || 0),
+                      unit:
+                        Number(profile.current_streak || 0) === 1
+                          ? "day"
+                          : "days",
+                      icon: Calendar,
+                      color: "#FF6B35",
+                    },
+                    {
+                      label: "Best streak",
+                      value: Number(profile.longest_streak || 0),
+                      unit:
+                        Number(profile.longest_streak || 0) === 1
+                          ? "day"
+                          : "days",
+                      icon: Trophy,
+                    },
+                    {
+                      label: "Problems solved",
+                      value: profileProblemsSolved,
+                      unit: `/ ${profileProblemsTotal}`,
+                      icon: Target,
+                      color: "#46A758",
+                    },
+                  ]}
                 />
 
-                <div className="profile-split">
                 <section
-                  className="surface-card mb-8 rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
+                  className="surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
                   aria-labelledby="public-profile-sheet-progress"
                 >
                   <h2
@@ -2260,6 +2244,18 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   </div>
                 </section>
 
+                <ActivityHeatmap
+                  activity={publicHeatmap.username === selectedPublicUsername ? publicHeatmap.activity : {}}
+                  years={publicHeatmap.years}
+                  todayKey={todayDateKey}
+                  selectedYear={publicHeatmapYear}
+                  onSelectYear={setPublicHeatmapYear}
+                  loading={
+                    publicHeatmap.username !== selectedPublicUsername ||
+                    publicHeatmap.year !== publicHeatmapYear
+                  }
+                />
+
                 <section
                   className="recent-ac-card surface-card"
                   aria-labelledby="public-recent-ac-heading"
@@ -2306,7 +2302,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     </p>
                   )}
                 </section>
-                </div>
                 </div>
               </div>
             )
@@ -2492,55 +2487,32 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </aside>
 
             <div className="profile-main">
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-4 mb-8 md:grid-cols-3">
-                <div className="surface-card stat-card bg-[#0A0A0A] rounded-xl border border-[#262626] p-4">
-                  <div className="flex items-center gap-2 text-[#A1A1A1] mb-1">
-                    <Calendar size={16} />
-                    <span className="text-xs font-medium">Current streak</span>
-                  </div>
-                  <div className="text-2xl font-bold text-[#FF6B35]">
-                    {dailyStreak}
-                  </div>
-                  <div className="text-xs text-[#A1A1A1] mt-1">
-                    current days
-                  </div>
-                </div>
-                <div className="surface-card stat-card bg-[#0A0A0A] rounded-xl border border-[#262626] p-4">
-                  <div className="flex items-center gap-2 text-[#A1A1A1] mb-1">
-                    <Trophy size={16} />
-                    <span className="text-xs font-medium">Best streak</span>
-                  </div>
-                  <div className="text-2xl font-bold text-[#EDEDED]">
-                    {longestStreak}
-                  </div>
-                  <div className="text-xs text-[#A1A1A1] mt-1">
-                    longest streak
-                  </div>
-                </div>
-                <div className="surface-card stat-card bg-[#0A0A0A] rounded-xl border border-[#262626] p-4">
-                  <div className="flex items-center gap-2 text-[#A1A1A1] mb-1">
-                    <Target size={16} />
-                    <span className="text-xs font-medium">Problems</span>
-                  </div>
-                  <div className="text-2xl font-bold text-[#46A758]">
-                    {profileProblemsSolved}
-                  </div>
-                  <div className="text-xs text-[#A1A1A1] mt-1">
-                    of {profileProblemsTotal} across all sheets
-                  </div>
-                </div>
-              </div>
-
-              <ActivityHeatmap
-                activity={activityLog}
-                todayKey={todayDateKey}
-                selectedYear={ownHeatmapYear}
-                onSelectYear={setOwnHeatmapYear}
+              <StatStrip
+                items={[
+                  {
+                    label: "Current streak",
+                    value: dailyStreak,
+                    unit: dailyStreak === 1 ? "day" : "days",
+                    icon: Calendar,
+                    color: "#FF6B35",
+                  },
+                  {
+                    label: "Best streak",
+                    value: longestStreak,
+                    unit: longestStreak === 1 ? "day" : "days",
+                    icon: Trophy,
+                  },
+                  {
+                    label: "Problems solved",
+                    value: profileProblemsSolved,
+                    unit: `/ ${profileProblemsTotal}`,
+                    icon: Target,
+                    color: "#46A758",
+                  },
+                ]}
               />
 
-              <div className="profile-split own-profile-split">
-                <div className="profile-progress-column">
+              <div className="profile-top">
               <section
                 className="surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
                 aria-labelledby="profile-sheet-progress"
@@ -2602,7 +2574,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 <p className="mt-1 text-sm text-[#A1A1A1]">
                   Back up, restore or reset your progress.
                 </p>
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="data-actions">
                   <button
                     type="button"
                     className="btn-secondary"
@@ -2641,9 +2613,15 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   onChange={importProgress}
                 />
               </section>
-                </div>
+              </div>
 
-              <div className="profile-recent-column">
+              <ActivityHeatmap
+                activity={activityLog}
+                todayKey={todayDateKey}
+                selectedYear={ownHeatmapYear}
+                onSelectYear={setOwnHeatmapYear}
+              />
+
               <section
                 className="recent-ac-card surface-card"
                 aria-labelledby="recent-ac-heading"
@@ -2699,9 +2677,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   </p>
                 )}
               </section>
-              </div>
             </div>
-          </div>
           </div>
           {backupAction && (
             <div
