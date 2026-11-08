@@ -184,42 +184,18 @@
 
 .sleep-entry {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
-  align-items: center;
-  gap: 0.55rem;
-  margin: 0.4rem 0;
-  padding: 0.4rem 0.55rem;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0.35rem 0;
+  padding: 0.4rem;
   border: 1px solid var(--border);
-  border-radius: 0.65rem;
+  border-radius: 0.6rem;
   background: var(--surface);
-}
-
-.sleep-entry-heading {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: var(--positive);
-}
-
-.sleep-entry-heading > div {
-  min-width: 0;
-}
-
-.sleep-entry-heading h3 {
-  margin: 0;
-  color: var(--text);
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
-.sleep-entry-heading p {
-  display: none;
 }
 
 .sleep-entry-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .sleep-entry-fields label {
@@ -235,17 +211,8 @@
 .sleep-entry-fields input {
   min-width: 0;
   width: 100%;
-  min-height: 1.8rem;
-  padding-inline: 0.35rem;
-}
-
-.sleep-entry .sleep-duration {
-  margin-left: auto;
-  padding: 0;
-  color: var(--text);
-  font-size: 0.7rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  min-height: 1.75rem;
+  padding-inline: 0.4rem;
 }
 
 .daily-entry-heading {
@@ -440,7 +407,7 @@
   min-width: 0;
   padding: 0.4rem 0.5rem;
   border: 1px solid var(--border);
-  border-left: 2px solid var(--positive);
+  border-left: 2px solid var(--border-strong);
   border-radius: 0.75rem;
   background: var(--surface-raised);
 }
@@ -448,7 +415,7 @@
 .activity-card-heading {
   gap: 0.45rem;
   margin-bottom: 0.3rem;
-  color: var(--positive);
+  color: var(--text);
 }
 
 .activity-card-heading strong {
@@ -822,8 +789,7 @@
   }
 
   .sleep-entry {
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr) auto;
-    gap: 0.3rem;
+    grid-template-columns: minmax(0, 1fr);
     padding: 0.35rem;
   }
 

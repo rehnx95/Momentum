@@ -120,27 +120,16 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
               label: "Problems solved",
               value: daily.problemCounts[daily.date] || 0,
               icon: Target,
-              color: "var(--positive)",
             },
             { label: "Streak", value: daily.currentStreak, unit: "days", icon: Flame },
           ]}
         />
       </section>
 
-      <section className="sleep-entry" aria-labelledby="sleep-entry-title">
-        <header className="sleep-entry-heading">
-          <Moon size={16} aria-hidden="true" />
-          <div>
-            <h3 id="sleep-entry-title">Sleep</h3>
-            <p>Night before to this morning</p>
-          </div>
-          <output className="sleep-duration" aria-label="Total sleep">
-            {formatDuration(daily.sleptMinutes)}
-          </output>
-        </header>
+      <section className="sleep-entry" aria-label="Sleep times">
         <div className="sleep-entry-fields">
           <label>
-            <span>Bedtime</span>
+            <span>Sleep</span>
             <input
               type="time"
               value={daily.log.sleep_time}
@@ -149,7 +138,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             />
           </label>
           <label>
-            <span>Wake up</span>
+            <span>Wake</span>
             <input
               type="time"
               value={daily.log.wake_time}
