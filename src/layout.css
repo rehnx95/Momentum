@@ -41,6 +41,32 @@ html {
   gap: 0.25rem;
 }
 
+.running-timer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  max-width: 13rem;
+  padding: 0 0.65rem;
+  overflow: hidden;
+  border: 1px solid rgb(239 68 68 / 0.45);
+  border-radius: 999px;
+  color: #ef4444;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.running-timer-pill > span:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.running-timer-pill:hover {
+  background: rgb(239 68 68 / 0.1);
+}
+
 .app-nav {
   display: flex;
   gap: 0.25rem;
@@ -497,6 +523,12 @@ html {
 }
 
 @media (max-width: 640px) {
+  .running-timer-pill {
+    max-width: 8rem;
+    padding-inline: 0.45rem;
+    font-size: 0.63rem;
+  }
+
   .own-profile-layout .profile-hero {
     align-items: flex-start;
   }

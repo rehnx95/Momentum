@@ -28,6 +28,24 @@ export function formatDuration(minutes) {
   return `${remainder}m`;
 }
 
+export function parseTimeEntry(value) {
+  const input = String(value || "").trim();
+  const range = input.match(/^(\d{1,2})(?::([0-5]\d))?\s*-\s*(\d{1,2})(?::([0-5]\d))?$/);
+  if (range) {
+    const start = `${String(Number(range[1])).padStart(2, "0")}:${range[2] || "00"}`;
+    const end = `${String(Number(range[3])).padStart(2, "0")}:${range[4] || "00"}`;
+    const minutes = slotMinutes({ start, end });
+    return minutes === null ? null : { start, end, minutes };
+  }
+
+  const duration = input.match(/^(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?$/i);
+  if (!duration || (!duration[1] && !duration[2])) return null;
+  const minutes = Number(duration[1] || 0) * 60 + Number(duration[2] || 0);
+  return minutes > 0 && minutes < 24 * 60
+    ? { minutes }
+    : null;
+}
+
 export function splitIntervalByDay(startedAt, endedAt) {
   let cursor = new Date(startedAt);
   const end = new Date(endedAt);

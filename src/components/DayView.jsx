@@ -36,6 +36,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
   const [newActivityOpen, setNewActivityOpen] = useState(false);
   const [newActivityName, setNewActivityName] = useState("");
   const [activityMenuOpen, setActivityMenuOpen] = useState(false);
+  const [quickEntry, setQuickEntry] = useState("");
   const activityMenuRef = useRef(null);
   const [selectedTimerActivity, setSelectedTimerActivity] = useState(() => {
     try {
@@ -76,6 +77,27 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
     daily.loading ||
     daily.loadFailed;
 
+  const selectTimerActivity = (activityId) => {
+    setSelectedTimerActivity(activityId);
+    try {
+      localStorage.setItem("track-sheet-last-timer-activity", activityId);
+    } catch (error) {
+      console.error("Could not remember the last timer activity:", error);
+    }
+  };
+  const selectedActivity = timerActivities.find(
+    (activity) => activity.id === timerActivityId,
+  );
+  const startSelectedTimer = () => {
+    if (selectedActivity) {
+      daily.startTimer(
+        selectedActivity.id,
+        selectedActivity.name,
+        selectedActivity.color,
+      );
+    }
+  };
+
   useEffect(() => {
     const closeOnOutsideClick = (event) => {
       if (!activityMenuRef.current?.contains(event.target)) {
@@ -103,14 +125,51 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
     }
   }, [daily.runningTimer, selectedTimerActivity, timerActivities]);
 
+  useEffect(() => {
+    const processStopRequest = () => {
+      try {
+        if (localStorage.getItem("track-sheet-stop-timer-on-open") !== "1") return;
+        localStorage.removeItem("track-sheet-stop-timer-on-open");
+        if (daily.runningTimer) void daily.stopTimer();
+      } catch (error) {
+        console.error("Could not process the timer stop request:", error);
+      }
+    };
+    processStopRequest();
+    window.addEventListener("daily-log-stop-timer", processStopRequest);
+    return () => window.removeEventListener("daily-log-stop-timer", processStopRequest);
+  }, [daily.runningTimer, daily.stopTimer]);
+
+  useEffect(() => {
+    const handleSpace = (event) => {
+      if (
+        event.code !== "Space" ||
+        event.repeat ||
+        window.matchMedia("(max-width: 700px)").matches ||
+        event.target instanceof HTMLElement &&
+          (event.target.isContentEditable ||
+            ["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(event.target.tagName))
+      ) {
+        return;
+      }
+      event.preventDefault();
+      if (daily.runningTimer) void daily.stopTimer();
+      else startSelectedTimer();
+    };
+    document.addEventListener("keydown", handleSpace);
+    return () => document.removeEventListener("keydown", handleSpace);
+  }, [daily.runningTimer, daily.stopTimer, selectedActivity]);
+
   const focusSlot = (activityId, index) => {
     const row = document.getElementById(`slot-${activityId}-${index}`);
     row?.scrollIntoView({ behavior: "smooth", block: "center" });
-    row?.querySelector("input")?.focus({ preventScroll: true });
+    row?.querySelector("input, .slot-chip")?.focus({ preventScroll: true });
   };
 
   const addActivity = async () => {
-    if (!(await daily.addCustomTask(newActivityName))) return;
+    const activity = await daily.addCustomTask(newActivityName);
+    if (!activity) return;
+    selectTimerActivity(activity.id);
     setNewActivityName("");
     setNewActivityOpen(false);
   };
@@ -124,6 +183,12 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
         <div className="daily-load-error" role="alert">
           Could not load this day. Existing data is not being overwritten.
           <button type="button" onClick={daily.retryLoad}>Try again</button>
+        </div>
+      )}
+      {daily.yesterdayNotLogged && (
+        <div className="missed-day-banner">
+          Yesterday isn’t logged.
+          <button type="button" onClick={() => daily.shiftDate(-1)}>Add it</button>
         </div>
       )}
       <div className="daily-day-header">
@@ -156,75 +221,171 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
           </button>
         </div>
         <section className="daily-timer">
-          <label>
-            <span>Timer</span>
-            <select
-              value={daily.runningTimer?.activityId || timerActivityId}
-              disabled={Boolean(daily.runningTimer) || entryDisabled || !timerActivities.length}
-              onChange={(event) => {
-                const activityId = event.target.value;
-                setSelectedTimerActivity(activityId);
-                try {
-                  localStorage.setItem("track-sheet-last-timer-activity", activityId);
-                } catch (error) {
-                  console.error("Could not remember the last timer activity:", error);
-                }
-              }}
-            >
-              {!timerActivities.length && (
-                <option value="">Create an activity first</option>
+          <div className="timer-activity-chips" aria-label="Choose timer activity">
+            {timerActivities.map((activity) => (
+              <button
+                type="button"
+                key={activity.id}
+                className={activity.id === timerActivityId ? "selected" : ""}
+                style={{ "--activity-color": activity.color }}
+                disabled={Boolean(daily.runningTimer) || entryDisabled}
+                onClick={() => selectTimerActivity(activity.id)}
+              >
+                {activity.name}
+              </button>
+            ))}
+            <div className="new-activity-wrap" ref={activityMenuRef}>
+              <button
+                type="button"
+                className="timer-add-activity"
+                aria-label="Add activity"
+                aria-expanded={activityMenuOpen}
+                disabled={entryDisabled}
+                onClick={() => setActivityMenuOpen((open) => !open)}
+              >
+                <Plus size={16} />
+              </button>
+              {activityMenuOpen && (
+                <div className="new-activity-menu" role="menu">
+                  <span className="activity-menu-label">From a sheet</span>
+                  {availableSheetActivities.map((sheet) => (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      key={sheet.id}
+                      onClick={async () => {
+                        if (await daily.addSheetActivity(sheet)) {
+                          selectTimerActivity(`sheet:${sheet.id}`);
+                          setActivityMenuOpen(false);
+                        }
+                      }}
+                    >
+                      {sheet.title}
+                    </button>
+                  ))}
+                  {availableSheetActivities.length === 0 && (
+                    <span className="new-activity-empty">
+                      {sheets.length
+                        ? "All sheets are already added."
+                        : "No sheets available."}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setActivityMenuOpen(false);
+                      setNewActivityOpen(true);
+                    }}
+                  >
+                    Create a new activity
+                  </button>
+                </div>
               )}
-              {timerActivities.map((activity) => (
-                <option key={activity.id} value={activity.id}>{activity.name}</option>
-              ))}
-            </select>
-          </label>
+            </div>
+          </div>
           {daily.runningTimer ? (
-            <button type="button" className="timer-stop" onClick={() => daily.stopTimer()}>
+            <button
+              type="button"
+              className="timer-stop"
+              aria-keyshortcuts="Space"
+              title="Stop timer (Space)"
+              onClick={() => daily.stopTimer()}
+            >
               Stop {daily.runningTimer.activityName} · {timeElapsed(daily.runningTimer.startedAt, daily.timerNow)}
             </button>
           ) : (
             <button
               type="button"
-              disabled={entryDisabled || !timerActivities.length}
-              onClick={() => {
-                const activity = timerActivities.find((item) => item.id === selectedTimerActivity) || timerActivities[0];
-                if (activity) daily.startTimer(activity.id, activity.name, activity.color);
-              }}
+              className="timer-start"
+              aria-keyshortcuts="Space"
+              title="Start timer (Space)"
+              disabled={entryDisabled || !selectedActivity}
+              onClick={startSelectedTimer}
             >
               <Timer size={15} /> Start timer
             </button>
           )}
-          {timerActivities.length > 0 && (
-            <div className="timer-quick-add">
-              <button
-                type="button"
-                disabled={entryDisabled}
-                onClick={() => {
-                  const activity = timerActivities.find((item) => item.id === selectedTimerActivity);
-                  if (activity) daily.quickAdd(activity.id, 30, activity.name, activity.color);
-                }}
-              >
-                +30m
-              </button>
-              <button
-                type="button"
-                disabled={entryDisabled}
-                onClick={() => {
-                  const activity = timerActivities.find((item) => item.id === selectedTimerActivity);
-                  if (activity) daily.quickAdd(activity.id, 60, activity.name, activity.color);
-                }}
-              >
-                +1h
-              </button>
-            </div>
-          )}
+          <form
+            className="quick-time-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (!selectedActivity || !daily.addTimeEntry(selectedActivity.id, quickEntry)) return;
+              setQuickEntry("");
+            }}
+          >
+            <label className="sr-only" htmlFor="quick-time-entry">
+              Log a duration or time range
+            </label>
+            <input
+              id="quick-time-entry"
+              value={quickEntry}
+              onChange={(event) => setQuickEntry(event.target.value)}
+              placeholder="2h · 90m · 10-12:30"
+              disabled={entryDisabled || !selectedActivity}
+            />
+            <button type="submit" disabled={entryDisabled || !selectedActivity || !quickEntry.trim()}>
+              Add
+            </button>
+          </form>
         </section>
       </div>
 
+      <section className="daily-goal-hero">
+        <div>
+          <span className="daily-goal-label">
+            {daily.date === getLocalDateKey()
+              ? "Today"
+              : new Date(`${daily.date}T00:00:00`).toLocaleDateString(undefined, {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "short",
+                })}
+          </span>
+          <div className="daily-goal-value">
+            {formatDuration(daily.studiedMinutes)}
+            {daily.goalMinutes > 0 && <span> / </span>}
+            <label>
+              <span className="sr-only">Daily study goal in hours</span>
+              <input
+                type="number"
+                min="0"
+                max="24"
+                step="1"
+                value={daily.goalMinutes / 60}
+                aria-label="Daily study goal in hours (zero turns goal off)"
+                onChange={(event) => {
+                  const hours = Number(event.target.value);
+                  if (hours >= 0 && hours <= 24) daily.setGoalMinutes(hours * 60);
+                }}
+              />
+              <span>{daily.goalMinutes > 0 ? "h goal" : "h goal off"}</span>
+            </label>
+          </div>
+        </div>
+        {daily.goalMinutes > 0 ? (
+          <>
+            <div
+              className="daily-goal-track"
+              role="progressbar"
+              aria-label="Daily study goal progress"
+              aria-valuemin={0}
+              aria-valuemax={daily.goalMinutes}
+              aria-valuenow={Math.min(daily.studiedMinutes, daily.goalMinutes)}
+            >
+              <span style={{ width: `${Math.min(100, (daily.studiedMinutes / daily.goalMinutes) * 100)}%` }} />
+            </div>
+            <span className="daily-goal-percent">
+              {Math.floor((daily.studiedMinutes / daily.goalMinutes) * 100)}%
+            </span>
+          </>
+        ) : (
+          <span className="daily-goal-off">Set a goal or enter 0 to turn it off.</span>
+        )}
+      </section>
+
       <StatStrip
         items={[
-          { label: "Studied", value: formatDuration(daily.studiedMinutes), icon: Timer },
           { label: "Sleep", value: formatDuration(daily.sleptMinutes), icon: Moon },
           {
             label: "Problems solved",
@@ -232,7 +393,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             icon: Target,
             color: "var(--positive)",
           },
-          { label: "Streak", value: daily.currentStreak, unit: "days", icon: Flame },
+          { label: "1h+ logging streak", value: daily.currentStreak, unit: "days", icon: Flame },
         ]}
       />
 
@@ -244,6 +405,19 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
       />
 
       <div className="sleep-entry">
+        {daily.yesterdaySleep && (
+          <button
+            type="button"
+            className="sleep-copy-button"
+            disabled={entryDisabled}
+            onClick={() => {
+              daily.updateField("sleep_time", daily.yesterdaySleep.sleep_time);
+              daily.updateField("wake_time", daily.yesterdaySleep.wake_time);
+            }}
+          >
+            Same as yesterday ({daily.yesterdaySleep.sleep_time} → {daily.yesterdaySleep.wake_time})
+          </button>
+        )}
         <label>
           <span>Sleep (night before) <small>ended this morning</small></span>
           <input
@@ -267,54 +441,16 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
 
       <div className="daily-entry-heading">
         <h3>Activities</h3>
-        <div className="new-activity-wrap" ref={activityMenuRef}>
+        {activities.length > 0 && (
           <button
             type="button"
             className="new-activity-trigger"
-            aria-expanded={activityMenuOpen}
-            aria-haspopup="menu"
             disabled={entryDisabled}
-            onClick={() => setActivityMenuOpen((open) => !open)}
+            onClick={() => setNewActivityOpen(true)}
           >
-            <Plus size={14} /> New activity
+            <Plus size={14} /> Add activity
           </button>
-          {activityMenuOpen && (
-            <div className="new-activity-menu" role="menu">
-              <span className="activity-menu-label">From a sheet</span>
-              {availableSheetActivities.map((sheet) => (
-                <button
-                  type="button"
-                  role="menuitem"
-                  key={sheet.id}
-                  onClick={async () => {
-                    if (await daily.addSheetActivity(sheet)) {
-                      setActivityMenuOpen(false);
-                    }
-                  }}
-                >
-                  {sheet.title}
-                </button>
-              ))}
-              {availableSheetActivities.length === 0 && (
-                <span className="new-activity-empty">
-                  {sheets.length
-                    ? "All sheets are already added."
-                    : "No sheets available. Add a custom activity instead."}
-                </span>
-              )}
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setActivityMenuOpen(false);
-                  setNewActivityOpen(true);
-                }}
-              >
-                Create a new activity
-              </button>
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       {newActivityOpen && (
@@ -354,7 +490,10 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             slots={activity.slots}
             totalMinutes={activityTotal(activity.slots)}
             disabled={entryDisabled}
-            onAddSlot={() => daily.addSlot(activity.id)}
+            onAddSlot={() => {
+              selectTimerActivity(activity.id);
+              document.getElementById("quick-time-entry")?.focus();
+            }}
             onChangeSlot={(index, field, value) =>
               updateActivitySlot(activity.id, index, field, value)
             }

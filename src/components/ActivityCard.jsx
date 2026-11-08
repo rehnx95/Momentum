@@ -19,6 +19,7 @@ export default function ActivityCard({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [renameValue, setRenameValue] = useState(activityName);
+  const [editingSlot, setEditingSlot] = useState(null);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -104,6 +105,10 @@ export default function ActivityCard({
             activityName={activityName}
             index={index}
             slot={slot}
+            editing={editingSlot === index || !slot.start || !slot.end}
+            onToggleEdit={() =>
+              setEditingSlot((current) => current === index ? null : index)
+            }
             onChange={(slotIndex, field, value) =>
               onChangeSlot(slotIndex, field, value)
             }
@@ -113,8 +118,16 @@ export default function ActivityCard({
         ))}
         {!slots.length && <p className="slot-empty">No time recorded yet.</p>}
       </div>
-      <button type="button" className="slot-add" onClick={onAddSlot} disabled={disabled}>
-        <Plus size={14} /> Add time
+      <button
+        type="button"
+        className="slot-add"
+        onClick={() => {
+          setEditingSlot(null);
+          onAddSlot();
+        }}
+        disabled={disabled}
+      >
+        <Plus size={14} /> Log time
       </button>
     </section>
   );

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   findOverlaps,
   formatDuration,
+  parseTimeEntry,
   slotMinutes,
   splitIntervalByDay,
   toMinutes,
@@ -26,6 +27,19 @@ describe("time helpers", () => {
     expect(formatDuration(157)).toBe("2h 37m");
     expect(formatDuration(120)).toBe("2h");
     expect(formatDuration(37)).toBe("37m");
+  });
+
+  it("parses quick duration and time-range entries", () => {
+    expect(parseTimeEntry("2h")).toEqual({ minutes: 120 });
+    expect(parseTimeEntry("90m")).toEqual({ minutes: 90 });
+    expect(parseTimeEntry("1h 30m")).toEqual({ minutes: 90 });
+    expect(parseTimeEntry("10-12:30")).toEqual({
+      start: "10:00",
+      end: "12:30",
+      minutes: 150,
+    });
+    expect(parseTimeEntry("23-01")).toBeNull();
+    expect(parseTimeEntry("0m")).toBeNull();
   });
 
   it("splits timer intervals at midnight without losing minutes", () => {

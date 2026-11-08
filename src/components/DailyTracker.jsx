@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import DayView from "./DayView";
 import FullLog from "./FullLog";
 import useDailyLog from "../hooks/useDailyLog";
@@ -6,6 +6,14 @@ import "./DailyTracker.css";
 
 export default function DailyTracker({ user, sheets, askConfirmation }) {
   const daily = useDailyLog(user);
+
+  useEffect(() => {
+    const showDayForTimerStop = () => {
+      if (daily.viewMode === "full") void daily.changeViewMode("daily");
+    };
+    window.addEventListener("daily-log-stop-timer", showDayForTimerStop);
+    return () => window.removeEventListener("daily-log-stop-timer", showDayForTimerStop);
+  }, [daily.changeViewMode, daily.viewMode]);
 
   const openDate = useCallback(async (date) => {
     if (await daily.changeDate(date)) daily.setViewMode("daily");
@@ -15,7 +23,7 @@ export default function DailyTracker({ user, sheets, askConfirmation }) {
     <section className="daily-tracker surface-card" aria-labelledby="daily-log-title">
       <header className="daily-toolbar">
         <h2 id="daily-log-title" className="page-title">
-          {daily.viewMode === "daily" ? "Daily log" : "Full log"}
+          {daily.viewMode === "daily" ? "Daily log" : "Review"}
         </h2>
         <div className="daily-view-switch" aria-label="Daily log view">
           <button
@@ -32,7 +40,7 @@ export default function DailyTracker({ user, sheets, askConfirmation }) {
             aria-pressed={daily.viewMode === "full"}
             onClick={() => void daily.changeViewMode("full")}
           >
-            Full log
+            Review
           </button>
         </div>
       </header>

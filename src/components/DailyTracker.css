@@ -5,6 +5,11 @@
   --activity-sleep: #46506d;
 }
 
+.daily-timer .new-activity-menu {
+  top: auto;
+  bottom: calc(100% + 0.4rem);
+}
+
 :root[data-theme="light"] {
   --activity-dsa: #087f5b;
   --activity-backend: #315ebd;
@@ -80,7 +85,6 @@
 
 .daily-date input,
 .sleep-entry input,
-.daily-timer select,
 .daily-new-inline input,
 .activity-menu input:not([type="color"]) {
   min-height: 2.3rem;
@@ -94,7 +98,6 @@
 
 :root[data-theme="light"] .daily-date input,
 :root[data-theme="light"] .sleep-entry input,
-:root[data-theme="light"] .daily-timer select,
 :root[data-theme="light"] .daily-new-inline input {
   color-scheme: light;
 }
@@ -146,13 +149,13 @@
 }
 
 .daily-day-view > .stat-strip {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-bottom: 0.65rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 0.5rem;
 }
 
 .daily-day-view .stat-chip {
   min-width: 0;
-  padding: 0.55rem 0.65rem;
+  padding: 0.45rem 0.6rem;
 }
 
 .daily-day-view .stat-value {
@@ -161,7 +164,105 @@
 }
 
 .day-timeline {
-  margin: 0.65rem 0;
+  margin: 0.45rem 0;
+}
+
+.daily-goal-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.4rem 1rem;
+  margin-bottom: 0.55rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface-raised);
+}
+
+.daily-goal-label {
+  display: block;
+  margin-bottom: 0.1rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.daily-goal-value {
+  color: var(--text);
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.daily-goal-value > span {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.daily-goal-value label {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.daily-goal-value input {
+  width: 3.2rem;
+  border: 0;
+  border-bottom: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.daily-goal-track {
+  grid-column: 1;
+  height: 0.35rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border-strong);
+}
+
+.daily-goal-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--positive);
+  transition: width 180ms ease;
+}
+
+.daily-goal-percent {
+  grid-column: 2;
+  grid-row: 2;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.daily-goal-off {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.missed-day-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.65rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.missed-day-banner button {
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 .timeline-hours {
@@ -187,7 +288,7 @@
 
 .timeline-bar {
   position: relative;
-  height: 2.5rem;
+  height: 2rem;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 0.65rem;
@@ -275,6 +376,18 @@
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 0.75rem;
+}
+
+.sleep-copy-button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-align: left;
+}
+
+.sleep-copy-button:hover {
+  color: var(--text);
 }
 
 .sleep-entry label {
@@ -405,7 +518,6 @@
 
 .daily-new-inline button,
 .daily-timer > button,
-.timer-quick-add button,
 .load-older-button {
   min-height: 2.25rem;
   padding-inline: 0.75rem;
@@ -578,6 +690,41 @@
   font-size: 0.8rem;
 }
 
+.slot-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text);
+  text-align: left;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot-chip .slot-hours {
+  margin-left: auto;
+}
+
+.slot-chip > svg {
+  flex: none;
+  color: var(--muted);
+}
+
+.slot-edit-toggle {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  color: var(--text);
+}
+
 :root[data-theme="light"] .daily-slot-row label input {
   color-scheme: light;
 }
@@ -652,24 +799,82 @@
 }
 
 .daily-timer {
+  display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 0.45rem;
   margin: 0;
   padding: 0;
   border: 0;
 }
 
-.daily-timer label {
+.timer-activity-chips {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--muted);
-  font-size: 0.72rem;
+  gap: 0.35rem;
+  max-width: 35vw;
+  overflow-x: auto;
 }
 
-.daily-timer select {
+.timer-activity-chips > button,
+.timer-add-activity {
+  min-height: 2rem;
+  padding: 0 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--activity-color, var(--border-strong)) 55%, var(--border-strong));
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.timer-activity-chips > button.selected {
+  border-color: var(--activity-color);
+  background: color-mix(in srgb, var(--activity-color) 20%, var(--surface));
+}
+
+.timer-add-activity {
+  display: grid;
+  width: 2rem;
+  padding: 0;
+  place-items: center;
+}
+
+.timer-start {
+  min-height: 2.45rem !important;
+  padding: 0 0.9rem !important;
+  border: 0 !important;
+  border-radius: 0.65rem !important;
+  background: var(--positive) !important;
+  color: white !important;
+  font-size: 0.82rem !important;
+}
+
+.quick-time-form {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.quick-time-form input {
+  width: 8.7rem;
+  min-width: 0;
   min-height: 2.1rem;
-  max-width: 11rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.55rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.68rem;
+}
+
+.quick-time-form button {
+  min-height: 2.1rem;
+  padding: 0 0.55rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.55rem;
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 700;
 }
 
 .daily-timer > button {
@@ -685,19 +890,15 @@
   gap: 0.35rem;
 }
 
+.daily-timer > button:disabled,
+.timer-activity-chips button:disabled,
+.quick-time-form button:disabled {
+  opacity: 0.55;
+}
+
 .timer-stop {
   border-color: #ef4444 !important;
   color: #ef4444 !important;
-}
-
-.timer-quick-add {
-  display: flex;
-  gap: 0.35rem;
-  margin-left: 0;
-}
-
-.timer-quick-add button {
-  min-height: 2rem;
 }
 
 .daily-warnings,
@@ -770,10 +971,17 @@
 
 .weekly-chart {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: calc(100vw - 1.2rem);
   max-height: 10rem;
   margin-top: 0.75rem;
   overflow: visible;
+}
+
+.timer-activity-chips {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
 .weekly-chart-axis {
@@ -784,6 +992,17 @@
 .weekly-chart-grid {
   stroke: var(--border);
   stroke-width: 1;
+}
+
+.weekly-chart-goal {
+  stroke: var(--positive);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.weekly-chart-goal-label {
+  fill: var(--positive);
+  font-size: 8px;
 }
 
 .weekly-chart-axis-label,
@@ -810,6 +1029,106 @@
   display: grid;
   gap: 1rem;
   margin-top: 1rem;
+}
+
+.review-week-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface-raised);
+}
+
+.review-week-summary > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 1rem;
+}
+
+.review-week-summary strong {
+  width: 100%;
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.review-week-summary span,
+.review-insight {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.review-insight {
+  color: var(--positive);
+}
+
+.review-week-nav {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) 2rem;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.review-week-nav > button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.55rem;
+  color: var(--text);
+  font-size: 1.3rem;
+}
+
+.review-week-nav > button:disabled {
+  opacity: 0.4;
+}
+
+.review-week-nav .weekly-chart-card {
+  min-width: 0;
+  margin: 0.5rem 0;
+}
+
+.review-heatmap {
+  position: relative;
+  margin-top: 0.75rem;
+}
+
+.review-heatmap-toggle {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.review-heatmap-toggle button {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.review-heatmap-toggle button.active {
+  background: var(--text);
+  color: var(--page);
+}
+
+.review-table-details {
+  margin-top: 1rem;
+}
+
+.review-table-details > summary {
+  padding: 0.65rem 0;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .weekly-log-group {
@@ -906,8 +1225,20 @@
   }
 
   .daily-timer {
+    position: fixed;
+    inset: auto 0.6rem calc(4.5rem + env(safe-area-inset-bottom));
+    z-index: 45;
     width: 100%;
-    justify-content: flex-start;
+    justify-content: space-between;
+    padding: 0.55rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.85rem;
+    background: var(--surface);
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.24);
+  }
+
+  .daily-day-view {
+    padding-bottom: 9rem;
   }
 
   .weekly-log-table {
