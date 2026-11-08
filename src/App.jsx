@@ -2874,6 +2874,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </button>
           </Tooltip>
           <div className="unified-header-actions">
+            <ThemeToggle theme={theme} setTheme={setTheme} />
             <div className="relative hidden sm:block">
             <Search
               size={15}
@@ -2894,7 +2895,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
               </button>
             )}
             </div>
-            <ThemeToggle theme={theme} setTheme={setTheme} />
           </div>
           <MainPageNavigation active="tracker" onNavigate={navigateTo} />
         </div>

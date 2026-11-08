@@ -157,10 +157,9 @@ input:focus-visible {
 }
 
 .track-sheet-brand-context {
-  width: 5.25rem;
+  width: 6rem;
   height: 1rem;
-  max-width: 100%;
-  overflow: hidden;
+  flex: 0 0 6rem;
   margin-top: 0.15rem;
   padding: 0.12rem 0.4rem;
   border: 1px solid var(--border);
@@ -171,7 +170,6 @@ input:focus-visible {
   font-weight: 500;
   letter-spacing: 0.015em;
   line-height: 1.2;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -193,16 +191,15 @@ input:focus-visible {
 }
 
 .track-sheet-brand-copy {
-  width: 5.25rem;
+  width: 6rem;
   height: 2.75rem;
-  flex: 0 0 5.25rem;
+  flex: 0 0 6rem;
 }
 
 .track-sheet-brand-name {
+  width: 6rem;
   height: 1.25rem;
-  overflow: hidden;
   line-height: 1.25rem;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
