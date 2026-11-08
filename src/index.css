@@ -206,7 +206,7 @@ input:focus-visible {
 
 @media (min-width: 768px) {
   .tracker-filter-row {
-    padding: 0 1.5rem 0 calc(1.5rem + 0.625rem);
+    padding-inline: 1.5rem;
   }
 
   .track-sheet-brand {
@@ -475,7 +475,7 @@ input:focus-visible {
   width: 100%;
   max-width: 80rem;
   margin: 0 auto;
-  padding: 0 1rem 0 calc(1rem + 0.625rem);
+  padding-inline: 1rem;
 }
 
 .tracker-filter-row .tracker-toolbar {
@@ -1016,10 +1016,6 @@ input:focus-visible {
 
   .tracker-dashboard-shell .unified-header-inner {
     height: auto;
-  }
-
-  .tracker-filter-row {
-    padding-inline: 1rem;
   }
 
   .tracker-filter-row .tracker-toolbar {
