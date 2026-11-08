@@ -73,7 +73,7 @@ function WeeklyChart({ rows }) {
         customActivities.set(id, {
           id,
           name: displayActivityName(task.name || "Custom"),
-          color: task.color || "var(--activity-custom)",
+          color: "var(--positive)",
         });
       }
     });

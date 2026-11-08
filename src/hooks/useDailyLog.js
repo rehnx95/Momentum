@@ -5,17 +5,6 @@ import { slotMinutes, splitIntervalByDay, validateDay } from "../utils/time";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const PAGE_SIZE = 84;
 const TIMER_STORAGE = (userId) => `track-sheet-running-timer:${userId}`;
-const COLOR_PALETTE = [
-  "#8b5cf6",
-  "#06b6d4",
-  "#f97316",
-  "#ec4899",
-  "#84cc16",
-  "#eab308",
-  "#14b8a6",
-  "#6366f1",
-];
-
 export function getLocalDateKey(date = new Date()) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -413,7 +402,6 @@ export default function useDailyLog(user) {
     const task = {
       id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`,
       name: trimmed,
-      color: COLOR_PALETTE[logRef.current.custom_tasks.length % COLOR_PALETTE.length],
       slots: [],
     };
     setLog((current) => ({
@@ -430,7 +418,6 @@ export default function useDailyLog(user) {
       id,
       sheetId: sheet.id,
       name: sheet.title,
-      color: COLOR_PALETTE[logRef.current.custom_tasks.length % COLOR_PALETTE.length],
       slots: [],
     };
     setLog((current) => ({
@@ -454,15 +441,6 @@ export default function useDailyLog(user) {
       ...current,
       custom_tasks: current.custom_tasks.map((task) =>
         task.id === taskId ? { ...task, name: trimmed } : task,
-      ),
-    }));
-  }, [setLog]);
-
-  const setCustomColor = useCallback((taskId, color) => {
-    setLog((current) => ({
-      ...current,
-      custom_tasks: current.custom_tasks.map((task) =>
-        task.id === taskId ? { ...task, color } : task,
       ),
     }));
   }, [setLog]);
@@ -838,7 +816,7 @@ export default function useDailyLog(user) {
     hasOlderLogs, olderLogsLoading, runningTimer, timerNow, validation, dirty,
     studiedMinutes, sleptMinutes, changeDate, shiftDate, updateField, updateSlot,
     addSlot, removeSlot, addCustomTask, addSheetActivity, removeCustomTask,
-    renameCustomTask, setCustomColor, saveLog, loadOlderLogs, clearAllLogs, startTimer,
+    renameCustomTask, saveLog, loadOlderLogs, clearAllLogs, startTimer,
     stopTimer, quickAdd,
     saveNow: flushPendingSave,
     retryLoad: () => setLoadRequest((current) => current + 1),

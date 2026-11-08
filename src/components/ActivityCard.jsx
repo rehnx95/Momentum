@@ -6,7 +6,6 @@ import SlotRow from "./SlotRow";
 export default function ActivityCard({
   activityId,
   activityName,
-  color,
   slots,
   totalMinutes = 0,
   disabled,
@@ -15,7 +14,6 @@ export default function ActivityCard({
   onRemoveSlot,
   onRemoveActivity,
   onRename,
-  onColorChange,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [renameValue, setRenameValue] = useState(activityName);
@@ -54,7 +52,7 @@ export default function ActivityCard({
   }, []);
 
   return (
-    <section className="activity-card" style={{ "--activity-color": color }}>
+    <section className="activity-card">
       <header className="activity-card-heading">
         <Clock3 size={15} aria-hidden="true" />
         <strong className="activity-card-name">{activityName}</strong>
@@ -84,14 +82,6 @@ export default function ActivityCard({
                   onKeyDown={(event) => {
                     if (event.key === "Enter") event.currentTarget.blur();
                   }}
-                />
-              </label>
-              <label className="activity-menu-label">
-                Color
-                <input
-                  type="color"
-                  value={color}
-                  onChange={(event) => onColorChange(event.target.value)}
                 />
               </label>
               <button

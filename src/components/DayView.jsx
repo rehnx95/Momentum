@@ -245,7 +245,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             key={activity.id}
             activityId={activity.id}
             activityName={activity.name}
-            color={activity.color || "#8b5cf6"}
             slots={activity.slots}
             totalMinutes={activityTotal(activity.slots)}
             disabled={entryDisabled}
@@ -260,7 +259,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
               daily.removeCustomTask(activity.id);
             }}
             onRename={(name) => daily.renameCustomTask(activity.id, name)}
-            onColorChange={(color) => daily.setCustomColor(activity.id, color)}
           />
         ))}
       </div>
