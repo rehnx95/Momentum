@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   ClipboardList,
   LayoutList,
@@ -17,54 +16,13 @@ const NAV = [
   { id: "profile", label: "Profile", path: "/profile", icon: User },
 ];
 
-const TIMER_STORAGE = (userId) => `track-sheet-running-timer:${userId}`;
-
 export default function AppHeader({
   active,
   onNavigate,
   theme,
   setTheme,
   onSignOut,
-  userId,
 }) {
-  const [runningTimer, setRunningTimer] = useState(null);
-  const [now, setNow] = useState(Date.now());
-
-  useEffect(() => {
-    if (!userId) return undefined;
-    const syncTimer = () => {
-      try {
-        const value = localStorage.getItem(TIMER_STORAGE(userId));
-        const timer = value ? JSON.parse(value) : null;
-        setRunningTimer(
-          timer &&
-            typeof timer.activityName === "string" &&
-            Number.isFinite(new Date(timer.startedAt).getTime())
-            ? timer
-            : null,
-        );
-      } catch (error) {
-        console.error("Could not read the running timer:", error);
-        setRunningTimer(null);
-      }
-      setNow(Date.now());
-    };
-    syncTimer();
-    const interval = window.setInterval(syncTimer, 1000);
-    return () => window.clearInterval(interval);
-  }, [userId]);
-
-  const elapsedSeconds = runningTimer
-    ? Math.max(0, Math.floor((now - new Date(runningTimer.startedAt).getTime()) / 1000))
-    : 0;
-  const elapsed = [
-    Math.floor(elapsedSeconds / 3600),
-    Math.floor((elapsedSeconds % 3600) / 60),
-    elapsedSeconds % 60,
-  ]
-    .map((part) => String(part).padStart(2, "0"))
-    .join(":");
-
   return (
     <header className="app-header">
       <div className="app-header-inner">
@@ -84,17 +42,6 @@ export default function AppHeader({
           ))}
         </nav>
         <div className="app-header-actions">
-          {runningTimer && (
-            <button
-              type="button"
-              className="running-timer-pill"
-              onClick={() => onNavigate("/daily-log")}
-              title="Return to Daily Log to stop this timer"
-            >
-              <span aria-hidden="true">●</span>
-              <span>{runningTimer.activityName} {elapsed}</span>
-            </button>
-          )}
           <button
             type="button"
             className="icon-btn"

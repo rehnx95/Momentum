@@ -11,7 +11,6 @@ import {
 import { formatDuration, slotMinutes } from "../utils/time";
 import { getLocalDateKey } from "../hooks/useDailyLog";
 import ActivityCard from "./ActivityCard";
-import DayTimeline from "./DayTimeline";
 import StatStrip from "./StatStrip";
 
 function activityTotal(slots) {
@@ -24,27 +23,11 @@ function activityTotal(slots) {
   }, 0);
 }
 
-function timeElapsed(startedAt, now) {
-  const total = Math.max(0, Math.floor((now - new Date(startedAt).getTime()) / 1000));
-  const hours = String(Math.floor(total / 3600)).padStart(2, "0");
-  const minutes = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
-  const seconds = String(total % 60).padStart(2, "0");
-  return `${hours}:${minutes}:${seconds}`;
-}
-
 export default function DayView({ daily, sheets = [], askConfirmation }) {
   const [newActivityOpen, setNewActivityOpen] = useState(false);
   const [newActivityName, setNewActivityName] = useState("");
   const [activityMenuOpen, setActivityMenuOpen] = useState(false);
   const activityMenuRef = useRef(null);
-  const [selectedTimerActivity, setSelectedTimerActivity] = useState(() => {
-    try {
-      return localStorage.getItem("track-sheet-last-timer-activity") || "";
-    } catch (error) {
-      console.error("Could not read the last timer activity:", error);
-      return "";
-    }
-  });
   const activities = useMemo(
     () => daily.activeCustomTasks.map((task) => ({
         ...task,
@@ -53,19 +36,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
       })),
     [daily.activeCustomTasks, daily.log.custom_tasks],
   );
-  const timerActivities = useMemo(
-    () => daily.activeCustomTasks.map((task) => ({
-      id: task.id,
-      name: task.name,
-      color: task.color,
-    })),
-    [daily.activeCustomTasks],
-  );
-  const timerActivityId = timerActivities.some(
-    (activity) => activity.id === selectedTimerActivity,
-  )
-    ? selectedTimerActivity
-    : timerActivities[0]?.id || "";
   const availableSheetActivities = sheets.filter(
     (sheet) =>
       !daily.activeCustomTasks.some(
@@ -92,22 +62,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
       document.removeEventListener("keydown", closeOnEscape);
     };
   }, []);
-
-  useEffect(() => {
-    if (
-      !daily.runningTimer &&
-      timerActivities.length &&
-      !timerActivities.some((item) => item.id === selectedTimerActivity)
-    ) {
-      setSelectedTimerActivity(timerActivities[0].id);
-    }
-  }, [daily.runningTimer, selectedTimerActivity, timerActivities]);
-
-  const focusSlot = (activityId, index) => {
-    const row = document.getElementById(`slot-${activityId}-${index}`);
-    row?.scrollIntoView({ behavior: "smooth", block: "center" });
-    row?.querySelector("input")?.focus({ preventScroll: true });
-  };
 
   const addActivity = async () => {
     if (!(await daily.addCustomTask(newActivityName))) return;
@@ -155,72 +109,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             <ChevronRight size={16} />
           </button>
         </div>
-        <section className="daily-timer">
-          <label>
-            <span>Timer</span>
-            <select
-              value={daily.runningTimer?.activityId || timerActivityId}
-              disabled={Boolean(daily.runningTimer) || entryDisabled || !timerActivities.length}
-              onChange={(event) => {
-                const activityId = event.target.value;
-                setSelectedTimerActivity(activityId);
-                try {
-                  localStorage.setItem("track-sheet-last-timer-activity", activityId);
-                } catch (error) {
-                  console.error("Could not remember the last timer activity:", error);
-                }
-              }}
-            >
-              {!timerActivities.length && (
-                <option value="">Create an activity first</option>
-              )}
-              {timerActivities.map((activity) => (
-                <option key={activity.id} value={activity.id}>{activity.name}</option>
-              ))}
-            </select>
-          </label>
-          {daily.runningTimer ? (
-            <button type="button" className="timer-stop" onClick={() => daily.stopTimer()}>
-              Stop {daily.runningTimer.activityName} · {timeElapsed(daily.runningTimer.startedAt, daily.timerNow)}
-            </button>
-          ) : (
-            <button
-              type="button"
-              disabled={entryDisabled || !timerActivities.length}
-              onClick={() => {
-                const activity = timerActivities.find((item) => item.id === selectedTimerActivity) || timerActivities[0];
-                if (activity) daily.startTimer(activity.id, activity.name, activity.color);
-              }}
-            >
-              <Timer size={15} /> Start timer
-            </button>
-          )}
-          {timerActivities.length > 0 && (
-            <details className="timer-quick-add">
-              <summary>Quick add</summary>
-              <button
-                type="button"
-                disabled={entryDisabled}
-                onClick={() => {
-                  const activity = timerActivities.find((item) => item.id === selectedTimerActivity);
-                  if (activity) daily.quickAdd(activity.id, 30, activity.name, activity.color);
-                }}
-              >
-                +30m
-              </button>
-              <button
-                type="button"
-                disabled={entryDisabled}
-                onClick={() => {
-                  const activity = timerActivities.find((item) => item.id === selectedTimerActivity);
-                  if (activity) daily.quickAdd(activity.id, 60, activity.name, activity.color);
-                }}
-              >
-                +1h
-              </button>
-            </details>
-          )}
-        </section>
       </div>
 
       <section className="daily-overview" aria-label="Day overview">
@@ -237,40 +125,40 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             { label: "Streak", value: daily.currentStreak, unit: "days", icon: Flame },
           ]}
         />
-        <details className="daily-timeline-details">
-          <summary>View 24-hour timeline</summary>
-          <DayTimeline
-            log={daily.log}
-            tasks={activities}
-            date={daily.date}
-            onFocusSlot={focusSlot}
-          />
-        </details>
       </section>
 
-      <div className="sleep-entry">
-        <label>
-          <span title="Sleep hours belong to the night before and ended this morning.">
-            Sleep <small>night before · ended this morning</small>
-          </span>
-          <input
-            type="time"
-            value={daily.log.sleep_time}
-            disabled={entryDisabled}
-            onChange={(event) => daily.updateField("sleep_time", event.target.value)}
-          />
-        </label>
-        <label>
-          <span>Wake</span>
-          <input
-            type="time"
-            value={daily.log.wake_time}
-            disabled={entryDisabled}
-            onChange={(event) => daily.updateField("wake_time", event.target.value)}
-          />
-        </label>
-        <span className="sleep-duration">{formatDuration(daily.sleptMinutes)}</span>
-      </div>
+      <section className="sleep-entry" aria-labelledby="sleep-entry-title">
+        <header className="sleep-entry-heading">
+          <Moon size={16} aria-hidden="true" />
+          <div>
+            <h3 id="sleep-entry-title">Sleep</h3>
+            <p>Night before to this morning</p>
+          </div>
+          <output className="sleep-duration" aria-label="Total sleep">
+            {formatDuration(daily.sleptMinutes)}
+          </output>
+        </header>
+        <div className="sleep-entry-fields">
+          <label>
+            <span>Bedtime</span>
+            <input
+              type="time"
+              value={daily.log.sleep_time}
+              disabled={entryDisabled}
+              onChange={(event) => daily.updateField("sleep_time", event.target.value)}
+            />
+          </label>
+          <label>
+            <span>Wake up</span>
+            <input
+              type="time"
+              value={daily.log.wake_time}
+              disabled={entryDisabled}
+              onChange={(event) => daily.updateField("wake_time", event.target.value)}
+            />
+          </label>
+        </div>
+      </section>
 
       <div className="daily-entry-heading">
         <h3>Activities</h3>

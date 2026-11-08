@@ -1221,7 +1221,7 @@ function AuthenticatedApp({
   const userUsername = profile?.username || "";
   const userLocation = profile?.location || "";
   const userWebsite = profile?.website || "";
-  const headerProps = { onNavigate: navigateTo, theme, setTheme, onSignOut, userId: user.id };
+  const headerProps = { onNavigate: navigateTo, theme, setTheme, onSignOut };
 
   const openProfileSettings = () => {
     navigateTo("/profile/edit");

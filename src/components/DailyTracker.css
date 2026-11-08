@@ -32,8 +32,7 @@
 .daily-view-switch,
 .daily-entry-heading,
 .daily-save-status,
-.activity-card-heading,
-.daily-timer {
+.activity-card-heading {
   display: flex;
   align-items: center;
 }
@@ -81,7 +80,6 @@
 
 .daily-date input,
 .sleep-entry input,
-.daily-timer select,
 .daily-new-inline input,
 .activity-menu input:not([type="color"]) {
   min-height: 2.3rem;
@@ -95,7 +93,6 @@
 
 :root[data-theme="light"] .daily-date input,
 :root[data-theme="light"] .sleep-entry input,
-:root[data-theme="light"] .daily-timer select,
 :root[data-theme="light"] .daily-new-inline input {
   color-scheme: light;
 }
@@ -185,102 +182,6 @@
   font-size: 0.65rem;
 }
 
-.daily-timeline-details > summary {
-  width: fit-content;
-  padding: 0.2rem 0;
-  color: var(--muted);
-  font-size: 0.68rem;
-  cursor: pointer;
-}
-
-.daily-timeline-details .day-timeline {
-  margin: 0.35rem 0 0.5rem;
-}
-
-.day-timeline {
-  margin: 0.65rem 0;
-}
-
-.timeline-hours {
-  position: relative;
-  height: 1.3rem;
-  margin: 0 0.25rem 0.25rem;
-  color: var(--muted);
-  font-size: 0.65rem;
-}
-
-.timeline-hours span {
-  position: absolute;
-  transform: translateX(-50%);
-}
-
-.timeline-hours span:first-child {
-  transform: none;
-}
-
-.timeline-hours span:last-child {
-  transform: translateX(-100%);
-}
-
-.timeline-bar {
-  position: relative;
-  height: 2.5rem;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 0.65rem;
-  background: var(--surface-raised);
-}
-
-.timeline-gridline {
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  bottom: 0;
-  border-left: 1px dashed var(--border-strong);
-  pointer-events: none;
-}
-
-.timeline-block {
-  position: absolute;
-  z-index: 2;
-  top: 0.35rem;
-  bottom: 0.35rem;
-  min-width: 3px;
-  border: 1px solid color-mix(in srgb, var(--activity-color) 85%, white);
-  border-radius: 0.3rem;
-  background: var(--activity-color);
-  cursor: pointer;
-}
-
-.timeline-block:disabled {
-  cursor: default;
-}
-
-.timeline-block.has-overlap {
-  background-image: repeating-linear-gradient(
-    135deg,
-    transparent 0,
-    transparent 4px,
-    rgba(255, 255, 255, 0.55) 4px,
-    rgba(255, 255, 255, 0.55) 6px
-  );
-}
-
-.timeline-block.is-invalid {
-  border: 2px solid #ef4444;
-  background: rgba(239, 68, 68, 0.45);
-}
-
-.timeline-now {
-  position: absolute;
-  z-index: 3;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: #ef4444;
-}
-
-.timeline-legend,
 .weekly-chart-legend {
   display: flex;
   flex-wrap: wrap;
@@ -290,14 +191,12 @@
   font-size: 0.72rem;
 }
 
-.timeline-legend span,
 .weekly-chart-legend span {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
 }
 
-.timeline-legend i,
 .weekly-chart-legend i {
   width: 0.65rem;
   height: 0.65rem;
@@ -305,40 +204,69 @@
 }
 
 .sleep-entry {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.4rem 0.6rem;
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.5rem 0;
+  padding: 0.7rem;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 0.8rem;
+  background: var(--surface-raised);
 }
 
-.sleep-entry label {
+.sleep-entry-heading {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  color: var(--muted);
-  font-size: 0.72rem;
+  gap: 0.55rem;
+  color: var(--activity-sleep);
+}
+
+.sleep-entry-heading > div {
+  min-width: 0;
+}
+
+.sleep-entry-heading h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.78rem;
   font-weight: 700;
 }
 
-.sleep-entry label small {
-  display: none;
-  margin-left: 0.2rem;
-  font-size: 0.6rem;
+.sleep-entry-heading p {
+  margin: 0.1rem 0 0;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.sleep-entry-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.sleep-entry-fields label {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-size: 0.65rem;
   font-weight: 400;
 }
 
-.sleep-entry input {
-  width: 6rem;
-  min-height: 1.9rem;
+.sleep-entry-fields input {
+  width: 100%;
+  min-height: 2rem;
 }
 
-.sleep-duration {
+.sleep-entry .sleep-duration {
   margin-left: auto;
-  padding: 0;
-  color: var(--muted);
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--text);
   font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .daily-entry-heading {
@@ -444,8 +372,6 @@
 }
 
 .daily-new-inline button,
-.daily-timer > button,
-.timer-quick-add button,
 .load-older-button {
   min-height: 2.25rem;
   padding-inline: 0.75rem;
@@ -519,8 +445,7 @@
   opacity: 0.55;
 }
 
-.daily-new-inline button[type="submit"],
-.daily-timer > button:not(.timer-stop) {
+.daily-new-inline button[type="submit"] {
   border-color: var(--text);
   background: var(--text);
   color: var(--page);
@@ -696,67 +621,6 @@
 
 .slot-add:hover {
   color: var(--text);
-}
-
-.daily-timer {
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.daily-timer label {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  color: var(--muted);
-  font-size: 0.72rem;
-}
-
-.daily-timer select {
-  min-height: 1.9rem;
-  max-width: 9rem;
-}
-
-.daily-timer > button {
-  min-height: 1.9rem;
-  padding-inline: 0.5rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 0.6rem;
-  color: var(--text);
-  font-size: 0.72rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.timer-stop {
-  border-color: #ef4444 !important;
-  color: #ef4444 !important;
-}
-
-.timer-quick-add {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-left: 0;
-}
-
-.timer-quick-add summary {
-  color: var(--muted);
-  font-size: 0.7rem;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.timer-quick-add[open] {
-  flex-wrap: wrap;
-}
-
-.timer-quick-add button {
-  min-height: 2rem;
 }
 
 .daily-warnings,
@@ -955,10 +819,6 @@
     align-items: center;
   }
 
-  .daily-timer {
-    justify-content: flex-start;
-  }
-
   .weekly-log-table {
     min-width: 40rem;
   }
@@ -987,20 +847,6 @@
 
   .slot-fix-badge {
     order: 4;
-  }
-
-  .sleep-entry {
-    gap: 0.4rem;
-    flex-wrap: wrap;
-  }
-
-  .sleep-entry label {
-    gap: 0.25rem;
-    font-size: 0.65rem;
-  }
-
-  .sleep-entry input {
-    width: 5.2rem;
   }
 
   .daily-save-status {
