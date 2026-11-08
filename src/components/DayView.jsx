@@ -69,9 +69,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
   );
   const entryDisabled =
     daily.loading ||
-    daily.loadFailed ||
-    daily.preferencesLoading ||
-    daily.preferencesFailed;
+    daily.loadFailed;
 
   useEffect(() => {
     const closeOnOutsideClick = (event) => {
@@ -121,12 +119,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
         <div className="daily-load-error" role="alert">
           Could not load this day. Existing data is not being overwritten.
           <button type="button" onClick={daily.retryLoad}>Try again</button>
-        </div>
-      )}
-      {daily.preferencesFailed && (
-        <div className="daily-load-error" role="alert">
-          Could not load your saved activities. Activity editing is paused to avoid overwriting them.
-          <button type="button" onClick={daily.retryPreferences}>Try again</button>
         </div>
       )}
       <div className="daily-date-nav">
