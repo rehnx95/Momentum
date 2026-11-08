@@ -1883,7 +1883,7 @@ gridStart.setDate(gridStart.getDate() - ((gridStart.getDay() + 6) % 7));
       <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
         <header className="dashboard-header sticky top-0 z-50 border-b">
           <div className="unified-header-inner mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 md:px-6">
-            <TrackSheetBrand onNavigate={onBack} />
+            <TrackSheetBrand onNavigate={onBack} subtitle="People" />
             <MainPageNavigation active="people" onNavigate={navigateTo} />
           </div>
         </header>
@@ -2082,7 +2082,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           <div className="unified-header-inner mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-4 md:px-6">
             <TrackSheetBrand
               onNavigate={() => navigateTo("/")}
-              subtitle="Public profile"
+              subtitle="People"
             />
             <MainPageNavigation active="people" onNavigate={navigateTo} />
             <button
@@ -2352,7 +2352,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           <div className="unified-header-inner max-w-[1440px] mx-auto px-4 md:px-6 py-4 flex items-center gap-4">
             <TrackSheetBrand
               onNavigate={() => navigateTo("/")}
-              subtitle="My profile"
+              subtitle="Profile"
             />
             <MainPageNavigation active="profile" onNavigate={navigateTo} />
             <div className="unified-header-actions">
@@ -2801,7 +2801,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
             <div className="unified-header-inner mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-6">
               <TrackSheetBrand subtitle="Daily Log" onNavigate={() => navigateTo("/")} />
-              <div className="flex-1" />
               <MainPageNavigation active="daily-log" onNavigate={navigateTo} />
             </div>
           </header>
@@ -2846,7 +2845,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </button>
           </Tooltip>
           <TrackSheetBrand
-            subtitle={selectedSheet?.title || "Select a sheet"}
+            subtitle="Tracker"
             onNavigate={() => navigateTo("/")}
           />
           <div className="unified-header-actions">

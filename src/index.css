@@ -171,6 +171,19 @@ input:focus-visible {
   line-height: 1.2;
 }
 
+.track-sheet-brand {
+  height: 2.75rem;
+  flex: 0 0 auto;
+  width: 11rem;
+}
+
+.track-sheet-brand > span:last-child {
+  display: flex;
+  min-height: 2.75rem;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .app-tooltip-anchor {
   position: relative;
   display: inline-flex;
@@ -909,6 +922,10 @@ input:focus-visible {
 }
 
 @media (max-width: 640px) {
+  .track-sheet-brand {
+    width: 8.25rem;
+  }
+
   .dashboard-header > div {
     flex-wrap: wrap;
     gap: 0.45rem;
