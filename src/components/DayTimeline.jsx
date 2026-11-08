@@ -1,4 +1,4 @@
-import { findOverlaps, toMinutes } from "../utils/time";
+import { findOverlaps, formatDuration, toMinutes } from "../utils/time";
 
 function makeBlocks(log, tasks) {
   const blocks = [];
@@ -92,7 +92,7 @@ export default function DayTimeline({
           const overlaps = overlappingSlots.has(block.slot);
           const start = Math.max(0, Math.min(1440, block.start));
           const end = Math.max(start + 2, Math.min(1440, block.end));
-          const label = `${block.name} ${block.slot.start} to ${block.slot.end}`;
+          const label = `${block.name} ${block.slot.start} to ${block.slot.end} · ${formatDuration(end - start)}`;
           return (
             <button
               type="button"

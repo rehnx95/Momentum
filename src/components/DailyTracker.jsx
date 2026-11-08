@@ -47,7 +47,6 @@ export default function DailyTracker({ user, sheets, askConfirmation }) {
         <FullLog
           daily={daily}
           onOpenDate={openDate}
-          askConfirmation={askConfirmation}
         />
       )}
       {daily.viewMode === "full" && daily.message && (

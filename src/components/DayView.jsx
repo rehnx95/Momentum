@@ -61,6 +61,11 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
     })),
     [daily.activeCustomTasks],
   );
+  const timerActivityId = timerActivities.some(
+    (activity) => activity.id === selectedTimerActivity,
+  )
+    ? selectedTimerActivity
+    : timerActivities[0]?.id || "";
   const availableSheetActivities = sheets.filter(
     (sheet) =>
       !daily.activeCustomTasks.some(
@@ -121,33 +126,100 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
           <button type="button" onClick={daily.retryLoad}>Try again</button>
         </div>
       )}
-      <div className="daily-date-nav">
-        <button
-          type="button"
-          aria-label="Previous day"
-          disabled={daily.loading}
-          onClick={() => daily.shiftDate(-1)}
-        >
-          <ChevronLeft size={16} />
-        </button>
-        <label className="daily-date">
-          <span className="sr-only">Log date</span>
-          <input
-            type="date"
-            value={daily.date}
-            max={getLocalDateKey()}
+      <div className="daily-day-header">
+        <div className="daily-date-nav">
+          <button
+            type="button"
+            aria-label="Previous day"
             disabled={daily.loading}
-            onChange={(event) => daily.changeDate(event.target.value)}
-          />
-        </label>
-        <button
-          type="button"
-          aria-label="Next day"
-          disabled={daily.loading || daily.date >= getLocalDateKey()}
-          onClick={() => daily.shiftDate(1)}
-        >
-          <ChevronRight size={16} />
-        </button>
+            onClick={() => daily.shiftDate(-1)}
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <label className="daily-date">
+            <span className="sr-only">Log date</span>
+            <input
+              type="date"
+              value={daily.date}
+              max={getLocalDateKey()}
+              disabled={daily.loading}
+              onChange={(event) => daily.changeDate(event.target.value)}
+            />
+          </label>
+          <button
+            type="button"
+            aria-label="Next day"
+            disabled={daily.loading || daily.date >= getLocalDateKey()}
+            onClick={() => daily.shiftDate(1)}
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+        <section className="daily-timer">
+          <label>
+            <span>Timer</span>
+            <select
+              value={daily.runningTimer?.activityId || timerActivityId}
+              disabled={Boolean(daily.runningTimer) || entryDisabled || !timerActivities.length}
+              onChange={(event) => {
+                const activityId = event.target.value;
+                setSelectedTimerActivity(activityId);
+                try {
+                  localStorage.setItem("track-sheet-last-timer-activity", activityId);
+                } catch (error) {
+                  console.error("Could not remember the last timer activity:", error);
+                }
+              }}
+            >
+              {!timerActivities.length && (
+                <option value="">Create an activity first</option>
+              )}
+              {timerActivities.map((activity) => (
+                <option key={activity.id} value={activity.id}>{activity.name}</option>
+              ))}
+            </select>
+          </label>
+          {daily.runningTimer ? (
+            <button type="button" className="timer-stop" onClick={() => daily.stopTimer()}>
+              Stop {daily.runningTimer.activityName} · {timeElapsed(daily.runningTimer.startedAt, daily.timerNow)}
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={entryDisabled || !timerActivities.length}
+              onClick={() => {
+                const activity = timerActivities.find((item) => item.id === selectedTimerActivity) || timerActivities[0];
+                if (activity) daily.startTimer(activity.id, activity.name, activity.color);
+              }}
+            >
+              <Timer size={15} /> Start timer
+            </button>
+          )}
+          {timerActivities.length > 0 && (
+            <div className="timer-quick-add">
+              <button
+                type="button"
+                disabled={entryDisabled}
+                onClick={() => {
+                  const activity = timerActivities.find((item) => item.id === selectedTimerActivity);
+                  if (activity) daily.quickAdd(activity.id, 30, activity.name, activity.color);
+                }}
+              >
+                +30m
+              </button>
+              <button
+                type="button"
+                disabled={entryDisabled}
+                onClick={() => {
+                  const activity = timerActivities.find((item) => item.id === selectedTimerActivity);
+                  if (activity) daily.quickAdd(activity.id, 60, activity.name, activity.color);
+                }}
+              >
+                +1h
+              </button>
+            </div>
+          )}
+        </section>
       </div>
 
       <StatStrip
@@ -173,7 +245,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
 
       <div className="sleep-entry">
         <label>
-          <span>Sleep (night before)</span>
+          <span>Sleep (night before) <small>ended this morning</small></span>
           <input
             type="time"
             value={daily.log.sleep_time}
@@ -266,6 +338,12 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
         </form>
       )}
 
+      {activities.every((activity) => activity.slots.length === 0) &&
+        !daily.log.sleep_time &&
+        !daily.log.wake_time && (
+          <p className="daily-empty-state">Nothing logged yet. Add an activity or record sleep for this day.</p>
+        )}
+
       <div className="daily-activity-list">
         {activities.map((activity) => (
           <ActivityCard
@@ -291,69 +369,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
           />
         ))}
       </div>
-
-      <section className="daily-timer">
-        <label>
-          <span>Timer activity</span>
-          <select
-            value={daily.runningTimer?.activityId || selectedTimerActivity}
-            disabled={Boolean(daily.runningTimer) || entryDisabled}
-            onChange={(event) => {
-              const activityId = event.target.value;
-              setSelectedTimerActivity(activityId);
-              try {
-                localStorage.setItem("track-sheet-last-timer-activity", activityId);
-              } catch (error) {
-                console.error("Could not remember the last timer activity:", error);
-              }
-            }}
-          >
-            {timerActivities.map((activity) => (
-              <option key={activity.id} value={activity.id}>{activity.name}</option>
-            ))}
-          </select>
-        </label>
-        {daily.runningTimer ? (
-          <button type="button" className="timer-stop" onClick={() => daily.stopTimer()}>
-            Stop {daily.runningTimer.activityName} · {timeElapsed(daily.runningTimer.startedAt, daily.timerNow)}
-          </button>
-        ) : (
-          <button
-            type="button"
-            disabled={entryDisabled || !timerActivities.length}
-            onClick={() => {
-              const activity = timerActivities.find((item) => item.id === selectedTimerActivity) || timerActivities[0];
-              if (activity) daily.startTimer(activity.id, activity.name, activity.color);
-            }}
-          >
-            <Timer size={15} /> Start timer
-          </button>
-        )}
-        {timerActivities.length > 0 && (
-          <div className="timer-quick-add">
-            <button
-              type="button"
-              disabled={entryDisabled}
-              onClick={() => {
-                const activity = timerActivities.find((item) => item.id === selectedTimerActivity);
-                if (activity) daily.quickAdd(activity.id, 30, activity.name, activity.color);
-              }}
-            >
-              +30m
-            </button>
-            <button
-              type="button"
-              disabled={entryDisabled}
-              onClick={() => {
-                const activity = timerActivities.find((item) => item.id === selectedTimerActivity);
-                if (activity) daily.quickAdd(activity.id, 60, activity.name, activity.color);
-              }}
-            >
-              +1h
-            </button>
-          </div>
-        )}
-      </section>
 
       {daily.validation.warnings.length > 0 && (
         <ul className="daily-warnings" aria-label="Daily log warnings">
