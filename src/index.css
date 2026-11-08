@@ -1202,7 +1202,8 @@ input:focus-visible {
 }
 :root[data-theme="light"] .dashboard-header .profile-trigger svg { color: var(--text); }
 :root[data-theme="light"] .sheet-nav-item[aria-current="page"] { color: var(--text); }
-:root[data-theme="light"] .dashboard-content .tracker-toolbar button[aria-pressed="true"] { color: #ffffff; }
+:root[data-theme="light"] .dashboard-content .tracker-toolbar button[aria-pressed="true"],
+:root[data-theme="light"] .tracker-filter-row .tracker-toolbar button[aria-pressed="true"] { color: #ffffff; }
 :root[data-theme="light"] .google-signin-button,
 :root[data-theme="light"] .auth-panel h2 { color: var(--text); }
 :root[data-theme="light"] .google-signin-button:hover:not(:disabled) { border-color: #a3a3a3; }
