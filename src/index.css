@@ -205,6 +205,10 @@ input:focus-visible {
 }
 
 @media (min-width: 768px) {
+  .tracker-filter-row {
+    padding-inline: 1.5rem;
+  }
+
   .track-sheet-brand {
     left: 5rem;
   }
@@ -455,10 +459,11 @@ input:focus-visible {
 
 .tracker-dashboard-shell {
   --tracker-header-height: 7.5rem;
+  --tracker-content-gap: 0.75rem;
 }
 
 .tracker-dashboard-shell > .dashboard-main {
-  padding-top: var(--tracker-header-height) !important;
+  padding-top: calc(var(--tracker-header-height) + var(--tracker-content-gap)) !important;
 }
 
 .tracker-dashboard-shell .sheet-sidebar {
@@ -466,10 +471,11 @@ input:focus-visible {
 }
 
 .tracker-filter-row {
+  box-sizing: border-box;
   width: 100%;
   max-width: 80rem;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 1rem;
 }
 
 .tracker-filter-row .tracker-toolbar {
