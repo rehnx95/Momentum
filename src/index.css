@@ -193,17 +193,15 @@ input:focus-visible {
 }
 
 .track-sheet-brand-copy {
-  width: 5.25rem;
+  width: 7.25rem;
   height: 2.75rem;
-  flex: 0 0 5.25rem;
+  flex: 0 0 7.25rem;
 }
 
 .track-sheet-brand-name {
   height: 1.25rem;
-  overflow: hidden;
-  line-height: 1.25rem;
-  text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.25rem;
 }
 
 @media (min-width: 768px) {
