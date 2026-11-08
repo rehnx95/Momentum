@@ -255,7 +255,9 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
 
       <div className="sleep-entry">
         <label>
-          <span>Sleep <small>night before · ended this morning</small></span>
+          <span title="Sleep hours belong to the night before and ended this morning.">
+            Sleep <small>night before · ended this morning</small>
+          </span>
           <input
             type="time"
             value={daily.log.sleep_time}
