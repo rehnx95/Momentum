@@ -1,0 +1,898 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { supabase } from "../lib/supabase";
+import { slotMinutes, splitIntervalByDay, validateDay } from "../utils/time";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const PAGE_SIZE = 84;
+const TIMER_STORAGE = (userId) => `track-sheet-running-timer:${userId}`;
+const COLOR_PALETTE = [
+  "#8b5cf6",
+  "#06b6d4",
+  "#f97316",
+  "#ec4899",
+  "#84cc16",
+  "#eab308",
+  "#14b8a6",
+  "#6366f1",
+];
+
+export function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatTime(value) {
+  return value ? String(value).slice(0, 5) : "";
+}
+
+function normalizeSlots(slots) {
+  if (!Array.isArray(slots)) return [];
+  return slots.map((slot) => ({
+    ...slot,
+    start: formatTime(slot.start),
+    end: formatTime(slot.end),
+  }));
+}
+
+function emptyLog(date) {
+  return {
+    date,
+    sleep_time: "",
+    wake_time: "",
+    dsa_slots: [],
+    backend_slots: [],
+    custom_tasks: [],
+  };
+}
+
+function normalizeLog(data, date, templates) {
+  const row = data || emptyLog(date);
+  const savedTasks = Array.isArray(row.custom_tasks) ? row.custom_tasks : [];
+  const savedIds = new Set(savedTasks.map((task) => task.id));
+  const templateById = new Map(templates.map((task) => [task.id, task]));
+  return {
+    ...emptyLog(date),
+    ...row,
+    sleep_time: formatTime(row.sleep_time),
+    wake_time: formatTime(row.wake_time),
+    dsa_slots: normalizeSlots(row.dsa_slots),
+    backend_slots: normalizeSlots(row.backend_slots),
+    custom_tasks: [
+      ...savedTasks.map((task) => ({
+        ...task,
+        color: task.color || templateById.get(task.id)?.color,
+        slots: normalizeSlots(task.slots),
+      })),
+      ...templates
+        .filter((task) => !savedIds.has(task.id))
+        .map((task) => ({ ...task, slots: [] })),
+    ],
+  };
+}
+
+function durationSlots(slots) {
+  return slots.reduce((total, slot) => {
+    const minutes = timerSlotMinutes(slot);
+    return total + (minutes ?? 0);
+  }, 0);
+}
+
+function timerSlotMinutes(slot) {
+  if (slot.endDayOffset === 1 && slot.end === "00:00") {
+    const start = slotMinutes({ start: slot.start, end: "23:59" });
+    return start === null ? 0 : start + 1;
+  }
+  return slotMinutes(slot);
+}
+
+function totalActivityMinutes(log) {
+  const custom = (log.custom_tasks || []).reduce(
+    (sum, task) => sum + durationSlots(task.slots || []),
+    0,
+  );
+  const dsa = (log.dsa_slots || []).reduce(
+    (sum, slot) => sum + timerSlotMinutes(slot),
+    0,
+  );
+  const backend = (log.backend_slots || []).reduce(
+    (sum, slot) => sum + timerSlotMinutes(slot),
+    0,
+  );
+  return dsa + backend + custom;
+}
+
+function sleepMinutes(log) {
+  if (!log.sleep_time || !log.wake_time) return 0;
+  return slotMinutes(
+    { start: log.sleep_time, end: log.wake_time },
+    { wrap: true },
+  ) || 0;
+}
+
+function timerStorageGet(userId) {
+  try {
+    const value = localStorage.getItem(TIMER_STORAGE(userId));
+    return value ? JSON.parse(value) : null;
+  } catch (error) {
+    console.error("Could not read the running timer:", error);
+    return null;
+  }
+}
+
+export default function useDailyLog(user) {
+  const [date, setDateState] = useState(() => getLocalDateKey());
+  const dateRef = useRef(date);
+  const [log, setLogState] = useState(() => emptyLog(getLocalDateKey()));
+  const logRef = useRef(log);
+  const [savedSnapshot, setSavedSnapshot] = useState(null);
+  const savedSnapshotRef = useRef(null);
+  const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadRequest, setLoadRequest] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
+  const savePromiseRef = useRef(null);
+  const [status, setStatus] = useState("");
+  const [message, setMessage] = useState("");
+  const [viewMode, setViewMode] = useState("daily");
+  const [dsaEnabled, setDsaEnabled] = useState(true);
+  const [backendEnabled, setBackendEnabled] = useState(true);
+  const [profileCustomTasks, setProfileCustomTasks] = useState([]);
+  const templatesRef = useRef(profileCustomTasks);
+  templatesRef.current = profileCustomTasks;
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [problemCounts, setProblemCounts] = useState({});
+  const [allLogs, setAllLogs] = useState([]);
+  const [allLogsLoading, setAllLogsLoading] = useState(false);
+  const [hasOlderLogs, setHasOlderLogs] = useState(false);
+  const [olderLogsLoading, setOlderLogsLoading] = useState(false);
+  const [runningTimer, setRunningTimer] = useState(() => timerStorageGet(user.id));
+  const [timerNow, setTimerNow] = useState(Date.now());
+  const autosaveTimer = useRef(null);
+
+  const setDate = useCallback((nextDate) => {
+    dateRef.current = nextDate;
+    setDateState(nextDate);
+  }, []);
+
+  const setLog = useCallback((update) => {
+    const next = typeof update === "function" ? update(logRef.current) : update;
+    logRef.current = next;
+    setLogState(next);
+  }, []);
+
+  const validation = useMemo(() => validateDay(log), [log]);
+  const studiedMinutes = useMemo(() => totalActivityMinutes(log), [log]);
+  const sleptMinutes = useMemo(() => sleepMinutes(log), [log]);
+  const dirty = savedSnapshot !== null && JSON.stringify(log) !== savedSnapshot;
+  const activeCustomTasks = useMemo(
+    () => profileCustomTasks.filter((task) =>
+      log.custom_tasks.some((saved) => saved.id === task.id),
+    ),
+    [profileCustomTasks, log.custom_tasks],
+  );
+
+  useEffect(() => {
+    if (loading || !profileCustomTasks.length) return;
+    const savedIds = new Set(logRef.current.custom_tasks.map((task) => task.id));
+    const additions = profileCustomTasks
+      .filter((task) => !savedIds.has(task.id))
+      .map((task) => ({ ...task, slots: [] }));
+    if (additions.length) {
+      setLog((current) => ({
+        ...current,
+        custom_tasks: [...current.custom_tasks, ...additions],
+      }));
+    }
+  }, [profileCustomTasks, loading, setLog]);
+
+  const saveLog = useCallback(async (draft, targetDate) => {
+    if (loadFailed) return false;
+    const nextDraft = draft || logRef.current;
+    const nextDate = targetDate || dateRef.current;
+    const result = validateDay(nextDraft);
+    if (result.errors.length) {
+      if (nextDate === dateRef.current) {
+        setStatus("Fix errors to save");
+        setMessage(result.errors[0].message);
+      }
+      return false;
+    }
+
+    const snapshot = JSON.stringify(nextDraft);
+    if (snapshot === savedSnapshotRef.current) return true;
+    if (savingRef.current && savePromiseRef.current) {
+      await savePromiseRef.current;
+      if (savedSnapshotRef.current === snapshot) return true;
+    }
+
+    savingRef.current = true;
+    setSaving(true);
+    if (nextDate === dateRef.current) {
+      setStatus("Saving…");
+      setMessage("");
+    }
+
+    const promise = (async () => {
+      const { error } = await supabase.from("daily_logs").upsert(
+        {
+          user_id: user.id,
+          date: nextDate,
+          sleep_time: nextDraft.sleep_time || null,
+          wake_time: nextDraft.wake_time || null,
+          dsa_slots: nextDraft.dsa_slots,
+          backend_slots: nextDraft.backend_slots,
+          custom_tasks: nextDraft.custom_tasks,
+          dsa_hours: durationSlots(nextDraft.dsa_slots) / 60 || null,
+          backend_hours: durationSlots(nextDraft.backend_slots) / 60 || null,
+        },
+        { onConflict: "user_id,date" },
+      );
+      if (error) throw error;
+      if (nextDate === dateRef.current) {
+        savedSnapshotRef.current = snapshot;
+        setSavedSnapshot(snapshot);
+        setStatus("Saved");
+        setMessage("");
+      }
+      return true;
+    })();
+
+    savePromiseRef.current = promise;
+    try {
+      return await promise;
+    } catch (error) {
+      console.error("Failed to save daily log:", error);
+      if (nextDate === dateRef.current) {
+        setStatus("Could not save");
+        setMessage("Could not save this daily log. Your edits are still here.");
+      }
+      return false;
+    } finally {
+      savingRef.current = false;
+      savePromiseRef.current = null;
+      setSaving(false);
+    }
+  }, [loadFailed, user.id]);
+
+  const saveLogRef = useRef(saveLog);
+  saveLogRef.current = saveLog;
+
+  useEffect(() => {
+    let active = true;
+    supabase
+      .from("profiles")
+      .select("dsa_enabled, backend_enabled, custom_tasks, current_streak")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) throw error;
+        if (!data) return;
+        setDsaEnabled(data.dsa_enabled !== false);
+        setBackendEnabled(data.backend_enabled !== false);
+        setCurrentStreak(Number(data.current_streak || 0));
+        setProfileCustomTasks(
+          Array.isArray(data.custom_tasks)
+            ? data.custom_tasks.map((task, index) => ({
+                id: task.id,
+                name: task.name,
+                color: task.color || COLOR_PALETTE[index % COLOR_PALETTE.length],
+              }))
+            : [],
+        );
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error("Failed to load daily log preferences:", error);
+        setMessage("Could not load daily log preferences.");
+      });
+    return () => {
+      active = false;
+    };
+  }, [user.id]);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setLoadFailed(false);
+    setStatus("");
+    setMessage("");
+    supabase
+      .from("daily_logs")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("date", date)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) throw error;
+        const nextLog = normalizeLog(data, date, templatesRef.current);
+        const snapshot = JSON.stringify(nextLog);
+        savedSnapshotRef.current = snapshot;
+        setSavedSnapshot(snapshot);
+        setLog(nextLog);
+        setStatus("Saved");
+        setLoadFailed(false);
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error("Failed to load daily log:", error);
+        setLoadFailed(true);
+        setStatus("Could not load");
+        setMessage("Could not load this daily log.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [user.id, date, loadRequest, setLog]);
+
+  useEffect(() => {
+    if (loading || loadFailed || !dirty) return undefined;
+    if (validation.errors.length) {
+      setStatus("Fix errors to save");
+      setMessage(validation.errors[0].message);
+      return undefined;
+    }
+    setStatus("Saving soon…");
+    autosaveTimer.current = window.setTimeout(() => {
+      saveLogRef.current(logRef.current, dateRef.current);
+    }, 800);
+    return () => window.clearTimeout(autosaveTimer.current);
+  }, [log, date, dirty, loading, loadFailed, validation.errors]);
+
+  const flushPendingSave = useCallback(async () => {
+    window.clearTimeout(autosaveTimer.current);
+    if (loadFailed) return true;
+    if (JSON.stringify(logRef.current) === savedSnapshotRef.current) return true;
+    return saveLog(logRef.current, dateRef.current);
+  }, [loadFailed, saveLog]);
+
+  useEffect(() => {
+    const flushWhenHidden = () => {
+      if (document.visibilityState === "hidden") {
+          if (JSON.stringify(logRef.current) !== savedSnapshotRef.current) {
+            void saveLogRef.current(logRef.current, dateRef.current);
+          }
+      }
+    };
+    document.addEventListener("visibilitychange", flushWhenHidden);
+    return () => document.removeEventListener("visibilitychange", flushWhenHidden);
+  }, []);
+
+  const changeDate = useCallback(async (selectedDate) => {
+    if (!selectedDate || selectedDate === dateRef.current || selectedDate > getLocalDateKey()) {
+      return false;
+    }
+    const saved = await flushPendingSave();
+    if (!saved) return false;
+    savedSnapshotRef.current = null;
+    setSavedSnapshot(null);
+    setLog(emptyLog(selectedDate));
+    setDate(selectedDate);
+    return true;
+  }, [flushPendingSave, setDate, setLog]);
+
+  const shiftDate = useCallback((days) => {
+    const [year, month, day] = dateRef.current.split("-").map(Number);
+    const target = new Date(year, month - 1, day + days);
+    const key = getLocalDateKey(target);
+    if (key <= getLocalDateKey()) void changeDate(key);
+  }, [changeDate]);
+
+  const updateField = useCallback((field, value) => {
+    setLog((current) => ({ ...current, [field]: value }));
+  }, [setLog]);
+
+  const updateSlot = useCallback((activity, index, field, value) => {
+    const key = activity === "dsa" || activity === "backend" ? `${activity}_slots` : null;
+    setLog((current) => {
+      if (key) {
+        return {
+          ...current,
+          [key]: current[key].map((slot, slotIndex) =>
+            slotIndex === index ? { ...slot, [field]: value, endDayOffset: 0 } : slot,
+          ),
+        };
+      }
+      return {
+        ...current,
+        custom_tasks: current.custom_tasks.map((task) =>
+          task.id === activity
+            ? {
+                ...task,
+                slots: task.slots.map((slot, slotIndex) =>
+                  slotIndex === index
+                    ? { ...slot, [field]: value, endDayOffset: 0 }
+                    : slot,
+                ),
+              }
+            : task,
+        ),
+      };
+    });
+  }, [setLog]);
+
+  const addSlot = useCallback((activity) => {
+    setLog((current) => {
+      if (activity === "dsa" || activity === "backend") {
+        const key = `${activity}_slots`;
+        return { ...current, [key]: [...current[key], { start: "", end: "" }] };
+      }
+      return {
+        ...current,
+        custom_tasks: current.custom_tasks.map((task) =>
+          task.id === activity
+            ? { ...task, slots: [...task.slots, { start: "", end: "" }] }
+            : task,
+        ),
+      };
+    });
+  }, [setLog]);
+
+  const removeSlot = useCallback((activity, index) => {
+    setLog((current) => {
+      if (activity === "dsa" || activity === "backend") {
+        const key = `${activity}_slots`;
+        return { ...current, [key]: current[key].filter((_, i) => i !== index) };
+      }
+      return {
+        ...current,
+        custom_tasks: current.custom_tasks.map((task) =>
+          task.id === activity
+            ? { ...task, slots: task.slots.filter((_, i) => i !== index) }
+            : task,
+        ),
+      };
+    });
+  }, [setLog]);
+
+  const savePreferences = useCallback(async (changes) => {
+    const { error } = await supabase.from("profiles").update(changes).eq("id", user.id);
+    if (error) throw error;
+  }, [user.id]);
+
+  const toggleBuiltin = useCallback(async (activity) => {
+    const dsa = activity === "dsa";
+    const setter = dsa ? setDsaEnabled : setBackendEnabled;
+    const enabled = dsa ? dsaEnabled : backendEnabled;
+    setter(!enabled);
+    try {
+      await savePreferences({ [dsa ? "dsa_enabled" : "backend_enabled"]: !enabled });
+    } catch (error) {
+      console.error("Failed to save activity preference:", error);
+      setter(enabled);
+      setMessage("Could not update activity preference.");
+    }
+  }, [dsaEnabled, backendEnabled, savePreferences]);
+
+  const updateTemplates = useCallback(async (templates) => {
+    const previous = profileCustomTasks;
+    setProfileCustomTasks(templates);
+    try {
+      await savePreferences({ custom_tasks: templates });
+    } catch (error) {
+      console.error("Failed to save custom activity preferences:", error);
+      setProfileCustomTasks(previous);
+      setMessage("Could not save custom activity preferences.");
+      return false;
+    }
+    return true;
+  }, [profileCustomTasks, savePreferences]);
+
+  const addCustomTask = useCallback(async (name) => {
+    const trimmed = name.trim();
+    if (!trimmed) return null;
+    const task = {
+      id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`,
+      name: trimmed,
+      color: COLOR_PALETTE[profileCustomTasks.length % COLOR_PALETTE.length],
+    };
+    if (!(await updateTemplates([...profileCustomTasks, task]))) return null;
+    return task;
+  }, [profileCustomTasks, updateTemplates]);
+
+  const removeCustomTask = useCallback((taskId) => {
+    void updateTemplates(profileCustomTasks.filter((task) => task.id !== taskId));
+  }, [profileCustomTasks, updateTemplates]);
+
+  const renameCustomTask = useCallback((taskId, name) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const templates = profileCustomTasks.map((task) =>
+      task.id === taskId ? { ...task, name: trimmed } : task,
+    );
+    void updateTemplates(templates);
+    setLog((current) => ({
+      ...current,
+      custom_tasks: current.custom_tasks.map((task) =>
+        task.id === taskId ? { ...task, name: trimmed } : task,
+      ),
+    }));
+  }, [profileCustomTasks, setLog, updateTemplates]);
+
+  const setCustomColor = useCallback((taskId, color) => {
+    void updateTemplates(
+      profileCustomTasks.map((task) =>
+        task.id === taskId ? { ...task, color } : task,
+      ),
+    );
+    setLog((current) => ({
+      ...current,
+      custom_tasks: current.custom_tasks.map((task) =>
+        task.id === taskId ? { ...task, color } : task,
+      ),
+    }));
+  }, [profileCustomTasks, setLog, updateTemplates]);
+
+  const loadLogs = useCallback(async () => {
+    setAllLogsLoading(true);
+    const cutoff = getLocalDateKey(new Date(Date.now() - 83 * DAY_MS));
+    try {
+      const [logsResult, activityResult, olderResult] = await Promise.all([
+        supabase
+          .from("daily_logs")
+          .select("date, sleep_time, wake_time, dsa_slots, backend_slots, custom_tasks")
+          .eq("user_id", user.id)
+          .gte("date", cutoff)
+          .order("date", { ascending: false })
+          .limit(PAGE_SIZE),
+        supabase
+          .from("activity_log")
+          .select("date, count")
+          .eq("user_id", user.id)
+          .gte("date", cutoff),
+        supabase
+          .from("daily_logs")
+          .select("date")
+          .eq("user_id", user.id)
+          .lt("date", cutoff)
+          .limit(1),
+      ]);
+      if (logsResult.error) throw logsResult.error;
+      if (activityResult.error) throw activityResult.error;
+      if (olderResult.error) throw olderResult.error;
+      const rows = logsResult.data || [];
+      setAllLogs(rows);
+      setProblemCounts(Object.fromEntries(
+        (activityResult.data || []).map((item) => [item.date, Number(item.count || 0)]),
+      ));
+      setHasOlderLogs((olderResult.data || []).length > 0);
+    } catch (error) {
+      console.error("Failed to load full daily log:", error);
+      setMessage("Could not load the full log.");
+    } finally {
+      setAllLogsLoading(false);
+    }
+  }, [user.id]);
+
+  useEffect(() => {
+    if (viewMode === "full") void loadLogs();
+  }, [viewMode, loadLogs]);
+
+  const loadOlderLogs = useCallback(async () => {
+    const oldest = allLogs[allLogs.length - 1]?.date;
+    if (!oldest) return;
+    setOlderLogsLoading(true);
+    try {
+      const logsResult = await supabase
+        .from("daily_logs")
+        .select("date, sleep_time, wake_time, dsa_slots, backend_slots, custom_tasks")
+        .eq("user_id", user.id)
+        .lt("date", oldest)
+        .order("date", { ascending: false })
+        .limit(PAGE_SIZE + 1);
+      if (logsResult.error) throw logsResult.error;
+      const fetched = logsResult.data || [];
+      const rows = fetched.slice(0, PAGE_SIZE);
+      const oldestFetched = rows[rows.length - 1]?.date;
+      let activityData = [];
+      if (oldestFetched) {
+        const activityResult = await supabase
+          .from("activity_log")
+          .select("date, count")
+          .eq("user_id", user.id)
+          .gte("date", oldestFetched)
+          .lt("date", oldest);
+        if (activityResult.error) throw activityResult.error;
+        activityData = activityResult.data || [];
+      }
+      setAllLogs((current) => [...current, ...rows]);
+      setProblemCounts((current) => ({
+        ...current,
+        ...Object.fromEntries(
+          activityData.map((item) => [item.date, Number(item.count || 0)]),
+        ),
+      }));
+      setHasOlderLogs(fetched.length > PAGE_SIZE);
+    } catch (error) {
+      console.error("Failed to load older daily logs:", error);
+      setMessage("Could not load older log entries.");
+    } finally {
+      setOlderLogsLoading(false);
+    }
+  }, [allLogs, user.id]);
+
+  useEffect(() => {
+    let active = true;
+    supabase
+      .from("activity_log")
+      .select("count")
+      .eq("user_id", user.id)
+      .eq("date", date)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        if (active) setProblemCounts((current) => ({
+          ...current,
+          [date]: Number(data?.count || 0),
+        }));
+      })
+      .catch((error) => {
+        if (active) {
+          console.error("Failed to load daily problem count:", error);
+          setMessage("Could not load the problem count.");
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [user.id, date]);
+
+  const startTimer = useCallback((activityId, activityName, color) => {
+    if (runningTimer) return false;
+    const timer = {
+      activityId,
+      activityName,
+      color,
+      startedAt: new Date().toISOString(),
+    };
+    try {
+      localStorage.setItem(TIMER_STORAGE(user.id), JSON.stringify(timer));
+      setRunningTimer(timer);
+      setTimerNow(Date.now());
+      return true;
+    } catch (error) {
+      console.error("Could not start the activity timer:", error);
+      setMessage("Could not start the timer in this browser.");
+      return false;
+    }
+  }, [runningTimer, user.id]);
+
+  const stopTimer = useCallback(async () => {
+    if (!runningTimer) return false;
+    if (!(await flushPendingSave())) return false;
+    try {
+      const segments = splitIntervalByDay(
+        new Date(runningTimer.startedAt),
+        new Date(),
+      ).map((segment) => ({
+        ...segment,
+        slot: { ...segment.slot, timerId: runningTimer.startedAt },
+      }));
+      const currentDate = dateRef.current;
+      for (const segment of segments) {
+        const id = runningTimer.activityId;
+        if (segment.date === currentDate) {
+          setLog((current) => {
+            if (id === "dsa" || id === "backend") {
+              const key = `${id}_slots`;
+              if (current[key].some((slot) => slot.timerId === segment.slot.timerId)) {
+                return current;
+              }
+              return { ...current, [key]: [...current[key], segment.slot] };
+            }
+            const exists = current.custom_tasks.some((task) => task.id === id);
+            return {
+              ...current,
+              custom_tasks: exists
+                ? current.custom_tasks.map((task) =>
+                    task.id === id
+                      ? {
+                          ...task,
+                          slots: task.slots.some((slot) => slot.timerId === segment.slot.timerId)
+                            ? task.slots
+                            : [...task.slots, segment.slot],
+                        }
+                      : task,
+                  )
+                : [
+                    ...current.custom_tasks,
+                    {
+                      id,
+                      name: runningTimer.activityName,
+                      color: runningTimer.color,
+                      slots: [segment.slot],
+                    },
+                  ],
+            };
+          });
+          continue;
+        }
+        const { data, error } = await supabase
+          .from("daily_logs")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("date", segment.date)
+          .maybeSingle();
+        if (error) throw error;
+        const previous = normalizeLog(data, segment.date, templatesRef.current);
+        if (id === "dsa" || id === "backend") {
+          const key = `${id}_slots`;
+          if (!previous[key].some((slot) => slot.timerId === segment.slot.timerId)) {
+            previous[key] = [...previous[key], segment.slot];
+          }
+        } else {
+          const exists = previous.custom_tasks.some((task) => task.id === id);
+          previous.custom_tasks = exists
+            ? previous.custom_tasks.map((task) =>
+                task.id === id
+                  ? {
+                      ...task,
+                      slots: task.slots.some((slot) => slot.timerId === segment.slot.timerId)
+                        ? task.slots
+                        : [...task.slots, segment.slot],
+                    }
+                  : task,
+              )
+            : [
+                ...previous.custom_tasks,
+                {
+                  id,
+                  name: runningTimer.activityName,
+                  color: runningTimer.color,
+                  slots: [segment.slot],
+                },
+              ];
+        }
+        if (validateDay(previous).errors.length) {
+          throw new Error(`The existing ${segment.date} log has validation errors.`);
+        }
+        const { error: saveError } = await supabase.from("daily_logs").upsert(
+          {
+            user_id: user.id,
+            date: segment.date,
+            sleep_time: previous.sleep_time || null,
+            wake_time: previous.wake_time || null,
+            dsa_slots: previous.dsa_slots,
+            backend_slots: previous.backend_slots,
+            custom_tasks: previous.custom_tasks,
+            dsa_hours: durationSlots(previous.dsa_slots) / 60 || null,
+            backend_hours: durationSlots(previous.backend_slots) / 60 || null,
+          },
+          { onConflict: "user_id,date" },
+        );
+        if (saveError) throw saveError;
+      }
+      if (segments.some((segment) => segment.date === currentDate)) {
+        const savedCurrentDate = await saveLogRef.current(
+          logRef.current,
+          currentDate,
+        );
+        if (!savedCurrentDate) {
+          setMessage("Timer time was added, but the day needs fixes before it can be saved.");
+          return false;
+        }
+      }
+      localStorage.removeItem(TIMER_STORAGE(user.id));
+      setRunningTimer(null);
+      return true;
+    } catch (error) {
+      console.error("Failed to stop and save the activity timer:", error);
+      setMessage("Could not save the timer. It is still running; please retry.");
+      return false;
+    }
+  }, [flushPendingSave, runningTimer, setLog, user.id]);
+
+  useEffect(() => {
+    if (!runningTimer) return undefined;
+    const interval = window.setInterval(() => setTimerNow(Date.now()), 1000);
+    return () => window.clearInterval(interval);
+  }, [runningTimer]);
+
+  const quickAdd = useCallback(async (activityId, minutes, activityName = "Activity", color) => {
+    const end = new Date();
+    const start = new Date(end.getTime() - minutes * 60 * 1000);
+    const id = `quick-${globalThis.crypto?.randomUUID?.() || Date.now()}`;
+    const segments = splitIntervalByDay(start, end).map((segment) => ({
+      ...segment,
+      slot: { ...segment.slot, timerId: id },
+    }));
+    const currentDate = dateRef.current;
+    if (!(await flushPendingSave())) return false;
+    try {
+      for (const segment of segments) {
+        if (segment.date === currentDate) {
+          setLog((current) => {
+            if (activityId === "dsa" || activityId === "backend") {
+              const key = `${activityId}_slots`;
+              if (current[key].some((slot) => slot.timerId === id)) return current;
+              return { ...current, [key]: [...current[key], segment.slot] };
+            }
+            const exists = current.custom_tasks.some((task) => task.id === activityId);
+            return {
+              ...current,
+              custom_tasks: exists
+                ? current.custom_tasks.map((task) =>
+                    task.id === activityId && !task.slots.some((slot) => slot.timerId === id)
+                      ? { ...task, slots: [...task.slots, segment.slot] }
+                      : task,
+                  )
+                : [
+                    ...current.custom_tasks,
+                    { id: activityId, name: activityName, color, slots: [segment.slot] },
+                  ],
+            };
+          });
+          continue;
+        }
+        const { data, error } = await supabase
+          .from("daily_logs")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("date", segment.date)
+          .maybeSingle();
+        if (error) throw error;
+        const previous = normalizeLog(data, segment.date, templatesRef.current);
+        if (activityId === "dsa" || activityId === "backend") {
+          const key = `${activityId}_slots`;
+          if (!previous[key].some((slot) => slot.timerId === id)) {
+            previous[key] = [...previous[key], segment.slot];
+          }
+        } else {
+          const exists = previous.custom_tasks.some((task) => task.id === activityId);
+          previous.custom_tasks = exists
+            ? previous.custom_tasks.map((task) =>
+                task.id === activityId && !task.slots.some((slot) => slot.timerId === id)
+                  ? { ...task, slots: [...task.slots, segment.slot] }
+                  : task,
+              )
+            : [
+                ...previous.custom_tasks,
+                { id: activityId, name: activityName, color, slots: [segment.slot] },
+              ];
+        }
+        if (validateDay(previous).errors.length) {
+          throw new Error(`The existing ${segment.date} log has validation errors.`);
+        }
+        const { error: saveError } = await supabase.from("daily_logs").upsert(
+          {
+            user_id: user.id,
+            date: segment.date,
+            sleep_time: previous.sleep_time || null,
+            wake_time: previous.wake_time || null,
+            dsa_slots: previous.dsa_slots,
+            backend_slots: previous.backend_slots,
+            custom_tasks: previous.custom_tasks,
+            dsa_hours: durationSlots(previous.dsa_slots) / 60 || null,
+            backend_hours: durationSlots(previous.backend_slots) / 60 || null,
+          },
+          { onConflict: "user_id,date" },
+        );
+        if (saveError) throw saveError;
+      }
+      return true;
+    } catch (error) {
+      console.error("Failed to add quick activity time:", error);
+      setMessage("Could not save the quick-added activity.");
+      return false;
+    }
+  }, [flushPendingSave, setLog, user.id]);
+
+  return {
+    date, log, setLog, loading, loadFailed, saving, status, message, setMessage,
+    viewMode, setViewMode, dsaEnabled, backendEnabled, profileCustomTasks,
+    activeCustomTasks, currentStreak, problemCounts, allLogs, allLogsLoading,
+    hasOlderLogs, olderLogsLoading, runningTimer, timerNow, validation, dirty,
+    studiedMinutes, sleptMinutes, changeDate, shiftDate, updateField, updateSlot,
+    addSlot, removeSlot, toggleBuiltin, addCustomTask, removeCustomTask,
+    renameCustomTask, setCustomColor, saveLog, loadOlderLogs, startTimer,
+    stopTimer, quickAdd,
+    retryLoad: () => setLoadRequest((current) => current + 1),
+  };
+}

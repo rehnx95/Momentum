@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildHeatmap, formatTooltipDate } from '../utils/heatmap';
+import { formatDuration } from '../utils/time';
 import './ActivityHeatmap.css';
 
 const WEEKDAYS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
@@ -14,6 +15,7 @@ export default function ActivityHeatmap({
   selectedYear = null,
   onSelectYear,
   loading = false,
+  mode = 'problems',
 }) {
   const scrollRef = useRef(null);
   const [cell, setCell] = useState(12);
@@ -21,9 +23,19 @@ export default function ActivityHeatmap({
   const currentYear = Number(todayKey.slice(0, 4));
   const activeYear = selectedYear == null ? currentYear : selectedYear;
 
+  const levelFn =
+    mode === 'hours'
+      ? (hours) => {
+          if (hours <= 0) return 0;
+          if (hours < 1) return 1;
+          if (hours < 3) return 2;
+          if (hours < 5) return 3;
+          return 4;
+        }
+      : undefined;
   const heat = useMemo(
-    () => buildHeatmap({ activity, todayKey, year: selectedYear }),
-    [activity, todayKey, selectedYear],
+    () => buildHeatmap({ activity, todayKey, year: selectedYear, levelFn }),
+    [activity, todayKey, selectedYear, levelFn],
   );
 
   const yearList = useMemo(() => {
@@ -64,10 +76,16 @@ export default function ActivityHeatmap({
     setTip({ text, x: rect.left + rect.width / 2, y: rect.top });
   };
 
-  const noun = heat.total === 1 ? 'problem' : 'problems';
-  const title = `${heat.total.toLocaleString()} ${noun} solved ${
-    selectedYear == null ? 'in the last year' : `in ${selectedYear}`
-  }`;
+  const title =
+    mode === 'hours'
+      ? `${formatDuration(heat.total * 60)} studied ${
+          selectedYear == null ? 'in the last year' : `in ${selectedYear}`
+        }`
+      : `${heat.total.toLocaleString()} ${
+          heat.total === 1 ? 'problem' : 'problems'
+        } solved ${
+          selectedYear == null ? 'in the last year' : `in ${selectedYear}`
+        }`;
 
   return (
     <section className={`hm-card${loading ? ' hm-loading' : ''}`} aria-label="Activity heatmap">
@@ -94,11 +112,13 @@ export default function ActivityHeatmap({
                   {heat.weeks.map((week, w) => (
                     <div className="hm-week" key={w}>
                       {week.map((day) => {
-                        const tipText = `${
-                          day.count === 0
-                            ? 'No problems'
-                            : `${day.count} ${day.count === 1 ? 'problem' : 'problems'}`
-                        } on ${formatTooltipDate(day.date, currentYear)}`;
+                        const tipText =
+                          mode === 'hours'
+                            ? `${formatDuration(day.count * 60)} on ${formatTooltipDate(day.date, currentYear)}`
+                            : `${day.count === 0
+                                ? 'No problems'
+                                : `${day.count} ${day.count === 1 ? 'problem' : 'problems'}`
+                              } on ${formatTooltipDate(day.date, currentYear)}`;
                         return (
                           <span
                             key={day.key}
@@ -116,7 +136,11 @@ export default function ActivityHeatmap({
             </div>
           </div>
           <div className="hm-foot">
-            <span>Total active days: {heat.activeDays}</span>
+            <span>
+              {mode === 'hours'
+                ? `Days with study: ${heat.activeDays}`
+                : `Total active days: ${heat.activeDays}`}
+            </span>
             <div className="hm-legend" aria-label="Activity scale: less to more">
               <span>Less</span>
               {[0, 1, 2, 3, 4].map((l) => (

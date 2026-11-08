@@ -30,7 +30,12 @@ export function formatTooltipDate(date, currentYear) {
 
 // year = null -> rolling last year ending today. year = 2025 -> Jan 1 to Dec 31 of 2025.
 // The grid always starts on a Sunday, like GitHub.
-export function buildHeatmap({ activity = {}, todayKey, year = null }) {
+export function buildHeatmap({
+  activity = {},
+  todayKey,
+  year = null,
+  levelFn = getLevel,
+}) {
   const today = fromKey(todayKey);
   let start;
   let end;
@@ -60,7 +65,7 @@ export function buildHeatmap({ activity = {}, todayKey, year = null }) {
         total += count;
         activeDays += 1;
       }
-           week.push({ date, key, count, inRange, future: date > today, level: getLevel(count) });
+      week.push({ date, key, count, inRange, future: date > today, level: levelFn(count) });
     }
     weeks.push(week);
   }
