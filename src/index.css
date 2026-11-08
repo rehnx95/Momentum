@@ -177,7 +177,7 @@ input:focus-visible {
 
 .track-sheet-brand {
   position: absolute;
-  left: 1rem;
+  left: 3.25rem;
   top: 50%;
   height: 2.75rem;
   flex: 0 0 auto;
@@ -208,7 +208,7 @@ input:focus-visible {
 
 @media (min-width: 768px) {
   .track-sheet-brand {
-    left: 1.5rem;
+    left: 3.75rem;
   }
 
   .unified-header-actions {
@@ -216,7 +216,7 @@ input:focus-visible {
   }
 
   .tracker-sidebar-toggle {
-    left: 12rem;
+    left: 1.5rem;
   }
 }
 
@@ -497,7 +497,7 @@ input:focus-visible {
 
 .tracker-sidebar-toggle {
   position: absolute;
-  left: 11.75rem;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
   z-index: 4;
