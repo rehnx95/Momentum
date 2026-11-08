@@ -209,14 +209,22 @@
   font-weight: 400;
 }
 
+.sleep-entry-fields input,
+.daily-slot-row label input {
+  min-height: 1.85rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.55rem;
+  background: var(--surface);
+  color: var(--text);
+  color-scheme: dark;
+  padding-inline: 0.4rem;
+  font-size: 0.8rem;
+}
+
 .sleep-entry-fields input {
   min-width: 0;
   width: 7rem;
   max-width: 100%;
-  min-height: 1.85rem;
-  border-radius: 0.55rem;
-  padding-inline: 0.4rem;
-  font-size: 0.8rem;
 }
 
 .daily-entry-heading {
@@ -482,20 +490,14 @@
 
 .daily-slot-row label input {
   width: 100%;
-  min-height: 1.85rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 0.55rem;
-  background: var(--surface);
-  color: var(--text);
-  color-scheme: dark;
-  padding-inline: 0.4rem;
-  font-size: 0.8rem;
 }
 
+:root[data-theme="light"] .sleep-entry-fields input,
 :root[data-theme="light"] .daily-slot-row label input {
   color-scheme: light;
 }
 
+.dashboard-shell[data-theme="light"] .sleep-entry-fields input,
 .dashboard-shell[data-theme="light"] .daily-slot-row label input {
   color-scheme: light;
 }
