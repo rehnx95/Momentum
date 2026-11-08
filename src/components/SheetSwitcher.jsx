@@ -57,7 +57,7 @@ export default function SheetSwitcher({
         />
       </button>
       {open && (
-        <div className="popover left-0 top-full" role="menu">
+        <div className="popover sheet-switcher-menu left-0 top-full" role="menu">
           {sheets.map((sheet) => (
             <div key={sheet.id} className="popover-row">
               <button

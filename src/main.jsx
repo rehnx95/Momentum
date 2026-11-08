@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import './layout.css';
 import { supabase } from './lib/supabase';
 import App from './App';
+import './layout.css';
 
 class AppErrorBoundary extends React.Component {
   state = { hasError: false };

@@ -54,12 +54,13 @@ export default function AppHeader({
           </button>
           <button
             type="button"
-            className="icon-btn"
+            className="icon-btn signout-btn"
             aria-label="Sign out"
             title="Sign out"
             onClick={onSignOut}
           >
             <LogOut size={18} />
+            <span className="signout-label">Sign out</span>
           </button>
         </div>
       </div>

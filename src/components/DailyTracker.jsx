@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
   ChevronLeft,
@@ -37,11 +37,15 @@ function durationHours(start, end) {
   return (minutes / 60).toFixed(2).replace(/\.?0+$/, "");
 }
 
+function formatTime(value) {
+  return value ? String(value).slice(0, 5) : "";
+}
+
 function normalizeSlots(slots) {
   if (!Array.isArray(slots)) return [];
   return slots.map((slot) => ({
-    start: slot.start || "",
-    end: slot.end || "",
+    start: formatTime(slot.start),
+    end: formatTime(slot.end),
   }));
 }
 
@@ -75,9 +79,13 @@ function createTaskId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-export default function DailyTracker({ user }) {
+export default function DailyTracker({ user, askConfirmation }) {
   const [date, setDate] = useState(() => getLocalDateKey());
   const [log, setLog] = useState(() => emptyLog(getLocalDateKey()));
+  const logRef = useRef(log);
+  logRef.current = log;
+  const savedLogSnapshotRef = useRef(null);
+  const [savedLogSnapshot, setSavedLogSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -90,6 +98,24 @@ export default function DailyTracker({ user }) {
   const [profileCustomTasks, setProfileCustomTasks] = useState([]);
   const [newTaskName, setNewTaskName] = useState("");
   const [showNewTask, setShowNewTask] = useState(false);
+  const [trackMenuOpen, setTrackMenuOpen] = useState(false);
+  const trackMenuRef = useRef(null);
+
+  useEffect(() => {
+    if (!trackMenuOpen) return undefined;
+    const onDown = (event) => {
+      if (!trackMenuRef.current?.contains(event.target)) setTrackMenuOpen(false);
+    };
+    const onKey = (event) => {
+      if (event.key === "Escape") setTrackMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [trackMenuOpen]);
 
   useEffect(() => {
     let active = true;
@@ -132,24 +158,34 @@ export default function DailyTracker({ user }) {
       .then(({ data, error }) => {
         if (!active) return;
         if (error) throw error;
-        setLog(
-          data
-            ? {
-                ...emptyLog(date),
-                ...data,
-                dsa_slots: normalizeSlots(data.dsa_slots),
-                backend_slots: normalizeSlots(data.backend_slots),
-                custom_tasks: mergeTaskTemplates(data.custom_tasks, profileCustomTasks),
-              }
-            : {
-                ...emptyLog(date),
-                custom_tasks: profileCustomTasks.map((task) => ({
-                  id: task.id,
-                  name: task.name,
-                  slots: [],
-                })),
-              },
-        );
+        const nextLog = data
+          ? {
+              ...emptyLog(date),
+              ...data,
+              sleep_time: formatTime(data.sleep_time),
+              wake_time: formatTime(data.wake_time),
+              dsa_slots: normalizeSlots(data.dsa_slots),
+              backend_slots: normalizeSlots(data.backend_slots),
+              custom_tasks: mergeTaskTemplates(data.custom_tasks, profileCustomTasks),
+            }
+          : {
+              ...emptyLog(date),
+              custom_tasks: profileCustomTasks.map((task) => ({
+                id: task.id,
+                name: task.name,
+                slots: [],
+              })),
+            };
+        if (
+          savedLogSnapshotRef.current !== null &&
+          JSON.stringify(logRef.current) !== savedLogSnapshotRef.current
+        ) {
+          return;
+        }
+        const snapshot = JSON.stringify(nextLog);
+        savedLogSnapshotRef.current = snapshot;
+        setSavedLogSnapshot(snapshot);
+        setLog(nextLog);
       })
       .catch((error) => {
         if (!active) return;
@@ -265,6 +301,22 @@ export default function DailyTracker({ user }) {
     );
   };
 
+  const confirmRemoveTrack = async (track) => {
+    const confirmed = await askConfirmation(
+      `Remove the ${track === "dsa" ? "DSA" : "Backend"} track? You can add it again later.`,
+      "Remove this track?",
+    );
+    if (confirmed) await toggleBuiltin(track);
+  };
+
+  const confirmRemoveCustomTask = async (task) => {
+    const confirmed = await askConfirmation(
+      `Remove "${task.name}" and its saved slots from this log?`,
+      "Remove custom track?",
+    );
+    if (confirmed) removeCustomTask(task.id);
+  };
+
   const updateCustomTask = (taskId, update) => {
     setLog((current) => ({
       ...current,
@@ -313,33 +365,42 @@ export default function DailyTracker({ user }) {
     };
   }, [user.id, viewMode]);
 
-  const openDailyDate = (selectedDate) => {
+  const isDirty =
+    savedLogSnapshot !== null && JSON.stringify(log) !== savedLogSnapshot;
+
+  const changeDate = async (selectedDate) => {
+    if (saving || !selectedDate || selectedDate === date) return !saving;
+    if (isDirty) {
+      const confirmed = await askConfirmation(
+        "You have unsaved changes for this day. Discard them and change the date?",
+        "Discard unsaved changes?",
+      );
+      if (!confirmed) return false;
+    }
+    savedLogSnapshotRef.current = null;
+    setSavedLogSnapshot(null);
+    setLog(emptyLog(selectedDate));
     setDate(selectedDate);
-    setViewMode("daily");
+    setMessage("");
+    return true;
+  };
+
+  const openDailyDate = async (selectedDate) => {
+    if (await changeDate(selectedDate)) setViewMode("daily");
   };
 
   const formatSlots = (slots) => {
     const normalized = normalizeSlots(slots);
-    if (!normalized.length) return "-";
-    return normalized
+    const entries = normalized
       .filter((slot) => slot.start || slot.end)
-      .map((slot) => `${slot.start || "?"}-${slot.end || "?"}`)
-      .join(", ");
-  };
-
-  const formatCustomTasks = (tasks) => {
-    if (!Array.isArray(tasks) || tasks.length === 0) return "-";
-    return tasks
-      .map((task) => {
-        const slots = formatSlots(task.slots);
-        return `${task.name}${slots === "-" ? "" : `: ${slots}`}`;
-      })
-      .join("; ");
+      .map((slot) => `${slot.start || "?"}-${slot.end || "?"}`);
+    return entries.length ? entries.join(", ") : "-";
   };
 
   const saveLog = async () => {
     setSaving(true);
     setMessage("");
+    const snapshot = JSON.stringify(log);
     try {
       const payload = {
         user_id: user.id,
@@ -356,6 +417,8 @@ export default function DailyTracker({ user }) {
         .from("daily_logs")
         .upsert(payload, { onConflict: "user_id,date" });
       if (error) throw error;
+      savedLogSnapshotRef.current = snapshot;
+      setSavedLogSnapshot(snapshot);
       setMessage("Daily log saved.");
     } catch (error) {
       console.error("Failed to save daily log:", error);
@@ -385,7 +448,7 @@ export default function DailyTracker({ user }) {
   const shiftDate = (delta) => {
     const [year, month, day] = date.split("-").map(Number);
     const key = getLocalDateKey(new Date(year, month - 1, day + delta));
-    if (key <= getLocalDateKey()) setDate(key);
+    if (key <= getLocalDateKey()) changeDate(key);
   };
   const totalStudied =
     totalSlots(log.dsa_slots) +
@@ -399,6 +462,22 @@ export default function DailyTracker({ user }) {
     addCustomTask();
     setShowNewTask(false);
   };
+  const groupedLogs = allLogs.reduce((groups, row) => {
+    const monthKey = row.date.slice(0, 7);
+    const existing = groups[groups.length - 1];
+    if (existing?.key === monthKey) existing.rows.push(row);
+    else {
+      groups.push({
+        key: monthKey,
+        label: new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
+          month: "long",
+          year: "numeric",
+        }),
+        rows: [row],
+      });
+    }
+    return groups;
+  }, []);
 
   return (
     <section className="daily-tracker surface-card" aria-labelledby="daily-log-title">
@@ -417,13 +496,12 @@ export default function DailyTracker({ user }) {
                 <ChevronLeft size={16} />
               </button>
               <label className="daily-date">
-                <CalendarDays size={16} />
                 <span className="sr-only">Log date</span>
                 <input
                   type="date"
                   value={date}
                   max={getLocalDateKey()}
-                  onChange={(event) => setDate(event.target.value)}
+                  onChange={(event) => changeDate(event.target.value)}
                 />
               </label>
               <button
@@ -457,13 +535,55 @@ export default function DailyTracker({ user }) {
             </button>
           </div>
           {viewMode === "daily" && (
-            <button
-              type="button"
-              className="daily-add-track"
-              onClick={() => setShowNewTask((visible) => !visible)}
-            >
-              <Plus size={14} /> New track
-            </button>
+            <div className="daily-track-menu-wrap" ref={trackMenuRef}>
+              <button
+                type="button"
+                className="daily-add-track"
+                aria-haspopup="menu"
+                aria-expanded={trackMenuOpen}
+                onClick={() => setTrackMenuOpen((visible) => !visible)}
+              >
+                <Plus size={14} /> New track
+              </button>
+              {trackMenuOpen && (
+                <div className="daily-track-menu" role="menu">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowNewTask(true);
+                      setTrackMenuOpen(false);
+                    }}
+                  >
+                    Custom
+                  </button>
+                  {!dsaEnabled && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setTrackMenuOpen(false);
+                        toggleBuiltin("dsa");
+                      }}
+                    >
+                      DSA
+                    </button>
+                  )}
+                  {!backendEnabled && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setTrackMenuOpen(false);
+                        toggleBuiltin("backend");
+                      }}
+                    >
+                      Backend
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -527,7 +647,7 @@ export default function DailyTracker({ user }) {
             <Clock3 size={15} />
             <span>DSA</span>
             <strong>{formatHours(totalSlots(log.dsa_slots))} hr</strong>
-            <button type="button" className="track-delete" aria-label="Delete DSA track" onClick={() => toggleBuiltin("dsa")}><Trash2 size={14} /></button>
+            <button type="button" className="track-delete" aria-label="Remove DSA track" onClick={() => confirmRemoveTrack("dsa")}><Trash2 size={14} /></button>
           </div>
           <div className="daily-slot-list">
             {log.dsa_slots.map((slot, index) => (
@@ -557,7 +677,7 @@ export default function DailyTracker({ user }) {
             <Clock3 size={15} />
             <span>Backend</span>
             <strong>{formatHours(totalSlots(log.backend_slots))} hr</strong>
-            <button type="button" className="track-delete" aria-label="Delete Backend track" onClick={() => toggleBuiltin("backend")}><Trash2 size={14} /></button>
+            <button type="button" className="track-delete" aria-label="Remove Backend track" onClick={() => confirmRemoveTrack("backend")}><Trash2 size={14} /></button>
           </div>
           <div className="daily-slot-list">
             {log.backend_slots.map((slot, index) => (
@@ -581,12 +701,6 @@ export default function DailyTracker({ user }) {
           <button type="button" className="slot-add" onClick={() => addSlot("backend")}><Plus size={14} /> Add Backend slot</button>
         </div>
         )}
-        {!dsaEnabled && (
-          <button type="button" className="builtin-restore" onClick={() => toggleBuiltin("dsa")}><Plus size={14} /> Add DSA track</button>
-        )}
-        {!backendEnabled && (
-          <button type="button" className="builtin-restore" onClick={() => toggleBuiltin("backend")}><Plus size={14} /> Add Backend track</button>
-        )}
         {log.custom_tasks.map((task) => (
           <div className="daily-study-block custom-task-block" key={task.id}>
             <div className="daily-study-title">
@@ -599,7 +713,7 @@ export default function DailyTracker({ user }) {
                 onBlur={(event) => saveCustomTaskName(task.id, event.target.value)}
               />
               <strong>{formatHours(totalSlots(task.slots || []))} hr</strong>
-              <button type="button" className="track-delete" aria-label={`Delete ${task.name}`} onClick={() => removeCustomTask(task.id)}>
+              <button type="button" className="track-delete" aria-label={`Remove ${task.name}`} onClick={() => confirmRemoveCustomTask(task)}>
                 <Trash2 size={14} />
               </button>
             </div>
@@ -624,9 +738,15 @@ export default function DailyTracker({ user }) {
         <p className={message ? "daily-message" : "daily-message is-empty"} role="status">
           {message || "\u00a0"}
         </p>
-        <button type="button" onClick={saveLog} disabled={saving || loading}>
+        <button type="button" onClick={saveLog} disabled={saving || loading || !isDirty}>
           <Save size={15} />
-          {saving ? "Saving..." : "Save daily log"}
+          {saving
+            ? "Saving..."
+            : isDirty
+              ? "Save daily log"
+              : message === "Daily log saved."
+                ? "Saved ✓"
+                : "No changes"}
         </button>
       </div>
         </>
@@ -637,53 +757,99 @@ export default function DailyTracker({ user }) {
           ) : allLogs.length === 0 ? (
             <p className="daily-full-empty">No saved daily logs yet.</p>
           ) : (
-            <div className="daily-log-cards">
-              {allLogs.map((row) => (
-                <article className="daily-log-card" key={row.date}>
-                  <button type="button" className="daily-log-card-date" onClick={() => openDailyDate(row.date)}>
-                    <CalendarDays size={16} />
-                    <span>
-                      {new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
-                        weekday: "short",
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </button>
+            <div className="daily-log-months">
+              {groupedLogs.map((month) => (
+                <section className="daily-log-month" key={month.key}>
+                  <h3 className="daily-log-month-title">{month.label}</h3>
+                  <div className="daily-log-cards">
+                    {month.rows.map((row) => {
+                      const tasks = [];
+                      const addTask = (name, slots, savedHours) => {
+                        const slotText = formatSlots(slots);
+                        const hours = Number(savedHours) || totalSlots(normalizeSlots(slots));
+                        if (slotText !== "-" || hours > 0) {
+                          tasks.push({ name, slotText, hours });
+                        }
+                      };
+                      if (dsaEnabled) {
+                        addTask("DSA", row.dsa_slots, row.dsa_hours);
+                      }
+                      if (backendEnabled) {
+                        addTask("Backend", row.backend_slots, row.backend_hours);
+                      }
+                      (Array.isArray(row.custom_tasks) ? row.custom_tasks : []).forEach(
+                        (task) => addTask(task.name, task.slots),
+                      );
+                      const hasSleep = Boolean(row.sleep_time || row.wake_time);
+                      const sleepHours =
+                        row.sleep_time && row.wake_time
+                          ? Number(durationHours(row.sleep_time, row.wake_time))
+                          : 0;
+                      const roundedSleepHours =
+                        Math.round(sleepHours * 4) / 4;
 
-                  <div className="daily-log-basics">
-                    <div><span>Sleep</span><strong>{row.sleep_time || "-"}</strong></div>
-                    <div><span>Wake</span><strong>{row.wake_time || "-"}</strong></div>
-                  </div>
-
-                  <div className="daily-log-task-grid">
-                    {dsaEnabled && (
-                      <div className="daily-log-task">
-                        <div><span>DSA</span><strong>{row.dsa_hours == null ? "0 hr" : `${Number(row.dsa_hours)} hr`}</strong></div>
-                        <p>{formatSlots(row.dsa_slots) === "-" ? "No slots recorded" : formatSlots(row.dsa_slots)}</p>
-                      </div>
-                    )}
-                    {backendEnabled && (
-                      <div className="daily-log-task">
-                        <div><span>Backend</span><strong>{row.backend_hours == null ? "0 hr" : `${Number(row.backend_hours)} hr`}</strong></div>
-                        <p>{formatSlots(row.backend_slots) === "-" ? "No slots recorded" : formatSlots(row.backend_slots)}</p>
-                      </div>
-                    )}
-                    {profileCustomTasks.map((taskTemplate) => {
-                      const task = (Array.isArray(row.custom_tasks) ? row.custom_tasks : [])
-                        .find((item) => item.id === taskTemplate.id);
-                      const slots = normalizeSlots(task?.slots);
-                      const hours = totalSlots(slots);
                       return (
-                        <div className="daily-log-task" key={taskTemplate.id}>
-                          <div><span>{taskTemplate.name}</span><strong>{hours ? `${formatHours(hours)} hr` : "0 hr"}</strong></div>
-                          <p>{formatSlots(slots) === "-" ? "No slots recorded" : formatSlots(slots)}</p>
-                        </div>
+                        <article className="daily-log-card" key={row.date}>
+                          <button
+                            type="button"
+                            className="daily-log-card-date"
+                            onClick={() => openDailyDate(row.date)}
+                          >
+                            <CalendarDays size={16} />
+                            <span>
+                              {new Date(`${row.date}T00:00:00`).toLocaleDateString(
+                                undefined,
+                                {
+                                  weekday: "short",
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                },
+                              )}
+                            </span>
+                          </button>
+
+                          {hasSleep && (
+                            <div className="daily-log-basics">
+                              <div>
+                                <span>Sleep</span>
+                                <strong>{formatTime(row.sleep_time) || "-"}</strong>
+                              </div>
+                              <div>
+                                <span>Wake</span>
+                                <strong>{formatTime(row.wake_time) || "-"}</strong>
+                              </div>
+                              {sleepHours > 0 && (
+                                <div className="daily-log-sleep-duration">
+                                  <span>Sleep duration</span>
+                                  <strong>{formatHours(roundedSleepHours)} hr</strong>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {tasks.length ? (
+                            <div className="daily-log-task-grid">
+                              {tasks.map((task) => (
+                                <div className="daily-log-task" key={task.name}>
+                                  <div>
+                                    <span>{task.name}</span>
+                                    <strong>
+                                      {task.hours ? `${formatHours(task.hours)} hr` : "0 hr"}
+                                    </strong>
+                                  </div>
+                                  <p>{task.slotText}</p>
+                                </div>
+                              ))}
+                            </div>
+                          ) : !hasSleep ? (
+                            <p className="daily-log-nothing">Nothing logged</p>
+                          ) : null}
+                        </article>
                       );
                     })}
                   </div>
-                </article>
+                </section>
               ))}
             </div>
           )}

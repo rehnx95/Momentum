@@ -2247,7 +2247,11 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                           >
                             <div
                               className="h-full rounded-full bg-[#EDEDED] transition-all"
-                              style={{ width: `${percentage}%` }}
+                              style={{
+                                width: `${percentage}%`,
+                                minWidth: sheet.solved > 0 ? "2px" : 0,
+                                borderRadius: percentage > 0 && percentage < 3 ? "2px" : undefined,
+                              }}
                             />
                           </div>
                         </div>
@@ -2265,7 +2269,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       <h2 id="public-recent-ac-heading">Recent AC</h2>
                       <p>Latest accepted problems</p>
                     </div>
-                    <span className="recent-ac-count">{recentAccepted.length}</span>
+                    <span className="recent-ac-count">Latest {recentAccepted.length}</span>
                   </div>
                   {recentAccepted.length > 0 ? (
                     <ul className="recent-ac-list">
@@ -2340,8 +2344,9 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   {userName.charAt(0).toUpperCase() || "U"}
                 </div>
                 <div className="profile-user-details">
-                  <h1 className="text-2xl font-bold text-[#EDEDED]">
-                    {userName}
+              <div className="profile-identity">
+              <h1 className="text-2xl font-bold text-[#EDEDED]">
+                {userName}
                   </h1>
                   {user.email && (
                     <p className="mt-1 break-all text-sm text-[#A1A1A1]">
@@ -2375,7 +2380,8 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       {userWebsite}
                     </a>
                   )}
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  </div>
+                  <div className="profile-hero-actions flex flex-wrap gap-2">
                     <button
                       type="button"
                       className="btn-secondary"
@@ -2533,9 +2539,10 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 onSelectYear={setOwnHeatmapYear}
               />
 
-              <div className="profile-split">
+              <div className="profile-split own-profile-split">
+                <div className="profile-progress-column">
               <section
-                className="surface-card mb-8 rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
+                className="surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
                 aria-labelledby="profile-sheet-progress"
               >
                 <h2
@@ -2577,7 +2584,11 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                         >
                           <div
                             className="h-full rounded-full bg-[#EDEDED] transition-all"
-                            style={{ width: `${percentage}%` }}
+                            style={{
+                              width: `${percentage}%`,
+                              minWidth: sheet.solved > 0 ? "2px" : 0,
+                              borderRadius: percentage > 0 && percentage < 3 ? "2px" : undefined,
+                            }}
                           />
                         </div>
                       </div>
@@ -2586,6 +2597,53 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 </div>
               </section>
 
+              <section className="surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-5">
+                <h2 className="text-lg font-semibold text-[#EDEDED]">Data</h2>
+                <p className="mt-1 text-sm text-[#A1A1A1]">
+                  Back up, restore or reset your progress.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => setBackupAction("export")}
+                  >
+                    <Download size={14} /> Export
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => setBackupAction("import")}
+                  >
+                    <Upload size={14} /> Import
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-secondary btn-danger"
+                    onClick={async () => {
+                      const confirmed = await askConfirmation(
+                        "Reset all progress across every sheet? This cannot be undone.",
+                        "Reset all progress?",
+                      );
+                      if (confirmed) await reset();
+                    }}
+                  >
+                    <RefreshCcw size={14} /> Reset all sheets
+                  </button>
+                </div>
+                <input
+                  ref={importFileInput}
+                  id="import-file"
+                  type="file"
+                  accept=".json,application/json"
+                  aria-label="Choose a progress backup JSON file"
+                  className="fixed left-0 top-0 h-px w-px opacity-0"
+                  onChange={importProgress}
+                />
+              </section>
+                </div>
+
+              <div className="profile-recent-column">
               <section
                 className="recent-ac-card surface-card"
                 aria-labelledby="recent-ac-heading"
@@ -2595,9 +2653,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     <h2 id="recent-ac-heading">Recent AC</h2>
                     <p>Your latest accepted problems</p>
                   </div>
-                  <span className="recent-ac-count">
-                    {recentAccepted.length}
-                  </span>
+                  <span className="recent-ac-count">Latest {recentAccepted.length}</span>
                 </div>
                 {recentAccepted.length > 0 ? (
                   <ul className="recent-ac-list">
@@ -2644,52 +2700,8 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 )}
               </section>
               </div>
-
-              <section className="surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-5">
-                <h2 className="text-lg font-semibold text-[#EDEDED]">Data</h2>
-                <p className="mt-1 text-sm text-[#A1A1A1]">
-                  Back up, restore or reset your progress.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => setBackupAction("export")}
-                  >
-                    <Download size={14} /> Export
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => setBackupAction("import")}
-                  >
-                    <Upload size={14} /> Import
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-secondary btn-danger"
-                    onClick={async () => {
-                      const confirmed = await askConfirmation(
-                        "Reset all progress across every sheet? This cannot be undone.",
-                        "Reset all progress?",
-                      );
-                      if (confirmed) await reset();
-                    }}
-                  >
-                    <RefreshCcw size={14} /> Reset all sheets
-                  </button>
-                </div>
-                <input
-                  ref={importFileInput}
-                  id="import-file"
-                  type="file"
-                  accept=".json,application/json"
-                  aria-label="Choose a progress backup JSON file"
-                  className="fixed left-0 top-0 h-px w-px opacity-0"
-                  onChange={importProgress}
-                />
-              </section>
             </div>
+          </div>
           </div>
           {backupAction && (
             <div
@@ -2802,7 +2814,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
         >
           <AppHeader active="daily-log" {...headerProps} />
           <main className="app-page">
-            <DailyTracker user={user} />
+            <DailyTracker user={user} askConfirmation={askConfirmation} />
           </main>
         </div>
         {renderDialog()}
@@ -3169,7 +3181,11 @@ function ProgressBar({ done, total }) {
     <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#262626]" aria-label={`${pct}% complete`}>
       <div
         className={`h-full rounded-full transition-all duration-300 ease-out ${pct === 100 ? "bg-[#46A758]" : "bg-[#EDEDED]"}`}
-        style={{ width: `${pct}%` }}
+        style={{
+          width: `${pct}%`,
+          minWidth: done > 0 ? "2px" : 0,
+          borderRadius: pct > 0 && pct < 3 ? "2px" : undefined,
+        }}
       />
     </div>
   );
