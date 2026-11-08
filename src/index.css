@@ -177,7 +177,7 @@ input:focus-visible {
 
 .track-sheet-brand {
   position: absolute;
-  left: 3.25rem;
+  left: 4.25rem;
   top: 50%;
   height: 2.75rem;
   flex: 0 0 auto;
@@ -208,7 +208,7 @@ input:focus-visible {
 
 @media (min-width: 768px) {
   .track-sheet-brand {
-    left: 3.75rem;
+    left: 5rem;
   }
 
   .unified-header-actions {
@@ -977,6 +977,7 @@ input:focus-visible {
 
 @media (max-width: 640px) {
   .track-sheet-brand {
+    left: 4rem;
     width: 10rem;
   }
 
