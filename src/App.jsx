@@ -22,6 +22,8 @@ import {
   Users,
   Link2,
   Trash2,
+  ClipboardList,
+  LayoutList,
 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "./lib/supabase";
 import { useProgress } from "./hooks/useProgress";
@@ -844,6 +846,9 @@ function AuthenticatedApp({
       window.location.pathname === "/profile" ||
       window.location.pathname === "/profile/edit",
   );
+  const [dailyLogPage, setDailyLogPage] = useState(
+    () => window.location.pathname === "/daily-log",
+  );
   const [showSettings, setShowSettings] = useState(
     () => window.location.pathname === "/profile/edit",
   );
@@ -957,6 +962,7 @@ function AuthenticatedApp({
           window.location.pathname === "/profile/edit",
       );
       setShowSettings(window.location.pathname === "/profile/edit");
+      setDailyLogPage(window.location.pathname === "/daily-log");
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
@@ -970,6 +976,7 @@ function AuthenticatedApp({
     setSelectedPublicUsername(route.username);
     setShowProfile(path === "/profile" || path === "/profile/edit");
     setShowSettings(path === "/profile/edit");
+    setDailyLogPage(path === "/daily-log");
   };
 
   const openPeopleSearch = () => {
@@ -2578,8 +2585,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 </div>
               </div>
 
-              <DailyTracker user={user} />
-
               <section
                 className="surface-card mb-8 rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
                 aria-labelledby="profile-sheet-progress"
@@ -2801,6 +2806,62 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
     );
   }
 
+  if (dailyLogPage) {
+    return (
+      <>
+        <div
+          className="dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300"
+          data-theme={theme === "light" ? "light" : undefined}
+        >
+          <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
+            <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-6">
+              <TrackSheetBrand subtitle="Daily Log" onNavigate={() => navigateTo("/")} />
+              <div className="flex-1" />
+              <button
+                type="button"
+                onClick={() => navigateTo("/")}
+                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
+              >
+                <LayoutList size={17} />
+                <span className="hidden sm:inline">Tracker</span>
+              </button>
+              <button
+                type="button"
+                aria-current="page"
+                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#EDEDED] transition-colors sm:px-3"
+              >
+                <ClipboardList size={17} />
+                <span className="hidden sm:inline">Daily Log</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateTo("/people")}
+                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
+              >
+                <Users size={17} />
+                <span className="hidden sm:inline">People</span>
+              </button>
+              <Tooltip label="Open your profile">
+                <button
+                  type="button"
+                  onClick={() => navigateTo("/profile")}
+                  aria-label="Profile"
+                  className="profile-trigger flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+                >
+                  <User size={14} className="text-[#EDEDED]" />
+                </button>
+              </Tooltip>
+            </div>
+          </header>
+          <main className="mx-auto max-w-7xl px-4 py-6 md:px-6">
+            <DailyTracker user={user} />
+          </main>
+        </div>
+        {renderDialog()}
+      </>
+    );
+  }
+
   if (showProfile) {
     return (
       <>
@@ -2857,6 +2918,23 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
               </button>
             )}
           </div>
+          <button
+            type="button"
+            onClick={() => navigateTo("/")}
+            aria-current="page"
+            className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#EDEDED] transition-colors hover:bg-[#1F1F1F] sm:px-3"
+          >
+            <LayoutList size={17} />
+            <span className="hidden sm:inline">Tracker</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => navigateTo("/daily-log")}
+            className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
+          >
+            <ClipboardList size={17} />
+            <span className="hidden sm:inline">Daily Log</span>
+          </button>
           <button
             type="button"
             onClick={openPeopleSearch}
