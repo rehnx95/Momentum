@@ -49,6 +49,7 @@ function WeeklyChart({ rows }) {
   const customActivities = new Map();
   chartRows.forEach((row) => {
     (Array.isArray(row.custom_tasks) ? row.custom_tasks : []).forEach((task, index) => {
+      if (slotTotal(task.slots || []) <= 0) return;
       const id = task.id || task.name || `custom-${index}`;
       if (!customActivities.has(id)) {
         customActivities.set(id, {
