@@ -196,7 +196,8 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             </button>
           )}
           {timerActivities.length > 0 && (
-            <div className="timer-quick-add">
+            <details className="timer-quick-add">
+              <summary>Quick add</summary>
               <button
                 type="button"
                 disabled={entryDisabled}
@@ -217,35 +218,44 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
               >
                 +1h
               </button>
-            </div>
+            </details>
           )}
         </section>
       </div>
 
-      <StatStrip
-        items={[
-          { label: "Studied", value: formatDuration(daily.studiedMinutes), icon: Timer },
-          { label: "Sleep", value: formatDuration(daily.sleptMinutes), icon: Moon },
-          {
-            label: "Problems solved",
-            value: daily.problemCounts[daily.date] || 0,
-            icon: Target,
-            color: "var(--positive)",
-          },
-          { label: "Streak", value: daily.currentStreak, unit: "days", icon: Flame },
-        ]}
-      />
-
-      <DayTimeline
-        log={daily.log}
-        tasks={activities}
-        date={daily.date}
-        onFocusSlot={focusSlot}
-      />
+      <details className="daily-overview">
+        <summary>
+          Day overview
+          <span>
+            {formatDuration(daily.studiedMinutes)} studied
+            {" · "}
+            {daily.problemCounts[daily.date] || 0} problems
+          </span>
+        </summary>
+        <StatStrip
+          items={[
+            { label: "Studied", value: formatDuration(daily.studiedMinutes), icon: Timer },
+            { label: "Sleep", value: formatDuration(daily.sleptMinutes), icon: Moon },
+            {
+              label: "Problems solved",
+              value: daily.problemCounts[daily.date] || 0,
+              icon: Target,
+              color: "var(--positive)",
+            },
+            { label: "Streak", value: daily.currentStreak, unit: "days", icon: Flame },
+          ]}
+        />
+        <DayTimeline
+          log={daily.log}
+          tasks={activities}
+          date={daily.date}
+          onFocusSlot={focusSlot}
+        />
+      </details>
 
       <div className="sleep-entry">
         <label>
-          <span>Sleep (night before) <small>ended this morning</small></span>
+          <span>Sleep <small>night before · ended this morning</small></span>
           <input
             type="time"
             value={daily.log.sleep_time}

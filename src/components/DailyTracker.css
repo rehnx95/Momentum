@@ -145,19 +145,47 @@
   text-decoration: underline;
 }
 
-.daily-day-view > .stat-strip {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-bottom: 0.65rem;
+.daily-overview {
+  margin: 0 0 0.75rem;
+  border-bottom: 1px solid var(--border);
 }
 
-.daily-day-view .stat-chip {
+.daily-overview > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.daily-overview > summary span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.daily-overview > .stat-strip {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0.35rem 0 0.6rem;
+}
+
+.daily-overview .stat-chip {
   min-width: 0;
   padding: 0.55rem 0.65rem;
 }
 
-.daily-day-view .stat-value {
+.daily-overview .stat-value {
   font-size: 1rem;
   overflow-wrap: anywhere;
+}
+
+.daily-overview .day-timeline {
+  margin: 0.6rem 0;
 }
 
 .day-timeline {
@@ -691,9 +719,21 @@
 }
 
 .timer-quick-add {
-  display: flex;
+  display: inline-flex;
+  align-items: center;
   gap: 0.35rem;
   margin-left: 0;
+}
+
+.timer-quick-add summary {
+  color: var(--muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.timer-quick-add[open] {
+  flex-wrap: wrap;
 }
 
 .timer-quick-add button {
@@ -896,7 +936,7 @@
     padding-bottom: 1rem;
   }
 
-  .daily-day-view > .stat-strip {
+  .daily-overview > .stat-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
