@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { LogOut } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import TrackSheetBrand from './TrackSheetBrand';
-function ProfileSettings({ userId, profile, onBack, onGoToDashboard, onSaved, navigation, onSignOut }) {
+function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
   const [form, setForm] = useState({
     name: profile?.name || '',
     username: profile?.username || '',
@@ -129,26 +128,14 @@ function ProfileSettings({ userId, profile, onBack, onGoToDashboard, onSaved, na
 
   return (
     <div className="profile-settings-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
-      <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
-        <div className="unified-header-inner max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center gap-4">
-          <TrackSheetBrand
-            onNavigate={onGoToDashboard}
-            subtitle="Edit profile"
-          />
-          {navigation}
-          <button
-            type="button"
-            onClick={onSignOut}
-            aria-label="Sign out"
-            className="unified-header-actions ml-auto flex h-9 items-center gap-2 rounded-lg px-2 text-red-400 hover:bg-red-500/10"
-          >
-            <LogOut size={17} />
-            <span className="hidden sm:inline">Sign out</span>
-          </button>
-        </div>
-      </header>
+      {header}
 
-      <main className="max-w-3xl mx-auto px-4 md:px-6 py-8">
+      <main className="app-page">
+        <div className="app-page-narrow">
+        <button type="button" onClick={onBack} className="btn-secondary mb-4">
+          <ChevronLeft size={14} /> Back to profile
+        </button>
+        <h1 className="page-title mb-4">Edit profile</h1>
         <form onSubmit={handleSubmit} className="settings-form space-y-5 rounded-xl border border-[#262626] bg-[#0A0A0A] p-6 md:p-8">
           {errorMessage && (
             <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
@@ -213,6 +200,7 @@ function ProfileSettings({ userId, profile, onBack, onGoToDashboard, onSaved, na
             {isSaving ? 'Saving…' : 'Save profile'}
           </button>
         </form>
+        </div>
       </main>
     </div>
   );

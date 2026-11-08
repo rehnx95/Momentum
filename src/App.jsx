@@ -3,8 +3,6 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
-  Sun,
-  Moon,
   User,
   CheckSquare,
   SkipForward,
@@ -12,22 +10,19 @@ import {
   Download,
   Upload,
   RefreshCcw,
-  Menu,
-  Settings,
   Calendar,
   Trophy,
   Target,
   LogOut,
-  BookOpen,
   Users,
   Link2,
-  Trash2,
-  ClipboardList,
-  LayoutList,
+  Pencil,
 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "./lib/supabase";
 import { useProgress } from "./hooks/useProgress";
 import ProfileSettings from "./components/ProfileSettings";
+import AppHeader from "./components/AppHeader";
+import SheetSwitcher from "./components/SheetSwitcher";
 import ActivityHeatmap from "./components/ActivityHeatmap";
 import TrackSheetBrand from "./components/TrackSheetBrand";
 import Tooltip from "./components/Tooltip";
@@ -126,46 +121,6 @@ function getPeopleRoute(pathname = window.location.pathname) {
   if (profileMatch)
     return { page: "profile", username: profileMatch[1].toLowerCase() };
   return { page: "tracker", username: "" };
-}
-
-function MainPageNavigation({ active, onNavigate, theme, setTheme }) {
-  const items = [
-    { id: "tracker", label: "Tracker", path: "/", icon: LayoutList },
-    { id: "daily-log", label: "Daily Log", path: "/daily-log", icon: ClipboardList },
-    { id: "people", label: "People", path: "/people", icon: Users },
-    { id: "profile", label: "Profile", path: "/profile", icon: User },
-  ];
-
-  return (
-    <nav className="main-page-navigation" aria-label="Main navigation">
-      {items.map(({ id, label, path, icon: Icon }) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => onNavigate(path)}
-          aria-current={active === id ? "page" : undefined}
-          className={active === id ? "active" : ""}
-        >
-          <Icon size={17} />
-          <span>{label}</span>
-        </button>
-      ))}
-      <ThemeToggle theme={theme} setTheme={setTheme} />
-    </nav>
-  );
-}
-
-function ThemeToggle({ theme, setTheme }) {
-  return (
-    <button
-      type="button"
-      onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
-      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-      className="theme-toggle-button"
-    >
-      {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-    </button>
-  );
 }
 
 function App() {
@@ -851,7 +806,6 @@ function AuthenticatedApp({
       ? savedSheetId
       : defaultSheetId;
   });
-  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(false);
   const [search, setSearch] = useState(
     () => localStorage.getItem("dsa-search") || "",
   );
@@ -1223,7 +1177,6 @@ function AuthenticatedApp({
       } catch (error) {
         if (!active) return;
         console.error("Failed to load sheets:", error);
-        setDesktopSidebarOpen(true);
         setSheetError(
           "Could not load your sheets. Apply the latest Supabase sheet migration and try again.",
         );
@@ -1267,6 +1220,7 @@ function AuthenticatedApp({
   const userUsername = profile?.username || "";
   const userLocation = profile?.location || "";
   const userWebsite = profile?.website || "";
+  const headerProps = { onNavigate: navigateTo, theme, setTheme, userName, onSignOut };
 
   const openProfileSettings = () => {
     navigateTo("/profile/edit");
@@ -1318,7 +1272,6 @@ function AuthenticatedApp({
       setCustomSheets((current) => [...current, nextSheet]);
       setSelectedSheetId(nextSheet.id);
       localStorage.setItem("dsa-active-sheet", nextSheet.id);
-      setDesktopSidebarOpen(false);
     } catch (error) {
       console.error("Failed to upload sheet:", error);
       setSheetError(
@@ -1895,15 +1848,14 @@ gridStart.setDate(gridStart.getDate() - ((gridStart.getDay() + 6) % 7));
   }) {
     return (
       <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
-        <header className="dashboard-header sticky top-0 z-50 border-b">
-          <div className="unified-header-inner mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 md:px-6">
-            <TrackSheetBrand onNavigate={onBack} subtitle="People" />
-            <MainPageNavigation active="people" onNavigate={navigateTo} theme={theme} setTheme={setTheme} />
-          </div>
-        </header>
+        <AppHeader active="people" {...headerProps} />
 
-        <main className="mx-auto max-w-4xl px-4 py-10 md:px-6 md:py-14">
-          <h1 className="mb-6 text-2xl font-bold tracking-tight">Find people</h1>
+        <main className="app-page">
+          <div className="app-page-narrow">
+          <h1 className="page-title mb-1">Find people</h1>
+          <p className="mb-6 text-sm text-[#A1A1A1]">
+            Search a username to see their streaks, sheet progress and activity.
+          </p>
           <div className="relative">
             <Search
               size={18}
@@ -1978,6 +1930,17 @@ gridStart.setDate(gridStart.getDate() - ((gridStart.getDay() + 6) % 7));
             )}
           </div>
           <p className="mt-2 text-xs text-[#A1A1A1]">3 characters minimum.</p>
+          {query.trim().length < 3 && (
+            <div className="empty-state">
+              <Users size={22} />
+              <strong>Start typing a username</strong>
+              <span>
+                Profiles show streaks, per-sheet progress, a yearly heatmap and
+                recent solves.
+              </span>
+            </div>
+          )}
+          </div>
         </main>
       </div>
     );
@@ -2092,24 +2055,12 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
 
     return (
       <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
-        <header className="dashboard-header sticky top-0 z-50 border-b">
-          <div className="unified-header-inner mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 md:px-6">
-            <TrackSheetBrand
-              onNavigate={() => navigateTo("/")}
-              subtitle="People"
-            />
-            <MainPageNavigation active="people" onNavigate={navigateTo} theme={theme} setTheme={setTheme} />
-            <button
-              type="button"
-              onClick={onCopyLink}
-              className="unified-header-actions rounded-lg border border-[#383838] px-3 py-2 text-sm font-medium text-[#EDEDED] transition-colors hover:bg-[#1F1F1F]"
-            >
-              {copied ? "Link copied" : "Share profile"}
-            </button>
-          </div>
-        </header>
+        <AppHeader
+          active={publicProfileReturnPath.current === "/profile" ? "profile" : "people"}
+          {...headerProps}
+        />
 
-        <main className="mx-auto max-w-[1440px] px-4 py-8 md:px-6">
+        <main className="app-page">
           {error && !loading && !profile ? (
             <section className="surface-card rounded-2xl border p-8 text-center">
               <p className="text-sm font-semibold uppercase tracking-wider text-violet-300">
@@ -2197,6 +2148,13 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     >
                       {window.location.host}/user/{profile.username}
                     </a>
+                    <button
+                      type="button"
+                      onClick={onCopyLink}
+                      className="btn-secondary mt-4"
+                    >
+                      {copied ? "Link copied" : "Share profile"}
+                    </button>
                   </div>
                 </section>
                 </aside>
@@ -2237,6 +2195,19 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   </div>
                 </div>
 
+                <ActivityHeatmap
+                  activity={publicHeatmap.username === selectedPublicUsername ? publicHeatmap.activity : {}}
+                  years={publicHeatmap.years}
+                  todayKey={todayDateKey}
+                  selectedYear={publicHeatmapYear}
+                  onSelectYear={setPublicHeatmapYear}
+                  loading={
+                    publicHeatmap.username !== selectedPublicUsername ||
+                    publicHeatmap.year !== publicHeatmapYear
+                  }
+                />
+
+                <div className="profile-split">
                 <section
                   className="surface-card mb-8 rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
                   aria-labelledby="public-profile-sheet-progress"
@@ -2285,18 +2256,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   </div>
                 </section>
 
-                <ActivityHeatmap
-                  activity={publicHeatmap.username === selectedPublicUsername ? publicHeatmap.activity : {}}
-                  years={publicHeatmap.years}
-                  todayKey={todayDateKey}
-                  selectedYear={publicHeatmapYear}
-                  onSelectYear={setPublicHeatmapYear}
-                  loading={
-                    publicHeatmap.username !== selectedPublicUsername ||
-                    publicHeatmap.year !== publicHeatmapYear
-                  }
-                />
-
                 <section
                   className="recent-ac-card surface-card"
                   aria-labelledby="public-recent-ac-heading"
@@ -2344,6 +2303,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   )}
                 </section>
                 </div>
+                </div>
               </div>
             )
           )}
@@ -2362,37 +2322,9 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
 
     return (
       <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
-        <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
-          <div className="unified-header-inner max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center gap-4">
-            <TrackSheetBrand
-              onNavigate={() => navigateTo("/")}
-              subtitle="Profile"
-            />
-            <MainPageNavigation active="profile" onNavigate={navigateTo} theme={theme} setTheme={setTheme} />
-            <div className="unified-header-actions">
-              <Tooltip label="Edit profile">
-                <button
-                  onClick={openProfileSettings}
-                  aria-label="Edit profile settings"
-                  className="p-2 rounded-lg hover:bg-[#1F1F1F] transition-colors text-[#A1A1A1]"
-                >
-                  <Settings size={20} />
-                </button>
-              </Tooltip>
-              <Tooltip label="Sign out">
-                <button
-                  onClick={onSignOut}
-                  aria-label="Sign out"
-                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-red-500/10 transition-colors text-red-400"
-                >
-                  <LogOut size={20} />
-                </button>
-              </Tooltip>
-            </div>
-          </div>
-        </header>
+        <AppHeader active="profile" {...headerProps} />
 
-        <main className="max-w-[1440px] mx-auto px-4 md:px-6 py-8">
+        <main className="app-page">
           {(authError || progressError) && (
             <div
               role="alert"
@@ -2401,7 +2333,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
               {authError || progressError}
             </div>
           )}
-          <div className="profile-layout">
+          <div className="profile-layout own-profile-layout">
             <aside className="profile-sidebar">
               <section className="profile-hero">
                 <div className="profile-avatar">
@@ -2443,10 +2375,31 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       {userWebsite}
                     </a>
                   )}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={openProfileSettings}
+                    >
+                      <Pencil size={14} /> Edit profile
+                    </button>
+                    {userUsername && (
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => {
+                          publicProfileReturnPath.current = "/profile";
+                          navigateTo(`/u/${encodeURIComponent(userUsername)}`);
+                        }}
+                      >
+                        <Link2 size={14} /> Public view
+                      </button>
+                    )}
+                  </div>
                 </div>
               </section>
 
-              <section className="surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] divide-y divide-[#262626]">
+              <section className="profile-data-legacy surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] divide-y divide-[#262626]">
                 <div className="p-4">
                   <h2 className="mb-4 text-lg font-semibold text-[#EDEDED]">
                     Progress &amp; Data Management
@@ -2527,15 +2480,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       />
                     </button>
 
-                    <input
-                      ref={importFileInput}
-                      id="import-file"
-                      type="file"
-                      accept=".json,application/json"
-                      aria-label="Choose a progress backup JSON file"
-                      className="fixed left-0 top-0 h-px w-px opacity-0"
-                      onChange={importProgress}
-                    />
                   </div>
                 </div>
               </section>
@@ -2582,6 +2526,14 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 </div>
               </div>
 
+              <ActivityHeatmap
+                activity={activityLog}
+                todayKey={todayDateKey}
+                selectedYear={ownHeatmapYear}
+                onSelectYear={setOwnHeatmapYear}
+              />
+
+              <div className="profile-split">
               <section
                 className="surface-card mb-8 rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
                 aria-labelledby="profile-sheet-progress"
@@ -2633,14 +2585,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   })}
                 </div>
               </section>
-
-              {/* Activity Section */}
-              <ActivityHeatmap
-                activity={activityLog}
-                todayKey={todayDateKey}
-                selectedYear={ownHeatmapYear}
-                onSelectYear={setOwnHeatmapYear}
-              />
 
               <section
                 className="recent-ac-card surface-card"
@@ -2698,6 +2642,52 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     Accepted problems will show here as you solve them.
                   </p>
                 )}
+              </section>
+              </div>
+
+              <section className="surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-5">
+                <h2 className="text-lg font-semibold text-[#EDEDED]">Data</h2>
+                <p className="mt-1 text-sm text-[#A1A1A1]">
+                  Back up, restore or reset your progress.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => setBackupAction("export")}
+                  >
+                    <Download size={14} /> Export
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => setBackupAction("import")}
+                  >
+                    <Upload size={14} /> Import
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-secondary btn-danger"
+                    onClick={async () => {
+                      const confirmed = await askConfirmation(
+                        "Reset all progress across every sheet? This cannot be undone.",
+                        "Reset all progress?",
+                      );
+                      if (confirmed) await reset();
+                    }}
+                  >
+                    <RefreshCcw size={14} /> Reset all sheets
+                  </button>
+                </div>
+                <input
+                  ref={importFileInput}
+                  id="import-file"
+                  type="file"
+                  accept=".json,application/json"
+                  aria-label="Choose a progress backup JSON file"
+                  className="fixed left-0 top-0 h-px w-px opacity-0"
+                  onChange={importProgress}
+                />
               </section>
             </div>
           </div>
@@ -2795,10 +2785,8 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           userId={user.id}
           profile={profile}
           onBack={() => navigateTo("/profile")}
-          onGoToDashboard={() => navigateTo("/")}
           onSaved={onProfileUpdated}
-          navigation={<MainPageNavigation active="profile" onNavigate={navigateTo} theme={theme} setTheme={setTheme} />}
-          onSignOut={onSignOut}
+          header={<AppHeader active="profile" {...headerProps} />}
         />
         {renderDialog()}
       </>
@@ -2812,13 +2800,8 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           className="dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300"
           data-theme={theme === "dark" ? undefined : theme}
         >
-          <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
-            <div className="unified-header-inner mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-6">
-              <TrackSheetBrand subtitle="Daily Log" onNavigate={() => navigateTo("/")} />
-              <MainPageNavigation active="daily-log" onNavigate={navigateTo} theme={theme} setTheme={setTheme} />
-            </div>
-          </header>
-          <main className="mx-auto max-w-7xl px-4 py-6 md:px-6">
+          <AppHeader active="daily-log" {...headerProps} />
+          <main className="app-page">
             <DailyTracker user={user} />
           </main>
         </div>
@@ -2842,106 +2825,9 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
       className={`dashboard-shell tracker-dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300`}
       data-theme={theme === "light" ? "light" : undefined}
     >
-      <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
-          <div className="unified-header-inner tracker-alignment-container max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-4">
-          <TrackSheetBrand
-            subtitle="Tracker"
-            onNavigate={() => navigateTo("/")}
-          />
-          <Tooltip
-            label={desktopSidebarOpen ? "Hide sidebar" : "Show sidebar"}
-          >
-            <button
-              onClick={() => setDesktopSidebarOpen((open) => !open)}
-              className="tracker-sidebar-toggle p-1.5 text-[#EDEDED]"
-              aria-label={
-                desktopSidebarOpen ? "Hide sheets sidebar" : "Show sheets sidebar"
-              }
-              aria-expanded={desktopSidebarOpen}
-            >
-              <Menu size={22} />
-            </button>
-          </Tooltip>
-          <div className="unified-header-actions">
-            <div className="relative hidden sm:block">
-            <Search
-              size={15}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
-            />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search problems..."
-              className="pl-8 pr-8 py-1.5 w-48 lg:w-72 bg-[#0A0A0A] border border-[#262626] rounded-lg text-sm text-[#EDEDED] placeholder-[#A1A1A1] focus:outline-none focus:border-[#EDEDED] transition-colors"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#A1A1A1] hover:text-white"
-              >
-                <X size={14} />
-              </button>
-            )}
-            </div>
-          </div>
-          <MainPageNavigation active="tracker" onNavigate={navigateTo} theme={theme} setTheme={setTheme} />
-        </div>
-        <div className="tracker-filter-row tracker-alignment-container">
-          <div className="tracker-toolbar flex items-center gap-2 flex-wrap">
-            <div className="relative w-full sm:hidden">
-              <Search
-                size={15}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
-              />
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                aria-label="Search problems"
-                placeholder="Search problems..."
-                className="h-12 w-full rounded-xl border border-[#383838] bg-[#0A0A0A] pl-11 pr-11 text-sm text-[#EDEDED] placeholder-[#A1A1A1] outline-none transition-colors focus:border-[#EDEDED] focus:outline-none"
-              />
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  aria-label="Clear problem search"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A1A1A1] hover:text-white"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-            {["all", "done", "skipped", "todo"].map((type) => (
-              <button
-                key={type}
-                onClick={() => setActiveFilter(type)}
-                aria-pressed={activeFilter === type}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${chipActive(type)}`}
-              >
-                {type === "all"
-                  ? "All"
-                  : type === "done"
-                    ? "Done"
-                    : type === "skipped"
-                      ? "Skipped"
-                      : "To do"}
-              </button>
-            ))}
-            <label className="flex items-center gap-1.5 text-xs text-[#A1A1A1] ml-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={hideSkipped}
-                onChange={(e) => setHideSkipped(e.target.checked)}
-                className="w-3.5 h-3.5 rounded border-[#262626] bg-[#0A0A0A] accent-[#EDEDED]"
-              />
-              Hide skipped
-            </label>
-          </div>
-        </div>
-      </header>
-
+      <AppHeader active="tracker" {...headerProps} />
       <main
-        className={`dashboard-main tracker-alignment-container ${!desktopSidebarOpen ? "desktop-sidebar-collapsed" : ""} max-w-7xl mx-auto px-4 md:px-6 py-6 flex min-h-0`}
+        className="dashboard-main app-page min-h-0"
       >
         {progressError && (
           <div
@@ -2970,113 +2856,109 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </div>
           </div>
         )}
-        {desktopSidebarOpen && (
-          <button
-            type="button"
-            aria-label="Close sheets sidebar"
-            onClick={() => setDesktopSidebarOpen(false)}
-            className="sheet-sidebar-backdrop lg:hidden"
-          />
-        )}
-        <aside
-          className={`sheet-sidebar ${!desktopSidebarOpen ? "sidebar-closed" : ""} surface-card fixed top-[57px] bottom-0 left-0 z-40 w-64 overflow-y-auto border-r border-[#262626] bg-[#000000] p-3 shadow-2xl lg:static lg:top-auto lg:bottom-auto lg:z-auto lg:w-56 lg:flex-shrink-0 lg:rounded-2xl lg:border lg:shadow-none`}
-        >
-            <div className="mb-3 flex items-center justify-between px-2">
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-[#A1A1A1]">
-                Your sheets
-              </h2>
-            </div>
-            <div className="mb-3 px-1">
-              <button
-                type="button"
-                onClick={() => uploadSheetInput.current?.click()}
-                disabled={uploadingSheet}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#383838] px-3 py-2 text-sm text-[#EDEDED] transition-colors hover:border-[#EDEDED]/60 hover:bg-[#1F1F1F] disabled:cursor-wait disabled:opacity-60"
-              >
-                <Upload size={15} />
-                {uploadingSheet
-                  ? "Converting and saving…"
-                  : "Upload a TXT sheet"}
-              </button>
-              <button
-                type="button"
-                onClick={downloadSampleFormat}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-xs text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-white"
-              >
-                <Download size={13} />
-                Download sample .txt
-              </button>
-              <input
-                ref={uploadSheetInput}
-                type="file"
-                accept=".txt,text/plain"
-                aria-label="Upload a problem sheet TXT file"
-                className="hidden"
-                onChange={handleUploadSheet}
+        <section className="dashboard-content min-w-0">
+          <div className="page-head">
+            <SheetSwitcher
+              sheets={availableSheets}
+              selected={selectedSheet}
+              loading={customSheetsLoading}
+              onSelect={setSelectedSheetId}
+              onUpload={() => uploadSheetInput.current?.click()}
+              uploading={uploadingSheet}
+              onSample={downloadSampleFormat}
+              onDelete={handleRemoveSheet}
+              deletingId={deletingSheetId}
+            />
+            <span className="text-sm text-[#A1A1A1]">
+              {totalProblems} problems
+            </span>
+            <span className="page-head-spacer" />
+            <div className="relative w-full sm:w-72">
+              <Search
+                size={15}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
               />
-              {sheetError && (
-                <p
-                  role="alert"
-                  className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 p-2 text-xs leading-relaxed text-red-300"
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                aria-label="Search problems"
+                placeholder="Search problems…"
+                className="h-10 w-full rounded-lg border border-[#262626] bg-[#0A0A0A] pl-9 pr-9 text-sm text-[#EDEDED] placeholder-[#A1A1A1] outline-none transition-colors focus:border-[#EDEDED]"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  aria-label="Clear problem search"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A1A1A1] hover:text-white"
                 >
-                  {sheetError}
-                </p>
+                  <X size={14} />
+                </button>
               )}
             </div>
-            <nav className="space-y-1" aria-label="Problem sheets">
-              {availableSheets.map((sheet) => (
-                <div key={sheet.id} className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedSheetId(sheet.id);
-                      setDesktopSidebarOpen(false);
-                    }}
-                    aria-current={
-                      selectedSheet?.id === sheet.id ? "page" : undefined
-                    }
-                    className={`sheet-nav-item flex min-w-0 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                      selectedSheet?.id === sheet.id
-                        ? "bg-[#1F1F1F] text-white"
-                        : "text-[#A1A1A1] hover:bg-[#1F1F1F] hover:text-white"
-                    }`}
-                  >
-                    <BookOpen size={16} className="shrink-0" />
-                    <span className="min-w-0 flex-1 truncate">{sheet.title}</span>
-                    <span className="text-xs text-[#A1A1A1]">
-                      {sheet.problemCount}
-                    </span>
-                  </button>
-                  {sheet.customId && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSheet(sheet)}
-                      disabled={deletingSheetId !== null}
-                      aria-label={`Permanently remove ${sheet.title}`}
-                      className="rounded-lg p-2 text-[#A1A1A1] transition-colors hover:bg-red-500/10 hover:text-red-300 disabled:cursor-wait disabled:opacity-50"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  )}
-                </div>
-              ))}
-              {availableSheets.length === 0 && (
-                <p className="px-3 py-2 text-sm text-[#A1A1A1]">
-                  No sheets available. Upload a TXT sheet to get started.
-                </p>
-              )}
-              {customSheetsLoading && (
-                <p className="px-3 py-2 text-xs text-[#A1A1A1]">
-                  Loading your sheets…
-                </p>
-              )}
-            </nav>
-        </aside>
-
-        <section
-          className="dashboard-content flex-1 min-w-0 overflow-y-auto pr-2"
-          style={{ maxHeight: "calc(100vh - 120px)" }}
-        >
+          </div>
+          <input
+            ref={uploadSheetInput}
+            type="file"
+            accept=".txt,text/plain"
+            aria-label="Upload a problem sheet TXT file"
+            className="hidden"
+            onChange={handleUploadSheet}
+          />
+          {sheetError && (
+            <p
+              role="alert"
+              className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300"
+            >
+              {sheetError}
+            </p>
+          )}
+          <div className="tracker-controls">
+            {["all", "done", "skipped", "todo"].map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setActiveFilter(type)}
+                aria-pressed={activeFilter === type}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${chipActive(type)}`}
+              >
+                {type === "all"
+                  ? "All"
+                  : type === "done"
+                    ? "Done"
+                    : type === "skipped"
+                      ? "Skipped"
+                      : "To do"}
+              </button>
+            ))}
+            <label className="ml-2 flex cursor-pointer select-none items-center gap-1.5 text-xs text-[#A1A1A1]">
+              <input
+                type="checkbox"
+                checked={hideSkipped}
+                onChange={(event) => setHideSkipped(event.target.checked)}
+                className="h-3.5 w-3.5 rounded border-[#262626] bg-[#0A0A0A] accent-[#EDEDED]"
+              />
+              Hide skipped
+            </label>
+            <span className="page-head-spacer" />
+            <div className="flex items-center gap-2 text-xs text-[#A1A1A1]">
+              <button
+                type="button"
+                onClick={expandAll}
+                className="transition-colors hover:text-white"
+              >
+                Expand all
+              </button>
+              <span>·</span>
+              <button
+                type="button"
+                onClick={collapseAll}
+                className="transition-colors hover:text-white"
+              >
+                Collapse all
+              </button>
+            </div>
+          </div>
           <section
             className="mobile-progress-summary surface-card mb-4 rounded-xl border border-[#262626] bg-[#0A0A0A] p-4 lg:hidden"
             aria-label="Overall progress"
@@ -3119,22 +3001,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </div>
           </section>
 
-          <div className="flex items-center gap-2 mb-4 text-xs text-[#A1A1A1]">
-            <button
-              onClick={expandAll}
-              className="hover:text-white transition-colors"
-            >
-              Expand all
-            </button>
-            <span>·</span>
-            <button
-              onClick={collapseAll}
-              className="hover:text-white transition-colors"
-            >
-              Collapse all
-            </button>
-          </div>
-
           <div>
             {filteredSteps.length > 0 ? (
               filteredSteps.map((step) => (
@@ -3160,11 +3026,11 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           </div>
         </section>
 
-        <aside className={`hidden lg:block w-72 flex-shrink-0 space-y-3`}>
+        <aside className="tracker-side hidden lg:block space-y-3">
           <div className="surface-card bg-[#0A0A0A] rounded-2xl border border-[#262626] p-6 relative">
             <div className="mb-4">
               <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
-                Overall Progress
+                {selectedSheet?.title || "Sheet"} progress
               </h3>
             </div>
             <div className="mb-2">
@@ -3188,22 +3054,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     width: `${totalProblems > 0 ? (doneCount / totalProblems) * 100 : 0}%`,
                   }}
                 >
-                  {doneCount > 0 && (
-                    <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-5 h-5 bg-zinc-300 rounded-full flex items-center justify-center shadow-lg">
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        className="text-zinc-700"
-                      >
-                        <path d="M12 15l-3 5 3-1 3 1-3-5z" />
-                        <circle cx="12" cy="8" r="6" />
-                      </svg>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -3313,15 +3163,12 @@ function AppDialog({ dialog, onClose, onConfirm }) {
 // =============================================================================
 // Step and Problem Row Components
 // =============================================================================
-function ProgressBar({ done, total, colorClass = "bg-[#EDEDED]" }) {
+function ProgressBar({ done, total }) {
   const pct = total ? Math.round((done / total) * 100) : 0;
   return (
-    <div
-      className="w-full h-[3px] bg-[#262626] rounded-full overflow-hidden flex-shrink-0"
-      aria-label={`${pct}% complete`}
-    >
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#262626]" aria-label={`${pct}% complete`}>
       <div
-        className={`${colorClass} h-full rounded-full transition-all duration-300 ease-out`}
+        className={`h-full rounded-full transition-all duration-300 ease-out ${pct === 100 ? "bg-[#46A758]" : "bg-[#EDEDED]"}`}
         style={{ width: `${pct}%` }}
       />
     </div>
@@ -3469,34 +3316,32 @@ function StepRow({
     0,
   );
   const total = step.subsections.reduce((sum, s) => sum + s.problems.length, 0);
+  const expanded = expandedSteps.has(step.id);
 
   return (
-    <div className="surface-card rounded-xl bg-[#0A0A0A] border border-[#262626] overflow-hidden mb-3">
+    <div className="surface-card mb-3 overflow-hidden rounded-xl border border-[#262626] bg-[#0A0A0A]">
       <button
         onClick={() => onToggleStep(step.id)}
-        className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[#1F1F1F] transition-colors"
+        aria-expanded={expanded}
+        className="grid w-full grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[#1F1F1F] md:grid-cols-[1.5rem_minmax(0,1fr)_14rem_3.5rem]"
       >
-        <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
-          {expandedSteps.has(step.id) ? (
-            <ChevronDown size={16} />
-          ) : (
-            <ChevronRight size={16} />
-          )}
-        </div>
-        <h2 className="font-semibold text-[17px] text-[#EDEDED] flex-1">
+        <span className="flex h-6 w-6 items-center justify-center">
+          {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+        </span>
+        <h2 className="min-w-0 text-[17px] font-semibold leading-snug text-[#EDEDED]">
           {step.title}
         </h2>
-        <div className="flex-1 mx-3 hidden md:block">
+        <div className="hidden md:block">
           <ProgressBar done={done} total={total} />
         </div>
-        <span className="text-sm text-[#A1A1A1] tabular-nums whitespace-nowrap">
+        <span className="text-right text-sm tabular-nums text-[#A1A1A1]">
           {done}/{total}
         </span>
       </button>
 
-      <div className="px-4 pb-3">
-        {expandedSteps.has(step.id) &&
-          step.subsections.map((sub) => (
+      {expanded && (
+        <div className="px-4 pb-3">
+          {step.subsections.map((sub) => (
             <SubSectionRow
               key={sub.id}
               sub={sub}
@@ -3510,7 +3355,8 @@ function StepRow({
               filter={filter}
             />
           ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { CalendarDays, Clock3, Plus, Save, Trash2 } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 function getLocalDateKey(date = new Date()) {
@@ -81,6 +89,7 @@ export default function DailyTracker({ user }) {
   const [backendEnabled, setBackendEnabled] = useState(true);
   const [profileCustomTasks, setProfileCustomTasks] = useState([]);
   const [newTaskName, setNewTaskName] = useState("");
+  const [showNewTask, setShowNewTask] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -373,19 +382,62 @@ export default function DailyTracker({ user }) {
     </label>
   );
 
+  const shiftDate = (delta) => {
+    const [year, month, day] = date.split("-").map(Number);
+    const key = getLocalDateKey(new Date(year, month - 1, day + delta));
+    if (key <= getLocalDateKey()) setDate(key);
+  };
+  const totalStudied =
+    totalSlots(log.dsa_slots) +
+    totalSlots(log.backend_slots) +
+    log.custom_tasks.reduce(
+      (sum, task) => sum + totalSlots(task.slots || []),
+      0,
+    );
+  const submitNewTask = () => {
+    if (!newTaskName.trim()) return;
+    addCustomTask();
+    setShowNewTask(false);
+  };
+
   return (
     <section className="daily-tracker surface-card" aria-labelledby="daily-log-title">
-      <div className="daily-tracker-header">
-        <div>
-          <p className="daily-eyebrow">Daily log</p>
-          <h2 id="daily-log-title">
-            {viewMode === "daily" ? "Sleep and study slots" : "Full study log"}
+      <div className="daily-toolbar">
+        <div className="daily-toolbar-left">
+          <h2 id="daily-log-title" className="page-title">
+            {viewMode === "daily" ? "Daily log" : "Full log"}
           </h2>
+          {viewMode === "daily" && (
+            <div className="daily-date-nav">
+              <button
+                type="button"
+                aria-label="Previous day"
+                onClick={() => shiftDate(-1)}
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <label className="daily-date">
+                <CalendarDays size={16} />
+                <span className="sr-only">Log date</span>
+                <input
+                  type="date"
+                  value={date}
+                  max={getLocalDateKey()}
+                  onChange={(event) => setDate(event.target.value)}
+                />
+              </label>
+              <button
+                type="button"
+                aria-label="Next day"
+                disabled={date >= getLocalDateKey()}
+                onClick={() => shiftDate(1)}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
         </div>
-        <div className="daily-view-actions">
-          <button type="button" className="daily-hide-button" onClick={toggleVisibility}>
-            {dailyLogVisible ? "Hide section" : "Show section"}
-          </button>
+        <div className="daily-toolbar-right">
           <div className="daily-view-switch" aria-label="Daily log view">
             <button
               type="button"
@@ -405,16 +457,13 @@ export default function DailyTracker({ user }) {
             </button>
           </div>
           {viewMode === "daily" && (
-            <label className="daily-date">
-              <CalendarDays size={16} />
-              <span className="sr-only">Log date</span>
-              <input
-                type="date"
-                value={date}
-                max={getLocalDateKey()}
-                onChange={(event) => setDate(event.target.value)}
-              />
-            </label>
+            <button
+              type="button"
+              className="daily-add-track"
+              onClick={() => setShowNewTask((visible) => !visible)}
+            >
+              <Plus size={14} /> New track
+            </button>
           )}
         </div>
       </div>
@@ -428,22 +477,48 @@ export default function DailyTracker({ user }) {
         </div>
       ) : viewMode === "daily" ? (
         <>
-      <div className="daily-grid">
+      <div className="daily-basics">
         {field("Sleep", "sleep_time", "time")}
         {field("Wake", "wake_time", "time")}
+        <div className="daily-total">
+          <span>Total studied</span>
+          <strong>{formatHours(totalStudied)} hr</strong>
+        </div>
       </div>
 
-      <div className="daily-study-block daily-new-task">
-        <div>
-          <p className="daily-eyebrow">Create task</p>
-          <h3>Custom study track</h3>
-        </div>
+      {showNewTask && (
+        <div className="daily-new-task-row daily-new-inline">
         <label htmlFor="new-daily-task" className="sr-only">Custom task name</label>
-        <div className="daily-new-task-row">
-          <input id="new-daily-task" type="text" value={newTaskName} onChange={(event) => setNewTaskName(event.target.value)} placeholder="e.g. System Design" onKeyDown={(event) => { if (event.key === "Enter") addCustomTask(); }} />
-          <button type="button" onClick={addCustomTask} disabled={!newTaskName.trim()}><Plus size={14} /> Add task</button>
+          <input
+            id="new-daily-task"
+            type="text"
+            autoFocus
+            value={newTaskName}
+            onChange={(event) => setNewTaskName(event.target.value)}
+            placeholder="e.g. System Design"
+            onKeyDown={(event) => {
+              if (event.key === "Enter") submitNewTask();
+              if (event.key === "Escape") setShowNewTask(false);
+            }}
+          />
+          <button
+            type="button"
+            onClick={submitNewTask}
+            disabled={!newTaskName.trim()}
+          >
+            Add
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setNewTaskName("");
+              setShowNewTask(false);
+            }}
+          >
+            Cancel
+          </button>
         </div>
-      </div>
+      )}
 
       <div className="daily-study-grid">
         {dsaEnabled && (
@@ -537,6 +612,9 @@ export default function DailyTracker({ user }) {
                   <button type="button" className="slot-remove" aria-label={`Remove ${task.name} slot`} onClick={() => updateCustomTask(task.id, (current) => ({ ...current, slots: (current.slots || []).filter((_, slotIndex) => slotIndex !== index) }))}><Trash2 size={14} /></button>
                 </div>
               ))}
+              {(task.slots || []).length === 0 && (
+                <p className="slot-empty">No slots added.</p>
+              )}
             </div>
             <button type="button" className="slot-add" onClick={() => updateCustomTask(task.id, (current) => ({ ...current, slots: [...(current.slots || []), { start: "", end: "" }] }))}><Plus size={14} /> Add slot</button>
           </div>
