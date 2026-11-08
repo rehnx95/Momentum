@@ -381,13 +381,31 @@ input:focus-visible {
 }
 
 .dashboard-header {
+  position: fixed !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 50;
   border-color: var(--border) !important;
   background: var(--page-overlay) !important;
   box-shadow: none;
 }
 
+.dashboard-shell > .dashboard-main {
+  padding-top: 5rem !important;
+}
+
+.dashboard-shell > main:not(.dashboard-main) {
+  padding-top: 5rem;
+}
+
 .dashboard-header button {
   border-radius: 0.6rem;
+  flex: none;
+}
+
+.dashboard-header > div {
+  min-height: 3.75rem;
 }
 
 .dashboard-header input {
@@ -433,7 +451,7 @@ input:focus-visible {
 .dashboard-content > .tracker-toolbar {
   position: sticky;
   z-index: 10;
-  top: 0;
+  top: 4.75rem;
   padding: 0.7rem 0 0.8rem;
   border-bottom: 1px solid var(--border);
   background: var(--page-overlay);
@@ -852,7 +870,7 @@ input:focus-visible {
   }
 
   .dashboard-content > .tracker-toolbar {
-    top: 4.3rem;
+    top: 4.75rem;
     margin-inline: -0.1rem;
     padding: 0.55rem 0 0.7rem;
     background: var(--page-overlay);
