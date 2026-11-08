@@ -257,7 +257,7 @@ export default function useDailyLog(user) {
     setPreferencesFailed(false);
     supabase
       .from("profiles")
-      .select("custom_tasks, current_streak")
+      .select("custom_tasks")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data, error }) => {
@@ -268,7 +268,6 @@ export default function useDailyLog(user) {
           templatesRef.current = [];
           return;
         }
-        setCurrentStreak(Number(data.current_streak || 0));
         setProfileCustomTasks(
           Array.isArray(data.custom_tasks)
             ? data.custom_tasks.map((task, index) => ({
@@ -301,6 +300,39 @@ export default function useDailyLog(user) {
       active = false;
     };
   }, [user.id, preferencesRequest]);
+
+  useEffect(() => {
+    let active = true;
+    const cutoff = getLocalDateKey(new Date(Date.now() - 366 * DAY_MS));
+    supabase
+      .from("activity_log")
+      .select("date")
+      .eq("user_id", user.id)
+      .gte("date", cutoff)
+      .order("date", { ascending: false })
+      .then(({ data, error }) => {
+        if (error) throw error;
+        if (!active) return;
+        const activeDates = new Set((data || []).map((item) => item.date));
+        const today = getLocalDateKey();
+        const cursor = new Date(`${today}T00:00:00`);
+        if (!activeDates.has(today)) cursor.setDate(cursor.getDate() - 1);
+        let streak = 0;
+        while (activeDates.has(getLocalDateKey(cursor))) {
+          streak += 1;
+          cursor.setDate(cursor.getDate() - 1);
+        }
+        setCurrentStreak(streak);
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error("Failed to load the Daily Log streak:", error);
+        setMessage("Could not load the current streak.");
+      });
+    return () => {
+      active = false;
+    };
+  }, [user.id]);
 
   useEffect(() => {
     let active = true;
