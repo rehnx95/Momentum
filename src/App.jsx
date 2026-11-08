@@ -2790,7 +2790,11 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
         >
           <AppHeader active="daily-log" {...headerProps} />
           <main className="app-page">
-            <DailyTracker user={user} askConfirmation={askConfirmation} />
+            <DailyTracker
+              user={user}
+              sheets={availableSheets}
+              askConfirmation={askConfirmation}
+            />
           </main>
         </div>
         {renderDialog()}

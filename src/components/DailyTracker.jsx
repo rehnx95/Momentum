@@ -4,7 +4,7 @@ import FullLog from "./FullLog";
 import useDailyLog from "../hooks/useDailyLog";
 import "./DailyTracker.css";
 
-export default function DailyTracker({ user, askConfirmation }) {
+export default function DailyTracker({ user, sheets, askConfirmation }) {
   const daily = useDailyLog(user);
 
   const openDate = useCallback(async (date) => {
@@ -41,10 +41,14 @@ export default function DailyTracker({ user, askConfirmation }) {
         daily.loading ? (
           <p className="daily-full-empty" role="status">Loading daily log…</p>
         ) : (
-          <DayView daily={daily} askConfirmation={askConfirmation} />
+          <DayView daily={daily} sheets={sheets} askConfirmation={askConfirmation} />
         )
       ) : (
-        <FullLog daily={daily} onOpenDate={openDate} />
+        <FullLog
+          daily={daily}
+          onOpenDate={openDate}
+          askConfirmation={askConfirmation}
+        />
       )}
       {daily.viewMode === "full" && daily.message && (
         <p className="daily-error-message" role="alert">{daily.message}</p>

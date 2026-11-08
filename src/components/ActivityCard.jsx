@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Clock3, Ellipsis, Plus, Trash2 } from "lucide-react";
 import { formatDuration } from "../utils/time";
 import SlotRow from "./SlotRow";
@@ -9,7 +9,6 @@ export default function ActivityCard({
   color,
   slots,
   totalMinutes = 0,
-  builtIn = false,
   disabled,
   onAddSlot,
   onChangeSlot,
@@ -20,57 +19,82 @@ export default function ActivityCard({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [renameValue, setRenameValue] = useState(activityName);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    setRenameValue(activityName);
+  }, [activityName]);
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event) => {
+      if (!menuRef.current?.contains(event.target)) setMenuOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
 
   return (
     <section className="activity-card" style={{ "--activity-color": color }}>
       <header className="activity-card-heading">
         <Clock3 size={15} aria-hidden="true" />
-        {builtIn ? (
-          <strong>{activityName}</strong>
-        ) : (
-          <strong className="activity-card-name">{activityName}</strong>
-        )}
+        <strong className="activity-card-name">{activityName}</strong>
         <span className="activity-total">{formatDuration(totalMinutes)}</span>
-        <details
-          className="activity-menu-wrap"
-          open={menuOpen}
-          onToggle={(event) => setMenuOpen(event.currentTarget.open)}
-        >
-          <summary aria-label={`More ${activityName} actions`}>
+        <div className="activity-menu-wrap" ref={menuRef}>
+          <button
+            type="button"
+            className="activity-menu-trigger"
+            aria-label={`More ${activityName} actions`}
+            aria-expanded={menuOpen}
+            aria-haspopup="menu"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
             <Ellipsis size={17} />
-          </summary>
-          <div className="activity-menu">
-            {!builtIn && (
-              <>
-                <label className="activity-menu-label">
-                  Rename
-                  <input
-                    value={renameValue}
-                    onChange={(event) => setRenameValue(event.target.value)}
-                    onBlur={() => {
-                      if (renameValue.trim() !== activityName) onRename(renameValue);
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") event.currentTarget.blur();
-                    }}
-                  />
-                </label>
-                <label className="activity-menu-label">
-                  Color
-                  <input
-                    type="color"
-                    value={color}
-                    onChange={(event) => onColorChange(event.target.value)}
-                  />
-                </label>
-              </>
-            )}
-            <button type="button" disabled={disabled} onClick={onRemoveActivity}>
-              <Trash2 size={14} />
-              {builtIn ? `Hide ${activityName}` : "Remove activity"}
-            </button>
-          </div>
-        </details>
+          </button>
+          {menuOpen && (
+            <div className="activity-menu">
+              <label className="activity-menu-label">
+                Rename
+                <input
+                  value={renameValue}
+                  onChange={(event) => setRenameValue(event.target.value)}
+                  onBlur={(event) => {
+                    const name = event.currentTarget.value.trim();
+                    if (name && name !== activityName) onRename(name);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") event.currentTarget.blur();
+                  }}
+                />
+              </label>
+              <label className="activity-menu-label">
+                Color
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(event) => onColorChange(event.target.value)}
+                />
+              </label>
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={async () => {
+                  await onRemoveActivity();
+                  setMenuOpen(false);
+                }}
+              >
+                <Trash2 size={14} />
+                Remove activity
+              </button>
+            </div>
+          )}
+        </div>
       </header>
       <div className="daily-slot-list">
         {slots.map((slot, index) => (

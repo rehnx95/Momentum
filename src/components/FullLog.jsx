@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-import ActivityHeatmap from "./ActivityHeatmap";
+import { useMemo } from "react";
 import { formatDuration, slotMinutes } from "../utils/time";
 import { getLocalDateKey } from "../hooks/useDailyLog";
 
@@ -22,13 +21,20 @@ function sleepTotal(row) {
 }
 
 function rowTotals(row) {
-  const dsa = slotTotal(row.dsa_slots || []);
-  const backend = slotTotal(row.backend_slots || []);
   const custom = (Array.isArray(row.custom_tasks) ? row.custom_tasks : []).reduce(
     (total, task) => total + slotTotal(task.slots || []),
     0,
   );
-  return { dsa, backend, custom, studied: dsa + backend + custom };
+  return { custom, studied: custom };
+}
+
+function activityBreakdown(row) {
+  const activities = [];
+  (Array.isArray(row.custom_tasks) ? row.custom_tasks : []).forEach((task) => {
+    const minutes = slotTotal(task.slots || []);
+    if (minutes) activities.push(`${task.name || "Activity"} ${formatDuration(minutes)}`);
+  });
+  return activities.join(" · ");
 }
 
 function mondayKey(dateKey) {
@@ -54,8 +60,6 @@ function WeeklyChart({ rows }) {
     });
   });
   const activities = [
-    { id: "dsa", name: "DSA", color: "var(--activity-dsa)" },
-    { id: "backend", name: "Backend", color: "var(--activity-backend)" },
     ...customActivities.values(),
   ];
   const maxMinutes = Math.max(
@@ -86,18 +90,11 @@ function WeeklyChart({ rows }) {
                 (task, taskIndex) => [task.id || task.name || `custom-${taskIndex}`, task],
               ),
             );
-            const values = {
-              dsa: slotTotal(row.dsa_slots || []),
-              backend: slotTotal(row.backend_slots || []),
-            };
             return (
               <g key={row.date}>
                 <title>{row.date}: {formatDuration(rowTotals(row).studied)} studied</title>
                 {activities.map((activity) => {
-                  const minutes =
-                    activity.id === "dsa" || activity.id === "backend"
-                      ? values[activity.id]
-                      : slotTotal(tasks.get(activity.id)?.slots || []);
+                  const minutes = slotTotal(tasks.get(activity.id)?.slots || []);
                   if (!minutes) return null;
                   const barHeight = minutes * scale;
                   y -= barHeight;
@@ -132,19 +129,7 @@ function WeeklyChart({ rows }) {
   );
 }
 
-export default function FullLog({ daily, onOpenDate }) {
-  const [heatmapMode, setHeatmapMode] = useState("problems");
-  const [heatmapYear, setHeatmapYear] = useState(null);
-  const heatmapValues = useMemo(() => {
-    if (heatmapMode === "problems") return daily.problemCounts;
-    return Object.fromEntries(
-      daily.allLogs.map((row) => [
-        row.date,
-        rowTotals(row).studied / 60,
-      ]),
-    );
-  }, [daily.allLogs, daily.problemCounts, heatmapMode]);
-
+export default function FullLog({ daily, onOpenDate, askConfirmation }) {
   const weeks = useMemo(() => {
     const groups = new Map();
     daily.allLogs.forEach((row) => {
@@ -165,29 +150,28 @@ export default function FullLog({ daily, onOpenDate }) {
 
   return (
     <div className="daily-full-log">
-      <div className="full-log-heatmap-head">
-        <h3>Activity</h3>
-        <div className="daily-view-switch" aria-label="Heatmap data">
-          {["problems", "hours"].map((mode) => (
-            <button
-              type="button"
-              key={mode}
-              className={heatmapMode === mode ? "active" : ""}
-              aria-pressed={heatmapMode === mode}
-              onClick={() => setHeatmapMode(mode)}
-            >
-              {mode === "problems" ? "Problems" : "Hours"}
-            </button>
-          ))}
-        </div>
+      <div className="full-log-actions">
+        <p>Daily time and sleep entries</p>
+        <button
+          type="button"
+          className="clear-daily-history"
+          disabled={
+            daily.clearingHistory ||
+            daily.allLogsLoading ||
+            daily.olderLogsLoading ||
+            daily.loading
+          }
+          onClick={async () => {
+            const confirmed = await askConfirmation(
+              "Permanently delete all saved Daily Log entries for your account, across every date? This does not change your tracker progress or problem history.",
+              "Clear Daily Log history?",
+            );
+            if (confirmed) await daily.clearAllLogs();
+          }}
+        >
+          {daily.clearingHistory ? "Clearing history…" : "Clear my saved history"}
+        </button>
       </div>
-      <ActivityHeatmap
-        activity={heatmapValues}
-        todayKey={getLocalDateKey()}
-        mode={heatmapMode}
-        selectedYear={heatmapYear}
-        onSelectYear={setHeatmapYear}
-      />
       <WeeklyChart rows={daily.allLogs} />
 
       {daily.allLogsLoading ? (
@@ -221,9 +205,7 @@ export default function FullLog({ daily, onOpenDate }) {
                     <tr>
                       <th>Date</th>
                       <th>Sleep</th>
-                      <th>DSA</th>
-                      <th>Backend</th>
-                      <th>Other</th>
+                      <th>Activities</th>
                       <th>Total · problems</th>
                     </tr>
                   </thead>
@@ -251,16 +233,14 @@ export default function FullLog({ daily, onOpenDate }) {
                             )}
                           </th>
                           {totals.studied === 0 && slept === 0 ? (
-                            <td colSpan={6}>
+                            <td colSpan={3}>
                               Nothing logged
                               {problems > 0 ? ` · ${problems} problems` : ""}
                             </td>
                           ) : (
                             <>
                               <td>{formatDuration(slept)}</td>
-                              <td>{formatDuration(totals.dsa)}</td>
-                              <td>{formatDuration(totals.backend)}</td>
-                              <td>{formatDuration(totals.custom)}</td>
+                              <td>{activityBreakdown(row) || "Nothing logged"}</td>
                               <td>{formatDuration(totals.studied)} · {problems} problems</td>
                             </>
                           )}

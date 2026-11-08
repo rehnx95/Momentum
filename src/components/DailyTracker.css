@@ -305,12 +305,13 @@
   position: relative;
 }
 
-.new-activity-wrap > summary {
+.new-activity-trigger {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
   min-height: 2.2rem;
   padding: 0 0.75rem;
+  border: 0;
   border-radius: 0.6rem;
   background: var(--text);
   color: var(--page);
@@ -318,11 +319,6 @@
   font-weight: 700;
   cursor: pointer;
   list-style: none;
-}
-
-.new-activity-wrap > summary::-webkit-details-marker,
-.activity-menu-wrap > summary::-webkit-details-marker {
-  display: none;
 }
 
 .new-activity-menu,
@@ -339,6 +335,28 @@
   border-radius: 0.7rem;
   background: var(--surface);
   box-shadow: 0 12px 32px var(--shadow);
+}
+
+.new-activity-menu {
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.activity-menu {
+  max-height: 20rem;
+  min-width: 13rem;
+  overflow-y: auto;
+}
+
+.new-activity-menu .activity-menu-label {
+  padding: 0.4rem 0.5rem 0.2rem;
+  font-weight: 700;
+}
+
+.new-activity-empty {
+  padding: 0.35rem 0.5rem;
+  color: var(--muted);
+  font-size: 0.72rem;
 }
 
 .new-activity-menu button,
@@ -383,6 +401,39 @@
   font-weight: 700;
 }
 
+.full-log-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.full-log-actions p {
+  margin: 0;
+}
+
+.clear-daily-history {
+  min-height: 2rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid rgb(239 68 68 / 0.45);
+  border-radius: 0.55rem;
+  color: #ef4444;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.clear-daily-history:hover {
+  background: rgb(239 68 68 / 0.1);
+}
+
+.clear-daily-history:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .daily-new-inline button[type="submit"],
 .daily-timer > button:not(.timer-stop) {
   border-color: var(--text);
@@ -425,15 +476,17 @@
   white-space: nowrap;
 }
 
-.activity-menu-wrap > summary {
+.activity-menu-trigger {
   display: grid;
   width: 1.8rem;
   height: 1.8rem;
   place-items: center;
+  flex: none;
+  border: 0;
   border-radius: 0.45rem;
+  background: transparent;
   color: var(--muted);
   cursor: pointer;
-  list-style: none;
 }
 
 .activity-menu-label {
@@ -623,6 +676,18 @@
   color: #ef4444;
 }
 
+.daily-save-status button {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.daily-save-status button:hover {
+  background: var(--surface-hover);
+}
+
 .full-log-heatmap-head {
   display: flex;
   align-items: center;
@@ -760,6 +825,11 @@
 
   .weekly-log-table {
     min-width: 40rem;
+  }
+
+  .full-log-actions {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 

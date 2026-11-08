@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -32,65 +32,63 @@ function timeElapsed(startedAt, now) {
   return `${hours}:${minutes}:${seconds}`;
 }
 
-export default function DayView({ daily, askConfirmation }) {
+export default function DayView({ daily, sheets = [], askConfirmation }) {
   const [newActivityOpen, setNewActivityOpen] = useState(false);
   const [newActivityName, setNewActivityName] = useState("");
+  const [activityMenuOpen, setActivityMenuOpen] = useState(false);
+  const activityMenuRef = useRef(null);
   const [selectedTimerActivity, setSelectedTimerActivity] = useState(() => {
     try {
-      return localStorage.getItem("track-sheet-last-timer-activity") || "dsa";
+      return localStorage.getItem("track-sheet-last-timer-activity") || "";
     } catch (error) {
       console.error("Could not read the last timer activity:", error);
-      return "dsa";
+      return "";
     }
   });
   const activities = useMemo(
-    () => [
-      ...(daily.dsaEnabled
-        ? [{
-            id: "dsa",
-            name: "DSA",
-            color: "var(--activity-dsa)",
-            slots: daily.log.dsa_slots,
-            builtIn: true,
-          }]
-        : []),
-      ...(daily.backendEnabled
-        ? [{
-            id: "backend",
-            name: "Backend",
-            color: "var(--activity-backend)",
-            slots: daily.log.backend_slots,
-            builtIn: true,
-          }]
-        : []),
-      ...daily.activeCustomTasks.map((task) => ({
+    () => daily.activeCustomTasks.map((task) => ({
         ...task,
         slots:
           daily.log.custom_tasks.find((item) => item.id === task.id)?.slots || [],
       })),
-    ],
-    [
-      daily.dsaEnabled,
-      daily.backendEnabled,
-      daily.activeCustomTasks,
-      daily.log.dsa_slots,
-      daily.log.backend_slots,
-      daily.log.custom_tasks,
-    ],
+    [daily.activeCustomTasks, daily.log.custom_tasks],
   );
   const timerActivities = useMemo(
-    () => [
-      ...(daily.dsaEnabled ? [{ id: "dsa", name: "DSA" }] : []),
-      ...(daily.backendEnabled ? [{ id: "backend", name: "Backend" }] : []),
-      ...daily.activeCustomTasks.map((task) => ({
-        id: task.id,
-        name: task.name,
-        color: task.color,
-      })),
-    ],
-    [daily.dsaEnabled, daily.backendEnabled, daily.activeCustomTasks],
+    () => daily.activeCustomTasks.map((task) => ({
+      id: task.id,
+      name: task.name,
+      color: task.color,
+    })),
+    [daily.activeCustomTasks],
   );
-  const entryDisabled = daily.loading || daily.loadFailed;
+  const availableSheetActivities = sheets.filter(
+    (sheet) =>
+      !daily.activeCustomTasks.some(
+        (task) => task.sheetId === sheet.id || task.id === `sheet:${sheet.id}`,
+      ),
+  );
+  const entryDisabled =
+    daily.loading ||
+    daily.loadFailed ||
+    daily.preferencesLoading ||
+    daily.preferencesFailed;
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event) => {
+      if (!activityMenuRef.current?.contains(event.target)) {
+        setActivityMenuOpen(false);
+      }
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setActivityMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
 
   useEffect(() => {
     if (
@@ -125,8 +123,19 @@ export default function DayView({ daily, askConfirmation }) {
           <button type="button" onClick={daily.retryLoad}>Try again</button>
         </div>
       )}
+      {daily.preferencesFailed && (
+        <div className="daily-load-error" role="alert">
+          Could not load your saved activities. Activity editing is paused to avoid overwriting them.
+          <button type="button" onClick={daily.retryPreferences}>Try again</button>
+        </div>
+      )}
       <div className="daily-date-nav">
-        <button type="button" aria-label="Previous day" onClick={() => daily.shiftDate(-1)}>
+        <button
+          type="button"
+          aria-label="Previous day"
+          disabled={daily.loading}
+          onClick={() => daily.shiftDate(-1)}
+        >
           <ChevronLeft size={16} />
         </button>
         <label className="daily-date">
@@ -135,13 +144,14 @@ export default function DayView({ daily, askConfirmation }) {
             type="date"
             value={daily.date}
             max={getLocalDateKey()}
+            disabled={daily.loading}
             onChange={(event) => daily.changeDate(event.target.value)}
           />
         </label>
         <button
           type="button"
           aria-label="Next day"
-          disabled={daily.date >= getLocalDateKey()}
+          disabled={daily.loading || daily.date >= getLocalDateKey()}
           onClick={() => daily.shiftDate(1)}
         >
           <ChevronRight size={16} />
@@ -165,7 +175,6 @@ export default function DayView({ daily, askConfirmation }) {
       <DayTimeline
         log={daily.log}
         tasks={daily.log.custom_tasks}
-        enabled={{ dsa: true, backend: true }}
         date={daily.date}
         onFocusSlot={focusSlot}
       />
@@ -194,24 +203,54 @@ export default function DayView({ daily, askConfirmation }) {
 
       <div className="daily-entry-heading">
         <h3>Activities</h3>
-        <details className="new-activity-wrap">
-          <summary><Plus size={14} /> New activity</summary>
-          <div className="new-activity-menu">
-            <button type="button" disabled={entryDisabled} onClick={() => setNewActivityOpen(true)}>
-              Custom activity
-            </button>
-            {!daily.dsaEnabled && (
-              <button type="button" disabled={entryDisabled} onClick={() => daily.toggleBuiltin("dsa")}>
-                Restore DSA
+        <div className="new-activity-wrap" ref={activityMenuRef}>
+          <button
+            type="button"
+            className="new-activity-trigger"
+            aria-expanded={activityMenuOpen}
+            aria-haspopup="menu"
+            disabled={entryDisabled}
+            onClick={() => setActivityMenuOpen((open) => !open)}
+          >
+            <Plus size={14} /> New activity
+          </button>
+          {activityMenuOpen && (
+            <div className="new-activity-menu" role="menu">
+              <span className="activity-menu-label">From a sheet</span>
+              {availableSheetActivities.map((sheet) => (
+                <button
+                  type="button"
+                  role="menuitem"
+                  key={sheet.id}
+                  onClick={async () => {
+                    if (await daily.addSheetActivity(sheet)) {
+                      setActivityMenuOpen(false);
+                    }
+                  }}
+                >
+                  {sheet.title}
+                </button>
+              ))}
+              {availableSheetActivities.length === 0 && (
+                <span className="new-activity-empty">
+                  {sheets.length
+                    ? "All sheets are already added."
+                    : "No sheets available. Add a custom activity instead."}
+                </span>
+              )}
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setActivityMenuOpen(false);
+                  setNewActivityOpen(true);
+                }}
+              >
+                Create a new activity
               </button>
-            )}
-            {!daily.backendEnabled && (
-              <button type="button" disabled={entryDisabled} onClick={() => daily.toggleBuiltin("backend")}>
-                Restore Backend
-              </button>
-            )}
-          </div>
-        </details>
+            </div>
+          )}
+        </div>
       </div>
 
       {newActivityOpen && (
@@ -244,7 +283,6 @@ export default function DayView({ daily, askConfirmation }) {
             color={activity.color || "#8b5cf6"}
             slots={activity.slots}
             totalMinutes={activityTotal(activity.slots)}
-            builtIn={activity.builtIn}
             disabled={entryDisabled}
             onAddSlot={() => daily.addSlot(activity.id)}
             onChangeSlot={(index, field, value) =>
@@ -252,12 +290,9 @@ export default function DayView({ daily, askConfirmation }) {
             }
             onRemoveSlot={(index) => daily.removeSlot(activity.id, index)}
             onRemoveActivity={async () => {
-              const message = activity.builtIn
-                ? `Hide ${activity.name} from future entry forms? Existing log data will remain visible.`
-                : `Remove "${activity.name}" from future days? Past logs keep their data.`;
+              const message = `Remove "${activity.name}" from future days? Past logs keep their data.`;
               if (!(await askConfirmation(message, "Remove this activity?"))) return;
-              if (activity.builtIn) await daily.toggleBuiltin(activity.id);
-              else daily.removeCustomTask(activity.id);
+              daily.removeCustomTask(activity.id);
             }}
             onRename={(name) => daily.renameCustomTask(activity.id, name)}
             onColorChange={(color) => daily.setCustomColor(activity.id, color)}
@@ -351,6 +386,11 @@ export default function DayView({ daily, askConfirmation }) {
               ? "Saved ✓"
               : daily.status || "Saved"}
         {daily.message && <span>{daily.message}</span>}
+        {daily.dirty && !daily.saving && daily.validation.errors.length === 0 && (
+          <button type="button" onClick={() => void daily.saveNow()}>
+            Save now
+          </button>
+        )}
       </div>
     </div>
   );

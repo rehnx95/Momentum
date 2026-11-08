@@ -57,8 +57,10 @@ function normalizeLog(data, date, templates) {
     ...row,
     sleep_time: formatTime(row.sleep_time),
     wake_time: formatTime(row.wake_time),
-    dsa_slots: normalizeSlots(row.dsa_slots),
-    backend_slots: normalizeSlots(row.backend_slots),
+    dsa_slots: [],
+    backend_slots: [],
+    dsa_hours: null,
+    backend_hours: null,
     custom_tasks: [
       ...savedTasks.map((task) => ({
         ...task,
@@ -92,15 +94,7 @@ function totalActivityMinutes(log) {
     (sum, task) => sum + durationSlots(task.slots || []),
     0,
   );
-  const dsa = (log.dsa_slots || []).reduce(
-    (sum, slot) => sum + timerSlotMinutes(slot),
-    0,
-  );
-  const backend = (log.backend_slots || []).reduce(
-    (sum, slot) => sum + timerSlotMinutes(slot),
-    0,
-  );
-  return dsa + backend + custom;
+  return custom;
 }
 
 function sleepMinutes(log) {
@@ -131,19 +125,21 @@ export default function useDailyLog(user) {
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const [loadRequest, setLoadRequest] = useState(0);
+  const [preferencesLoading, setPreferencesLoading] = useState(true);
+  const [preferencesFailed, setPreferencesFailed] = useState(false);
+  const [preferencesRequest, setPreferencesRequest] = useState(0);
   const [saving, setSaving] = useState(false);
-  const savingRef = useRef(false);
-  const savePromiseRef = useRef(null);
+  const [clearingHistory, setClearingHistory] = useState(false);
+  const saveQueueRef = useRef(Promise.resolve(true));
+  const preferencesQueueRef = useRef(Promise.resolve());
   const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
   const [viewMode, setViewMode] = useState("daily");
-  const [dsaEnabled, setDsaEnabled] = useState(true);
-  const [backendEnabled, setBackendEnabled] = useState(true);
   const [profileCustomTasks, setProfileCustomTasks] = useState([]);
   const templatesRef = useRef(profileCustomTasks);
-  templatesRef.current = profileCustomTasks;
   const [currentStreak, setCurrentStreak] = useState(0);
   const [problemCounts, setProblemCounts] = useState({});
+  const logsRequestRef = useRef(0);
   const [allLogs, setAllLogs] = useState([]);
   const [allLogsLoading, setAllLogsLoading] = useState(false);
   const [hasOlderLogs, setHasOlderLogs] = useState(false);
@@ -188,8 +184,7 @@ export default function useDailyLog(user) {
     }
   }, [profileCustomTasks, loading, setLog]);
 
-  const saveLog = useCallback(async (draft, targetDate) => {
-    if (loadFailed) return false;
+  const saveLog = useCallback((draft, targetDate) => {
     const nextDraft = draft || logRef.current;
     const nextDate = targetDate || dateRef.current;
     const result = validateDay(nextDraft);
@@ -202,31 +197,25 @@ export default function useDailyLog(user) {
     }
 
     const snapshot = JSON.stringify(nextDraft);
-    if (snapshot === savedSnapshotRef.current) return true;
-    if (savingRef.current && savePromiseRef.current) {
-      await savePromiseRef.current;
-      if (savedSnapshotRef.current === snapshot) return true;
-    }
-
-    savingRef.current = true;
-    setSaving(true);
-    if (nextDate === dateRef.current) {
-      setStatus("Saving…");
-      setMessage("");
-    }
-
-    const promise = (async () => {
+    const save = async () => {
+      if (loadFailed) return false;
+      if (snapshot === savedSnapshotRef.current) return true;
+      setSaving(true);
+      if (nextDate === dateRef.current) {
+        setStatus("Saving…");
+        setMessage("");
+      }
       const { error } = await supabase.from("daily_logs").upsert(
         {
           user_id: user.id,
           date: nextDate,
           sleep_time: nextDraft.sleep_time || null,
           wake_time: nextDraft.wake_time || null,
-          dsa_slots: nextDraft.dsa_slots,
-          backend_slots: nextDraft.backend_slots,
+          dsa_slots: [],
+          backend_slots: [],
           custom_tasks: nextDraft.custom_tasks,
-          dsa_hours: durationSlots(nextDraft.dsa_slots) / 60 || null,
-          backend_hours: durationSlots(nextDraft.backend_slots) / 60 || null,
+          dsa_hours: null,
+          backend_hours: null,
         },
         { onConflict: "user_id,date" },
       );
@@ -238,23 +227,25 @@ export default function useDailyLog(user) {
         setMessage("");
       }
       return true;
-    })();
-
-    savePromiseRef.current = promise;
-    try {
-      return await promise;
-    } catch (error) {
-      console.error("Failed to save daily log:", error);
-      if (nextDate === dateRef.current) {
-        setStatus("Could not save");
-        setMessage("Could not save this daily log. Your edits are still here.");
+    };
+    const runSave = async () => {
+      try {
+        return await save();
+      } catch (error) {
+        console.error("Failed to save daily log:", error);
+        if (nextDate === dateRef.current) {
+          setStatus("Could not save");
+          setMessage("Could not save this daily log. Your edits are still here.");
+        }
+        return false;
+      } finally {
+        setSaving(false);
       }
-      return false;
-    } finally {
-      savingRef.current = false;
-      savePromiseRef.current = null;
-      setSaving(false);
-    }
+    };
+
+    const queuedPromise = saveQueueRef.current.then(runSave, runSave);
+    saveQueueRef.current = queuedPromise;
+    return queuedPromise;
   }, [loadFailed, user.id]);
 
   const saveLogRef = useRef(saveLog);
@@ -262,37 +253,54 @@ export default function useDailyLog(user) {
 
   useEffect(() => {
     let active = true;
+    setPreferencesLoading(true);
+    setPreferencesFailed(false);
     supabase
       .from("profiles")
-      .select("dsa_enabled, backend_enabled, custom_tasks, current_streak")
+      .select("custom_tasks, current_streak")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data, error }) => {
         if (!active) return;
         if (error) throw error;
-        if (!data) return;
-        setDsaEnabled(data.dsa_enabled !== false);
-        setBackendEnabled(data.backend_enabled !== false);
+        if (!data) {
+          setProfileCustomTasks([]);
+          templatesRef.current = [];
+          return;
+        }
         setCurrentStreak(Number(data.current_streak || 0));
         setProfileCustomTasks(
           Array.isArray(data.custom_tasks)
             ? data.custom_tasks.map((task, index) => ({
                 id: task.id,
+                sheetId: task.sheetId,
                 name: task.name,
                 color: task.color || COLOR_PALETTE[index % COLOR_PALETTE.length],
               }))
             : [],
         );
+        templatesRef.current = Array.isArray(data.custom_tasks)
+          ? data.custom_tasks.map((task, index) => ({
+              id: task.id,
+              sheetId: task.sheetId,
+              name: task.name,
+              color: task.color || COLOR_PALETTE[index % COLOR_PALETTE.length],
+            }))
+          : [];
       })
       .catch((error) => {
         if (!active) return;
         console.error("Failed to load daily log preferences:", error);
+        setPreferencesFailed(true);
         setMessage("Could not load daily log preferences.");
+      })
+      .finally(() => {
+        if (active) setPreferencesLoading(false);
       });
     return () => {
       active = false;
     };
-  }, [user.id]);
+  }, [user.id, preferencesRequest]);
 
   useEffect(() => {
     let active = true;
@@ -302,7 +310,7 @@ export default function useDailyLog(user) {
     setMessage("");
     supabase
       .from("daily_logs")
-      .select("*")
+      .select("date, sleep_time, wake_time, custom_tasks")
       .eq("user_id", user.id)
       .eq("date", date)
       .maybeSingle()
@@ -348,10 +356,11 @@ export default function useDailyLog(user) {
 
   const flushPendingSave = useCallback(async () => {
     window.clearTimeout(autosaveTimer.current);
+    if (loading && !loadFailed) return false;
     if (loadFailed) return true;
     if (JSON.stringify(logRef.current) === savedSnapshotRef.current) return true;
     return saveLog(logRef.current, dateRef.current);
-  }, [loadFailed, saveLog]);
+  }, [loading, loadFailed, saveLog]);
 
   useEffect(() => {
     const flushWhenHidden = () => {
@@ -366,7 +375,12 @@ export default function useDailyLog(user) {
   }, []);
 
   const changeDate = useCallback(async (selectedDate) => {
-    if (!selectedDate || selectedDate === dateRef.current || selectedDate > getLocalDateKey()) {
+    if (
+      loading ||
+      !selectedDate ||
+      selectedDate === dateRef.current ||
+      selectedDate > getLocalDateKey()
+    ) {
       return false;
     }
     const saved = await flushPendingSave();
@@ -376,7 +390,7 @@ export default function useDailyLog(user) {
     setLog(emptyLog(selectedDate));
     setDate(selectedDate);
     return true;
-  }, [flushPendingSave, setDate, setLog]);
+  }, [flushPendingSave, loading, setDate, setLog]);
 
   const shiftDate = useCallback((days) => {
     const [year, month, day] = dateRef.current.split("-").map(Number);
@@ -390,16 +404,7 @@ export default function useDailyLog(user) {
   }, [setLog]);
 
   const updateSlot = useCallback((activity, index, field, value) => {
-    const key = activity === "dsa" || activity === "backend" ? `${activity}_slots` : null;
     setLog((current) => {
-      if (key) {
-        return {
-          ...current,
-          [key]: current[key].map((slot, slotIndex) =>
-            slotIndex === index ? { ...slot, [field]: value, endDayOffset: 0 } : slot,
-          ),
-        };
-      }
       return {
         ...current,
         custom_tasks: current.custom_tasks.map((task) =>
@@ -420,10 +425,6 @@ export default function useDailyLog(user) {
 
   const addSlot = useCallback((activity) => {
     setLog((current) => {
-      if (activity === "dsa" || activity === "backend") {
-        const key = `${activity}_slots`;
-        return { ...current, [key]: [...current[key], { start: "", end: "" }] };
-      }
       return {
         ...current,
         custom_tasks: current.custom_tasks.map((task) =>
@@ -437,10 +438,6 @@ export default function useDailyLog(user) {
 
   const removeSlot = useCallback((activity, index) => {
     setLog((current) => {
-      if (activity === "dsa" || activity === "backend") {
-        const key = `${activity}_slots`;
-        return { ...current, [key]: current[key].filter((_, i) => i !== index) };
-      }
       return {
         ...current,
         custom_tasks: current.custom_tasks.map((task) =>
@@ -457,33 +454,27 @@ export default function useDailyLog(user) {
     if (error) throw error;
   }, [user.id]);
 
-  const toggleBuiltin = useCallback(async (activity) => {
-    const dsa = activity === "dsa";
-    const setter = dsa ? setDsaEnabled : setBackendEnabled;
-    const enabled = dsa ? dsaEnabled : backendEnabled;
-    setter(!enabled);
-    try {
-      await savePreferences({ [dsa ? "dsa_enabled" : "backend_enabled"]: !enabled });
-    } catch (error) {
-      console.error("Failed to save activity preference:", error);
-      setter(enabled);
-      setMessage("Could not update activity preference.");
-    }
-  }, [dsaEnabled, backendEnabled, savePreferences]);
-
   const updateTemplates = useCallback(async (templates) => {
-    const previous = profileCustomTasks;
+    const previous = templatesRef.current;
     setProfileCustomTasks(templates);
+    templatesRef.current = templates;
+    const save = preferencesQueueRef.current
+      .catch(() => undefined)
+      .then(() => savePreferences({ custom_tasks: templates }));
+    preferencesQueueRef.current = save;
     try {
-      await savePreferences({ custom_tasks: templates });
+      await save;
     } catch (error) {
       console.error("Failed to save custom activity preferences:", error);
-      setProfileCustomTasks(previous);
+      if (templatesRef.current === templates) {
+        templatesRef.current = previous;
+        setProfileCustomTasks(previous);
+      }
       setMessage("Could not save custom activity preferences.");
       return false;
     }
     return true;
-  }, [profileCustomTasks, savePreferences]);
+  }, [savePreferences]);
 
   const addCustomTask = useCallback(async (name) => {
     const trimmed = name.trim();
@@ -491,20 +482,32 @@ export default function useDailyLog(user) {
     const task = {
       id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`,
       name: trimmed,
-      color: COLOR_PALETTE[profileCustomTasks.length % COLOR_PALETTE.length],
+      color: COLOR_PALETTE[templatesRef.current.length % COLOR_PALETTE.length],
     };
-    if (!(await updateTemplates([...profileCustomTasks, task]))) return null;
+    if (!(await updateTemplates([...templatesRef.current, task]))) return null;
     return task;
-  }, [profileCustomTasks, updateTemplates]);
+  }, [updateTemplates]);
+
+  const addSheetActivity = useCallback(async (sheet) => {
+    const id = `sheet:${sheet.id}`;
+    if (templatesRef.current.some((task) => task.id === id)) return true;
+    const task = {
+      id,
+      sheetId: sheet.id,
+      name: sheet.title,
+      color: COLOR_PALETTE[templatesRef.current.length % COLOR_PALETTE.length],
+    };
+    return updateTemplates([...templatesRef.current, task]);
+  }, [updateTemplates]);
 
   const removeCustomTask = useCallback((taskId) => {
-    void updateTemplates(profileCustomTasks.filter((task) => task.id !== taskId));
-  }, [profileCustomTasks, updateTemplates]);
+    void updateTemplates(templatesRef.current.filter((task) => task.id !== taskId));
+  }, [updateTemplates]);
 
   const renameCustomTask = useCallback((taskId, name) => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    const templates = profileCustomTasks.map((task) =>
+    const templates = templatesRef.current.map((task) =>
       task.id === taskId ? { ...task, name: trimmed } : task,
     );
     void updateTemplates(templates);
@@ -514,11 +517,11 @@ export default function useDailyLog(user) {
         task.id === taskId ? { ...task, name: trimmed } : task,
       ),
     }));
-  }, [profileCustomTasks, setLog, updateTemplates]);
+  }, [setLog, updateTemplates]);
 
   const setCustomColor = useCallback((taskId, color) => {
     void updateTemplates(
-      profileCustomTasks.map((task) =>
+      templatesRef.current.map((task) =>
         task.id === taskId ? { ...task, color } : task,
       ),
     );
@@ -528,16 +531,17 @@ export default function useDailyLog(user) {
         task.id === taskId ? { ...task, color } : task,
       ),
     }));
-  }, [profileCustomTasks, setLog, updateTemplates]);
+  }, [setLog, updateTemplates]);
 
   const loadLogs = useCallback(async () => {
+    const requestId = ++logsRequestRef.current;
     setAllLogsLoading(true);
     const cutoff = getLocalDateKey(new Date(Date.now() - 83 * DAY_MS));
     try {
       const [logsResult, activityResult, olderResult] = await Promise.all([
         supabase
           .from("daily_logs")
-          .select("date, sleep_time, wake_time, dsa_slots, backend_slots, custom_tasks")
+          .select("date, sleep_time, wake_time, custom_tasks")
           .eq("user_id", user.id)
           .gte("date", cutoff)
           .order("date", { ascending: false })
@@ -557,6 +561,7 @@ export default function useDailyLog(user) {
       if (logsResult.error) throw logsResult.error;
       if (activityResult.error) throw activityResult.error;
       if (olderResult.error) throw olderResult.error;
+      if (requestId !== logsRequestRef.current) return;
       const rows = logsResult.data || [];
       setAllLogs(rows);
       setProblemCounts(Object.fromEntries(
@@ -564,10 +569,11 @@ export default function useDailyLog(user) {
       ));
       setHasOlderLogs((olderResult.data || []).length > 0);
     } catch (error) {
+      if (requestId !== logsRequestRef.current) return;
       console.error("Failed to load full daily log:", error);
       setMessage("Could not load the full log.");
     } finally {
-      setAllLogsLoading(false);
+      if (requestId === logsRequestRef.current) setAllLogsLoading(false);
     }
   }, [user.id]);
 
@@ -582,7 +588,7 @@ export default function useDailyLog(user) {
     try {
       const logsResult = await supabase
         .from("daily_logs")
-        .select("date, sleep_time, wake_time, dsa_slots, backend_slots, custom_tasks")
+        .select("date, sleep_time, wake_time, custom_tasks")
         .eq("user_id", user.id)
         .lt("date", oldest)
         .order("date", { ascending: false })
@@ -617,6 +623,38 @@ export default function useDailyLog(user) {
       setOlderLogsLoading(false);
     }
   }, [allLogs, user.id]);
+
+  const clearAllLogs = useCallback(async () => {
+    window.clearTimeout(autosaveTimer.current);
+    setClearingHistory(true);
+    try {
+      await saveQueueRef.current;
+      logsRequestRef.current += 1;
+      const { error } = await supabase
+        .from("daily_logs")
+        .delete()
+        .eq("user_id", user.id);
+      if (error) throw error;
+    } catch (error) {
+      console.error("Failed to clear this user's daily logs:", error);
+      setMessage("Could not clear your saved Daily Log history.");
+      return false;
+    } finally {
+      setClearingHistory(false);
+    }
+
+    const clearedLog = emptyLog(dateRef.current);
+    const snapshot = JSON.stringify(clearedLog);
+    setLog(clearedLog);
+    savedSnapshotRef.current = snapshot;
+    setSavedSnapshot(snapshot);
+    setAllLogs([]);
+    setHasOlderLogs(false);
+    setLoadRequest((current) => current + 1);
+    setStatus("Saved");
+    setMessage("All saved Daily Log entries for your account were cleared.");
+    return true;
+  }, [setLog, user.id]);
 
   useEffect(() => {
     let active = true;
@@ -680,13 +718,6 @@ export default function useDailyLog(user) {
         const id = runningTimer.activityId;
         if (segment.date === currentDate) {
           setLog((current) => {
-            if (id === "dsa" || id === "backend") {
-              const key = `${id}_slots`;
-              if (current[key].some((slot) => slot.timerId === segment.slot.timerId)) {
-                return current;
-              }
-              return { ...current, [key]: [...current[key], segment.slot] };
-            }
             const exists = current.custom_tasks.some((task) => task.id === id);
             return {
               ...current,
@@ -716,40 +747,33 @@ export default function useDailyLog(user) {
         }
         const { data, error } = await supabase
           .from("daily_logs")
-          .select("*")
+          .select("date, sleep_time, wake_time, custom_tasks")
           .eq("user_id", user.id)
           .eq("date", segment.date)
           .maybeSingle();
         if (error) throw error;
         const previous = normalizeLog(data, segment.date, templatesRef.current);
-        if (id === "dsa" || id === "backend") {
-          const key = `${id}_slots`;
-          if (!previous[key].some((slot) => slot.timerId === segment.slot.timerId)) {
-            previous[key] = [...previous[key], segment.slot];
-          }
-        } else {
-          const exists = previous.custom_tasks.some((task) => task.id === id);
-          previous.custom_tasks = exists
-            ? previous.custom_tasks.map((task) =>
-                task.id === id
-                  ? {
-                      ...task,
-                      slots: task.slots.some((slot) => slot.timerId === segment.slot.timerId)
-                        ? task.slots
-                        : [...task.slots, segment.slot],
-                    }
-                  : task,
-              )
-            : [
-                ...previous.custom_tasks,
-                {
-                  id,
-                  name: runningTimer.activityName,
-                  color: runningTimer.color,
-                  slots: [segment.slot],
-                },
-              ];
-        }
+        const exists = previous.custom_tasks.some((task) => task.id === id);
+        previous.custom_tasks = exists
+          ? previous.custom_tasks.map((task) =>
+              task.id === id
+                ? {
+                    ...task,
+                    slots: task.slots.some((slot) => slot.timerId === segment.slot.timerId)
+                      ? task.slots
+                      : [...task.slots, segment.slot],
+                  }
+                : task,
+            )
+          : [
+              ...previous.custom_tasks,
+              {
+                id,
+                name: runningTimer.activityName,
+                color: runningTimer.color,
+                slots: [segment.slot],
+              },
+            ];
         if (validateDay(previous).errors.length) {
           throw new Error(`The existing ${segment.date} log has validation errors.`);
         }
@@ -759,11 +783,11 @@ export default function useDailyLog(user) {
             date: segment.date,
             sleep_time: previous.sleep_time || null,
             wake_time: previous.wake_time || null,
-            dsa_slots: previous.dsa_slots,
-            backend_slots: previous.backend_slots,
+            dsa_slots: [],
+            backend_slots: [],
             custom_tasks: previous.custom_tasks,
-            dsa_hours: durationSlots(previous.dsa_slots) / 60 || null,
-            backend_hours: durationSlots(previous.backend_slots) / 60 || null,
+            dsa_hours: null,
+            backend_hours: null,
           },
           { onConflict: "user_id,date" },
         );
@@ -809,11 +833,6 @@ export default function useDailyLog(user) {
       for (const segment of segments) {
         if (segment.date === currentDate) {
           setLog((current) => {
-            if (activityId === "dsa" || activityId === "backend") {
-              const key = `${activityId}_slots`;
-              if (current[key].some((slot) => slot.timerId === id)) return current;
-              return { ...current, [key]: [...current[key], segment.slot] };
-            }
             const exists = current.custom_tasks.some((task) => task.id === activityId);
             return {
               ...current,
@@ -833,30 +852,23 @@ export default function useDailyLog(user) {
         }
         const { data, error } = await supabase
           .from("daily_logs")
-          .select("*")
+          .select("date, sleep_time, wake_time, custom_tasks")
           .eq("user_id", user.id)
           .eq("date", segment.date)
           .maybeSingle();
         if (error) throw error;
         const previous = normalizeLog(data, segment.date, templatesRef.current);
-        if (activityId === "dsa" || activityId === "backend") {
-          const key = `${activityId}_slots`;
-          if (!previous[key].some((slot) => slot.timerId === id)) {
-            previous[key] = [...previous[key], segment.slot];
-          }
-        } else {
-          const exists = previous.custom_tasks.some((task) => task.id === activityId);
-          previous.custom_tasks = exists
-            ? previous.custom_tasks.map((task) =>
-                task.id === activityId && !task.slots.some((slot) => slot.timerId === id)
-                  ? { ...task, slots: [...task.slots, segment.slot] }
-                  : task,
-              )
-            : [
-                ...previous.custom_tasks,
-                { id: activityId, name: activityName, color, slots: [segment.slot] },
-              ];
-        }
+        const exists = previous.custom_tasks.some((task) => task.id === activityId);
+        previous.custom_tasks = exists
+          ? previous.custom_tasks.map((task) =>
+              task.id === activityId && !task.slots.some((slot) => slot.timerId === id)
+                ? { ...task, slots: [...task.slots, segment.slot] }
+                : task,
+            )
+          : [
+              ...previous.custom_tasks,
+              { id: activityId, name: activityName, color, slots: [segment.slot] },
+            ];
         if (validateDay(previous).errors.length) {
           throw new Error(`The existing ${segment.date} log has validation errors.`);
         }
@@ -866,11 +878,11 @@ export default function useDailyLog(user) {
             date: segment.date,
             sleep_time: previous.sleep_time || null,
             wake_time: previous.wake_time || null,
-            dsa_slots: previous.dsa_slots,
-            backend_slots: previous.backend_slots,
+            dsa_slots: [],
+            backend_slots: [],
             custom_tasks: previous.custom_tasks,
-            dsa_hours: durationSlots(previous.dsa_slots) / 60 || null,
-            backend_hours: durationSlots(previous.backend_slots) / 60 || null,
+            dsa_hours: null,
+            backend_hours: null,
           },
           { onConflict: "user_id,date" },
         );
@@ -885,14 +897,17 @@ export default function useDailyLog(user) {
   }, [flushPendingSave, setLog, user.id]);
 
   return {
-    date, log, setLog, loading, loadFailed, saving, status, message, setMessage,
-    viewMode, setViewMode, dsaEnabled, backendEnabled, profileCustomTasks,
+    date, log, setLog, loading, loadFailed, preferencesLoading, preferencesFailed,
+    saving, clearingHistory, status, message, setMessage,
+    viewMode, setViewMode, profileCustomTasks,
     activeCustomTasks, currentStreak, problemCounts, allLogs, allLogsLoading,
     hasOlderLogs, olderLogsLoading, runningTimer, timerNow, validation, dirty,
     studiedMinutes, sleptMinutes, changeDate, shiftDate, updateField, updateSlot,
-    addSlot, removeSlot, toggleBuiltin, addCustomTask, removeCustomTask,
-    renameCustomTask, setCustomColor, saveLog, loadOlderLogs, startTimer,
+    addSlot, removeSlot, addCustomTask, addSheetActivity, removeCustomTask,
+    renameCustomTask, setCustomColor, saveLog, loadOlderLogs, clearAllLogs, startTimer,
     stopTimer, quickAdd,
+    saveNow: flushPendingSave,
     retryLoad: () => setLoadRequest((current) => current + 1),
+    retryPreferences: () => setPreferencesRequest((current) => current + 1),
   };
 }

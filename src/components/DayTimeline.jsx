@@ -1,6 +1,6 @@
 import { findOverlaps, toMinutes } from "../utils/time";
 
-function makeBlocks(log, tasks, enabled) {
+function makeBlocks(log, tasks) {
   const blocks = [];
   const byActivity = {};
   const pushSlots = (id, name, color, slots) => {
@@ -24,10 +24,6 @@ function makeBlocks(log, tasks, enabled) {
     });
   };
 
-  if (enabled.dsa) pushSlots("dsa", "DSA", "var(--activity-dsa)", log.dsa_slots);
-  if (enabled.backend) {
-    pushSlots("backend", "Backend", "var(--activity-backend)", log.backend_slots);
-  }
   tasks.forEach((task) => pushSlots(task.id, task.name, task.color, task.slots || []));
 
   if (log.sleep_time && log.wake_time) {
@@ -50,11 +46,10 @@ function makeBlocks(log, tasks, enabled) {
 export default function DayTimeline({
   log,
   tasks,
-  enabled,
   date,
   onFocusSlot,
 }) {
-  const { blocks, byActivity } = makeBlocks(log, tasks, enabled);
+  const { blocks, byActivity } = makeBlocks(log, tasks);
   const overlappingSlots = new Set(
     findOverlaps(byActivity).flatMap((overlap) => [
       overlap.slotA,
@@ -69,8 +64,6 @@ export default function DayTimeline({
   ].join("-");
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const legends = [
-    ...(enabled.dsa ? [{ name: "DSA", color: "var(--activity-dsa)" }] : []),
-    ...(enabled.backend ? [{ name: "Backend", color: "var(--activity-backend)" }] : []),
     ...tasks.map((task) => ({ name: task.name, color: task.color })),
     ...(log.sleep_time && log.wake_time
       ? [{ name: "Sleep (night before)", color: "var(--activity-sleep)" }]
