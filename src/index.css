@@ -157,7 +157,7 @@ input:focus-visible {
 }
 
 .track-sheet-brand-context {
-  width: 7rem;
+  width: 5.25rem;
   height: 1rem;
   max-width: 100%;
   overflow: hidden;
@@ -193,9 +193,9 @@ input:focus-visible {
 }
 
 .track-sheet-brand-copy {
-  width: 7.25rem;
+  width: 5.25rem;
   height: 2.75rem;
-  flex: 0 0 7.25rem;
+  flex: 0 0 5.25rem;
 }
 
 .track-sheet-brand-name {
@@ -495,6 +495,24 @@ input:focus-visible {
   z-index: 3;
 }
 
+.theme-toggle-button {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.theme-toggle-button:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
 .tracker-sidebar-toggle {
   position: absolute;
   left: 1rem;
@@ -573,8 +591,9 @@ input:focus-visible {
 .dashboard-content > .tracker-toolbar {
   position: sticky;
   z-index: 10;
-  top: 4.75rem;
-  padding: 0.7rem 0 0.8rem;
+  top: 3.75rem;
+  margin-top: -0.25rem;
+  padding: 0.45rem 0 0.55rem;
   border-bottom: 1px solid var(--border);
   background: var(--page-overlay);
   backdrop-filter: blur(12px);
@@ -1034,7 +1053,7 @@ input:focus-visible {
   }
 
   .dashboard-content > .tracker-toolbar {
-    top: 4.75rem;
+    top: 4.25rem;
     margin-inline: -0.1rem;
     padding: 0.55rem 0 0.7rem;
     background: var(--page-overlay);

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { LogOut } from 'lucide-react';
+import { LogOut, Moon, Sun } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import TrackSheetBrand from './TrackSheetBrand';
-function ProfileSettings({ userId, profile, onBack, onGoToDashboard, onSaved, navigation, onSignOut }) {
+function ProfileSettings({ userId, profile, onBack, onGoToDashboard, onSaved, navigation, onSignOut, theme, setTheme }) {
   const [form, setForm] = useState({
     name: profile?.name || '',
     username: profile?.username || '',
@@ -136,15 +136,25 @@ function ProfileSettings({ userId, profile, onBack, onGoToDashboard, onSaved, na
             subtitle="Edit profile"
           />
           {navigation}
-          <button
-            type="button"
-            onClick={onSignOut}
-            aria-label="Sign out"
-            className="unified-header-actions ml-auto flex h-9 items-center gap-2 rounded-lg px-2 text-red-400 hover:bg-red-500/10"
-          >
-            <LogOut size={17} />
-            <span className="hidden sm:inline">Sign out</span>
-          </button>
+          <div className="unified-header-actions">
+            <button
+              type="button"
+              onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              className="theme-toggle-button"
+            >
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button
+              type="button"
+              onClick={onSignOut}
+              aria-label="Sign out"
+              className="flex h-9 items-center gap-2 rounded-lg px-2 text-red-400 hover:bg-red-500/10"
+            >
+              <LogOut size={17} />
+              <span className="hidden sm:inline">Sign out</span>
+            </button>
+          </div>
         </div>
       </header>
 
