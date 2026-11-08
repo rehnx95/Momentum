@@ -1,10 +1,8 @@
-import { useEffect, useRef, useState } from "react";
 import {
   ClipboardList,
   LayoutList,
   LogOut,
   Moon,
-  Pencil,
   Sun,
   User,
   Users,
@@ -23,28 +21,8 @@ export default function AppHeader({
   onNavigate,
   theme,
   setTheme,
-  userName = "",
   onSignOut,
 }) {
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef(null);
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const onDown = (event) => {
-      if (!menuRef.current?.contains(event.target)) setOpen(false);
-    };
-    const onKey = (event) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
   return (
     <header className="app-header">
       <div className="app-header-inner">
@@ -63,7 +41,7 @@ export default function AppHeader({
             </button>
           ))}
         </nav>
-        <div className="app-header-actions" ref={menuRef}>
+        <div className="app-header-actions">
           <button
             type="button"
             className="icon-btn"
@@ -76,42 +54,13 @@ export default function AppHeader({
           </button>
           <button
             type="button"
-            className="avatar-btn"
-            aria-haspopup="menu"
-            aria-expanded={open}
-            aria-label="Account menu"
-            onClick={() => setOpen((current) => !current)}
+            className="icon-btn"
+            aria-label="Sign out"
+            title="Sign out"
+            onClick={onSignOut}
           >
-            {(userName || "U").charAt(0).toUpperCase()}
+            <LogOut size={18} />
           </button>
-          {open && (
-            <div className="popover popover-right" role="menu" style={{ top: "100%" }}>
-              <button
-                type="button"
-                role="menuitem"
-                className="popover-item"
-                onClick={() => {
-                  setOpen(false);
-                  onNavigate("/profile/edit");
-                }}
-              >
-                <Pencil size={15} /> Edit profile
-              </button>
-              <div className="popover-sep" />
-              <button
-                type="button"
-                role="menuitem"
-                className="popover-item"
-                style={{ color: "#f87171" }}
-                onClick={() => {
-                  setOpen(false);
-                  onSignOut();
-                }}
-              >
-                <LogOut size={15} /> Sign out
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </header>

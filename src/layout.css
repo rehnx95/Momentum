@@ -65,8 +65,7 @@
   color: var(--page);
 }
 
-.icon-btn,
-.avatar-btn {
+.icon-btn {
   display: grid;
   place-items: center;
   width: 2.25rem;
@@ -78,19 +77,6 @@
 .icon-btn:hover {
   background: var(--surface-hover);
   color: var(--text);
-}
-
-.avatar-btn {
-  border: 1px solid var(--border-strong);
-  border-radius: 9999px;
-  background: var(--surface-raised);
-  color: var(--text);
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.avatar-btn:hover {
-  border-color: var(--muted);
 }
 
 .app-page {
