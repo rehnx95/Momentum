@@ -176,9 +176,14 @@ input:focus-visible {
 }
 
 .track-sheet-brand {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
   height: 2.75rem;
   flex: 0 0 auto;
   width: 11rem;
+  transform: translateY(-50%);
+  z-index: 3;
 }
 
 .track-sheet-brand-logo {
@@ -199,6 +204,20 @@ input:focus-visible {
   line-height: 1.25rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .track-sheet-brand {
+    left: 1.5rem;
+  }
+
+  .unified-header-actions {
+    right: 1.5rem;
+  }
+
+  .tracker-sidebar-toggle {
+    left: 12rem;
+  }
 }
 
 .track-sheet-brand > span:last-child {
@@ -466,7 +485,7 @@ input:focus-visible {
 
 .unified-header-actions {
   position: absolute;
-  right: 0;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -474,6 +493,14 @@ input:focus-visible {
   justify-content: flex-end;
   gap: 0.45rem;
   z-index: 3;
+}
+
+.tracker-sidebar-toggle {
+  position: absolute;
+  left: 11.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
 }
 
 .main-page-navigation button {

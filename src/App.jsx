@@ -2088,7 +2088,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             <button
               type="button"
               onClick={onCopyLink}
-              className="rounded-lg border border-[#383838] px-3 py-2 text-sm font-medium text-[#EDEDED] transition-colors hover:bg-[#1F1F1F]"
+              className="unified-header-actions rounded-lg border border-[#383838] px-3 py-2 text-sm font-medium text-[#EDEDED] transition-colors hover:bg-[#1F1F1F]"
             >
               {copied ? "Link copied" : "Share profile"}
             </button>
@@ -2830,12 +2830,16 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
     >
       <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
           <div className="unified-header-inner max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-4">
+          <TrackSheetBrand
+            subtitle="Tracker"
+            onNavigate={() => navigateTo("/")}
+          />
           <Tooltip
             label={desktopSidebarOpen ? "Hide sidebar" : "Show sidebar"}
           >
             <button
               onClick={() => setDesktopSidebarOpen((open) => !open)}
-              className="p-1.5 -ml-1 text-[#EDEDED]"
+              className="tracker-sidebar-toggle p-1.5 text-[#EDEDED]"
               aria-label={
                 desktopSidebarOpen ? "Hide sheets sidebar" : "Show sheets sidebar"
               }
@@ -2844,10 +2848,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
               <Menu size={22} />
             </button>
           </Tooltip>
-          <TrackSheetBrand
-            subtitle="Tracker"
-            onNavigate={() => navigateTo("/")}
-          />
           <div className="unified-header-actions">
             <div className="relative hidden sm:block">
             <Search
