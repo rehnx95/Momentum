@@ -1,16 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
-import {
-  parseTimeEntry,
-  slotMinutes,
-  splitIntervalByDay,
-  validateDay,
-} from "../utils/time";
+import { slotMinutes, splitIntervalByDay, validateDay } from "../utils/time";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const PAGE_SIZE = 84;
 const TIMER_STORAGE = (userId) => `track-sheet-running-timer:${userId}`;
-const GOAL_STORAGE = (userId) => `track-sheet-daily-goal:${userId}`;
 const COLOR_PALETTE = [
   "#8b5cf6",
   "#06b6d4",
@@ -97,10 +91,6 @@ function totalActivityMinutes(log) {
   return custom;
 }
 
-function rowStudyMinutes(row) {
-  return totalActivityMinutes(normalizeLog(row, row.date));
-}
-
 function sleepMinutes(log) {
   if (!log.sleep_time || !log.wake_time) return 0;
   return slotMinutes(
@@ -116,18 +106,6 @@ function timerStorageGet(userId) {
   } catch (error) {
     console.error("Could not read the running timer:", error);
     return null;
-  }
-}
-
-function storedGoalGet(userId) {
-  try {
-    const stored = localStorage.getItem(GOAL_STORAGE(userId));
-    if (stored === null) return 240;
-    const value = Number(stored);
-    return Number.isFinite(value) && value >= 0 && value <= 1440 ? value : 240;
-  } catch (error) {
-    console.error("Could not read the daily study goal:", error);
-    return 240;
   }
 }
 
@@ -148,12 +126,7 @@ export default function useDailyLog(user) {
   const [message, setMessage] = useState("");
   const [viewMode, setViewMode] = useState("daily");
   const [currentStreak, setCurrentStreak] = useState(0);
-  const [loggingDates, setLoggingDates] = useState(() => new Set());
-  const [goalMinutes, setGoalMinutesState] = useState(() => storedGoalGet(user.id));
-  const [yesterdayNotLogged, setYesterdayNotLogged] = useState(false);
-  const [yesterdaySleep, setYesterdaySleep] = useState(null);
   const [problemCounts, setProblemCounts] = useState({});
-  const [heatmapHours, setHeatmapHours] = useState({});
   const logsRequestRef = useRef(0);
   const [allLogs, setAllLogs] = useState([]);
   const [allLogsLoading, setAllLogsLoading] = useState(false);
@@ -179,20 +152,6 @@ export default function useDailyLog(user) {
   const sleptMinutes = useMemo(() => sleepMinutes(log), [log]);
   const dirty = savedSnapshot !== null && JSON.stringify(log) !== savedSnapshot;
   const activeCustomTasks = log.custom_tasks;
-
-  const setGoalMinutes = useCallback((value) => {
-    const minutes = Number(value);
-    if (!Number.isFinite(minutes) || minutes < 0 || minutes > 1440) return false;
-    try {
-      localStorage.setItem(GOAL_STORAGE(user.id), String(minutes));
-      setGoalMinutesState(minutes);
-      return true;
-    } catch (error) {
-      console.error("Could not save the daily study goal:", error);
-      setMessage("Could not save your goal in this browser.");
-      return false;
-    }
-  }, [user.id]);
 
   const saveLog = useCallback((draft, targetDate) => {
     const nextDraft = draft || logRef.current;
@@ -230,12 +189,6 @@ export default function useDailyLog(user) {
         { onConflict: "user_id,date" },
       );
       if (error) throw error;
-      setLoggingDates((current) => {
-        const next = new Set(current);
-        if (totalActivityMinutes(nextDraft) >= 60) next.add(nextDate);
-        else next.delete(nextDate);
-        return next;
-      });
       if (nextDate === dateRef.current) {
         savedSnapshotRef.current = snapshot;
         setSavedSnapshot(snapshot);
@@ -271,82 +224,34 @@ export default function useDailyLog(user) {
     let active = true;
     const cutoff = getLocalDateKey(new Date(Date.now() - 366 * DAY_MS));
     supabase
-      .from("daily_logs")
-      .select("date, custom_tasks")
+      .from("activity_log")
+      .select("date")
       .eq("user_id", user.id)
       .gte("date", cutoff)
       .order("date", { ascending: false })
       .then(({ data, error }) => {
         if (error) throw error;
         if (!active) return;
-        const activeDates = new Set(
-          (data || [])
-            .filter((item) => totalActivityMinutes(normalizeLog(item, item.date)) >= 60)
-            .map((item) => item.date),
-        );
-        setLoggingDates(activeDates);
+        const activeDates = new Set((data || []).map((item) => item.date));
+        const today = getLocalDateKey();
+        const cursor = new Date(`${today}T00:00:00`);
+        if (!activeDates.has(today)) cursor.setDate(cursor.getDate() - 1);
+        let streak = 0;
+        while (activeDates.has(getLocalDateKey(cursor))) {
+          streak += 1;
+          cursor.setDate(cursor.getDate() - 1);
+        }
+        setCurrentStreak(streak);
       })
       .catch((error) => {
         if (!active) return;
-        console.error("Failed to load the Daily Log logging streak:", error);
-        setMessage("Could not load the logging streak.");
+        console.error("Failed to load the Daily Log streak:", error);
+        setMessage("Could not load the current streak.");
       });
     return () => {
       active = false;
     };
   }, [user.id]);
-
-  useEffect(() => {
-    const activeDates = new Set(loggingDates);
-    const today = getLocalDateKey();
-    if (date === today) {
-      if (studiedMinutes >= 60) activeDates.add(today);
-      else activeDates.delete(today);
-    }
-    const cursor = new Date(`${today}T00:00:00`);
-    if (!activeDates.has(today)) cursor.setDate(cursor.getDate() - 1);
-    let streak = 0;
-    while (activeDates.has(getLocalDateKey(cursor))) {
-      streak += 1;
-      cursor.setDate(cursor.getDate() - 1);
-    }
-    setCurrentStreak(streak);
-  }, [date, loggingDates, studiedMinutes]);
-
-  useEffect(() => {
-    const targetDate = new Date(`${date}T00:00:00`);
-    targetDate.setDate(targetDate.getDate() - 1);
-    const previousDate = getLocalDateKey(targetDate);
-    let active = true;
-    supabase
-      .from("daily_logs")
-      .select("date, sleep_time, wake_time, custom_tasks")
-      .eq("user_id", user.id)
-      .eq("date", previousDate)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (error) throw error;
-        if (!active) return;
-        const previous = data ? normalizeLog(data, previousDate) : null;
-        const hasEntry = previous &&
-          (totalActivityMinutes(previous) > 0 ||
-            Boolean(previous.sleep_time && previous.wake_time));
-        setYesterdaySleep(
-          previous?.sleep_time && previous?.wake_time
-            ? { sleep_time: previous.sleep_time, wake_time: previous.wake_time }
-            : null,
-        );
-        setYesterdayNotLogged(date === getLocalDateKey() && !hasEntry);
-      })
-      .catch((error) => {
-        if (!active) return;
-        console.error("Failed to check the previous day's log:", error);
-        setMessage("Could not check yesterday's log.");
-      });
-    return () => {
-      active = false;
-    };
-  }, [date, user.id]);
 
   useEffect(() => {
     let active = true;
@@ -476,39 +381,17 @@ export default function useDailyLog(user) {
     });
   }, [setLog]);
 
-  const addTimeEntry = useCallback((activityId, value) => {
-    const parsed = parseTimeEntry(value);
-    if (!parsed) {
-      setMessage("Enter a duration like 2h or 90m, or a time range like 10-12:30.");
-      return false;
-    }
-    let slot;
-    if (parsed.start) {
-      slot = { start: parsed.start, end: parsed.end };
-    } else {
-      const now = new Date();
-      const endMinutes = Math.max(1, now.getHours() * 60 + now.getMinutes());
-      const startMinutes = endMinutes - parsed.minutes;
-      if (startMinutes < 0 || endMinutes <= 0) {
-        setMessage("That duration does not fit within this day.");
-        return false;
-      }
-      const format = (minutes) =>
-        `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-      slot = { start: format(startMinutes), end: format(endMinutes) };
-    }
+  const addSlot = useCallback((activity) => {
     setLog((current) => {
-      const task = current.custom_tasks.find((item) => item.id === activityId);
-      if (!task) return current;
       return {
         ...current,
-        custom_tasks: current.custom_tasks.map((item) =>
-          item.id === activityId ? { ...item, slots: [...item.slots, slot] } : item,
+        custom_tasks: current.custom_tasks.map((task) =>
+          task.id === activity
+            ? { ...task, slots: [...task.slots, { start: "", end: "" }] }
+            : task,
         ),
       };
     });
-    setMessage("");
-    return true;
   }, [setLog]);
 
   const removeSlot = useCallback((activity, index) => {
@@ -588,9 +471,8 @@ export default function useDailyLog(user) {
     const requestId = ++logsRequestRef.current;
     setAllLogsLoading(true);
     const cutoff = getLocalDateKey(new Date(Date.now() - 83 * DAY_MS));
-    const heatmapCutoff = getLocalDateKey(new Date(Date.now() - 366 * DAY_MS));
     try {
-      const [logsResult, activityResult, olderResult, heatmapResult] = await Promise.all([
+      const [logsResult, activityResult, olderResult] = await Promise.all([
         supabase
           .from("daily_logs")
           .select("date, sleep_time, wake_time, custom_tasks")
@@ -602,35 +484,22 @@ export default function useDailyLog(user) {
           .from("activity_log")
           .select("date, count")
           .eq("user_id", user.id)
-          .gte("date", heatmapCutoff),
+          .gte("date", cutoff),
         supabase
           .from("daily_logs")
           .select("date")
           .eq("user_id", user.id)
           .lt("date", cutoff)
           .limit(1),
-        supabase
-          .from("daily_logs")
-          .select("date, custom_tasks")
-          .eq("user_id", user.id)
-          .gte("date", heatmapCutoff)
-          .limit(400),
       ]);
       if (logsResult.error) throw logsResult.error;
       if (activityResult.error) throw activityResult.error;
       if (olderResult.error) throw olderResult.error;
-      if (heatmapResult.error) throw heatmapResult.error;
       if (requestId !== logsRequestRef.current) return;
       const rows = logsResult.data || [];
       setAllLogs(rows);
       setProblemCounts(Object.fromEntries(
         (activityResult.data || []).map((item) => [item.date, Number(item.count || 0)]),
-      ));
-      setHeatmapHours(Object.fromEntries(
-        (heatmapResult.data || []).map((item) => [
-          item.date,
-          rowStudyMinutes(item) / 60,
-        ]),
       ));
       setHasOlderLogs((olderResult.data || []).length > 0);
     } catch (error) {
@@ -680,10 +549,6 @@ export default function useDailyLog(user) {
           activityData.map((item) => [item.date, Number(item.count || 0)]),
         ),
       }));
-      setHeatmapHours((current) => ({
-        ...current,
-        ...Object.fromEntries(rows.map((row) => [row.date, rowStudyMinutes(row) / 60])),
-      }));
       setHasOlderLogs(fetched.length > PAGE_SIZE);
     } catch (error) {
       console.error("Failed to load older daily logs:", error);
@@ -718,8 +583,6 @@ export default function useDailyLog(user) {
     savedSnapshotRef.current = snapshot;
     setSavedSnapshot(snapshot);
     setAllLogs([]);
-    setHeatmapHours({});
-    setLoggingDates(new Set());
     setHasOlderLogs(false);
     setLoadRequest((current) => current + 1);
     setStatus("Saved");
@@ -763,7 +626,6 @@ export default function useDailyLog(user) {
     };
     try {
       localStorage.setItem(TIMER_STORAGE(user.id), JSON.stringify(timer));
-      localStorage.setItem("track-sheet-last-timer-activity", activityId);
       setRunningTimer(timer);
       setTimerNow(Date.now());
       return true;
@@ -972,12 +834,10 @@ export default function useDailyLog(user) {
     date, log, setLog, loading, loadFailed,
     saving, clearingHistory, status, message, setMessage,
     viewMode, setViewMode, changeViewMode,
-    activeCustomTasks, currentStreak, goalMinutes, setGoalMinutes,
-    yesterdayNotLogged, yesterdaySleep, problemCounts, allLogs, allLogsLoading,
-    heatmapHours,
+    activeCustomTasks, currentStreak, problemCounts, allLogs, allLogsLoading,
     hasOlderLogs, olderLogsLoading, runningTimer, timerNow, validation, dirty,
     studiedMinutes, sleptMinutes, changeDate, shiftDate, updateField, updateSlot,
-    addTimeEntry, removeSlot, addCustomTask, addSheetActivity, removeCustomTask,
+    addSlot, removeSlot, addCustomTask, addSheetActivity, removeCustomTask,
     renameCustomTask, setCustomColor, saveLog, loadOlderLogs, clearAllLogs, startTimer,
     stopTimer, quickAdd,
     saveNow: flushPendingSave,

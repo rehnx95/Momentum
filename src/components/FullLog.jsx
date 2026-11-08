@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { formatDuration, slotMinutes } from "../utils/time";
 import { getLocalDateKey } from "../hooks/useDailyLog";
-import ActivityHeatmap from "./ActivityHeatmap";
 
 function slotTotal(slots = []) {
   return slots.reduce((total, slot) => {
@@ -52,16 +51,16 @@ function mondayKey(dateKey) {
   return getLocalDateKey(date);
 }
 
-function weekDates(weekStart) {
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(`${weekStart}T00:00:00`);
-    date.setDate(date.getDate() + index);
-    return getLocalDateKey(date);
-  });
-}
-
-function WeeklyChart({ rows, weekStart, goalMinutes }) {
-  const weekDays = weekDates(weekStart);
+function WeeklyChart({ rows }) {
+  const latestDate = rows[0]?.date;
+  const weekStart = latestDate ? mondayKey(latestDate) : null;
+  const weekDays = weekStart
+    ? Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(`${weekStart}T00:00:00`);
+        date.setDate(date.getDate() + index);
+        return getLocalDateKey(date);
+      })
+    : [];
   const rowsByDate = new Map(rows.map((row) => [row.date, row]));
   const customActivities = new Map();
   weekDays.forEach((date) => {
@@ -84,7 +83,6 @@ function WeeklyChart({ rows, weekStart, goalMinutes }) {
   ];
   const maxMinutes = Math.max(
     60,
-    goalMinutes,
     ...weekDays.map((date) => rowTotals(rowsByDate.get(date) || {}).studied),
   );
   const maxHours = Math.max(1, Math.ceil(maxMinutes / 60));
@@ -104,23 +102,26 @@ function WeeklyChart({ rows, weekStart, goalMinutes }) {
     <section className="weekly-chart-card" aria-label="Daily study time by activity">
       <h3>
         Study by day
-        <span className="weekly-chart-period">
-          {new Date(`${weekStart}T00:00:00`).toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
-          })}
-          {" – "}
-          {new Date(`${weekDays[6]}T00:00:00`).toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
-          })}
-        </span>
+        {weekStart && (
+          <span className="weekly-chart-period">
+            {new Date(`${weekStart}T00:00:00`).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            })}
+            {" – "}
+            {new Date(`${weekDays[6]}T00:00:00`).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            })}
+          </span>
+        )}
       </h3>
-      <svg
+      {rows.length ? (
+        <svg
           className="weekly-chart"
           viewBox={`0 0 ${width} ${height}`}
           role="img"
-          aria-label={`Stacked daily study-time bars for week of ${weekStart}`}
+          aria-label="Stacked daily study-time bars for the latest week"
         >
           {yTicks.map((hours) => {
             const y = baseline - hours * 60 * scale;
@@ -139,25 +140,6 @@ function WeeklyChart({ rows, weekStart, goalMinutes }) {
               </g>
             );
           })}
-          {goalMinutes > 0 && (
-            <>
-              <line
-                x1={plotLeft}
-                x2={plotRight}
-                y1={baseline - goalMinutes * scale}
-                y2={baseline - goalMinutes * scale}
-                className="weekly-chart-goal"
-              />
-              <text
-                x={plotRight - 2}
-                y={baseline - goalMinutes * scale - 3}
-                textAnchor="end"
-                className="weekly-chart-goal-label"
-              >
-                {formatDuration(goalMinutes)} goal
-              </text>
-            </>
-          )}
           {weekDays.map((date, index) => {
             const row = rowsByDate.get(date);
             const center = plotLeft + slotWidth * (index + 0.5);
@@ -220,7 +202,10 @@ function WeeklyChart({ rows, weekStart, goalMinutes }) {
               </g>
             );
           })}
-      </svg>
+        </svg>
+      ) : (
+        <p>No study entries yet.</p>
+      )}
       <div className="weekly-chart-legend">
         {activities.map((activity) => (
           <span key={activity.id}>
@@ -234,11 +219,6 @@ function WeeklyChart({ rows, weekStart, goalMinutes }) {
 }
 
 export default function FullLog({ daily, onOpenDate }) {
-  const todayKey = getLocalDateKey();
-  const currentWeek = mondayKey(todayKey);
-  const [selectedWeek, setSelectedWeek] = useState(currentWeek);
-  const [heatmapMode, setHeatmapMode] = useState("hours");
-  const [heatmapYear, setHeatmapYear] = useState(null);
   const [actionsOpen, setActionsOpen] = useState(false);
   const actionsRef = useRef(null);
   useEffect(() => {
@@ -273,46 +253,6 @@ export default function FullLog({ daily, onOpenDate }) {
       return { key, rows, total, averageSleep };
     });
   }, [daily.allLogs]);
-  const selectedWeekRows = useMemo(
-    () => daily.allLogs.filter((row) => row.date >= selectedWeek && row.date <= weekDates(selectedWeek)[6]),
-    [daily.allLogs, selectedWeek],
-  );
-  const previousWeekStart = useMemo(() => {
-    const date = new Date(`${selectedWeek}T00:00:00`);
-    date.setDate(date.getDate() - 7);
-    return getLocalDateKey(date);
-  }, [selectedWeek]);
-  const weeklySummary = useMemo(() => {
-    const total = (rows) => rows.reduce((sum, row) => sum + rowTotals(row).studied, 0);
-    const weekTotal = total(selectedWeekRows);
-    const previousRows = daily.allLogs.filter(
-      (row) => row.date >= previousWeekStart && row.date < selectedWeek,
-    );
-    const previousTotal = total(previousRows);
-    const best = selectedWeekRows
-      .map((row) => ({ row, minutes: rowTotals(row).studied }))
-      .filter((entry) => entry.minutes > 0)
-      .sort((a, b) => b.minutes - a.minutes)[0];
-    const sleepRows = selectedWeekRows.map(sleepTotal).filter((minutes) => minutes > 0);
-    const averageSleep = sleepRows.length
-      ? Math.round(sleepRows.reduce((sum, minutes) => sum + minutes, 0) / sleepRows.length)
-      : 0;
-    const shortSleepDays = sleepRows.filter((minutes) => minutes < 360).length;
-    return {
-      weekTotal,
-      difference: weekTotal - previousTotal,
-      hasComparison: previousRows.length > 0,
-      best,
-      averageSleep,
-      insight: sleepRows.length >= 3 && shortSleepDays >= 2
-        ? `${shortSleepDays} days under 6h sleep this week.`
-        : "",
-    };
-  }, [daily.allLogs, previousWeekStart, selectedWeekRows, selectedWeek]);
-  const heatmapActivity = useMemo(() => {
-    if (heatmapMode === "problems") return daily.problemCounts;
-    return daily.heatmapHours;
-  }, [daily.heatmapHours, daily.problemCounts, heatmapMode]);
 
   return (
     <div className="daily-full-log">
@@ -355,102 +295,15 @@ export default function FullLog({ daily, onOpenDate }) {
           )}
         </div>
       </div>
-      <section className="review-week-summary">
-        <div>
-          <strong>
-            {formatDuration(weeklySummary.weekTotal)}{" "}
-            {selectedWeek === currentWeek
-              ? "this week"
-              : `week of ${new Date(`${selectedWeek}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`}
-          </strong>
-          <span>
-            {weeklySummary.hasComparison
-              ? `${weeklySummary.difference >= 0 ? "+" : "−"}${formatDuration(Math.abs(weeklySummary.difference))} vs last week`
-              : "No comparison data"}
-          </span>
-          <span>
-            {weeklySummary.best
-              ? `Best day ${new Date(`${weeklySummary.best.row.date}T00:00:00`).toLocaleDateString(undefined, { weekday: "short" })} (${formatDuration(weeklySummary.best.minutes)})`
-              : "No study time logged"}
-          </span>
-          <span>
-            {weeklySummary.averageSleep
-              ? `${formatDuration(weeklySummary.averageSleep)} avg sleep`
-              : "No sleep data"}
-          </span>
-        </div>
-        {weeklySummary.insight && (
-          <p className="review-insight">{weeklySummary.insight}</p>
-        )}
-      </section>
-      <div className="review-week-nav">
-        <button
-          type="button"
-          aria-label="Previous week"
-          onClick={() => {
-            const previous = new Date(`${selectedWeek}T00:00:00`);
-            previous.setDate(previous.getDate() - 7);
-            setSelectedWeek(getLocalDateKey(previous));
-          }}
-        >
-          ‹
-        </button>
-        <WeeklyChart
-          rows={selectedWeekRows}
-          weekStart={selectedWeek}
-          goalMinutes={daily.goalMinutes}
-        />
-        <button
-          type="button"
-          aria-label="Next week"
-          disabled={selectedWeek >= currentWeek}
-          onClick={() => {
-            const next = new Date(`${selectedWeek}T00:00:00`);
-            next.setDate(next.getDate() + 7);
-            setSelectedWeek(getLocalDateKey(next));
-          }}
-        >
-          ›
-        </button>
-      </div>
-      <section className="review-heatmap">
-        <div className="review-heatmap-toggle" aria-label="Heatmap metric">
-          <button
-            type="button"
-            className={heatmapMode === "hours" ? "active" : ""}
-            aria-pressed={heatmapMode === "hours"}
-            onClick={() => setHeatmapMode("hours")}
-          >
-            Hours
-          </button>
-          <button
-            type="button"
-            className={heatmapMode === "problems" ? "active" : ""}
-            aria-pressed={heatmapMode === "problems"}
-            onClick={() => setHeatmapMode("problems")}
-          >
-            Problems
-          </button>
-        </div>
-        <ActivityHeatmap
-          activity={heatmapActivity}
-          todayKey={todayKey}
-          selectedYear={heatmapYear}
-          onSelectYear={setHeatmapYear}
-          mode={heatmapMode}
-          loading={daily.allLogsLoading}
-        />
-      </section>
+      <WeeklyChart rows={daily.allLogs} />
 
       {daily.allLogsLoading ? (
         <p className="daily-full-empty">Loading full log…</p>
       ) : daily.allLogs.length === 0 ? (
         <p className="daily-full-empty">No saved daily logs yet.</p>
       ) : (
-        <details className="review-table-details">
-          <summary>Daily entries</summary>
-          <div className="weekly-log-groups">
-            {weeks.map((week) => (
+        <div className="weekly-log-groups">
+          {weeks.map((week) => (
             <section className="weekly-log-group" key={week.key}>
               <header>
                 <h3>
@@ -521,9 +374,8 @@ export default function FullLog({ daily, onOpenDate }) {
                 </table>
               </div>
             </section>
-            ))}
-          </div>
-        </details>
+          ))}
+        </div>
       )}
       {daily.hasOlderLogs && (
         <button

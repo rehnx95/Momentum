@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   ClipboardList,
-  CircleStop,
   LayoutList,
   LogOut,
   Moon,
@@ -89,20 +88,11 @@ export default function AppHeader({
             <button
               type="button"
               className="running-timer-pill"
-              onClick={() => {
-                try {
-                  localStorage.setItem("track-sheet-stop-timer-on-open", "1");
-                  window.dispatchEvent(new Event("daily-log-stop-timer"));
-                } catch (error) {
-                  console.error("Could not request timer stop:", error);
-                }
-                onNavigate("/daily-log");
-              }}
-              title="Stop timer and return to Daily Log"
+              onClick={() => onNavigate("/daily-log")}
+              title="Return to Daily Log to stop this timer"
             >
               <span aria-hidden="true">●</span>
-              <span>Stop {runningTimer.activityName} · {elapsed}</span>
-              <CircleStop size={16} aria-hidden="true" />
+              <span>{runningTimer.activityName} {elapsed}</span>
             </button>
           )}
           <button
