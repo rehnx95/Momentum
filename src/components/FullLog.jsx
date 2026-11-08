@@ -163,8 +163,8 @@ export default function FullLog({ daily, onOpenDate, askConfirmation }) {
           }
           onClick={async () => {
             const confirmed = await askConfirmation(
-              "Permanently delete all saved Daily Log entries for your account, across every date? This does not change your tracker progress or problem history.",
-              "Clear Daily Log history?",
+              "Permanently delete all saved Daily Log entries and Daily Log activity choices for your account? Tracker progress and problem history will not change.",
+              "Clear my Daily Log data?",
             );
             if (confirmed) await daily.clearAllLogs();
           }}

@@ -22,7 +22,7 @@ export default function DailyTracker({ user, sheets, askConfirmation }) {
             type="button"
             className={daily.viewMode === "daily" ? "active" : ""}
             aria-pressed={daily.viewMode === "daily"}
-            onClick={() => daily.setViewMode("daily")}
+            onClick={() => void daily.changeViewMode("daily")}
           >
             Day
           </button>
@@ -30,7 +30,7 @@ export default function DailyTracker({ user, sheets, askConfirmation }) {
             type="button"
             className={daily.viewMode === "full" ? "active" : ""}
             aria-pressed={daily.viewMode === "full"}
-            onClick={() => daily.setViewMode("full")}
+            onClick={() => void daily.changeViewMode("full")}
           >
             Full log
           </button>

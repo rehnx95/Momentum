@@ -191,7 +191,7 @@ export default function useDailyLog(user) {
     if (result.errors.length) {
       if (nextDate === dateRef.current) {
         setStatus("Fix errors to save");
-        setMessage(result.errors[0].message);
+        setMessage("");
       }
       return false;
     }
@@ -376,7 +376,7 @@ export default function useDailyLog(user) {
     if (loading || loadFailed || !dirty) return undefined;
     if (validation.errors.length) {
       setStatus("Fix errors to save");
-      setMessage(validation.errors[0].message);
+      setMessage("");
       return undefined;
     }
     setStatus("Saving soon…");
@@ -393,6 +393,13 @@ export default function useDailyLog(user) {
     if (JSON.stringify(logRef.current) === savedSnapshotRef.current) return true;
     return saveLog(logRef.current, dateRef.current);
   }, [loading, loadFailed, saveLog]);
+
+  const changeViewMode = useCallback(async (nextMode) => {
+    if (nextMode === viewMode) return true;
+    if (viewMode === "daily" && !(await flushPendingSave())) return false;
+    setViewMode(nextMode);
+    return true;
+  }, [flushPendingSave, viewMode]);
 
   useEffect(() => {
     const flushWhenHidden = () => {
@@ -662,6 +669,11 @@ export default function useDailyLog(user) {
     try {
       await saveQueueRef.current;
       logsRequestRef.current += 1;
+      const { error: preferencesError } = await supabase
+        .from("profiles")
+        .update({ custom_tasks: [] })
+        .eq("id", user.id);
+      if (preferencesError) throw preferencesError;
       const { error } = await supabase
         .from("daily_logs")
         .delete()
@@ -669,7 +681,7 @@ export default function useDailyLog(user) {
       if (error) throw error;
     } catch (error) {
       console.error("Failed to clear this user's daily logs:", error);
-      setMessage("Could not clear your saved Daily Log history.");
+      setMessage("Could not clear all Daily Log data. Refresh and check your history before retrying.");
       return false;
     } finally {
       setClearingHistory(false);
@@ -678,6 +690,8 @@ export default function useDailyLog(user) {
     const clearedLog = emptyLog(dateRef.current);
     const snapshot = JSON.stringify(clearedLog);
     setLog(clearedLog);
+    templatesRef.current = [];
+    setProfileCustomTasks([]);
     savedSnapshotRef.current = snapshot;
     setSavedSnapshot(snapshot);
     setAllLogs([]);
@@ -931,7 +945,7 @@ export default function useDailyLog(user) {
   return {
     date, log, setLog, loading, loadFailed, preferencesLoading, preferencesFailed,
     saving, clearingHistory, status, message, setMessage,
-    viewMode, setViewMode, profileCustomTasks,
+    viewMode, setViewMode, changeViewMode, profileCustomTasks,
     activeCustomTasks, currentStreak, problemCounts, allLogs, allLogsLoading,
     hasOlderLogs, olderLogsLoading, runningTimer, timerNow, validation, dirty,
     studiedMinutes, sleptMinutes, changeDate, shiftDate, updateField, updateSlot,
