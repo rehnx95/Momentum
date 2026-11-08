@@ -128,6 +128,32 @@ function getPeopleRoute(pathname = window.location.pathname) {
   return { page: "tracker", username: "" };
 }
 
+function MainPageNavigation({ active, onNavigate }) {
+  const items = [
+    { id: "tracker", label: "Tracker", path: "/", icon: LayoutList },
+    { id: "daily-log", label: "Daily Log", path: "/daily-log", icon: ClipboardList },
+    { id: "people", label: "People", path: "/people", icon: Users },
+    { id: "profile", label: "Profile", path: "/profile", icon: User },
+  ];
+
+  return (
+    <nav className="main-page-navigation" aria-label="Main navigation">
+      {items.map(({ id, label, path, icon: Icon }) => (
+        <button
+          key={id}
+          type="button"
+          onClick={() => onNavigate(path)}
+          aria-current={active === id ? "page" : undefined}
+          className={active === id ? "active" : ""}
+        >
+          <Icon size={17} />
+          <span>{label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 function App() {
   const [appState, setAppState] = useState(AppState.LOADING);
   const [user, setUser] = useState(null);
@@ -1869,6 +1895,7 @@ gridStart.setDate(gridStart.getDate() - ((gridStart.getDay() + 6) % 7));
             </Tooltip>
             <TrackSheetBrand onNavigate={onBack} />
             <div className="flex-1" />
+            <MainPageNavigation active="people" onNavigate={navigateTo} />
           </div>
         </header>
 
@@ -2079,6 +2106,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
               subtitle="Public profile"
             />
             <div className="flex-1" />
+            <MainPageNavigation active="people" onNavigate={navigateTo} />
             <button
               type="button"
               onClick={onCopyLink}
@@ -2359,44 +2387,8 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
               subtitle="My profile"
             />
             <div className="flex-1" />
+            <MainPageNavigation active="profile" onNavigate={navigateTo} />
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => navigateTo("/")}
-                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
-              >
-                <LayoutList size={17} />
-                <span className="hidden sm:inline">Tracker</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateTo("/daily-log")}
-                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
-              >
-                <ClipboardList size={17} />
-                <span className="hidden sm:inline">Daily Log</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateTo("/people")}
-                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
-              >
-                <Users size={17} />
-                <span className="hidden sm:inline">People</span>
-              </button>
-              {userUsername && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    publicProfileReturnPath.current = "/";
-                    navigateTo(`/u/${encodeURIComponent(userUsername)}`);
-                  }}
-                  className="flex items-center gap-2 rounded-lg border border-[#383838] px-3 py-2 text-sm font-medium text-[#EDEDED] transition-colors hover:bg-[#1F1F1F]"
-                >
-                  <Link2 size={16} />
-                  <span className="hidden sm:inline">Public profile</span>
-                </button>
-              )}
               <Tooltip label="Edit profile">
                 <button
                   onClick={openProfileSettings}
@@ -2841,40 +2833,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-6">
               <TrackSheetBrand subtitle="Daily Log" onNavigate={() => navigateTo("/")} />
               <div className="flex-1" />
-              <button
-                type="button"
-                onClick={() => navigateTo("/")}
-                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
-              >
-                <LayoutList size={17} />
-                <span className="hidden sm:inline">Tracker</span>
-              </button>
-              <button
-                type="button"
-                aria-current="page"
-                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#EDEDED] transition-colors sm:px-3"
-              >
-                <ClipboardList size={17} />
-                <span className="hidden sm:inline">Daily Log</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateTo("/people")}
-                className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
-              >
-                <Users size={17} />
-                <span className="hidden sm:inline">People</span>
-              </button>
-              <Tooltip label="Open your profile">
-                <button
-                  type="button"
-                  onClick={() => navigateTo("/profile")}
-                  aria-label="Profile"
-                  className="profile-trigger flex h-9 w-9 items-center justify-center rounded-full transition-colors"
-                >
-                  <User size={14} className="text-[#EDEDED]" />
-                </button>
-              </Tooltip>
+              <MainPageNavigation active="daily-log" onNavigate={navigateTo} />
             </div>
           </header>
           <main className="mx-auto max-w-7xl px-4 py-6 md:px-6">
@@ -2942,33 +2901,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
               </button>
             )}
           </div>
-          <button
-            type="button"
-            onClick={() => navigateTo("/")}
-            aria-current="page"
-            className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#EDEDED] transition-colors hover:bg-[#1F1F1F] sm:px-3"
-          >
-            <LayoutList size={17} />
-            <span className="hidden sm:inline">Tracker</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => navigateTo("/daily-log")}
-            className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
-          >
-            <ClipboardList size={17} />
-            <span className="hidden sm:inline">Daily Log</span>
-          </button>
-          <button
-            type="button"
-            onClick={openPeopleSearch}
-            aria-label="Find people"
-            aria-current={peopleSearchPage ? "page" : undefined}
-            className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#A1A1A1] transition-colors hover:bg-[#1F1F1F] hover:text-[#EDEDED] sm:px-3"
-          >
-            <Users size={17} />
-            <span className="hidden sm:inline">People</span>
-          </button>
+          <MainPageNavigation active="tracker" onNavigate={navigateTo} />
           <button
             onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
@@ -2976,15 +2909,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           >
             {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <Tooltip label="Open your profile">
-            <button
-              onClick={() => navigateTo("/profile")}
-              aria-label="Profile"
-              className="profile-trigger w-9 h-9 rounded-full flex items-center justify-center transition-colors"
-            >
-              <User size={14} className="text-[#EDEDED]" />
-            </button>
-          </Tooltip>
         </div>
       </header>
 

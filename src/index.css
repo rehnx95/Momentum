@@ -404,6 +404,35 @@ input:focus-visible {
   flex: none;
 }
 
+.main-page-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.main-page-navigation button {
+  display: inline-flex;
+  height: 2.25rem;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.6rem;
+  padding: 0 0.6rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.main-page-navigation button:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.main-page-navigation button.active {
+  background: var(--text);
+  color: var(--page);
+}
+
 .dashboard-header > div {
   min-height: 3.75rem;
 }
@@ -854,6 +883,32 @@ input:focus-visible {
 }
 
 @media (max-width: 640px) {
+  .dashboard-header > div {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .main-page-navigation {
+    order: 10;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .main-page-navigation button {
+    flex: 1;
+    justify-content: center;
+    height: 2rem;
+    padding-inline: 0.3rem;
+    font-size: 0.68rem;
+  }
+
+  .dashboard-shell > .dashboard-main,
+  .dashboard-shell > main:not(.dashboard-main),
+  .profile-shell main {
+    padding-top: 7rem !important;
+  }
   .dashboard-main {
     gap: 0.8rem;
     padding-top: 0.75rem;
