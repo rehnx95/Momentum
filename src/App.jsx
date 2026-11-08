@@ -2843,7 +2843,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
       data-theme={theme === "light" ? "light" : undefined}
     >
       <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
-          <div className="unified-header-inner max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-4">
+          <div className="unified-header-inner tracker-alignment-container max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-4">
           <TrackSheetBrand
             subtitle="Tracker"
             onNavigate={() => navigateTo("/")}
@@ -2886,7 +2886,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           </div>
           <MainPageNavigation active="tracker" onNavigate={navigateTo} theme={theme} setTheme={setTheme} />
         </div>
-        <div className="tracker-filter-row">
+        <div className="tracker-filter-row tracker-alignment-container">
           <div className="tracker-toolbar flex items-center gap-2 flex-wrap">
             <div className="relative w-full sm:hidden">
               <Search
@@ -2941,7 +2941,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
       </header>
 
       <main
-        className={`dashboard-main ${!desktopSidebarOpen ? "desktop-sidebar-collapsed" : ""} max-w-7xl mx-auto px-4 md:px-6 py-6 flex min-h-0`}
+        className={`dashboard-main tracker-alignment-container ${!desktopSidebarOpen ? "desktop-sidebar-collapsed" : ""} max-w-7xl mx-auto px-4 md:px-6 py-6 flex min-h-0`}
       >
         {progressError && (
           <div
