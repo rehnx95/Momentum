@@ -410,6 +410,32 @@ input:focus-visible {
   gap: 0.25rem;
 }
 
+.unified-header-inner {
+  position: relative;
+  width: 100%;
+  min-height: 3.75rem;
+}
+
+.unified-header-inner > .main-page-navigation {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.unified-header-actions {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  z-index: 3;
+}
+
 .main-page-navigation button {
   display: inline-flex;
   height: 2.25rem;
@@ -894,6 +920,17 @@ input:focus-visible {
     order: 10;
     width: 100%;
     justify-content: space-between;
+  }
+
+  .unified-header-inner > .main-page-navigation {
+    position: static;
+    transform: none;
+  }
+
+  .unified-header-actions {
+    position: static;
+    margin-left: auto;
+    transform: none;
   }
 
   .main-page-navigation button {

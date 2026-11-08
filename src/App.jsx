@@ -1882,19 +1882,8 @@ gridStart.setDate(gridStart.getDate() - ((gridStart.getDay() + 6) % 7));
     return (
       <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
         <header className="dashboard-header sticky top-0 z-50 border-b">
-          <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 md:px-6">
-            <Tooltip label="Back to tracker">
-              <button
-                type="button"
-                onClick={onBack}
-                aria-label="Back to tracker"
-                className="rounded-lg p-2 text-[#EDEDED] transition-colors hover:bg-[#1F1F1F]"
-              >
-                <ChevronDown size={20} className="rotate-90" />
-              </button>
-            </Tooltip>
+          <div className="unified-header-inner mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 md:px-6">
             <TrackSheetBrand onNavigate={onBack} />
-            <div className="flex-1" />
             <MainPageNavigation active="people" onNavigate={navigateTo} />
           </div>
         </header>
@@ -2090,22 +2079,11 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
     return (
       <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
         <header className="dashboard-header sticky top-0 z-50 border-b">
-          <div className="mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-4 md:px-6">
-            <Tooltip label="Back to tracker">
-              <button
-                type="button"
-                onClick={onBack}
-                aria-label="Back to tracker"
-                className="rounded-lg p-2 text-[#EDEDED] transition-colors hover:bg-[#1F1F1F]"
-              >
-                <ChevronDown size={20} className="rotate-90" />
-              </button>
-            </Tooltip>
+          <div className="unified-header-inner mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-4 md:px-6">
             <TrackSheetBrand
               onNavigate={() => navigateTo("/")}
               subtitle="Public profile"
             />
-            <div className="flex-1" />
             <MainPageNavigation active="people" onNavigate={navigateTo} />
             <button
               type="button"
@@ -2371,24 +2349,13 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
     return (
       <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
         <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
-          <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-4 flex items-center gap-4">
-            <Tooltip label="Back to tracker">
-              <button
-                type="button"
-                onClick={() => navigateTo("/")}
-                aria-label="Back to tracker"
-                className="p-2 rounded-lg hover:bg-[#1F1F1F] transition-colors text-[#EDEDED]"
-              >
-                <ChevronDown size={20} className="rotate-90" />
-              </button>
-            </Tooltip>
+          <div className="unified-header-inner max-w-[1440px] mx-auto px-4 md:px-6 py-4 flex items-center gap-4">
             <TrackSheetBrand
               onNavigate={() => navigateTo("/")}
               subtitle="My profile"
             />
-            <div className="flex-1" />
             <MainPageNavigation active="profile" onNavigate={navigateTo} />
-            <div className="flex items-center gap-3">
+            <div className="unified-header-actions">
               <Tooltip label="Edit profile">
                 <button
                   onClick={openProfileSettings}
@@ -2816,6 +2783,8 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           onBack={() => navigateTo("/profile")}
           onGoToDashboard={() => navigateTo("/")}
           onSaved={onProfileUpdated}
+          navigation={<MainPageNavigation active="profile" onNavigate={navigateTo} />}
+          onSignOut={onSignOut}
         />
         {renderDialog()}
       </>
@@ -2830,7 +2799,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           data-theme={theme === "dark" ? undefined : theme}
         >
           <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
-            <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-6">
+            <div className="unified-header-inner mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-6">
               <TrackSheetBrand subtitle="Daily Log" onNavigate={() => navigateTo("/")} />
               <div className="flex-1" />
               <MainPageNavigation active="daily-log" onNavigate={navigateTo} />
@@ -2861,7 +2830,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
       data-theme={theme === "light" ? "light" : undefined}
     >
       <header className="dashboard-header sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-4">
+          <div className="unified-header-inner max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-4">
           <Tooltip
             label={desktopSidebarOpen ? "Hide sidebar" : "Show sidebar"}
           >
@@ -2880,8 +2849,8 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             subtitle={selectedSheet?.title || "Select a sheet"}
             onNavigate={() => navigateTo("/")}
           />
-          <div className="flex-1" />
-          <div className="relative hidden sm:block">
+          <div className="unified-header-actions">
+            <div className="relative hidden sm:block">
             <Search
               size={15}
               className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
@@ -2900,15 +2869,16 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 <X size={14} />
               </button>
             )}
+            </div>
+            <button
+              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              className="p-1.5 rounded-lg hover:bg-[#1F1F1F] text-[#A1A1A1] hover:text-[#EDEDED] transition-colors"
+            >
+              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
           </div>
           <MainPageNavigation active="tracker" onNavigate={navigateTo} />
-          <button
-            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            className="p-1.5 rounded-lg hover:bg-[#1F1F1F] text-[#A1A1A1] hover:text-[#EDEDED] transition-colors"
-          >
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
         </div>
       </header>
 
