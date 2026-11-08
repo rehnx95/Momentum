@@ -174,7 +174,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
 
       <DayTimeline
         log={daily.log}
-        tasks={daily.log.custom_tasks}
+        tasks={activities}
         date={daily.date}
         onFocusSlot={focusSlot}
       />
