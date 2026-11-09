@@ -2268,34 +2268,52 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     <span className="recent-ac-count">Latest {recentAccepted.length}</span>
                   </div>
                   {recentAccepted.length > 0 ? (
-                    <ul className="recent-ac-list">
-                      {recentAccepted.map((problem) => (
-                        <li key={problem.id} className="recent-ac-item">
-                          <div className="recent-ac-check" aria-hidden="true">✓</div>
-                          <div className="min-w-0 flex-1">
+                    <>
+                      <div className="recent-ac-columns" aria-hidden="true">
+                        <span />
+                        <span>Problem</span>
+                        <span>Topic</span>
+                        <span>Date</span>
+                      </div>
+                      <ul className="recent-ac-list">
+                        {recentAccepted.map((problem) => (
+                          <li key={problem.id} className="recent-ac-item">
+                            <div className="recent-ac-check" aria-hidden="true">
+                              ✓
+                            </div>
                             <p
-                              className="truncate text-sm font-medium text-[#EDEDED]"
+                              className="recent-ac-title"
                               title={problem.title}
                             >
                               {problem.title}
                             </p>
-                            <p className="mt-1 truncate text-xs text-[#858585]">
+                            <span
+                              className="recent-ac-topic"
+                              title={problem.sheetTitle}
+                            >
                               {problem.sheetTitle}
-                            </p>
-                          </div>
-                          {problem.acceptedOn ? (
-                            <time className="recent-ac-date" dateTime={problem.acceptedOn}>
-                              {new Date(`${problem.acceptedOn}T00:00:00`).toLocaleDateString(
-                                undefined,
-                                { month: "short", day: "numeric" },
-                              )}
-                            </time>
-                          ) : (
-                            <span className="recent-ac-date">Date unavailable</span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
+                            </span>
+                            {problem.acceptedOn ? (
+                              <time
+                                className="recent-ac-date"
+                                dateTime={problem.acceptedOn}
+                              >
+                                {new Date(
+                                  `${problem.acceptedOn}T00:00:00`,
+                                ).toLocaleDateString(undefined, {
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </time>
+                            ) : (
+                              <span className="recent-ac-date">
+                                Date unavailable
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
                   ) : (
                     <p className="recent-ac-empty">
                       Accepted problems will show here as they are solved.
@@ -2339,42 +2357,44 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   {userName.charAt(0).toUpperCase() || "U"}
                 </div>
                 <div className="profile-user-details">
-              <div className="profile-identity">
-              <h1 className="text-2xl font-bold text-[#EDEDED]">
-                {userName}
-                  </h1>
-                  {user.email && (
-                    <p className="mt-1 break-all text-sm text-[#A1A1A1]">
-                      {user.email}
+                  <div className="profile-identity">
+                    <h1 className="text-2xl font-bold text-[#EDEDED]">
+                      {userName}
+                    </h1>
+                    <p className="mt-1 text-sm text-[#A1A1A1]">
+                      @{userUsername}
                     </p>
-                  )}
-                  <p className="mt-1 text-sm text-[#A1A1A1]">@{userUsername}</p>
-                  {userLocation && (
-                    <div className="mt-3 flex items-center gap-2 text-sm text-[#A1A1A1]">
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
+                    {user.email && (
+                      <p className="mt-1 break-all text-sm text-[#A1A1A1]">
+                        {user.email}
+                      </p>
+                    )}
+                    {userLocation && (
+                      <div className="mt-3 flex items-center gap-2 text-sm text-[#A1A1A1]">
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                          <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        {userLocation}
+                      </div>
+                    )}
+                    {userWebsite && (
+                      <a
+                        href={userWebsite}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-block break-all text-sm text-[#A1A1A1] hover:text-white hover:underline"
                       >
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                        <circle cx="12" cy="10" r="3" />
-                      </svg>
-                      {userLocation}
-                    </div>
-                  )}
-                  {userWebsite && (
-                    <a
-                      href={userWebsite}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-block break-all text-sm text-[#A1A1A1] hover:text-white hover:underline"
-                    >
-                      {userWebsite}
-                    </a>
-                  )}
+                        {userWebsite}
+                      </a>
+                    )}
                   </div>
                   <div className="profile-hero-actions flex flex-wrap gap-2">
                     <button
@@ -2625,43 +2645,52 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   <span className="recent-ac-count">Latest {recentAccepted.length}</span>
                 </div>
                 {recentAccepted.length > 0 ? (
-                  <ul className="recent-ac-list">
-                    {recentAccepted.map((problem) => (
-                      <li key={problem.id} className="recent-ac-item">
-                        <div className="recent-ac-check" aria-hidden="true">
-                          ✓
-                        </div>
-                        <div className="min-w-0 flex-1">
+                  <>
+                    <div className="recent-ac-columns" aria-hidden="true">
+                      <span />
+                      <span>Problem</span>
+                      <span>Topic</span>
+                      <span>Date</span>
+                    </div>
+                    <ul className="recent-ac-list">
+                      {recentAccepted.map((problem) => (
+                        <li key={problem.id} className="recent-ac-item">
+                          <div className="recent-ac-check" aria-hidden="true">
+                            ✓
+                          </div>
                           <p
-                            className="truncate text-sm font-medium text-[#EDEDED]"
+                            className="recent-ac-title"
                             title={problem.title}
                           >
                             {problem.title}
                           </p>
-                          <p className="mt-1 truncate text-xs text-[#858585]">
-                            {problem.sheetTitle}
-                          </p>
-                        </div>
-                        {problem.acceptedOn ? (
-                          <time
-                            className="recent-ac-date"
-                            dateTime={problem.acceptedOn}
+                          <span
+                            className="recent-ac-topic"
+                            title={problem.sheetTitle}
                           >
-                            {new Date(
-                              `${problem.acceptedOn}T00:00:00`,
-                            ).toLocaleDateString(undefined, {
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </time>
-                        ) : (
-                          <span className="recent-ac-date">
-                            Date unavailable
+                            {problem.sheetTitle}
                           </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                          {problem.acceptedOn ? (
+                            <time
+                              className="recent-ac-date"
+                              dateTime={problem.acceptedOn}
+                            >
+                              {new Date(
+                                `${problem.acceptedOn}T00:00:00`,
+                              ).toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </time>
+                          ) : (
+                            <span className="recent-ac-date">
+                              Date unavailable
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 ) : (
                   <p className="recent-ac-empty">
                     Accepted problems will show here as you solve them.

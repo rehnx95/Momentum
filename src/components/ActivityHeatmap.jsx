@@ -136,11 +136,30 @@ export default function ActivityHeatmap({
             </div>
           </div>
           <div className="hm-foot">
-            <span>
-              {mode === 'hours'
-                ? `Days with study: ${heat.activeDays}`
-                : `Total active days: ${heat.activeDays}`}
-            </span>
+            <div className="hm-summary">
+              <span>
+                {mode === 'hours'
+                  ? `Days with study: ${heat.activeDays}`
+                  : `Total active days: ${heat.activeDays}`}
+              </span>
+              <ul className="hm-years" aria-label="Select activity year">
+                {yearList.map((y) => (
+                  <li key={y}>
+                    <button
+                      type="button"
+                      aria-pressed={y === activeYear}
+                      onClick={() =>
+                        onSelectYear?.(
+                          y === currentYear && selectedYear === currentYear ? null : y,
+                        )
+                      }
+                    >
+                      {y}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
             <div className="hm-legend" aria-label="Activity scale: less to more">
               <span>Less</span>
               {[0, 1, 2, 3, 4].map((l) => (
@@ -150,23 +169,6 @@ export default function ActivityHeatmap({
             </div>
           </div>
         </div>
-        <ul className="hm-years">
-          {yearList.map((y) => (
-            <li key={y}>
-              <button
-                type="button"
-                aria-pressed={y === activeYear}
-                onClick={() =>
-                  onSelectYear?.(
-                    y === currentYear && selectedYear === currentYear ? null : y,
-                  )
-                }
-              >
-                {y}
-              </button>
-            </li>
-          ))}
-        </ul>
       </div>
       {tip && (
         <div className="hm-tip" role="tooltip" style={{ left: tip.x, top: tip.y }}>
