@@ -2488,6 +2488,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
 
             <div className="profile-main">
               <StatStrip
+                className="profile-overview-stats"
                 items={[
                   {
                     label: "Current streak",
@@ -2501,6 +2502,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     value: longestStreak,
                     unit: longestStreak === 1 ? "day" : "days",
                     icon: Trophy,
+                    color: "#438DFF",
                   },
                   {
                     label: "Problems solved",
@@ -2508,6 +2510,11 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     unit: `/ ${profileProblemsTotal}`,
                     icon: Target,
                     color: "#46A758",
+                  },
+                  {
+                    label: "Active days",
+                    value: yearlyActiveDays,
+                    icon: Calendar,
                   },
                 ]}
               />
@@ -2517,37 +2524,58 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 className="profile-sheet-progress surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
                 aria-labelledby="profile-sheet-progress"
               >
-                <h2
-                  id="profile-sheet-progress"
-                  className="mb-4 text-lg font-semibold text-[#EDEDED]"
-                >
-                  Sheet progress
-                </h2>
-                <div className="space-y-4">
+                <header className="profile-progress-heading">
+                  <h2
+                    id="profile-sheet-progress"
+                    className="text-lg font-semibold text-[#EDEDED]"
+                  >
+                    Sheet progress
+                  </h2>
+                  <div className="profile-progress-actions">
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => setBackupAction("export")}
+                    >
+                      <Download size={14} /> Export
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => setBackupAction("import")}
+                    >
+                      <Upload size={14} /> Import
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary btn-danger"
+                      onClick={async () => {
+                        const confirmed = await askConfirmation(
+                          "Reset all progress across every sheet? This cannot be undone.",
+                          "Reset all progress?",
+                        );
+                        if (confirmed) await reset();
+                      }}
+                    >
+                      <RefreshCcw size={14} /> Reset all
+                    </button>
+                  </div>
+                </header>
+                <div className="profile-sheet-grid">
                   {profileSheetStats.map((sheet) => {
                     const percentage = sheet.total
                       ? Math.round((sheet.solved / sheet.total) * 100)
                       : 0;
                     return (
-                      <div key={sheet.id}>
-                        <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2 text-sm">
+                      <div className="profile-sheet-tile" key={sheet.id}>
+                        <div className="profile-sheet-tile-heading">
                           <span className="truncate font-medium text-[#EDEDED]">
                             {sheet.title}
                           </span>
-                          <span className="shrink-0 tabular-nums text-[#A1A1A1]">
-                            <span className="text-[#46A758]">
-                              {sheet.solved} solved
-                            </span>
-                            <span className="mx-2 text-[#4D4D4D]">·</span>
-                            <span className="text-[#F5A623]">
-                              {sheet.skipped} skipped
-                            </span>
-                            <span className="mx-2 text-[#4D4D4D]">·</span>
-                            {sheet.total} total
-                          </span>
+                          <span className="profile-sheet-percent">{percentage}%</span>
                         </div>
                         <div
-                          className="h-2 overflow-hidden rounded-full bg-[#262626]"
+                          className="profile-sheet-progress-track"
                           role="progressbar"
                           aria-label={`${sheet.title} progress`}
                           aria-valuemin={0}
@@ -2555,53 +2583,18 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                           aria-valuenow={sheet.solved}
                         >
                           <div
-                            className="h-full rounded-full bg-[#EDEDED] transition-all"
-                            style={{
-                              width: `${percentage}%`,
-                              minWidth: sheet.solved > 0 ? "2px" : 0,
-                              borderRadius: percentage > 0 && percentage < 3 ? "2px" : undefined,
-                            }}
+                            className="profile-sheet-progress-fill"
+                            style={{ width: `${percentage}%` }}
                           />
                         </div>
+                        <span className="profile-sheet-counts">
+                          {sheet.solved} / {sheet.total} solved
+                          <span aria-hidden="true"> · </span>
+                          {sheet.skipped} skipped
+                        </span>
                       </div>
                     );
                   })}
-                </div>
-              </section>
-
-              <section className="profile-data-card surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-5">
-                <h2 className="text-lg font-semibold text-[#EDEDED]">Data</h2>
-                <p className="mt-1 text-sm text-[#A1A1A1]">
-                  Back up, restore or reset your progress.
-                </p>
-                <div className="data-actions profile-data-actions">
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => setBackupAction("export")}
-                  >
-                    <Download size={14} /> Export
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => setBackupAction("import")}
-                  >
-                    <Upload size={14} /> Import
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-secondary btn-danger"
-                    onClick={async () => {
-                      const confirmed = await askConfirmation(
-                        "Reset all progress across every sheet? This cannot be undone.",
-                        "Reset all progress?",
-                      );
-                      if (confirmed) await reset();
-                    }}
-                  >
-                    <RefreshCcw size={14} /> Reset all sheets
-                  </button>
                 </div>
                 <input
                   ref={importFileInput}

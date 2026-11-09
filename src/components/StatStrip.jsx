@@ -1,6 +1,6 @@
-export default function StatStrip({ items }) {
+export default function StatStrip({ items, className = "" }) {
   return (
-    <div className="stat-strip">
+    <div className={`stat-strip${className ? ` ${className}` : ""}`}>
       {items.map(({ label, value, unit, icon: Icon, color }) => (
         <div className="stat-chip" key={label}>
           <Icon size={16} className="stat-icon" />
