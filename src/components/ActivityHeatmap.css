@@ -13,15 +13,15 @@
 
 .hm-card {
   --hm-cell: 12px;
-  --hm-gap: 3px;
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
+  --hm-gap: 2px;
+  margin-bottom: 1rem;
+  padding: 1rem;
   border: 1px solid var(--hm-border);
   border-radius: 1rem;
   background: var(--hm-surface);
   color: var(--hm-text);
 }
-.hm-title { margin: 0 0 1rem; font-size: 1.05rem; font-weight: 600; }
+.hm-title { margin: 0 0 0.65rem; font-size: 0.95rem; font-weight: 600; }
 .hm-body { min-width: 0; }
 .hm-main { min-width: 0; flex: 1; }
 .hm-scroll { display: flex; overflow-x: auto; padding-bottom: 0.5rem; }

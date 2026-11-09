@@ -4,9 +4,9 @@ import { formatDuration } from '../utils/time';
 import './ActivityHeatmap.css';
 
 const WEEKDAYS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
-const GAP = 3;
+const GAP = 2;
 const LABEL_W = 34;
-const MIN_CELL = 11;
+const MIN_CELL = 4;
 
 export default function ActivityHeatmap({
   activity,
@@ -51,8 +51,13 @@ export default function ActivityHeatmap({
     const el = scrollRef.current;
     if (!el) return undefined;
     const measure = () => {
-       const usable = el.clientWidth - LABEL_W - (heat.columns - 1) * GAP - 6;
-      setCell(Math.max(MIN_CELL, Math.floor((usable / heat.columns) * 10) / 10));
+      const usable = el.clientWidth - LABEL_W - (heat.columns - 1) * GAP - 6;
+      setCell(
+        Math.min(
+          12,
+          Math.max(MIN_CELL, Math.floor((usable / heat.columns) * 10) / 10),
+        ),
+      );
     };
     measure();
     const observer = new ResizeObserver(measure);

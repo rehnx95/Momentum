@@ -632,17 +632,21 @@ html {
   grid-column: 1 / -1;
   grid-row: 2;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
+  align-content: center;
+  gap: 0.7rem 1rem;
   margin: 0;
+  padding: 0.25rem 0;
 }
 
 .own-profile-layout .profile-overview-stats .stat-chip {
   min-width: 0;
-  min-height: 3.6rem;
-  gap: 0.35rem;
-  padding: 0.5rem 0.65rem;
-  border-radius: 0.65rem;
-  background: var(--surface-raised);
+  min-height: 0;
+  align-items: flex-start;
+  gap: 0.1rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .own-profile-layout .profile-overview-stats .stat-icon {
@@ -650,11 +654,13 @@ html {
 }
 
 .own-profile-layout .profile-overview-stats .stat-label {
-  font-size: 0.62rem;
+  font-size: 0.68rem;
+  line-height: 1.2;
 }
 
 .own-profile-layout .profile-overview-stats .stat-value {
-  font-size: 1rem;
+  font-size: 1.1rem;
+  line-height: 1.2;
 }
 
 .own-profile-layout .profile-data-legacy {
@@ -785,10 +791,9 @@ html {
     grid-column: 3;
     grid-row: 1 / 3;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .own-profile-layout .profile-overview-stats .stat-chip {
-    min-height: 0;
+    gap: 0.6rem 1.1rem;
+    padding-left: 1rem;
+    border-left: 1px solid var(--border);
   }
 }
 
