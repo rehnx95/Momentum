@@ -382,7 +382,7 @@ html {
 
 .profile-sheet-percent {
   flex: none;
-  color: #438dff;
+  color: var(--text);
   font-size: 0.9rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -399,7 +399,7 @@ html {
 .profile-sheet-progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: #438dff;
+  background: var(--text);
 }
 
 .profile-sheet-counts {
@@ -524,23 +524,28 @@ html {
 }
 
 .profile-layout.own-profile-layout {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
 }
 
 .profile-layout.own-profile-layout .profile-sidebar {
   display: block;
   position: static;
-  margin: 0 0 1rem;
+  margin: 0;
 }
 
 .own-profile-layout .profile-hero {
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 3.75rem minmax(0, 1fr);
   align-items: center;
-  gap: 1rem;
+  gap: 0.55rem 0.75rem;
   padding: 0.85rem 1rem;
 }
 
 .own-profile-layout .profile-avatar {
+  grid-column: 1;
+  grid-row: 1;
   width: 3.75rem;
   height: 3.75rem;
   font-size: 1.5rem;
@@ -548,36 +553,29 @@ html {
 
 .own-profile-layout .profile-user-details {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0 1.5rem;
+  grid-column: 2;
+  grid-row: 1;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.4rem;
 }
 
 .own-profile-layout .profile-identity {
   min-width: 0;
   grid-column: 1;
+  grid-row: 1;
 }
 
 .own-profile-layout .profile-hero-actions {
-  grid-column: 2;
-  grid-row: 1;
-  justify-self: end;
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: start;
 }
 
-.own-profile-layout .profile-data-legacy {
-  display: none;
-}
-
-.own-profile-layout .profile-main {
-  display: contents;
-}
-
-.own-profile-layout .profile-main > .stat-strip {
-  grid-column: 2;
-  grid-row: 1;
+.own-profile-layout .profile-overview-stats {
+  grid-column: 1 / -1;
+  grid-row: 2;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.45rem;
-  align-self: stretch;
   margin: 0;
 }
 
@@ -598,6 +596,14 @@ html {
 
 .own-profile-layout .profile-overview-stats .stat-value {
   font-size: 1rem;
+}
+
+.own-profile-layout .profile-data-legacy {
+  display: none;
+}
+
+.own-profile-layout .profile-main {
+  display: contents;
 }
 
 .own-profile-layout .profile-main > .profile-top {
@@ -660,21 +666,15 @@ html {
 @media (min-width: 640px) {
   .profile-layout.own-profile-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-    gap: 0.65rem;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .own-profile-layout .profile-sidebar {
-    grid-column: 1;
-    grid-row: 1;
     margin: 0;
   }
 
   .own-profile-layout .profile-hero {
-    display: grid;
-    grid-template-columns: 2.75rem minmax(0, 1fr);
-    gap: 0.4rem 0.6rem;
-    height: 100%;
+    grid-template-columns: 2.75rem minmax(12rem, 0.9fr) minmax(0, 2fr);
     padding: 0.75rem;
   }
 
@@ -706,15 +706,10 @@ html {
     line-height: 1.25;
   }
 
-  .own-profile-layout .profile-identity > div,
-  .own-profile-layout .profile-identity > a {
-    display: none;
-  }
-
   .own-profile-layout .profile-hero-actions {
-    grid-column: 1 / -1;
+    grid-column: 1 / 3;
     grid-row: 2;
-    justify-self: stretch;
+    justify-self: start;
     gap: 0.35rem;
   }
 
@@ -726,27 +721,32 @@ html {
     padding-inline: 0.35rem;
     font-size: 0.65rem;
   }
+
+  .own-profile-layout .profile-overview-stats {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 700px) {
   .own-profile-layout .profile-sheet-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
-@media (max-width: 640px) {
-  .own-profile-layout .profile-hero {
+  .own-profile-layout .profile-progress-heading {
     align-items: flex-start;
   }
+}
 
-  .own-profile-layout .profile-user-details {
-    grid-template-columns: minmax(0, 1fr);
+@media (max-width: 520px) {
+  .own-profile-layout .profile-hero {
+    padding: 0.7rem;
   }
 
-  .own-profile-layout .profile-hero-actions {
-    grid-column: 1;
-    grid-row: auto;
-    justify-self: start;
+  .own-profile-layout .profile-progress-actions .btn-secondary {
+    padding-inline: 0.4rem;
+    font-size: 0.62rem;
   }
 }
 

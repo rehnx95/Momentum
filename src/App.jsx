@@ -2398,6 +2398,36 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     )}
                   </div>
                 </div>
+                <StatStrip
+                  className="profile-overview-stats"
+                  items={[
+                    {
+                    label: "Current streak",
+                    value: dailyStreak,
+                    unit: dailyStreak === 1 ? "day" : "days",
+                    icon: Calendar,
+                    color: "#FF6B35",
+                    },
+                    {
+                    label: "Best streak",
+                    value: longestStreak,
+                    unit: longestStreak === 1 ? "day" : "days",
+                    icon: Trophy,
+                    },
+                    {
+                    label: "Problems solved",
+                    value: profileProblemsSolved,
+                    unit: `/ ${profileProblemsTotal}`,
+                    icon: Target,
+                    color: "#46A758",
+                    },
+                    {
+                    label: "Active days",
+                    value: yearlyActiveDays,
+                    icon: Calendar,
+                    },
+                  ]}
+                />
               </section>
 
               <section className="profile-data-legacy surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] divide-y divide-[#262626]">
@@ -2487,38 +2517,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </aside>
 
             <div className="profile-main">
-              <StatStrip
-                className="profile-overview-stats"
-                items={[
-                  {
-                    label: "Current streak",
-                    value: dailyStreak,
-                    unit: dailyStreak === 1 ? "day" : "days",
-                    icon: Calendar,
-                    color: "#FF6B35",
-                  },
-                  {
-                    label: "Best streak",
-                    value: longestStreak,
-                    unit: longestStreak === 1 ? "day" : "days",
-                    icon: Trophy,
-                    color: "#438DFF",
-                  },
-                  {
-                    label: "Problems solved",
-                    value: profileProblemsSolved,
-                    unit: `/ ${profileProblemsTotal}`,
-                    icon: Target,
-                    color: "#46A758",
-                  },
-                  {
-                    label: "Active days",
-                    value: yearlyActiveDays,
-                    icon: Calendar,
-                  },
-                ]}
-              />
-
               <div className="profile-top">
               <section
                 className="profile-sheet-progress surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
