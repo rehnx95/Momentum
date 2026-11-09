@@ -637,8 +637,8 @@
 
 .full-log-day-date {
   color: var(--text);
-  font-size: 0.76rem;
-  font-weight: 650;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .full-log-day-overview {
@@ -676,19 +676,20 @@
 
 .full-log-sleep-value small {
   color: var(--muted);
-  font-size: 0.76rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 650;
 }
 
 .full-log-sleep-value strong {
   color: var(--text);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
 .full-log-metrics-card {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
 }
 
 .full-log-activities {
@@ -717,7 +718,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.35rem;
-  font-size: 0.8rem;
+  font-size: 0.88rem;
 }
 
 .full-log-activity-heading strong:first-child {
@@ -738,7 +739,7 @@
   align-items: center;
   row-gap: 0.2rem;
   color: var(--text);
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -771,22 +772,27 @@
 }
 
 .full-log-metric {
-  display: flex;
+  display: grid;
   width: 100%;
   min-width: 0;
-  min-height: 1.8rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.25rem;
-  padding: 0.1rem 0.15rem;
+  min-height: 2rem;
+  align-content: center;
+  justify-items: center;
+  gap: 0.2rem;
+  padding: 0.2rem 0.1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  background: var(--surface-hover);
   color: var(--text);
-  font-size: 0.74rem;
+  font-size: 0.8rem;
 }
 
 .full-log-metric span {
+  max-width: 100%;
   overflow: hidden;
   color: var(--muted);
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
