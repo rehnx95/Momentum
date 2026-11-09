@@ -246,11 +246,11 @@ html {
 }
 
 .btn-danger {
-  color: #f87171;
+  color: var(--muted);
 }
 
 .btn-danger:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--surface-hover);
 }
 
 .empty-state {
@@ -544,6 +544,8 @@ html {
     flex-direction: column;
     gap: 0.15rem;
     height: auto;
+    min-width: 4.25rem;
+    min-height: 2.75rem;
     padding: 0.35rem 0.75rem;
     font-size: 0.68rem;
   }
@@ -575,6 +577,11 @@ html {
   align-items: start;
 }
 
+.profile-layout > *,
+.profile-layout .profile-main > * {
+  min-width: 0;
+}
+
 .own-profile-layout .profile-left-column {
   display: grid;
   min-width: 0;
@@ -582,7 +589,8 @@ html {
 }
 
 .own-profile-layout .profile-future-slot {
-  display: none;
+  display: block;
+  min-width: 0;
 }
 
 .profile-layout.own-profile-layout .profile-sidebar {

@@ -1,4 +1,12 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import {
+  lazy,
+  Suspense,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import {
   Search,
   ChevronDown,
@@ -20,13 +28,11 @@ import {
 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "./lib/supabase";
 import { useProgress } from "./hooks/useProgress";
-import ProfileSettings from "./components/ProfileSettings";
 import AppHeader from "./components/AppHeader";
 import SheetSwitcher from "./components/SheetSwitcher";
 import ActivityHeatmap from "./components/ActivityHeatmap";
 import TrackSheetBrand from "./components/TrackSheetBrand";
 import Tooltip from "./components/Tooltip";
-import DailyTracker from "./components/DailyTracker";
 import StatStrip from "./components/StatStrip";
 import {
   countSheetProblems,
@@ -34,40 +40,13 @@ import {
   sampleSheetTemplate,
 } from "./utils/parseSheet";
 
+const ProfileSettings = lazy(() => import("./components/ProfileSettings"));
+const DailyTracker = lazy(() => import("./components/DailyTracker"));
+const SleepStudyChart = lazy(() => import("./components/SleepStudyChart"));
+
 const sheetModules = import.meta.glob("./data/*.json", {
-  eager: true,
   import: "default",
 });
-const builtInSheets = Object.entries(sheetModules)
-  .filter(([, sheet]) => Array.isArray(sheet?.steps))
-  .map(([filePath, sheet]) => {
-    const id = filePath
-      .split("/")
-      .pop()
-      .replace(/\.json$/i, "");
-    return {
-      id,
-      title:
-        id === "dsa"
-          ? "DSA"
-          : id
-              .replace(/[_-]+/g, " ")
-              .replace(/\b\w/g, (character) => character.toUpperCase()),
-      sheet,
-      problemCount: sheet.steps.reduce(
-        (total, step) =>
-          total +
-          step.subsections.reduce(
-            (subTotal, subsection) => subTotal + subsection.problems.length,
-            0,
-          ),
-        0,
-      ),
-    };
-  })
-  .sort((a, b) => a.title.localeCompare(b.title));
-const defaultSheetId =
-  builtInSheets.find((sheet) => sheet.id === "dsa")?.id || builtInSheets[0]?.id;
 
 // =============================================================================
 // Authentication Routing State Machine
@@ -291,11 +270,9 @@ function App() {
   // =======================================================================
   if (appState === AppState.LOADING) {
     return (
-      <div className="min-h-screen bg-[#000000] text-[#EDEDED] font-sans flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-3 border-[#EDEDED] border-t-transparent rounded-full animate-spin" />
-          <p className="text-[#A1A1A1]">Loading...</p>
-        </div>
+      <div className="app-loading-screen" role="status" aria-live="polite">
+        <span className="app-loading-spinner" aria-hidden="true" />
+        <p>Loading your account…</p>
       </div>
     );
   }
@@ -766,6 +743,7 @@ function AuthenticatedApp({
   onSignOut,
 }) {
   const [customSheetsLoading, setCustomSheetsLoading] = useState(true);
+  const [sheetBootstrapComplete, setSheetBootstrapComplete] = useState(false);
   const [dialog, setDialog] = useState(null);
   const dialogResolver = useRef(null);
   const {
@@ -782,7 +760,7 @@ function AuthenticatedApp({
     theme,
     setTheme,
     reset,
-  } = useProgress(customSheetsLoading ? null : user);
+  } = useProgress(sheetBootstrapComplete ? user : null);
   const [customSheets, setCustomSheets] = useState([]);
   const [uploadingSheet, setUploadingSheet] = useState(false);
   const [deletingSheetId, setDeletingSheetId] = useState(null);
@@ -803,9 +781,7 @@ function AuthenticatedApp({
   const savedSheetIdRef = useRef(localStorage.getItem("dsa-active-sheet"));
   const [selectedSheetId, setSelectedSheetId] = useState(() => {
     const savedSheetId = savedSheetIdRef.current;
-    return builtInSheets.some((sheet) => sheet.id === savedSheetId)
-      ? savedSheetId
-      : defaultSheetId;
+    return savedSheetId || "";
   });
   const [search, setSearch] = useState(
     () => localStorage.getItem("dsa-search") || "",
@@ -1132,6 +1108,45 @@ function AuthenticatedApp({
     let active = true;
     const loadSheets = async () => {
       try {
+        const sheetEntries = await Promise.all(
+          Object.entries(sheetModules).map(async ([filePath, load]) => [
+            filePath,
+            await load(),
+          ]),
+        );
+        if (!active) return;
+        const builtInSheets = sheetEntries
+          .filter(([, sheet]) => Array.isArray(sheet?.steps))
+          .map(([filePath, sheet]) => {
+            const id = filePath
+              .split("/")
+              .pop()
+              .replace(/\.json$/i, "");
+            return {
+              id,
+              title:
+                id === "dsa"
+                  ? "DSA"
+                  : id
+                      .replace(/[_-]+/g, " ")
+                      .replace(/\b\w/g, (character) => character.toUpperCase()),
+              sheet,
+              problemCount: sheet.steps.reduce(
+                (total, step) =>
+                  total +
+                  step.subsections.reduce(
+                    (subTotal, subsection) => subTotal + subsection.problems.length,
+                    0,
+                  ),
+                0,
+              ),
+            };
+          })
+          .sort((a, b) => a.title.localeCompare(b.title));
+        const defaultSheetId =
+          builtInSheets.find((sheet) => sheet.id === "dsa")?.id ||
+          builtInSheets[0]?.id;
+
         const { error: bootstrapError } = await supabase.rpc(
           "ensure_builtin_sheet_copies",
           {
@@ -1143,6 +1158,8 @@ function AuthenticatedApp({
           },
         );
         if (bootstrapError) throw bootstrapError;
+        if (!active) return;
+        setSheetBootstrapComplete(true);
 
         const { data, error } = await supabase
           .from("user_sheets")
@@ -1177,6 +1194,7 @@ function AuthenticatedApp({
         else setSelectedSheetId("");
       } catch (error) {
         if (!active) return;
+        setSheetBootstrapComplete(true);
         console.error("Failed to load sheets:", error);
         setSheetError(
           "Could not load your sheets. Apply the latest Supabase sheet migration and try again.",
@@ -1828,8 +1846,9 @@ gridStart.setDate(gridStart.getDate() - ((gridStart.getDay() + 6) % 7));
 
   if (customSheetsLoading || progressLoading) {
     return (
-      <div className="min-h-screen bg-[#000000] text-[#EDEDED] font-sans flex items-center justify-center">
-        <p className="text-[#A1A1A1]">
+      <div className="app-loading-screen" role="status" aria-live="polite">
+        <span className="app-loading-spinner" aria-hidden="true" />
+        <p>
           {customSheetsLoading
             ? "Preparing your sheets…"
             : "Syncing your saved progress…"}
@@ -2171,7 +2190,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                           ? "day"
                           : "days",
                       icon: Calendar,
-                      color: "#FF6B35",
                     },
                     {
                       label: "Best streak",
@@ -2187,7 +2205,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       value: profileProblemsSolved,
                       unit: `/ ${profileProblemsTotal}`,
                       icon: Target,
-                      color: "#46A758",
                     },
                   ]}
                 />
@@ -2629,7 +2646,20 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </div>
             </div>
 
-            <div className="profile-future-slot" aria-hidden="true" />
+            <div className="profile-future-slot">
+              <Suspense
+                fallback={
+                  <div
+                    className="surface-card rounded-2xl border p-4 text-sm text-[#A1A1A1]"
+                    role="status"
+                  >
+                    Preparing chart…
+                  </div>
+                }
+              >
+                <SleepStudyChart userId={user.id} />
+              </Suspense>
+            </div>
 
             <div className="profile-main">
               <ActivityHeatmap
@@ -2795,13 +2825,21 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
   if (showSettings) {
     return (
       <>
-        <ProfileSettings
-          userId={user.id}
-          profile={profile}
-          onBack={() => navigateTo("/profile")}
-          onSaved={onProfileUpdated}
-          header={<AppHeader active="profile" {...headerProps} />}
-        />
+        <Suspense
+          fallback={
+            <div className="app-loading-screen" role="status">
+              Loading profile settings…
+            </div>
+          }
+        >
+          <ProfileSettings
+            userId={user.id}
+            profile={profile}
+            onBack={() => navigateTo("/profile")}
+            onSaved={onProfileUpdated}
+            header={<AppHeader active="profile" {...headerProps} />}
+          />
+        </Suspense>
         {renderDialog()}
       </>
     );
@@ -2816,11 +2854,22 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
         >
           <AppHeader active="daily-log" {...headerProps} />
           <main className="app-page">
-            <DailyTracker
-              user={user}
-              sheets={availableSheets}
-              askConfirmation={askConfirmation}
-            />
+            <Suspense
+              fallback={
+                <div
+                  className="surface-card rounded-xl border p-4 text-sm text-[#A1A1A1]"
+                  role="status"
+                >
+                  Preparing your daily log…
+                </div>
+              }
+            >
+              <DailyTracker
+                user={user}
+                sheets={availableSheets}
+                askConfirmation={askConfirmation}
+              />
+            </Suspense>
           </main>
         </div>
         {renderDialog()}

@@ -1,0 +1,129 @@
+.sleep-study-card {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.sleep-study-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.sleep-study-heading h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.sleep-study-heading p {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.sleep-study-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.sleep-study-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.sleep-study-swatch {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 2px;
+  background: var(--text);
+}
+
+.study-swatch {
+  background: var(--muted);
+}
+
+.sleep-study-chart-wrap {
+  width: 100%;
+  min-width: 0;
+}
+
+.sleep-study-chart {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.sleep-study-chart text {
+  fill: var(--muted);
+  font-size: 9px;
+  font-family: var(--font-sans);
+}
+
+.sleep-study-gridline {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.sleep-study-bar {
+  rx: 1.5px;
+}
+
+.sleep-study-footnote {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.sleep-bar {
+  fill: var(--text);
+}
+
+.study-bar {
+  fill: var(--muted);
+}
+
+.sleep-study-message {
+  display: flex;
+  min-height: 7rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.sleep-study-message button {
+  flex: none;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.sleep-study-message button:hover {
+  background: var(--surface-hover);
+}
+
+@media (max-width: 520px) {
+  .sleep-study-card {
+    padding: 0.75rem;
+  }
+
+  .sleep-study-chart text {
+    font-size: 10px;
+  }
+}

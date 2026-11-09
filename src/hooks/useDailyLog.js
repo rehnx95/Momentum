@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { slotMinutes, splitIntervalByDay, validateDay } from "../utils/time";
+import {
+  getSleepMinutes,
+  getStudyMinutes,
+  splitIntervalByDay,
+  validateDay,
+} from "../utils/time";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const PAGE_SIZE = 10;
@@ -57,37 +62,6 @@ function normalizeLog(data, date) {
   };
 }
 
-function durationSlots(slots) {
-  return slots.reduce((total, slot) => {
-    const minutes = timerSlotMinutes(slot);
-    return total + (minutes ?? 0);
-  }, 0);
-}
-
-function timerSlotMinutes(slot) {
-  if (slot.endDayOffset === 1 && slot.end === "00:00") {
-    const start = slotMinutes({ start: slot.start, end: "23:59" });
-    return start === null ? 0 : start + 1;
-  }
-  return slotMinutes(slot);
-}
-
-function totalActivityMinutes(log) {
-  const custom = (log.custom_tasks || []).reduce(
-    (sum, task) => sum + durationSlots(task.slots || []),
-    0,
-  );
-  return custom;
-}
-
-function sleepMinutes(log) {
-  if (!log.sleep_time || !log.wake_time) return 0;
-  return slotMinutes(
-    { start: log.sleep_time, end: log.wake_time },
-    { wrap: true },
-  ) || 0;
-}
-
 function timerStorageGet(userId) {
   try {
     const value = localStorage.getItem(TIMER_STORAGE(userId));
@@ -137,8 +111,8 @@ export default function useDailyLog(user) {
   }, []);
 
   const validation = useMemo(() => validateDay(log), [log]);
-  const studiedMinutes = useMemo(() => totalActivityMinutes(log), [log]);
-  const sleptMinutes = useMemo(() => sleepMinutes(log), [log]);
+  const studiedMinutes = useMemo(() => getStudyMinutes(log), [log]);
+  const sleptMinutes = useMemo(() => getSleepMinutes(log), [log]);
   const dirty = savedSnapshot !== null && JSON.stringify(log) !== savedSnapshot;
   const activeCustomTasks = log.custom_tasks;
 

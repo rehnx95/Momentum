@@ -13,7 +13,7 @@ Personal sheets and progress are synchronized to the user's account.
 - Browse built-in DSA and Backend sheets, or upload a private TXT sheet.
 - Filter and search problems, collapse or expand topics, and hide skipped items.
 - View solved counts, streaks, recent accepted problems, and a year-long activity
-  heatmap on a profile.
+  heatmap on a profile. Your profile also shows a 30-day sleep-and-study chart.
 - Search for other users by username and view their profiles. These features
   require sign-in.
 - Export or restore progress for an individual sheet.
@@ -91,9 +91,7 @@ npm run preview
 The production bundle is emitted to `dist/`.
 
 To run the available automated checks, inspect the scripts in
-[`package.json`](./package.json). The project currently defines development,
-production build/preview, and sheet-conversion commands; it does not define an
-automated test script.
+[`package.json`](./package.json). Run `npm test` for the utility test suite.
 
 ## Built-in problem sheets
 
@@ -194,16 +192,17 @@ verified access token.
 
 ```text
 api/                    Vercel serverless API
-scripts/                Built-in sheet converter
+scripts/                Sheet conversion and maintenance utilities
 source/                 TXT sources for built-in tracks
 src/
   App.jsx               Authentication flow, routing, tracker, profile UI
-  components/           Shared brand, tooltip, profile settings UI
+  components/           Profile charts, tracker views, settings, and shared UI
   data/                 Bundled built-in track templates
-  hooks/useProgress.js  Progress, activity, theme, and sync behavior
+  hooks/                 Progress sync and daily-log state
   lib/supabase.js       Browser Supabase client
   utils/parseSheet.js   TXT upload parser and sample template
-  index.css             Theme, component, and responsive styles
+  index.css              Theme and component styles
+  layout.css             Shared page and responsive layout rules
   main.jsx              React entry point and render error boundary
 supabase/migrations/    Database schema, access policies, and RPC history
 architecture.md         System design and operating guide

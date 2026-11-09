@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   findOverlaps,
   formatDuration,
+  getSleepMinutes,
+  getStudyMinutes,
   slotMinutes,
   splitIntervalByDay,
   toMinutes,
@@ -26,6 +28,24 @@ describe("time helpers", () => {
     expect(formatDuration(157)).toBe("2h 37m");
     expect(formatDuration(120)).toBe("2h");
     expect(formatDuration(37)).toBe("37m");
+  });
+
+  it("calculates sleep and study minutes from daily log entries", () => {
+    expect(getSleepMinutes({ sleep_time: "22:30", wake_time: "06:30" })).toBe(480);
+    expect(getSleepMinutes({
+      sleep_time: "22:30:00",
+      wake_time: "06:30:00",
+    })).toBe(480);
+    expect(getSleepMinutes({ sleep_time: "", wake_time: "" })).toBe(0);
+    expect(getStudyMinutes({
+      custom_tasks: [
+        { slots: [
+          { start: "09:00", end: "09:45" },
+          { start: "23:30", end: "00:00", endDayOffset: 1 },
+          { start: "invalid", end: "00:00", endDayOffset: 1 },
+        ] },
+      ],
+    })).toBe(75);
   });
 
   it("splits timer intervals at midnight without losing minutes", () => {

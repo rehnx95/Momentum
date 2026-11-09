@@ -76,8 +76,8 @@ function permissions determine what the request can access.
 5. Profile onboarding status selects the next screen:
    - no completed profile: onboarding;
    - completed profile: authenticated tracker.
-6. The tracker initializes that user's sheet copies and loads their progress
-   and activity.
+6. The tracker initializes that user's sheet copies. Once initialization
+   completes, progress and activity load alongside the user's sheet records.
 
 The top-level states are `LOADING`, `UNAUTHENTICATED`, `ONBOARDING`, and
 `AUTHENTICATED`. People search and profile views are screens inside the
@@ -133,20 +133,21 @@ can be swiped horizontally.
 | `src/main.jsx` | React entry point, global stylesheet import, render error boundary. |
 | `src/App.jsx` | Authentication state machine, onboarding, history-based navigation, tracker, sheets, profiles, import/export, and custom dialogs. |
 | `src/hooks/useProgress.js` | Loads and updates cloud progress/activity, applies optimistic updates, serializes writes, and manages theme. |
+| `src/hooks/useDailyLog.js` | Loads, validates, saves, and paginates daily-log data. |
+| `src/components/DailyTracker.jsx` | Daily and paginated full-log views. |
 | `src/components/ProfileSettings.jsx` | Profile edit form and save/availability flow. |
+| `src/components/SleepStudyChart.jsx` | Owner-only 30-day sleep and study chart, backed by RLS-protected daily logs. |
 | `src/components/TrackSheetBrand.jsx` | Shared clickable product branding and current-page/track label. |
 | `src/components/Tooltip.jsx` | Accessible themed tooltip behavior for interactive controls. |
 | `src/lib/supabase.js` | Creates the browser Supabase client from the public Vite environment variables. |
 | `src/utils/parseSheet.js` | Parses user-uploaded TXT sheets and exports the sample format. |
+| `src/utils/time.js` | Shared daily-log duration, validation, and interval helpers. |
 | `src/data/*.json` | Built-in sheet templates included at build time. |
 | `api/search.js` | Authenticated username-prefix search function. |
 | `supabase/migrations/*.sql` | Database schema, RLS policies, triggers, indexes, and RPC implementations. |
 
-Most product UI is intentionally concentrated in `App.jsx`; profile settings,
-the brand, and tooltip are extracted components. `src/components/Onboarding.jsx`
-and `src/hooks/useSupabaseProgress.js` are legacy implementations. The active
-onboarding screen is embedded in `App.jsx`, and active progress synchronization
-is implemented by `useProgress.js`.
+Most product UI and route composition live in `App.jsx`; reusable profile,
+daily-log, and shared interface pieces are extracted into `src/components/`.
 
 ## 6. Sheets and problem identifiers
 
@@ -275,6 +276,10 @@ and streak dates from done rows in `progress`; it prefers `completed_on` and
 falls back to the UTC date of `updated_at` for older rows. These are distinct
 read paths and can disagree if activity rows drift. Completion dates on
 progress rows are the best source when investigating a discrepancy.
+
+The owner-only 30-day sleep-and-study chart reads `daily_logs` directly under
+the signed-in user's row-level security policy. It does not expose daily-log
+details through the public-profile function.
 
 Both profile views display the most recent 53 weeks. On mobile, the grid is
 horizontally scrollable and initially positioned at the latest weeks.

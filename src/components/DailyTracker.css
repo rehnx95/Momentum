@@ -112,9 +112,9 @@
   gap: 1rem;
   margin-bottom: 0.75rem;
   padding: 0.75rem;
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  border: 1px solid var(--border-strong);
   border-radius: 0.65rem;
-  color: #ef4444;
+  color: var(--muted);
   font-size: 0.75rem;
 }
 
@@ -349,7 +349,7 @@
   min-height: 2.2rem;
   padding: 0.45rem 0.55rem;
   border-radius: 0.45rem;
-  color: #ef4444;
+  color: var(--muted);
   font-size: 0.72rem;
   font-weight: 700;
   text-align: left;
@@ -479,7 +479,7 @@
 .slot-next-day,
 .slot-fix-badge {
   flex: none;
-  color: #ef4444;
+  color: var(--muted);
   font-size: 0.63rem;
   font-weight: 700;
 }
@@ -505,7 +505,7 @@
 }
 
 .slot-remove:hover {
-  color: #ef4444;
+  color: var(--muted);
 }
 
 .slot-empty {
@@ -548,7 +548,7 @@
 
 .daily-errors,
 .daily-error-message {
-  color: #ef4444;
+  color: var(--muted);
 }
 
 .daily-save-status {
@@ -560,7 +560,7 @@
 }
 
 .daily-save-status span {
-  color: #ef4444;
+  color: var(--muted);
 }
 
 .daily-save-status button {

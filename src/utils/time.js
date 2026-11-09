@@ -18,6 +18,32 @@ export function slotMinutes(slot, { wrap = false } = {}) {
   return duration;
 }
 
+export function getSleepMinutes(log) {
+  if (!log?.sleep_time || !log?.wake_time) return 0;
+  const sleepTime = String(log.sleep_time).slice(0, 5);
+  const wakeTime = String(log.wake_time).slice(0, 5);
+  return slotMinutes(
+    { start: sleepTime, end: wakeTime },
+    { wrap: true },
+  ) || 0;
+}
+
+export function getStudyMinutes(log) {
+  const tasks = Array.isArray(log?.custom_tasks) ? log.custom_tasks : [];
+  return tasks.reduce((total, task) => {
+    const slots = Array.isArray(task?.slots) ? task.slots : [];
+    const taskMinutes = slots.reduce((taskTotal, slot) => {
+      const start = toMinutes(slot?.start);
+      const duration =
+        slot?.endDayOffset === 1 && slot?.end === "00:00" && start !== null
+          ? 1440 - start
+          : slotMinutes(slot);
+      return taskTotal + (duration || 0);
+    }, 0);
+    return total + taskMinutes;
+  }, 0);
+}
+
 export function formatDuration(minutes) {
   if (!Number.isFinite(minutes) || minutes < 0) return "0m";
   const rounded = Math.round(minutes);
