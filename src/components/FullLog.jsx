@@ -12,6 +12,12 @@ function slotTotal(slots = []) {
   }, 0);
 }
 
+function formatTime(value) {
+  if (!value) return "—";
+  const [hours, minutes] = String(value).slice(0, 5).split(":");
+  return `${hours}:${minutes}`;
+}
+
 function sleepTotal(row) {
   if (!row.sleep_time || !row.wake_time) return 0;
   return (
@@ -32,9 +38,10 @@ function activityBreakdown(row) {
         String(task.name || "Activity").trim().toLowerCase() === "dsa"
           ? "DSA"
           : task.name || "Activity",
+      slots: Array.isArray(task.slots) ? task.slots : [],
       minutes: slotTotal(task.slots || []),
     }))
-    .filter((activity) => activity.minutes > 0);
+    .filter((activity) => activity.minutes > 0 || activity.slots.length > 0);
 }
 
 function dateLabel(dateKey) {
@@ -144,19 +151,29 @@ export default function FullLog({ daily, onOpenDate }) {
                 onClick={() => onOpenDate(row.date)}
                 aria-label={`Open log for ${dateLabel(row.date)}`}
               >
-                <span className="full-log-day-main">
-                  <span className="full-log-day-meta">
-                    <strong className="full-log-day-date">
-                      {dateLabel(row.date)}
-                    </strong>
-                    <span className="full-log-day-details">
+                <span className="full-log-day-content">
+                  <strong className="full-log-day-date">
+                    {dateLabel(row.date)}
+                  </strong>
+                  <span className="full-log-day-overview">
+                    <span className="full-log-sleep-card">
+                      <span className="full-log-sleep-value">
+                        <small>Sleep</small>
+                        <strong>{formatTime(row.sleep_time)}</strong>
+                      </span>
+                      <span className="full-log-sleep-value">
+                        <small>Wake</small>
+                        <strong>{formatTime(row.wake_time)}</strong>
+                      </span>
+                    </span>
+                    <span className="full-log-metrics-card">
                       <span className="full-log-metric">
                         <strong>{problems}</strong>
                         <span>solved</span>
                       </span>
                       <span className="full-log-metric">
                         <strong>{sleep ? formatDuration(sleep) : "—"}</strong>
-                        <span>sleep</span>
+                        <span>sleep duration</span>
                       </span>
                       <span className="full-log-metric">
                         <strong>{studied ? formatDuration(studied) : "—"}</strong>
@@ -171,8 +188,20 @@ export default function FullLog({ daily, onOpenDate }) {
                           className="full-log-activity"
                           key={`${activity.name}-${index}`}
                         >
-                          <span>{activity.name}</span>
-                          <strong>{formatDuration(activity.minutes)}</strong>
+                          <span className="full-log-activity-heading">
+                            <strong>{activity.name}</strong>
+                            <strong>{formatDuration(activity.minutes)}</strong>
+                          </span>
+                          <span className="full-log-activity-slots">
+                            {activity.slots.map((slot, slotIndex) => (
+                              <span
+                                className="full-log-activity-slot"
+                                key={`${slot.start}-${slot.end}-${slotIndex}`}
+                              >
+                                {formatTime(slot.start)}–{formatTime(slot.end)}
+                              </span>
+                            ))}
+                          </span>
                         </span>
                       ))}
                     </span>

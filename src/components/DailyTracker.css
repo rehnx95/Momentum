@@ -615,12 +615,9 @@
 }
 
 .full-log-day {
-  display: grid;
+  display: block;
   width: 100%;
-  grid-template-columns: minmax(13rem, auto) minmax(0, 1fr);
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 0.7rem;
+  padding: 0.65rem;
   background: var(--surface);
   text-align: left;
   cursor: pointer;
@@ -632,50 +629,123 @@
   outline: none;
 }
 
-.full-log-day-main {
-  display: contents;
-}
-
-.full-log-day-meta {
+.full-log-day-content {
   display: grid;
-  min-width: 0;
-  gap: 0.3rem;
+  gap: 0.55rem;
 }
 
 .full-log-day-date {
   color: var(--text);
-  font-size: 0.7rem;
+  font-size: 0.76rem;
   font-weight: 650;
 }
 
-.full-log-activities {
-  display: flex;
-  flex-wrap: wrap;
+.full-log-day-overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.full-log-sleep-card,
+.full-log-metrics-card {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.35rem;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  background: var(--surface-raised);
+}
+
+.full-log-sleep-value {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 0.15rem 0.3rem;
+}
+
+.full-log-sleep-value small {
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.full-log-sleep-value strong {
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.full-log-metrics-card {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.full-log-activities {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 0.4rem;
 }
 
 .full-log-activity {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 1.8rem;
-  padding: 0.25rem 0.55rem;
-  border: 1px solid var(--border-strong);
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 0.4rem;
+  padding: 0.45rem;
+  border: 1px solid var(--border);
   border-radius: 0.4rem;
-  background: var(--surface-hover);
-  font-size: 0.73rem;
+  background: var(--surface);
 }
 
-.full-log-activity > span {
-  color: var(--text);
-  font-weight: 550;
+.full-log-activity-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  font-size: 0.7rem;
 }
 
-.full-log-activity > strong {
-  color: var(--text);
-  font-weight: 700;
+.full-log-activity-heading strong:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.full-log-activity-heading strong:last-child {
+  flex: none;
   font-variant-numeric: tabular-nums;
+}
+
+.full-log-activity-slots {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 0.2rem;
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.full-log-activity-slot {
+  padding: 0 0.3rem;
+  white-space: nowrap;
+}
+
+.full-log-activity-slot + .full-log-activity-slot {
+  border-left: 1px solid var(--border-strong);
+}
+
+.full-log-activity-heading strong,
+.full-log-metric strong {
+  color: var(--text);
+  font-weight: 650;
 }
 
 .full-log-no-activities {
@@ -693,22 +763,23 @@
 
 .full-log-metric {
   display: inline-flex;
-  min-height: 1.55rem;
+  min-width: 0;
+  min-height: 1.7rem;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.15rem 0.4rem;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.3rem;
   border: 1px solid var(--border);
   border-radius: 0.4rem;
-  background: var(--surface-raised);
+  background: var(--surface-hover);
   color: var(--muted);
   font-size: 0.62rem;
 }
 
-.full-log-metric strong {
-  color: var(--text);
-  font-size: 0.68rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+.full-log-metric span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .load-older-button {
@@ -769,25 +840,22 @@
     width: 6.5rem;
   }
 
-  .full-log-day {
+  .full-log-activities {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .full-log-day-overview {
     grid-template-columns: minmax(0, 1fr);
-    align-items: start;
-    gap: 0.4rem;
-  }
-
-  .full-log-day-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.25rem 0.65rem;
-  }
-
-  .full-log-day-details {
-    gap: 0.5rem;
   }
 
   .daily-save-status {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 420px) {
+  .full-log-activities {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
