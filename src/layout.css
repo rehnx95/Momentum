@@ -739,13 +739,17 @@ html {
     grid-template-columns: minmax(17rem, 0.8fr) minmax(0, 1.7fr);
     grid-template-areas:
       "profile heatmap"
-      "progress recent";
+      "profile progress"
+      "profile recent";
     column-gap: 1rem;
     row-gap: 0.75rem;
   }
 
   .own-profile-layout .profile-sidebar {
     grid-area: profile;
+    position: sticky;
+    top: 5.5rem;
+    align-self: start;
   }
 
   .own-profile-layout .profile-main > .profile-top {
@@ -761,7 +765,7 @@ html {
   }
 }
 
-@media (min-width: 640px) {
+@media (min-width: 640px) and (max-width: 1023px) {
   .profile-layout.own-profile-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
