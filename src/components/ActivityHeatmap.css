@@ -1,11 +1,11 @@
 :root {
-  --hm-0: #171717; --hm-1: #262626; --hm-2: #404040; --hm-3: #737373; --hm-4: #ededed;
+  --hm-0: #171717; --hm-1: #14532d; --hm-2: #15803d; --hm-3: #22c55e; --hm-4: #86efac;
   --hm-surface: #0a0a0a; --hm-border: #262626; --hm-text: #ededed; --hm-muted: #a1a1a1;
   --hm-hover: #1f1f1f; --hm-outline: rgba(255, 255, 255, 0.05);
   --hm-accent-bg: #ededed; --hm-accent-fg: #000000;
 }
 :root[data-theme="light"] {
-  --hm-0: #ebedf0; --hm-1: #d4d4d4; --hm-2: #a3a3a3; --hm-3: #525252; --hm-4: #171717;
+  --hm-0: #ebedf0; --hm-1: #bbf7d0; --hm-2: #4ade80; --hm-3: #16a34a; --hm-4: #14532d;
   --hm-surface: #ffffff; --hm-border: #e5e5e5; --hm-text: #171717; --hm-muted: #5f5f5f;
   --hm-hover: #f0f0f0; --hm-outline: rgba(0, 0, 0, 0.06);
   --hm-accent-bg: #171717; --hm-accent-fg: #ffffff;

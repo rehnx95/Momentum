@@ -294,6 +294,7 @@ The owner profile combines:
 - yearly activity heatmap and active-day count;
 - recent accepted problems;
 - owner-only import/export and reset controls.
+- a 30-day owner-only sleep-and-study chart, using `daily_logs` values.
 
 The public profile omits email, account identifiers, private settings, and raw
 uploaded sheet JSON. It displays selected profile fields, solved/streak

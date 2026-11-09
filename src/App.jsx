@@ -1847,12 +1847,15 @@ gridStart.setDate(gridStart.getDate() - ((gridStart.getDay() + 6) % 7));
   if (customSheetsLoading || progressLoading) {
     return (
       <div className="app-loading-screen" role="status" aria-live="polite">
-        <span className="app-loading-spinner" aria-hidden="true" />
-        <p>
-          {customSheetsLoading
-            ? "Preparing your sheets…"
-            : "Syncing your saved progress…"}
+        <p className="app-loading-label">
+          {customSheetsLoading ? "Preparing your sheets…" : "Syncing your saved progress…"}
         </p>
+        <div className="app-loading-skeleton" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
       </div>
     );
   }
@@ -2646,22 +2649,17 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </div>
             </div>
 
-            <div className="profile-future-slot">
+            <div className="profile-main">
               <Suspense
                 fallback={
-                  <div
-                    className="surface-card rounded-2xl border p-4 text-sm text-[#A1A1A1]"
-                    role="status"
-                  >
+                  <div className="surface-card profile-chart-placeholder" role="status">
                     Preparing chart…
                   </div>
                 }
               >
                 <SleepStudyChart userId={user.id} />
               </Suspense>
-            </div>
 
-            <div className="profile-main">
               <ActivityHeatmap
                 activity={activityLog}
                 todayKey={todayDateKey}

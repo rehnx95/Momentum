@@ -16,7 +16,7 @@ export default {
         skip: '#F5A623',
       },
       fontFamily: {
-        sans: ['Geist', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'Segoe UI Variable', 'Segoe UI', 'system-ui', 'sans-serif'],
         mono: ['Geist Mono', 'ui-monospace', 'monospace'],
       },
     },
