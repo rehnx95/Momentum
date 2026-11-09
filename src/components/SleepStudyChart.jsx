@@ -9,9 +9,14 @@ const CHART_HEIGHT = 220;
 const PLOT = { left: 42, right: 12, top: 14, bottom: 30 };
 const DATE_LABEL_INDEXES = [0, 7, 14, 21, 29];
 const CHARTS = [
-  { title: "Sleep hours", series: ["sleep"] },
-  { title: "Study hours", series: ["study"] },
-  { title: "Sleep + study", series: ["sleep", "study"] },
+  { id: "sleep", label: "Sleep", title: "Sleep hours", series: ["sleep"] },
+  { id: "study", label: "Study", title: "Study hours", series: ["study"] },
+  {
+    id: "combined",
+    label: "Study + Sleep",
+    title: "Study + sleep hours",
+    series: ["study", "sleep"],
+  },
 ];
 
 function getLocalDateKey(date) {
@@ -147,6 +152,8 @@ function SleepStudyGraph({ days, title, series }) {
 
 export default function SleepStudyChart({ userId }) {
   const [logs, setLogs] = useState([]);
+  const [selectedChart, setSelectedChart] = useState("sleep");
+  const tabRefs = useRef({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [requestId, setRequestId] = useState(0);
@@ -213,6 +220,26 @@ export default function SleepStudyChart({ userId }) {
       };
     });
   }, [logs]);
+  const activeChart = CHARTS.find((chart) => chart.id === selectedChart);
+  const handleTabKeyDown = (event, currentIndex) => {
+    let nextIndex = currentIndex;
+    if (event.key === "ArrowRight") {
+      nextIndex = (currentIndex + 1) % CHARTS.length;
+    } else if (event.key === "ArrowLeft") {
+      nextIndex = (currentIndex - 1 + CHARTS.length) % CHARTS.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = CHARTS.length - 1;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    const nextChart = CHARTS[nextIndex];
+    setSelectedChart(nextChart.id);
+    tabRefs.current[nextChart.id]?.focus();
+  };
 
   return (
     <section
@@ -239,15 +266,42 @@ export default function SleepStudyChart({ userId }) {
         </div>
       ) : (
         <>
-          <div className="sleep-study-graphs">
-            {CHARTS.map((chart) => (
-              <SleepStudyGraph
-                key={chart.title}
-                days={days}
-                title={chart.title}
-                series={chart.series}
-              />
+          <div
+            className="sleep-study-tabs"
+            role="tablist"
+            aria-label="Sleep and study graph"
+          >
+            {CHARTS.map((chart, index) => (
+              <button
+                key={chart.id}
+                ref={(element) => {
+                  tabRefs.current[chart.id] = element;
+                }}
+                id={`sleep-study-tab-${chart.id}`}
+                type="button"
+                role="tab"
+                aria-selected={selectedChart === chart.id}
+                aria-controls="sleep-study-tabpanel"
+                tabIndex={selectedChart === chart.id ? 0 : -1}
+                className="sleep-study-tab"
+                onClick={() => setSelectedChart(chart.id)}
+                onKeyDown={(event) => handleTabKeyDown(event, index)}
+              >
+                {chart.label}
+              </button>
             ))}
+          </div>
+          <div
+            id="sleep-study-tabpanel"
+            role="tabpanel"
+            aria-labelledby={`sleep-study-tab-${selectedChart}`}
+            className="sleep-study-tabpanel"
+          >
+            <SleepStudyGraph
+              days={days}
+              title={activeChart.title}
+              series={activeChart.series}
+            />
           </div>
           <p className="sleep-study-footnote">
             Days without a saved log appear as 0h.

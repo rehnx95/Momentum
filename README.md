@@ -13,8 +13,8 @@ Personal sheets and progress are synchronized to the user's account.
 - Browse built-in DSA and Backend sheets, or upload a private TXT sheet.
 - Filter and search problems, collapse or expand topics, and hide skipped items.
 - View solved counts, streaks, recent accepted problems, and a year-long activity
-  green-shaded heatmap on a profile. Your profile also shows a 30-day
-  sleep-only graph, study-only graph, and combined sleep-and-study graph.
+  green-shaded heatmap on a profile. Your profile also shows 30-day sleep,
+  study, and combined graphs in a tabbed view.
 - Search for other users by username and view their profiles. These features
   require sign-in.
 - Export or restore progress for an individual sheet.

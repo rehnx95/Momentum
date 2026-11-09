@@ -19,8 +19,8 @@
   --positive: #d4d4d4;
   --warning: #a3a3a3;
   --study-accent: #a1a1a1;
-  --sleep-chart-color: #e2a076;
-  --study-chart-color: #d17b68;
+  --sleep-chart-color: #e8a34c;
+  --study-chart-color: #df7468;
   --progress-fill: #ffffff;
   --font-sans: Inter, "Segoe UI", system-ui, sans-serif;
 }
@@ -42,8 +42,8 @@
   --positive: #525252;
   --warning: #737373;
   --study-accent: #737373;
-  --sleep-chart-color: #9b532f;
-  --study-chart-color: #a54f3c;
+  --sleep-chart-color: #a85f0b;
+  --study-chart-color: #b5473a;
   --progress-fill: #000000;
 }
 

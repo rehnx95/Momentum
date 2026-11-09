@@ -278,9 +278,9 @@ read paths and can disagree if activity rows drift. Completion dates on
 progress rows are the best source when investigating a discrepancy.
 
 The owner-only 30-day sleep-and-study graphs read `daily_logs` directly under
-the signed-in user's row-level security policy. Separate sleep-only and
-study-only graphs, plus a combined graph, share the same daily data. They do
-not expose daily-log details through the public-profile function.
+the signed-in user's row-level security policy. Sleep-only, study-only, and
+combined graphs are selectable in a tabbed view and share the same daily data.
+They do not expose daily-log details through the public-profile function.
 
 Both profile views display the most recent 53 weeks. On mobile, the grid is
 horizontally scrollable and initially positioned at the latest weeks.
@@ -295,7 +295,8 @@ The owner profile combines:
 - yearly activity heatmap and active-day count;
 - recent accepted problems;
 - owner-only import/export and reset controls.
-- three 30-day owner-only sleep-and-study graphs, using `daily_logs` values.
+- three selectable 30-day owner-only sleep-and-study graph views, using
+  `daily_logs` values.
 
 The public profile omits email, account identifiers, private settings, and raw
 uploaded sheet JSON. It displays selected profile fields, solved/streak
