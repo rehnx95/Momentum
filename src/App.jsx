@@ -2351,6 +2351,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </div>
           )}
           <div className="profile-layout own-profile-layout">
+            <div className="profile-left-column">
             <aside className="profile-sidebar">
               <section className="profile-hero">
                 <div className="profile-avatar">
@@ -2536,8 +2537,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
               </section>
             </aside>
 
-            <div className="profile-main">
-              <div className="profile-top">
+            <div className="profile-top">
               <section
                 className="profile-sheet-progress surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
                 aria-labelledby="profile-sheet-progress"
@@ -2624,8 +2624,10 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   onChange={importProgress}
                 />
               </section>
-              </div>
+            </div>
+            </div>
 
+            <div className="profile-main">
               <ActivityHeatmap
                 activity={activityLog}
                 todayKey={todayDateKey}

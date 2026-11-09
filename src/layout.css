@@ -570,17 +570,17 @@ html {
 .profile-layout.own-profile-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-areas:
-    "profile"
-    "progress"
-    "heatmap"
-    "recent";
   gap: 0.75rem;
   align-items: start;
 }
 
+.own-profile-layout .profile-left-column {
+  display: grid;
+  min-width: 0;
+  gap: 0.75rem;
+}
+
 .profile-layout.own-profile-layout .profile-sidebar {
-  grid-area: profile;
   display: block;
   position: static;
   margin: 0;
@@ -675,11 +675,13 @@ html {
 }
 
 .own-profile-layout .profile-main {
-  display: contents;
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 0.75rem;
 }
 
-.own-profile-layout .profile-main > .profile-top {
-  grid-area: progress;
+.own-profile-layout .profile-top {
   grid-template-columns: minmax(0, 1fr);
   gap: 0;
   margin: 0;
@@ -691,6 +693,7 @@ html {
 }
 
 .own-profile-layout .profile-sheet-grid {
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.4rem;
 }
 
@@ -723,12 +726,10 @@ html {
 }
 
 .own-profile-layout .profile-main > .hm-card {
-  grid-area: heatmap;
   padding: 0.85rem;
 }
 
 .own-profile-layout .profile-main > .recent-ac-card {
-  grid-area: recent;
   padding: 0.85rem;
 }
 
@@ -758,37 +759,9 @@ html {
     grid-template-columns: minmax(0, 1fr) 20rem;
   }
 
-  .own-profile-layout .profile-sheet-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .profile-layout.own-profile-layout {
-    grid-template-columns: minmax(17rem, 0.9fr) minmax(0, 1.5fr);
-    grid-template-areas:
-      "profile ."
-      "progress heatmap"
-      ". recent";
+    grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.5fr);
     column-gap: 1rem;
-    row-gap: 0.75rem;
-  }
-
-  .own-profile-layout .profile-sidebar {
-    grid-area: profile;
-    position: sticky;
-    top: 5.5rem;
-    align-self: start;
-  }
-
-  .own-profile-layout .profile-main > .profile-top {
-    grid-area: progress;
-  }
-
-  .own-profile-layout .profile-main > .hm-card {
-    grid-area: heatmap;
-  }
-
-  .own-profile-layout .profile-main > .recent-ac-card {
-    grid-area: recent;
   }
 }
 
@@ -862,10 +835,6 @@ html {
 }
 
 @media (max-width: 700px) {
-  .own-profile-layout .profile-sheet-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .own-profile-layout .profile-progress-heading {
     align-items: flex-start;
   }
