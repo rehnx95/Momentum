@@ -147,6 +147,41 @@ export default function FullLog({ daily }) {
         </div>
       </header>
 
+      <div className="full-log-pagination">
+        <button
+          type="button"
+          className="load-older-button"
+          disabled={
+            daily.allLogsLoading ||
+            daily.olderLogsLoading ||
+            !daily.hasOlderLogs
+          }
+          onClick={() => daily.loadOlderLogs()}
+        >
+          {daily.olderLogsLoading || daily.allLogsLoading
+            ? "Loading…"
+            : daily.hasOlderLogs
+              ? "Load 10 older days"
+              : "No older days"}
+        </button>
+        <button
+          type="button"
+          className="load-older-button full-log-show-all"
+          disabled={
+            daily.allLogsLoading ||
+            daily.olderLogsLoading ||
+            !daily.hasOlderLogs
+          }
+          onClick={() => daily.loadOlderLogs(true)}
+        >
+          {daily.olderLogsLoading || daily.allLogsLoading
+            ? "Loading all days…"
+            : daily.hasOlderLogs
+              ? "Show all days"
+              : "All days shown"}
+        </button>
+      </div>
+
       {daily.allLogsLoading ? (
         <p className="daily-full-empty" role="status">
           Loading recent days…
@@ -222,27 +257,6 @@ export default function FullLog({ daily }) {
         </ul>
       ) : (
         <p className="daily-full-empty">No saved daily logs yet.</p>
-      )}
-
-      {daily.hasOlderLogs && (
-        <div className="full-log-pagination">
-          <button
-            type="button"
-            className="load-older-button"
-            disabled={daily.olderLogsLoading}
-            onClick={() => daily.loadOlderLogs()}
-          >
-            {daily.olderLogsLoading ? "Loading…" : "Load 10 older days"}
-          </button>
-          <button
-            type="button"
-            className="load-older-button full-log-show-all"
-            disabled={daily.olderLogsLoading}
-            onClick={() => daily.loadOlderLogs(true)}
-          >
-            {daily.olderLogsLoading ? "Loading all days…" : "Show all days"}
-          </button>
-        </div>
       )}
     </div>
   );

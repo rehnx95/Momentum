@@ -682,9 +682,9 @@
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 15rem);
   align-items: start;
-  grid-auto-rows: min-content;
+  justify-content: start;
   gap: 0.4rem;
 }
 
@@ -804,7 +804,7 @@
 }
 
 .load-older-button:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.65;
 }
 
@@ -828,6 +828,12 @@
 
   .daily-day-header {
     align-items: center;
+  }
+}
+
+@media (max-width: 760px) {
+  .full-log-activities {
+    grid-template-columns: repeat(2, minmax(0, 15rem));
   }
 }
 
@@ -871,6 +877,10 @@
   .daily-save-status {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .full-log-activities {
+    grid-template-columns: minmax(0, 15rem);
   }
 }
 
