@@ -3233,7 +3233,7 @@ function ProgressBar({ done, total }) {
   return (
     <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#262626]" aria-label={`${pct}% complete`}>
       <div
-        className={`h-full rounded-full transition-all duration-300 ease-out ${pct === 100 ? "bg-[#A1A1A1]" : "bg-[#EDEDED]"}`}
+        className="h-full rounded-full bg-[#A1A1A1] transition-all duration-300 ease-out"
         style={{
           width: `${pct}%`,
           minWidth: done > 0 ? "2px" : 0,
@@ -3259,7 +3259,7 @@ function ProblemRow({ prob, state, onToggle, onSkip }) {
             ? `Mark ${prob.title} as not done`
             : `Mark ${prob.title} as done`
         }
-        className={`w-[22px] h-[22px] flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${isDone ? "bg-[#A1A1A1] border-[#A1A1A1]" : "border-[#EDEDED]/60 bg-transparent hover:border-[#EDEDED]"}`}
+        className={`w-[22px] h-[22px] flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${isDone ? "bg-[#EDEDED] border-[#EDEDED]" : "border-[#EDEDED]/60 bg-transparent hover:border-[#EDEDED]"}`}
       >
         {isDone && (
           <svg
