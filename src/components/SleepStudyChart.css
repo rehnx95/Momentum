@@ -66,46 +66,6 @@
   background: var(--surface-raised);
 }
 
-.sleep-study-graph-heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.4rem 0.8rem;
-  margin-bottom: 0.25rem;
-}
-
-.sleep-study-graph-heading h3 {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.sleep-study-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  color: var(--muted);
-  font-size: 0.7rem;
-}
-
-.sleep-study-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.sleep-study-swatch {
-  width: 0.65rem;
-  height: 0.18rem;
-  border-radius: 99px;
-  background: var(--sleep-chart-color);
-}
-
-.study-swatch {
-  background: var(--study-chart-color);
-}
-
 .sleep-study-chart {
   display: block;
   width: 100%;

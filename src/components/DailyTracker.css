@@ -640,6 +640,9 @@
   display: grid;
   min-width: 0;
   gap: 0.15rem;
+  padding: 0.4rem 0.45rem;
+  border-radius: 0.4rem;
+  background: var(--surface-raised);
 }
 
 .full-log-summary-item small {

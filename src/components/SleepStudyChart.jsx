@@ -67,17 +67,6 @@ function SleepStudyGraph({ days, title, series }) {
 
   return (
     <section className="sleep-study-graph" aria-label={title}>
-      <header className="sleep-study-graph-heading">
-        <h3>{title}</h3>
-        <div className="sleep-study-legend" aria-hidden="true">
-          {series.map((key) => (
-            <span key={key}>
-              <i className={`sleep-study-swatch ${key}-swatch`} />
-              {key === "sleep" ? "Sleep" : "Study"}
-            </span>
-          ))}
-        </div>
-      </header>
       <div className="sleep-study-chart-wrap" ref={chartWrapRef}>
         <svg
           className="sleep-study-chart"
