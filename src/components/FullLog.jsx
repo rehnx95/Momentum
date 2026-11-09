@@ -257,7 +257,7 @@ export default function FullLog({ daily, onOpenDate }) {
   return (
     <div className="daily-full-log">
       <div className="full-log-actions">
-        <p>Daily time and sleep entries</p>
+        <p>History by week</p>
         <div className="full-log-menu-wrap" ref={actionsRef}>
           <button
             type="button"
@@ -295,7 +295,10 @@ export default function FullLog({ daily, onOpenDate }) {
           )}
         </div>
       </div>
-      <WeeklyChart rows={daily.allLogs} />
+      <details className="weekly-chart-disclosure">
+        <summary>Weekly study chart</summary>
+        <WeeklyChart rows={daily.allLogs} />
+      </details>
 
       {daily.allLogsLoading ? (
         <p className="daily-full-empty">Loading full log…</p>
@@ -303,25 +306,27 @@ export default function FullLog({ daily, onOpenDate }) {
         <p className="daily-full-empty">No saved daily logs yet.</p>
       ) : (
         <div className="weekly-log-groups">
-          {weeks.map((week) => (
-            <section className="weekly-log-group" key={week.key}>
-              <header>
-                <h3>
+          {weeks.map((week, index) => (
+            <details className="weekly-log-group" key={week.key} open={index === 0}>
+              <summary>
+                <span className="weekly-log-week">
                   Week of{" "}
                   {new Date(`${week.key}T00:00:00`).toLocaleDateString(undefined, {
                     month: "short",
                     day: "numeric",
                     year: "numeric",
                   })}
-                </h3>
-                <span>
+                </span>
+                <span className="weekly-log-summary">
                   {formatDuration(week.total)} studied
                   <span aria-hidden="true"> · </span>
                   {week.averageSleep
                     ? `${formatDuration(week.averageSleep)} avg sleep`
                     : "No sleep data"}
+                  <span aria-hidden="true"> · </span>
+                  {week.rows.length} {week.rows.length === 1 ? "day" : "days"}
                 </span>
-              </header>
+              </summary>
               <div className="weekly-log-table-wrap">
                 <table className="weekly-log-table">
                   <thead>
@@ -329,7 +334,7 @@ export default function FullLog({ daily, onOpenDate }) {
                       <th>Date</th>
                       <th>Sleep</th>
                       <th>Activities</th>
-                      <th>Total · problems</th>
+                      <th>Study · solved</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -356,15 +361,19 @@ export default function FullLog({ daily, onOpenDate }) {
                             )}
                           </th>
                           {totals.studied === 0 && slept === 0 ? (
-                            <td colSpan={3}>
+                            <td colSpan={3} className="weekly-log-empty-cell" data-label="Entries">
                               Nothing logged
                               {problems > 0 ? ` · ${problems} problems` : ""}
                             </td>
                           ) : (
                             <>
-                              <td>{formatDuration(slept)}</td>
-                              <td>{activityBreakdown(row) || "Nothing logged"}</td>
-                              <td>{formatDuration(totals.studied)} · {problems} problems</td>
+                              <td data-label="Sleep">{formatDuration(slept)}</td>
+                              <td data-label="Activities" className="weekly-log-activities">
+                                {activityBreakdown(row) || "Nothing logged"}
+                              </td>
+                              <td data-label="Studied · solved">
+                                {formatDuration(totals.studied)} · {problems}
+                              </td>
                             </>
                           )}
                         </tr>
@@ -373,7 +382,7 @@ export default function FullLog({ daily, onOpenDate }) {
                   </tbody>
                 </table>
               </div>
-            </section>
+            </details>
           ))}
         </div>
       )}

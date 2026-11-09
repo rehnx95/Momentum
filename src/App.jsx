@@ -2514,7 +2514,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
 
               <div className="profile-top">
               <section
-                className="surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
+                className="profile-sheet-progress surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
                 aria-labelledby="profile-sheet-progress"
               >
                 <h2
@@ -2569,12 +2569,12 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 </div>
               </section>
 
-              <section className="surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-5">
+              <section className="profile-data-card surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-5">
                 <h2 className="text-lg font-semibold text-[#EDEDED]">Data</h2>
                 <p className="mt-1 text-sm text-[#A1A1A1]">
                   Back up, restore or reset your progress.
                 </p>
-                <div className="data-actions">
+                <div className="data-actions profile-data-actions">
                   <button
                     type="button"
                     className="btn-secondary"

@@ -126,7 +126,11 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
         />
       </section>
 
-      <section className="sleep-entry" aria-label="Sleep times">
+      <section className="activity-card sleep-entry" aria-label="Sleep times">
+        <header className="activity-card-heading">
+          <Moon size={15} aria-hidden="true" />
+          <strong>Sleep</strong>
+        </header>
         <div className="sleep-entry-fields">
           <label>
             <span>Sleep</span>
