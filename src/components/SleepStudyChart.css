@@ -7,12 +7,7 @@
 }
 
 .sleep-study-heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.65rem 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.9rem;
 }
 
 .sleep-study-heading h2 {
@@ -27,12 +22,40 @@
   font-size: 0.75rem;
 }
 
+.sleep-study-graphs {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.sleep-study-graph {
+  min-width: 0;
+  padding: 0.8rem 0.75rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface-raised);
+}
+
+.sleep-study-graph-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.sleep-study-graph-heading h3 {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .sleep-study-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: 0.65rem;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
 }
 
 .sleep-study-legend span {
@@ -42,23 +65,14 @@
 }
 
 .sleep-study-swatch {
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 2px;
+  width: 0.65rem;
+  height: 0.18rem;
+  border-radius: 99px;
   background: var(--sleep-chart-color);
 }
 
 .study-swatch {
-  background: repeating-linear-gradient(
-    135deg,
-    var(--study-chart-color) 0 3px,
-    var(--study-chart-stripe) 3px 4px
-  );
-}
-
-.sleep-study-chart-wrap {
-  width: 100%;
-  min-width: 0;
+  background: var(--study-chart-color);
 }
 
 .sleep-study-chart {
@@ -69,39 +83,53 @@
 
 .sleep-study-chart text {
   fill: var(--text);
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   font-family: var(--font-sans);
 }
 
 .sleep-study-gridline {
   stroke: var(--muted);
-  stroke-opacity: 0.45;
+  stroke-opacity: 0.3;
   stroke-width: 1;
 }
 
-.sleep-study-bar {
-  rx: 1.5px;
+.sleep-study-line {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 
-.sleep-study-footnote {
-  margin: 0.3rem 0 0;
-  color: var(--muted);
-  font-size: 0.68rem;
+.sleep-study-point {
+  stroke: var(--surface-raised);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
 }
 
-.sleep-bar {
+.sleep-series .sleep-study-line,
+.sleep-series .sleep-study-point {
+  stroke: var(--sleep-chart-color);
+}
+
+.sleep-series .sleep-study-point {
   fill: var(--sleep-chart-color);
 }
 
-.study-bar {
-  fill: url(#study-bar-pattern);
-  stroke: var(--surface);
-  stroke-width: 1px;
+.study-series .sleep-study-line,
+.study-series .sleep-study-point {
+  stroke: var(--study-chart-color);
 }
 
-.sleep-study-bar {
-  vector-effect: non-scaling-stroke;
+.study-series .sleep-study-point {
+  fill: var(--study-chart-color);
+}
+
+.sleep-study-footnote {
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
 }
 
 .sleep-study-message {
@@ -135,4 +163,11 @@
     padding: 0.75rem;
   }
 
+  .sleep-study-graph {
+    padding-inline: 0.4rem;
+  }
+
+  .sleep-study-chart text {
+    font-size: 10px;
+  }
 }

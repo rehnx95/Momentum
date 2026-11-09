@@ -14,7 +14,7 @@ Personal sheets and progress are synchronized to the user's account.
 - Filter and search problems, collapse or expand topics, and hide skipped items.
 - View solved counts, streaks, recent accepted problems, and a year-long activity
   green-shaded heatmap on a profile. Your profile also shows a 30-day
-  sleep-and-study chart.
+  sleep-only graph, study-only graph, and combined sleep-and-study graph.
 - Search for other users by username and view their profiles. These features
   require sign-in.
 - Export or restore progress for an individual sheet.
