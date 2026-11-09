@@ -100,7 +100,7 @@ export default function SleepStudyChart({ userId }) {
   const plotWidth = CHART_WIDTH - PLOT.left - PLOT.right;
   const plotHeight = CHART_HEIGHT - PLOT.top - PLOT.bottom;
   const groupWidth = plotWidth / DAY_COUNT;
-  const barWidth = Math.min(7, groupWidth * 0.34);
+  const barWidth = Math.min(9, groupWidth * 0.4);
   const tickCount = 4;
   const dateLabelIndexes = [0, 7, 14, 21, 29];
 

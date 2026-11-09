@@ -64,13 +64,14 @@
 }
 
 .sleep-study-chart text {
-  fill: var(--muted);
+  fill: var(--text);
   font-size: 9px;
   font-family: var(--font-sans);
 }
 
 .sleep-study-gridline {
-  stroke: var(--border-strong);
+  stroke: var(--muted);
+  stroke-opacity: 0.45;
   stroke-width: 1;
 }
 
