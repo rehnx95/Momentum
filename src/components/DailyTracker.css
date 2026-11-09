@@ -642,7 +642,7 @@
 
 .full-log-day-overview {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.4rem;
 }
 
@@ -650,10 +650,11 @@
 .full-log-metrics-card {
   display: grid;
   min-width: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem;
+  align-content: start;
+  gap: 0.25rem;
+  padding: 0.45rem;
   border: 1px solid var(--border);
   border-radius: 0.45rem;
   background: var(--surface-raised);
@@ -665,23 +666,24 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.35rem;
-  padding: 0.15rem 0.3rem;
+  padding: 0.1rem 0.15rem;
 }
 
 .full-log-sleep-value small {
-  color: var(--muted);
-  font-size: 0.65rem;
+  color: var(--text);
+  font-size: 0.66rem;
+  font-weight: 550;
 }
 
 .full-log-sleep-value strong {
   color: var(--text);
-  font-size: 0.72rem;
-  font-weight: 650;
+  font-size: 0.74rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
 .full-log-metrics-card {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .full-log-activities {
@@ -762,22 +764,21 @@
 }
 
 .full-log-metric {
-  display: inline-flex;
+  display: flex;
   min-width: 0;
-  min-height: 1.7rem;
+  min-height: 1.5rem;
   align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.3rem;
-  border: 1px solid var(--border);
-  border-radius: 0.4rem;
-  background: var(--surface-hover);
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding: 0.1rem 0.15rem;
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: 0.64rem;
 }
 
 .full-log-metric span {
   overflow: hidden;
+  color: var(--text);
+  font-weight: 550;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -845,7 +846,7 @@
   }
 
   .full-log-day-overview {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .daily-save-status {
@@ -855,7 +856,8 @@
 }
 
 @media (max-width: 420px) {
-  .full-log-activities {
+  .full-log-activities,
+  .full-log-day-overview {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
