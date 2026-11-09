@@ -617,7 +617,6 @@
 }
 
 .full-log-day-content {
-  --full-log-card-columns: 3;
   display: grid;
   gap: 0.55rem;
 }
@@ -632,7 +631,7 @@
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: repeat(var(--full-log-card-columns), minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.4rem;
 }
 
@@ -683,14 +682,17 @@
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: repeat(var(--full-log-card-columns), minmax(0, 1fr));
-  align-items: stretch;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  grid-auto-rows: min-content;
   gap: 0.4rem;
 }
 
 .full-log-activity {
   display: grid;
+  width: 100%;
   min-width: 0;
+  align-self: start;
   align-content: start;
   gap: 0.4rem;
   padding: 0.45rem;
@@ -826,10 +828,6 @@
 
   .daily-day-header {
     align-items: center;
-  }
-
-  .full-log-day-content {
-    --full-log-card-columns: 2;
   }
 }
 

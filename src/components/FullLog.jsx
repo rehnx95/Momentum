@@ -18,6 +18,16 @@ function formatTime(value) {
   return `${hours}:${minutes}`;
 }
 
+function dateLabel(value) {
+  const date = new Date(`${value}T00:00:00`);
+  return date.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 function sleepTotal(row) {
   if (!row.sleep_time || !row.wake_time) return 0;
   return (
