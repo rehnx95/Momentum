@@ -372,7 +372,7 @@
 
 .daily-activity-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
 }
 
@@ -630,7 +630,7 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.65rem;
   border: 1px solid var(--border);
   border-radius: 0.45rem;
   background: var(--surface);
@@ -659,7 +659,7 @@
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: repeat(3, 15rem);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: start;
   justify-content: start;
   gap: 0.4rem;
@@ -667,8 +667,6 @@
 
 .full-log-activity {
   display: grid;
-  width: 15rem;
-  max-width: 15rem;
   min-width: 0;
   align-self: start;
   align-content: start;
@@ -773,11 +771,15 @@
   .daily-day-header {
     align-items: center;
   }
+
+  .daily-activity-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @container full-log-day (max-width: 760px) {
   .full-log-activities {
-    grid-template-columns: repeat(2, 15rem);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .full-log-summary {
@@ -787,7 +789,7 @@
 
 @container full-log-day (max-width: 500px) {
   .full-log-activities {
-    grid-template-columns: 15rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .full-log-summary {
@@ -835,6 +837,10 @@
   .daily-save-status {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .daily-activity-list {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .full-log-summary {
