@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import DayView from "./DayView";
 import FullLog from "./FullLog";
 import useDailyLog from "../hooks/useDailyLog";
@@ -6,10 +5,6 @@ import "./DailyTracker.css";
 
 export default function DailyTracker({ user, sheets, askConfirmation }) {
   const daily = useDailyLog(user);
-
-  const openDate = useCallback(async (date) => {
-    if (await daily.changeDate(date)) daily.setViewMode("daily");
-  }, [daily.changeDate, daily.setViewMode]);
 
   return (
     <section className="daily-tracker surface-card" aria-labelledby="daily-log-title">
@@ -44,10 +39,7 @@ export default function DailyTracker({ user, sheets, askConfirmation }) {
           <DayView daily={daily} sheets={sheets} askConfirmation={askConfirmation} />
         )
       ) : (
-        <FullLog
-          daily={daily}
-          onOpenDate={openDate}
-        />
+        <FullLog daily={daily} />
       )}
       {daily.viewMode === "full" && daily.message && (
         <p className="daily-error-message" role="alert">{daily.message}</p>

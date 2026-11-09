@@ -587,16 +587,10 @@
   gap: 0.75rem;
 }
 
-.full-log-header h3 {
+.full-log-status {
   margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.full-log-header p {
-  margin: 0.15rem 0 0;
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
 }
 
 .full-log-day-list {
@@ -618,19 +612,12 @@
   display: block;
   width: 100%;
   padding: 0.65rem;
-  background: var(--surface);
+  background: var(--surface-raised);
   text-align: left;
-  cursor: pointer;
-}
-
-.full-log-day:hover,
-.full-log-day:focus-visible {
-  background: var(--surface-hover);
-  outline: none;
 }
 
 .full-log-day-content {
-  --full-log-card-columns: 5;
+  --full-log-card-columns: 3;
   display: grid;
   gap: 0.55rem;
 }
@@ -709,7 +696,8 @@
   padding: 0.45rem;
   border: 1px solid var(--border);
   border-radius: 0.4rem;
-  background: var(--surface);
+  border-left: 2px solid var(--border-strong);
+  background: var(--surface-raised);
 }
 
 .full-log-activity-heading {
@@ -798,8 +786,31 @@
 }
 
 .load-older-button {
-  display: block;
-  margin: 1rem auto 0;
+  min-height: 2.25rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.55rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.load-older-button:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.load-older-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.full-log-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 @media (hover: none) {
@@ -818,7 +829,7 @@
   }
 
   .full-log-day-content {
-    --full-log-card-columns: 3;
+    --full-log-card-columns: 2;
   }
 }
 
@@ -866,7 +877,5 @@
 }
 
 @media (max-width: 420px) {
-  .full-log-day-content {
-    --full-log-card-columns: 2;
-  }
+  .full-log-pagination > button { flex: 1; }
 }

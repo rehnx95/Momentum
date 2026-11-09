@@ -44,16 +44,7 @@ function activityBreakdown(row) {
     .filter((activity) => activity.minutes > 0 || activity.slots.length > 0);
 }
 
-function dateLabel(dateKey) {
-  return new Date(`${dateKey}T00:00:00`).toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-export default function FullLog({ daily, onOpenDate }) {
+export default function FullLog({ daily }) {
   const [actionsOpen, setActionsOpen] = useState(false);
   const actionsRef = useRef(null);
 
@@ -93,10 +84,19 @@ export default function FullLog({ daily, onOpenDate }) {
   return (
     <div className="daily-full-log">
       <header className="full-log-header">
-        <div>
-          <h3>Full log</h3>
-          <p>Showing {entries.length} entries · loads 10 days at a time</p>
-        </div>
+        <p className="full-log-status" aria-live="polite">
+          {daily.allLogsLoading
+            ? "Loading latest days…"
+            : daily.olderLogsLoading
+              ? "Loading older days…"
+              : entries.length === 0
+                ? "No saved days"
+                : `${entries.length} days shown · ${
+                    daily.hasOlderLogs
+                      ? "More older days available"
+                      : "All saved days shown"
+                  }`}
+        </p>
         <div className="full-log-menu-wrap" ref={actionsRef}>
           <button
             type="button"
@@ -145,12 +145,7 @@ export default function FullLog({ daily, onOpenDate }) {
         <ul className="full-log-day-list">
           {entries.map(({ row, activities, sleep, studied, problems }) => (
             <li key={row.date}>
-              <button
-                type="button"
-                className="full-log-day"
-                onClick={() => onOpenDate(row.date)}
-                aria-label={`Open log for ${dateLabel(row.date)}`}
-              >
+              <article className="full-log-day">
                 <span className="full-log-day-content">
                   <strong className="full-log-day-date">
                     {dateLabel(row.date)}
@@ -211,7 +206,7 @@ export default function FullLog({ daily, onOpenDate }) {
                     </span>
                   )}
                 </span>
-              </button>
+              </article>
             </li>
           ))}
         </ul>
@@ -220,14 +215,24 @@ export default function FullLog({ daily, onOpenDate }) {
       )}
 
       {daily.hasOlderLogs && (
-        <button
-          type="button"
-          className="load-older-button"
-          disabled={daily.olderLogsLoading}
-          onClick={daily.loadOlderLogs}
-        >
-          {daily.olderLogsLoading ? "Loading…" : "Load 10 older days"}
-        </button>
+        <div className="full-log-pagination">
+          <button
+            type="button"
+            className="load-older-button"
+            disabled={daily.olderLogsLoading}
+            onClick={() => daily.loadOlderLogs()}
+          >
+            {daily.olderLogsLoading ? "Loading…" : "Load 10 older days"}
+          </button>
+          <button
+            type="button"
+            className="load-older-button full-log-show-all"
+            disabled={daily.olderLogsLoading}
+            onClick={() => daily.loadOlderLogs(true)}
+          >
+            {daily.olderLogsLoading ? "Loading all days…" : "Show all days"}
+          </button>
+        </div>
       )}
     </div>
   );

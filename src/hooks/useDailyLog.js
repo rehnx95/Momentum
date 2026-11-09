@@ -489,41 +489,50 @@ export default function useDailyLog(user) {
     if (viewMode === "full") void loadLogs();
   }, [viewMode, loadLogs]);
 
-  const loadOlderLogs = useCallback(async () => {
+  const loadOlderLogs = useCallback(async (loadAll = false) => {
     const oldest = allLogs[allLogs.length - 1]?.date;
     if (!oldest) return;
     setOlderLogsLoading(true);
+    let cursor = oldest;
+    let more = true;
     try {
-      const logsResult = await supabase
-        .from("daily_logs")
-        .select("date, sleep_time, wake_time, custom_tasks")
-        .eq("user_id", user.id)
-        .lt("date", oldest)
-        .order("date", { ascending: false })
-        .limit(PAGE_SIZE + 1);
-      if (logsResult.error) throw logsResult.error;
-      const fetched = logsResult.data || [];
-      const rows = fetched.slice(0, PAGE_SIZE);
-      const oldestFetched = rows[rows.length - 1]?.date;
-      let activityData = [];
-      if (oldestFetched) {
-        const activityResult = await supabase
-          .from("activity_log")
-          .select("date, count")
+      while (more) {
+        const logsResult = await supabase
+          .from("daily_logs")
+          .select("date, sleep_time, wake_time, custom_tasks")
           .eq("user_id", user.id)
-          .gte("date", oldestFetched)
-          .lt("date", oldest);
-        if (activityResult.error) throw activityResult.error;
-        activityData = activityResult.data || [];
+          .lt("date", cursor)
+          .order("date", { ascending: false })
+          .limit(PAGE_SIZE + 1);
+        if (logsResult.error) throw logsResult.error;
+        const fetched = logsResult.data || [];
+        const rows = fetched.slice(0, PAGE_SIZE);
+        const oldestFetched = rows[rows.length - 1]?.date;
+        let activityData = [];
+        if (oldestFetched) {
+          const activityResult = await supabase
+            .from("activity_log")
+            .select("date, count")
+            .eq("user_id", user.id)
+            .gte("date", oldestFetched)
+            .lt("date", cursor);
+          if (activityResult.error) throw activityResult.error;
+          activityData = activityResult.data || [];
+        }
+        if (rows.length) {
+          setAllLogs((current) => [...current, ...rows]);
+          setProblemCounts((current) => ({
+            ...current,
+            ...Object.fromEntries(
+              activityData.map((item) => [item.date, Number(item.count || 0)]),
+            ),
+          }));
+        }
+        more = fetched.length > PAGE_SIZE;
+        setHasOlderLogs(more);
+        if (!loadAll || !oldestFetched) break;
+        cursor = oldestFetched;
       }
-      setAllLogs((current) => [...current, ...rows]);
-      setProblemCounts((current) => ({
-        ...current,
-        ...Object.fromEntries(
-          activityData.map((item) => [item.date, Number(item.count || 0)]),
-        ),
-      }));
-      setHasOlderLogs(fetched.length > PAGE_SIZE);
     } catch (error) {
       console.error("Failed to load older daily logs:", error);
       setMessage("Could not load older log entries.");
