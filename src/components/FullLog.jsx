@@ -67,12 +67,19 @@ export default function FullLog({ daily, onOpenDate }) {
 
   const entries = useMemo(
     () =>
-      daily.allLogs.map((row) => ({
-        row,
-        activities: activityBreakdown(row),
-        sleep: sleepTotal(row),
-        problems: daily.problemCounts[row.date] || 0,
-      })),
+      daily.allLogs.map((row) => {
+        const activities = activityBreakdown(row);
+        return {
+          row,
+          activities,
+          sleep: sleepTotal(row),
+          studied: activities.reduce(
+            (total, activity) => total + activity.minutes,
+            0,
+          ),
+          problems: daily.problemCounts[row.date] || 0,
+        };
+      }),
     [daily.allLogs, daily.problemCounts],
   );
 
@@ -129,7 +136,7 @@ export default function FullLog({ daily, onOpenDate }) {
         </p>
       ) : entries.length ? (
         <ul className="full-log-day-list">
-          {entries.map(({ row, activities, sleep, problems }) => (
+          {entries.map(({ row, activities, sleep, studied, problems }) => (
             <li key={row.date}>
               <button
                 type="button"
@@ -143,16 +150,18 @@ export default function FullLog({ daily, onOpenDate }) {
                       {dateLabel(row.date)}
                     </strong>
                     <span className="full-log-day-details">
-                      {problems > 0 && (
-                        <span>
-                          <strong>{problems}</strong> solved
-                        </span>
-                      )}
-                      {sleep > 0 && (
-                        <span>
-                          <strong>{formatDuration(sleep)}</strong> sleep
-                        </span>
-                      )}
+                      <span className="full-log-metric">
+                        <strong>{problems}</strong>
+                        <span>solved</span>
+                      </span>
+                      <span className="full-log-metric">
+                        <strong>{sleep ? formatDuration(sleep) : "—"}</strong>
+                        <span>sleep</span>
+                      </span>
+                      <span className="full-log-metric">
+                        <strong>{studied ? formatDuration(studied) : "—"}</strong>
+                        <span>studied</span>
+                      </span>
                     </span>
                   </span>
                   {activities.length ? (
