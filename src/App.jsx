@@ -2397,27 +2397,31 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       </a>
                     )}
                   </div>
-                  <div className="profile-hero-actions flex flex-wrap gap-2">
+                </div>
+                <div className="profile-hero-actions flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={openProfileSettings}
+                    aria-label="Edit profile"
+                    title="Edit profile"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  {userUsername && (
                     <button
                       type="button"
                       className="btn-secondary"
-                      onClick={openProfileSettings}
+                      onClick={() => {
+                        publicProfileReturnPath.current = "/profile";
+                        navigateTo(`/u/${encodeURIComponent(userUsername)}`);
+                      }}
+                      aria-label="Public view"
+                      title="Public view"
                     >
-                      <Pencil size={14} /> Edit profile
+                      <Link2 size={16} />
                     </button>
-                    {userUsername && (
-                      <button
-                        type="button"
-                        className="btn-secondary"
-                        onClick={() => {
-                          publicProfileReturnPath.current = "/profile";
-                          navigateTo(`/u/${encodeURIComponent(userUsername)}`);
-                        }}
-                      >
-                        <Link2 size={14} /> Public view
-                      </button>
-                    )}
-                  </div>
+                  )}
                 </div>
                 <StatStrip
                   className="profile-overview-stats"
@@ -2427,7 +2431,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     value: dailyStreak,
                     unit: dailyStreak === 1 ? "day" : "days",
                     icon: Calendar,
-                    color: "#FF6B35",
                     },
                     {
                     label: "Best streak",
@@ -2440,7 +2443,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     value: profileProblemsSolved,
                     unit: `/ ${profileProblemsTotal}`,
                     icon: Target,
-                    color: "#46A758",
                     },
                     {
                     label: "Active days",

@@ -21,7 +21,20 @@
   background: var(--hm-surface);
   color: var(--hm-text);
 }
-.hm-title { margin: 0 0 0.65rem; font-size: 0.95rem; font-weight: 600; }
+.hm-header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.65rem; }
+.hm-title { min-width: 0; margin: 0; font-size: 0.95rem; font-weight: 600; }
+.hm-year-select {
+  min-width: 7.5rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--hm-border);
+  border-radius: 0.45rem;
+  background: var(--hm-hover);
+  color: var(--hm-text);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.hm-year-select:focus-visible { outline: 2px solid var(--hm-muted); outline-offset: 2px; }
 .hm-body { min-width: 0; }
 .hm-main { min-width: 0; flex: 1; }
 .hm-scroll { display: flex; overflow-x: auto; padding-bottom: 0.5rem; }
@@ -89,25 +102,11 @@
 .hm-legend { display: flex; align-items: center; gap: 4px; }
 .hm-swatch { width: 12px; height: 12px; border-radius: 2px; outline: 1px solid var(--hm-outline); outline-offset: -1px; }
 
-.hm-years { display: flex; max-width: min(22rem, 55vw); flex: none; gap: 0.2rem; overflow-x: auto; margin: 0; padding: 0; list-style: none; }
-.hm-years button {
-  min-width: 2.8rem;
-  padding: 0.25rem 0.5rem;
-  border: 0;
-  border-radius: 0.4rem;
-  background: transparent;
-  color: var(--hm-muted);
-  font-size: 0.72rem;
-  text-align: center;
-  cursor: pointer;
-}
-.hm-years button:hover { background: var(--hm-hover); color: var(--hm-text); }
-.hm-years button[aria-pressed="true"] { background: var(--hm-accent-bg); color: var(--hm-accent-fg); }
-
 @media (max-width: 520px) {
   .hm-card { padding: 1rem; }
   .hm-foot { align-items: flex-start; }
-  .hm-years { max-width: min(14rem, 60vw); }
+  .hm-header { align-items: flex-start; }
+  .hm-year-select { max-width: 45%; }
 }
 
 .hm-tip {

@@ -21,7 +21,6 @@ export default function ActivityHeatmap({
   const [cell, setCell] = useState(12);
   const [tip, setTip] = useState(null);
   const currentYear = Number(todayKey.slice(0, 4));
-  const activeYear = selectedYear == null ? currentYear : selectedYear;
 
   const levelFn =
     mode === 'hours'
@@ -94,7 +93,26 @@ export default function ActivityHeatmap({
 
   return (
     <section className={`hm-card${loading ? ' hm-loading' : ''}`} aria-label="Activity heatmap">
-      <h3 className="hm-title">{title}</h3>
+      <header className="hm-header">
+        <h3 className="hm-title">{title}</h3>
+        <select
+          className="hm-year-select"
+          aria-label="Select activity year"
+          value={selectedYear == null ? 'rolling' : selectedYear}
+          onChange={(event) =>
+            onSelectYear?.(
+              event.target.value === 'rolling' ? null : Number(event.target.value),
+            )
+          }
+        >
+          <option value="rolling">Last 12 months</option>
+          {yearList.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </header>
       <div className="hm-body">
         <div className="hm-main">
           <div className="hm-scroll" ref={scrollRef} onScroll={() => setTip(null)}>
@@ -147,23 +165,6 @@ export default function ActivityHeatmap({
                   ? `Days with study: ${heat.activeDays}`
                   : `Total active days: ${heat.activeDays}`}
               </span>
-              <ul className="hm-years" aria-label="Select activity year">
-                {yearList.map((y) => (
-                  <li key={y}>
-                    <button
-                      type="button"
-                      aria-pressed={y === activeYear}
-                      onClick={() =>
-                        onSelectYear?.(
-                          y === currentYear && selectedYear === currentYear ? null : y,
-                        )
-                      }
-                    >
-                      {y}
-                    </button>
-                  </li>
-                ))}
-              </ul>
             </div>
             <div className="hm-legend" aria-label="Activity scale: less to more">
               <span>Less</span>
