@@ -570,11 +570,17 @@ html {
 .profile-layout.own-profile-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "profile"
+    "progress"
+    "heatmap"
+    "recent";
   gap: 0.75rem;
   align-items: start;
 }
 
 .profile-layout.own-profile-layout .profile-sidebar {
+  grid-area: profile;
   display: block;
   position: static;
   margin: 0;
@@ -669,16 +675,7 @@ html {
 }
 
 .own-profile-layout .profile-main {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas:
-    "progress"
-    "heatmap"
-    "recent";
-  align-items: start;
-  gap: 0.75rem;
-  min-width: 0;
+  display: contents;
 }
 
 .own-profile-layout .profile-main > .profile-top {
@@ -739,23 +736,16 @@ html {
   }
 
   .profile-layout.own-profile-layout {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 0.75rem;
-    row-gap: 1rem;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    grid-template-areas:
+      "profile ."
+      "progress heatmap"
+      "progress recent";
+    gap: 0.75rem;
   }
 
   .own-profile-layout .profile-sidebar {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .own-profile-layout .profile-main {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-areas:
-      "progress heatmap"
-      "progress recent";
+    grid-area: profile;
   }
 }
 
