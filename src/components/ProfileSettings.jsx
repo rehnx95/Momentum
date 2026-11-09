@@ -131,12 +131,12 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
       {header}
 
       <main className="app-page">
-        <div className="app-page-narrow">
+        <div className="app-page-narrow profile-settings-content">
         <button type="button" onClick={onBack} className="btn-secondary mb-4">
           <ChevronLeft size={14} /> Back to profile
         </button>
         <h1 className="page-title mb-4">Edit profile</h1>
-        <form onSubmit={handleSubmit} className="settings-form space-y-5 rounded-xl border border-[#262626] bg-[#0A0A0A] p-6 md:p-8">
+        <form onSubmit={handleSubmit} className="settings-form space-y-4 rounded-xl border border-[#262626] bg-[#0A0A0A] p-4 md:p-5">
           {errorMessage && (
             <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
               {errorMessage}
@@ -155,7 +155,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
             { name: 'website', label: 'Website / URL', type: 'url', placeholder: 'https://example.com', maxLength: 2048 },
           ].map(field => (
             <div key={field.name}>
-              <label htmlFor={`profile-${field.name}`} className="mb-2 block text-sm font-medium">
+              <label htmlFor={`profile-${field.name}`} className="mb-1.5 block text-sm font-medium">
                 {field.label}
               </label>
               <input
@@ -167,7 +167,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
                 placeholder={field.placeholder}
                 value={form[field.name]}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-[#262626] bg-[#000000] px-4 py-3 text-[#EDEDED] placeholder-[#A1A1A1] outline-none transition-colors focus:border-[#EDEDED] focus:outline-none"
+                className="w-full rounded-lg border border-[#262626] bg-[#000000] px-3 py-2.5 text-[#EDEDED] placeholder-[#A1A1A1] outline-none transition-colors focus:border-[#EDEDED] focus:outline-none"
               />
               {field.name === 'username' && (
                 <div className="mt-1 space-y-1">
@@ -195,7 +195,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full rounded-lg bg-[#EDEDED] px-4 py-3 font-medium text-black transition-colors hover:bg-white disabled:cursor-wait disabled:opacity-60"
+            className="w-full rounded-lg bg-[#EDEDED] px-4 py-2.5 font-medium text-black transition-colors hover:bg-white disabled:cursor-wait disabled:opacity-60"
           >
             {isSaving ? 'Saving…' : 'Save profile'}
           </button>

@@ -23,8 +23,13 @@
 }
 .hm-header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.65rem; }
 .hm-title { min-width: 0; margin: 0; font-size: 0.95rem; font-weight: 600; }
-.hm-year-select {
+.hm-year-picker { position: relative; flex: none; }
+.hm-year-trigger {
+  display: flex;
   min-width: 7.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
   padding: 0.35rem 0.55rem;
   border: 1px solid var(--hm-border);
   border-radius: 0.45rem;
@@ -34,7 +39,41 @@
   font-size: 0.75rem;
   cursor: pointer;
 }
-.hm-year-select:focus-visible { outline: 2px solid var(--hm-muted); outline-offset: 2px; }
+.hm-year-trigger:hover,
+.hm-year-trigger[aria-expanded="true"] { border-color: var(--hm-muted); }
+.hm-year-trigger:focus-visible,
+.hm-year-menu button:focus-visible { outline: 2px solid var(--hm-muted); outline-offset: 2px; }
+.hm-year-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 20;
+  display: grid;
+  width: max-content;
+  min-width: 100%;
+  max-height: 15rem;
+  gap: 0.15rem;
+  overflow-y: auto;
+  padding: 0.3rem;
+  border: 1px solid var(--hm-border);
+  border-radius: 0.55rem;
+  background: var(--hm-surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+.hm-year-menu button {
+  padding: 0.4rem 0.55rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--hm-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.hm-year-menu button:hover,
+.hm-year-menu button[aria-pressed="true"] { background: var(--hm-hover); color: var(--hm-text); }
 .hm-body { min-width: 0; }
 .hm-main { min-width: 0; flex: 1; }
 .hm-scroll { display: flex; overflow-x: auto; padding-bottom: 0.5rem; }
@@ -106,7 +145,7 @@
   .hm-card { padding: 1rem; }
   .hm-foot { align-items: flex-start; }
   .hm-header { align-items: flex-start; }
-  .hm-year-select { max-width: 45%; }
+  .hm-year-trigger { min-width: 0; max-width: 10rem; }
 }
 
 .hm-tip {

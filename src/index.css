@@ -872,17 +872,21 @@ input:focus-visible {
   color: var(--text) !important;
 }
 
+.profile-settings-content {
+  max-width: 34rem;
+}
+
 .profile-settings-shell .settings-form {
   border-radius: 0.9rem;
 }
 
 .settings-form input {
-  min-height: 3.1rem;
+  min-height: 2.75rem;
   border-radius: 0.6rem;
 }
 
 .settings-form button[type="submit"] {
-  min-height: 3.15rem;
+  min-height: 2.75rem;
   border-radius: 0.6rem;
   background: var(--accent);
   font-weight: 650;

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { buildHeatmap, formatTooltipDate } from '../utils/heatmap';
 import { formatDuration } from '../utils/time';
 import './ActivityHeatmap.css';
@@ -18,8 +19,12 @@ export default function ActivityHeatmap({
   mode = 'problems',
 }) {
   const scrollRef = useRef(null);
+  const yearMenuRef = useRef(null);
+  const yearTriggerRef = useRef(null);
   const [cell, setCell] = useState(12);
   const [tip, setTip] = useState(null);
+  const [yearMenuOpen, setYearMenuOpen] = useState(false);
+  const yearMenuId = useId();
   const currentYear = Number(todayKey.slice(0, 4));
 
   const levelFn =
@@ -44,6 +49,25 @@ export default function ActivityHeatmap({
     }
     return [...set].filter(Number.isFinite).sort((a, b) => b - a);
   }, [activity, years, currentYear]);
+
+  useEffect(() => {
+    if (!yearMenuOpen) return undefined;
+    const handlePointerDown = (event) => {
+      if (!yearMenuRef.current?.contains(event.target)) setYearMenuOpen(false);
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setYearMenuOpen(false);
+        yearTriggerRef.current?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [yearMenuOpen]);
 
   // Size the cells so the grid fills the available width.
   useEffect(() => {
@@ -95,23 +119,52 @@ export default function ActivityHeatmap({
     <section className={`hm-card${loading ? ' hm-loading' : ''}`} aria-label="Activity heatmap">
       <header className="hm-header">
         <h3 className="hm-title">{title}</h3>
-        <select
-          className="hm-year-select"
-          aria-label="Select activity year"
-          value={selectedYear == null ? 'rolling' : selectedYear}
-          onChange={(event) =>
-            onSelectYear?.(
-              event.target.value === 'rolling' ? null : Number(event.target.value),
-            )
-          }
-        >
-          <option value="rolling">Last 12 months</option>
-          {yearList.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
+        <div className="hm-year-picker" ref={yearMenuRef}>
+          <button
+            ref={yearTriggerRef}
+            type="button"
+            className="hm-year-trigger"
+            aria-label="Select activity year"
+            aria-expanded={yearMenuOpen}
+            aria-controls={yearMenuId}
+            onClick={() => setYearMenuOpen((open) => !open)}
+          >
+            <span>{selectedYear == null ? 'Last 12 months' : selectedYear}</span>
+            <ChevronDown size={14} aria-hidden="true" />
+          </button>
+          {yearMenuOpen && (
+            <div
+              id={yearMenuId}
+              className="hm-year-menu"
+              role="group"
+              aria-label="Activity year"
+            >
+              <button
+                type="button"
+                aria-pressed={selectedYear == null}
+                onClick={() => {
+                  onSelectYear?.(null);
+                  setYearMenuOpen(false);
+                }}
+              >
+                Last 12 months
+              </button>
+              {yearList.map((year) => (
+                <button
+                  key={year}
+                  type="button"
+                  aria-pressed={selectedYear === year}
+                  onClick={() => {
+                    onSelectYear?.(year);
+                    setYearMenuOpen(false);
+                  }}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </header>
       <div className="hm-body">
         <div className="hm-main">
