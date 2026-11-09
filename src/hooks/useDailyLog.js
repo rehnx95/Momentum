@@ -3,7 +3,7 @@ import { supabase } from "../lib/supabase";
 import { slotMinutes, splitIntervalByDay, validateDay } from "../utils/time";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const PAGE_SIZE = 84;
+const PAGE_SIZE = 10;
 const TIMER_STORAGE = (userId) => `track-sheet-running-timer:${userId}`;
 export function getLocalDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -448,38 +448,34 @@ export default function useDailyLog(user) {
   const loadLogs = useCallback(async () => {
     const requestId = ++logsRequestRef.current;
     setAllLogsLoading(true);
-    const cutoff = getLocalDateKey(new Date(Date.now() - 83 * DAY_MS));
     try {
-      const [logsResult, activityResult, olderResult] = await Promise.all([
-        supabase
-          .from("daily_logs")
-          .select("date, sleep_time, wake_time, custom_tasks")
-          .eq("user_id", user.id)
-          .gte("date", cutoff)
-          .order("date", { ascending: false })
-          .limit(PAGE_SIZE),
-        supabase
+      const logsResult = await supabase
+        .from("daily_logs")
+        .select("date, sleep_time, wake_time, custom_tasks")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false })
+        .limit(PAGE_SIZE + 1);
+      if (logsResult.error) throw logsResult.error;
+      if (requestId !== logsRequestRef.current) return;
+      const fetched = logsResult.data || [];
+      const rows = fetched.slice(0, PAGE_SIZE);
+      let activityData = [];
+      if (rows.length) {
+        const activityResult = await supabase
           .from("activity_log")
           .select("date, count")
           .eq("user_id", user.id)
-          .gte("date", cutoff),
-        supabase
-          .from("daily_logs")
-          .select("date")
-          .eq("user_id", user.id)
-          .lt("date", cutoff)
-          .limit(1),
-      ]);
-      if (logsResult.error) throw logsResult.error;
-      if (activityResult.error) throw activityResult.error;
-      if (olderResult.error) throw olderResult.error;
+          .gte("date", rows[rows.length - 1].date)
+          .lte("date", rows[0].date);
+        if (activityResult.error) throw activityResult.error;
+        activityData = activityResult.data || [];
+      }
       if (requestId !== logsRequestRef.current) return;
-      const rows = logsResult.data || [];
       setAllLogs(rows);
       setProblemCounts(Object.fromEntries(
-        (activityResult.data || []).map((item) => [item.date, Number(item.count || 0)]),
+        activityData.map((item) => [item.date, Number(item.count || 0)]),
       ));
-      setHasOlderLogs((olderResult.data || []).length > 0);
+      setHasOlderLogs(fetched.length > PAGE_SIZE);
     } catch (error) {
       if (requestId !== logsRequestRef.current) return;
       console.error("Failed to load full daily log:", error);

@@ -599,113 +599,29 @@
   font-size: 0.68rem;
 }
 
-.full-log-overview {
+.full-log-day-list {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.4rem;
-}
-
-.full-log-stat {
-  display: grid;
-  min-width: 0;
-  gap: 0.2rem;
-  padding: 0.5rem 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 0.6rem;
-  background: var(--surface-raised);
-}
-
-.full-log-stat > span {
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 0.64rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.full-log-stat > strong {
-  overflow: hidden;
-  font-size: 0.95rem;
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.full-log-week-list {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.full-log-week {
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 0.65rem;
-}
-
-.full-log-week > summary {
-  display: flex;
-  min-height: 2.5rem;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.35rem 0.75rem;
-  padding: 0.5rem 0.65rem;
-  background: var(--surface-raised);
-  cursor: pointer;
-  list-style: none;
-}
-
-.full-log-week > summary::-webkit-details-marker {
-  display: none;
-}
-
-.full-log-week-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: var(--text);
-  font-size: 0.73rem;
-  font-weight: 650;
-}
-
-.full-log-week-title svg {
-  flex: none;
-  color: var(--muted);
-  transform: rotate(-90deg);
-  transition: transform 120ms ease;
-}
-
-.full-log-week[open] .full-log-week-title svg {
-  transform: rotate(0);
-}
-
-.full-log-week-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.75rem;
-  color: var(--muted);
-  font-size: 0.65rem;
-}
-
-.full-log-days {
-  display: grid;
+  gap: 0;
   margin: 0;
   padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  overflow: hidden;
   list-style: none;
 }
 
-.full-log-days li + li {
+.full-log-day-list li + li {
   border-top: 1px solid var(--border);
 }
 
 .full-log-day {
-  display: grid;
+  display: flex;
   width: 100%;
-  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.45rem 0.65rem;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0.7rem;
+  background: var(--surface);
   text-align: left;
   cursor: pointer;
 }
@@ -716,44 +632,64 @@
   outline: none;
 }
 
-.full-log-day-date {
+.full-log-day-main {
   display: grid;
   min-width: 0;
-  gap: 0.12rem;
+  flex: 1;
+  gap: 0.35rem;
 }
 
-.full-log-day-date strong {
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-.full-log-day-date > span {
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 0.65rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.full-log-day-metrics {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-
-.full-log-day-metrics > span {
-  display: grid;
-  min-width: 2.5rem;
-  justify-items: end;
+.full-log-day-date {
   color: var(--text);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
+  font-weight: 650;
+}
+
+.full-log-activities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.full-log-activity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.35rem;
+  background: var(--surface-raised);
+  font-size: 0.65rem;
+}
+
+.full-log-activity > span {
+  color: var(--muted);
+}
+
+.full-log-activity > strong {
+  color: var(--text);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-.full-log-day-metrics small {
+.full-log-no-activities {
   color: var(--muted);
-  font-size: 0.58rem;
-  font-variant-numeric: normal;
+  font-size: 0.65rem;
+}
+
+.full-log-day-details {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.full-log-day-details strong {
+  color: var(--text);
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .load-older-button {
@@ -814,27 +750,13 @@
     width: 6.5rem;
   }
 
-  .full-log-overview {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .full-log-week > summary {
+  .full-log-day {
     align-items: flex-start;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.4rem;
   }
 
-  .full-log-week-stats {
-    padding-left: 1.25rem;
-  }
-
-  .full-log-day {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.35rem;
-  }
-
-  .full-log-day-metrics {
-    justify-content: space-between;
+  .full-log-day-details {
     padding-left: 0;
   }
 
