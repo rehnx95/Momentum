@@ -116,7 +116,7 @@ export default function SleepStudyChart({ userId }) {
         </div>
         <div className="sleep-study-legend" aria-hidden="true">
           <span><i className="sleep-study-swatch sleep-swatch" /> Sleep</span>
-          <span><i className="sleep-study-swatch study-swatch" /> Study</span>
+          <span><i className="sleep-study-swatch study-swatch" /> Study (hatched)</span>
         </div>
       </header>
 
@@ -140,6 +140,26 @@ export default function SleepStudyChart({ userId }) {
               role="img"
               aria-label="Grouped bar chart comparing daily sleep and study hours over the last 30 days"
             >
+              <defs>
+                <pattern
+                  id="study-bar-pattern"
+                  width="4"
+                  height="4"
+                  patternUnits="userSpaceOnUse"
+                  patternTransform="rotate(45)"
+                >
+                  <rect
+                    width="4"
+                    height="4"
+                    fill="var(--study-chart-color)"
+                  />
+                  <path
+                    d="M 0 0 V 4"
+                    stroke="var(--study-chart-stripe)"
+                    strokeWidth="1.5"
+                  />
+                </pattern>
+              </defs>
               {Array.from({ length: tickCount + 1 }, (_, index) => {
                 const hours = (maxHours / tickCount) * index;
                 const y = PLOT.top + plotHeight - (plotHeight * index) / tickCount;
@@ -201,7 +221,7 @@ export default function SleepStudyChart({ userId }) {
             </svg>
           </div>
           <p className="sleep-study-footnote">
-            Days without a saved log appear as 0h.
+            No bar means no sleep or study was logged that day.
           </p>
           <ul className="sr-only">
             {days.map((day) => (

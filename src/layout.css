@@ -400,7 +400,7 @@ html {
 .profile-sheet-progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: var(--text);
+  background: var(--progress-fill);
 }
 
 .profile-sheet-counts {

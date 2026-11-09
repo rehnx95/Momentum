@@ -49,7 +49,11 @@
 }
 
 .study-swatch {
-  background: var(--study-chart-color);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--study-chart-color) 0 3px,
+    var(--study-chart-stripe) 3px 4px
+  );
 }
 
 .sleep-study-chart-wrap {
@@ -65,7 +69,8 @@
 
 .sleep-study-chart text {
   fill: var(--text);
-  font-size: 9px;
+  font-size: 10px;
+  font-weight: 600;
   font-family: var(--font-sans);
 }
 
@@ -90,9 +95,9 @@
 }
 
 .study-bar {
-  fill: var(--study-chart-color);
+  fill: url(#study-bar-pattern);
   stroke: var(--surface);
-  stroke-width: 0.75px;
+  stroke-width: 1px;
 }
 
 .sleep-study-bar {
@@ -130,7 +135,4 @@
     padding: 0.75rem;
   }
 
-  .sleep-study-chart text {
-    font-size: 10px;
-  }
 }

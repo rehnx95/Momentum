@@ -21,6 +21,8 @@
   --study-accent: #a1a1a1;
   --sleep-chart-color: #f5f5f5;
   --study-chart-color: #bdbdbd;
+  --study-chart-stripe: #ededed;
+  --progress-fill: #ffffff;
   --font-sans: Inter, "Segoe UI", system-ui, sans-serif;
 }
 
@@ -43,6 +45,8 @@
   --study-accent: #737373;
   --sleep-chart-color: #262626;
   --study-chart-color: #525252;
+  --study-chart-stripe: #ffffff;
+  --progress-fill: #000000;
 }
 
 * {
