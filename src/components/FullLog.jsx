@@ -195,30 +195,26 @@ export default function FullLog({ daily }) {
                   <strong className="full-log-day-date">
                     {dateLabel(row.date)}
                   </strong>
-                  <span className="full-log-day-overview">
-                    <span className="full-log-sleep-card">
-                      <span className="full-log-sleep-value">
-                        <small>Sleep</small>
-                        <strong>{formatTime(row.sleep_time)}</strong>
-                      </span>
-                      <span className="full-log-sleep-value">
-                        <small>Wake</small>
-                        <strong>{formatTime(row.wake_time)}</strong>
-                      </span>
+                  <span className="full-log-summary">
+                    <span className="full-log-summary-item">
+                      <small>Sleep</small>
+                      <strong>{formatTime(row.sleep_time)}</strong>
                     </span>
-                    <span className="full-log-metrics-card">
-                      <span className="full-log-metric">
-                        <strong>{problems}</strong>
-                        <span>solved</span>
-                      </span>
-                      <span className="full-log-metric">
-                        <strong>{sleep ? formatDuration(sleep) : "—"}</strong>
-                        <span>sleep duration</span>
-                      </span>
-                      <span className="full-log-metric">
-                        <strong>{studied ? formatDuration(studied) : "—"}</strong>
-                        <span>studied</span>
-                      </span>
+                    <span className="full-log-summary-item">
+                      <small>Wake</small>
+                      <strong>{formatTime(row.wake_time)}</strong>
+                    </span>
+                    <span className="full-log-summary-item">
+                      <small>Sleep duration</small>
+                      <strong>{sleep ? formatDuration(sleep) : "—"}</strong>
+                    </span>
+                    <span className="full-log-summary-item">
+                      <small>Solved</small>
+                      <strong>{problems}</strong>
+                    </span>
+                    <span className="full-log-summary-item">
+                      <small>Studied</small>
+                      <strong>{studied ? formatDuration(studied) : "—"}</strong>
                     </span>
                   </span>
                   {activities.length ? (

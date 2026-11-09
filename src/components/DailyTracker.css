@@ -595,23 +595,18 @@
 
 .full-log-day-list {
   display: grid;
-  gap: 0;
+  gap: 0.55rem;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 0.65rem;
-  overflow: hidden;
   list-style: none;
-}
-
-.full-log-day-list li + li {
-  border-top: 1px solid var(--border);
 }
 
 .full-log-day {
   display: block;
   width: 100%;
   padding: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
   background: var(--surface-raised);
   text-align: left;
 }
@@ -619,6 +614,7 @@
 .full-log-day-content {
   display: grid;
   gap: 0.55rem;
+  container: full-log-day / inline-size;
 }
 
 .full-log-day-date {
@@ -627,55 +623,36 @@
   font-weight: 700;
 }
 
-.full-log-day-overview {
+.full-log-summary {
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.4rem;
-}
-
-.full-log-sleep-card,
-.full-log-metrics-card {
-  display: grid;
-  width: 100%;
-  min-width: 0;
-  grid-column: span 1;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
-  align-content: start;
-  gap: 0.25rem;
-  padding: 0.45rem;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
   border: 1px solid var(--border);
   border-radius: 0.45rem;
-  background: var(--surface-raised);
+  background: var(--surface);
 }
 
-.full-log-sleep-value {
-  display: flex;
+.full-log-summary-item {
+  display: grid;
   min-width: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.35rem;
-  padding: 0.1rem 0.15rem;
+  gap: 0.15rem;
 }
 
-.full-log-sleep-value small {
+.full-log-summary-item small {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.7rem;
   font-weight: 650;
 }
 
-.full-log-sleep-value strong {
+.full-log-summary-item strong {
   color: var(--text);
   font-size: 0.9rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-}
-
-.full-log-metrics-card {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: stretch;
 }
 
 .full-log-activities {
@@ -690,7 +667,8 @@
 
 .full-log-activity {
   display: grid;
-  width: 100%;
+  width: 15rem;
+  max-width: 15rem;
   min-width: 0;
   align-self: start;
   align-content: start;
@@ -743,7 +721,7 @@
 }
 
 .full-log-activity-heading strong,
-.full-log-metric strong {
+.full-log-summary-item strong {
   color: var(--text);
   font-weight: 650;
 }
@@ -751,40 +729,6 @@
 .full-log-no-activities {
   color: var(--muted);
   font-size: 0.65rem;
-}
-
-.full-log-day-details {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-  color: var(--muted);
-}
-
-.full-log-metric {
-  display: grid;
-  width: 100%;
-  min-width: 0;
-  min-height: 2rem;
-  align-content: center;
-  justify-items: center;
-  gap: 0.2rem;
-  padding: 0.2rem 0.1rem;
-  border: 1px solid var(--border);
-  border-radius: 0.35rem;
-  background: var(--surface-hover);
-  color: var(--text);
-  font-size: 0.8rem;
-}
-
-.full-log-metric span {
-  max-width: 100%;
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 0.7rem;
-  font-weight: 650;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .load-older-button {
@@ -831,9 +775,23 @@
   }
 }
 
-@media (max-width: 760px) {
+@container full-log-day (max-width: 760px) {
   .full-log-activities {
-    grid-template-columns: repeat(2, minmax(0, 15rem));
+    grid-template-columns: repeat(2, 15rem);
+  }
+
+  .full-log-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container full-log-day (max-width: 500px) {
+  .full-log-activities {
+    grid-template-columns: 15rem;
+  }
+
+  .full-log-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -879,8 +837,8 @@
     flex-direction: column;
   }
 
-  .full-log-activities {
-    grid-template-columns: minmax(0, 15rem);
+  .full-log-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
