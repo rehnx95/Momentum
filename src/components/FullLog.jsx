@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { formatDuration, slotMinutes } from "../utils/time";
 import { getLocalDateKey } from "../hooks/useDailyLog";
 
@@ -15,33 +15,39 @@ function slotTotal(slots = []) {
 
 function sleepTotal(row) {
   if (!row.sleep_time || !row.wake_time) return 0;
-  return slotMinutes(
-    { start: String(row.sleep_time).slice(0, 5), end: String(row.wake_time).slice(0, 5) },
-    { wrap: true },
-  ) || 0;
+  return (
+    slotMinutes(
+      {
+        start: String(row.sleep_time).slice(0, 5),
+        end: String(row.wake_time).slice(0, 5),
+      },
+      { wrap: true },
+    ) || 0
+  );
 }
 
-function rowTotals(row) {
-  const custom = (Array.isArray(row.custom_tasks) ? row.custom_tasks : []).reduce(
+function studyTotal(row) {
+  return (Array.isArray(row.custom_tasks) ? row.custom_tasks : []).reduce(
     (total, task) => total + slotTotal(task.slots || []),
     0,
   );
-  return { custom, studied: custom };
-}
-
-function activityBreakdown(row) {
-  const activities = [];
-  (Array.isArray(row.custom_tasks) ? row.custom_tasks : []).forEach((task) => {
-    const minutes = slotTotal(task.slots || []);
-    if (minutes) activities.push(`${displayActivityName(task.name)} ${formatDuration(minutes)}`);
-  });
-  return activities.join(" · ");
 }
 
 function displayActivityName(name) {
   return String(name || "Activity").trim().toLowerCase() === "dsa"
     ? "DSA"
     : name || "Activity";
+}
+
+function activityBreakdown(row) {
+  const activities = [];
+  (Array.isArray(row.custom_tasks) ? row.custom_tasks : []).forEach((task) => {
+    const minutes = slotTotal(task.slots || []);
+    if (minutes) {
+      activities.push(`${displayActivityName(task.name)} ${formatDuration(minutes)}`);
+    }
+  });
+  return activities;
 }
 
 function mondayKey(dateKey) {
@@ -51,176 +57,45 @@ function mondayKey(dateKey) {
   return getLocalDateKey(date);
 }
 
-function WeeklyChart({ rows }) {
-  const latestDate = rows[0]?.date;
-  const weekStart = latestDate ? mondayKey(latestDate) : null;
-  const weekDays = weekStart
-    ? Array.from({ length: 7 }, (_, index) => {
-        const date = new Date(`${weekStart}T00:00:00`);
-        date.setDate(date.getDate() + index);
-        return getLocalDateKey(date);
-      })
-    : [];
-  const rowsByDate = new Map(rows.map((row) => [row.date, row]));
-  const customActivities = new Map();
-  weekDays.forEach((date) => {
-    const row = rowsByDate.get(date);
-    if (!row) return;
-    (Array.isArray(row.custom_tasks) ? row.custom_tasks : []).forEach((task, index) => {
-      if (slotTotal(task.slots || []) <= 0) return;
-      const id = task.id || task.name || `custom-${index}`;
-      if (!customActivities.has(id)) {
-        customActivities.set(id, {
-          id,
-          name: displayActivityName(task.name || "Custom"),
-          color: "var(--text)",
-        });
-      }
-    });
-  });
-  const activities = [
-    ...customActivities.values(),
-  ];
-  const maxMinutes = Math.max(
-    60,
-    ...weekDays.map((date) => rowTotals(rowsByDate.get(date) || {}).studied),
-  );
-  const maxHours = Math.max(1, Math.ceil(maxMinutes / 60));
-  const width = 420;
-  const height = 184;
-  const plotLeft = 38;
-  const plotRight = 410;
-  const plotTop = 24;
-  const baseline = 142;
-  const plotHeight = baseline - plotTop;
-  const slotWidth = (plotRight - plotLeft) / 7;
-  const barWidth = 20;
-  const scale = plotHeight / (maxHours * 60);
-  const yTicks = [...new Set([0, Math.ceil(maxHours / 2), maxHours])];
+function dateLabel(dateKey, options) {
+  return new Date(`${dateKey}T00:00:00`).toLocaleDateString(undefined, options);
+}
 
+function weekLabel(weekStart) {
+  const weekEnd = new Date(`${weekStart}T00:00:00`);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  const endKey = getLocalDateKey(weekEnd);
+  const start = new Date(`${weekStart}T00:00:00`);
+  const sameMonth = start.getMonth() === weekEnd.getMonth();
+  const sameYear = start.getFullYear() === weekEnd.getFullYear();
+
+  if (sameMonth) {
+    return `${dateLabel(weekStart, { month: "short", day: "numeric" })}–${dateLabel(
+      endKey,
+      sameYear
+        ? { day: "numeric", year: "numeric" }
+        : { month: "short", day: "numeric", year: "numeric" },
+    )}`;
+  }
+  return `${dateLabel(weekStart, { month: "short", day: "numeric" })}–${dateLabel(
+    endKey,
+    { month: "short", day: "numeric", year: "numeric" },
+  )}`;
+}
+
+function Stat({ label, value }) {
   return (
-    <section className="weekly-chart-card" aria-label="Daily study time by activity">
-      <h3>
-        Study by day
-        {weekStart && (
-          <span className="weekly-chart-period">
-            {new Date(`${weekStart}T00:00:00`).toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-            })}
-            {" – "}
-            {new Date(`${weekDays[6]}T00:00:00`).toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-            })}
-          </span>
-        )}
-      </h3>
-      {rows.length ? (
-        <svg
-          className="weekly-chart"
-          viewBox={`0 0 ${width} ${height}`}
-          role="img"
-          aria-label="Stacked daily study-time bars for the latest week"
-        >
-          {yTicks.map((hours) => {
-            const y = baseline - hours * 60 * scale;
-            return (
-              <g key={hours}>
-                <line
-                  x1={plotLeft}
-                  x2={plotRight}
-                  y1={y}
-                  y2={y}
-                  className="weekly-chart-grid"
-                />
-                <text x="2" y={y + 3} className="weekly-chart-axis-label">
-                  {hours}h
-                </text>
-              </g>
-            );
-          })}
-          {weekDays.map((date, index) => {
-            const row = rowsByDate.get(date);
-            const center = plotLeft + slotWidth * (index + 0.5);
-            let y = baseline;
-            const tasks = new Map(
-              (Array.isArray(row?.custom_tasks) ? row.custom_tasks : []).map(
-                (task, taskIndex) => [task.id || task.name || `custom-${taskIndex}`, task],
-              ),
-            );
-            const tooltipDetails = activities.flatMap((activity) => {
-              const minutes = slotTotal(tasks.get(activity.id)?.slots || []);
-              return minutes > 0
-                ? [`${activity.name} ${formatDuration(minutes)}`]
-                : [];
-            });
-            const dateLabel = new Date(`${date}T00:00:00`).toLocaleDateString(
-              undefined,
-              { month: "short", day: "numeric" },
-            );
-            const title = tooltipDetails.length
-              ? `${dateLabel} · ${tooltipDetails.join(" · ")}`
-              : `${dateLabel} · Nothing logged`;
-            return (
-              <g key={date}>
-                <title>{title}</title>
-                {activities.map((activity) => {
-                  const minutes = slotTotal(tasks.get(activity.id)?.slots || []);
-                  if (!minutes) return null;
-                  const barHeight = minutes * scale;
-                  y -= barHeight;
-                  return (
-                    <rect
-                      key={activity.id}
-                      x={center - barWidth / 2}
-                      y={y}
-                      width={barWidth}
-                      height={barHeight}
-                      fill={activity.color}
-                      rx="1"
-                    />
-                  );
-                })}
-                {!tooltipDetails.length && (
-                  <line
-                    x1={center - 4}
-                    x2={center + 4}
-                    y1={baseline - 2}
-                    y2={baseline - 2}
-                    className="weekly-chart-empty-tick"
-                  />
-                )}
-                <text
-                  x={center}
-                  y="163"
-                  textAnchor="middle"
-                  className="weekly-chart-day-label"
-                >
-                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index]}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-      ) : (
-        <p>No study entries yet.</p>
-      )}
-      <div className="weekly-chart-legend">
-        {activities.map((activity) => (
-          <span key={activity.id}>
-            <i style={{ background: activity.color }} />
-            {activity.name}
-          </span>
-        ))}
-      </div>
-    </section>
+    <div className="full-log-stat">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }
 
 export default function FullLog({ daily, onOpenDate }) {
   const [actionsOpen, setActionsOpen] = useState(false);
   const actionsRef = useRef(null);
+
   useEffect(() => {
     const closeOnOutsideClick = (event) => {
       if (!actionsRef.current?.contains(event.target)) setActionsOpen(false);
@@ -243,21 +118,55 @@ export default function FullLog({ daily, onOpenDate }) {
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(row);
     });
+
     return [...groups.entries()].map(([key, rows]) => {
-      const total = rows.reduce((sum, row) => sum + rowTotals(row).studied, 0);
-      const sleepRows = rows.map(sleepTotal).filter((value) => value > 0);
-      const averageSleep =
-        sleepRows.length > 0
-          ? Math.round(sleepRows.reduce((sum, value) => sum + value, 0) / sleepRows.length)
-          : 0;
-      return { key, rows, total, averageSleep };
+      const studied = rows.reduce((total, row) => total + studyTotal(row), 0);
+      const problems = rows.reduce(
+        (total, row) => total + (daily.problemCounts[row.date] || 0),
+        0,
+      );
+      const sleepRows = rows.map(sleepTotal).filter(Boolean);
+      const averageSleep = sleepRows.length
+        ? Math.round(
+            sleepRows.reduce((total, minutes) => total + minutes, 0) /
+              sleepRows.length,
+          )
+        : 0;
+      return { key, rows, studied, problems, averageSleep };
     });
-  }, [daily.allLogs]);
+  }, [daily.allLogs, daily.problemCounts]);
+
+  const overview = useMemo(() => {
+    const sleepRows = daily.allLogs.map(sleepTotal).filter(Boolean);
+    const studied = daily.allLogs.reduce(
+      (total, row) => total + studyTotal(row),
+      0,
+    );
+    const problems = daily.allLogs.reduce(
+      (total, row) => total + (daily.problemCounts[row.date] || 0),
+      0,
+    );
+    const averageSleep = sleepRows.length
+      ? Math.round(
+          sleepRows.reduce((total, minutes) => total + minutes, 0) /
+            sleepRows.length,
+        )
+      : 0;
+    return {
+      days: daily.allLogs.length,
+      studied,
+      problems,
+      averageSleep,
+    };
+  }, [daily.allLogs, daily.problemCounts]);
 
   return (
     <div className="daily-full-log">
-      <div className="full-log-actions">
-        <p>History by week</p>
+      <div className="full-log-header">
+        <div>
+          <h3>Activity overview</h3>
+          <p>Totals for loaded days. Open a week to see each day.</p>
+        </div>
         <div className="full-log-menu-wrap" ref={actionsRef}>
           <button
             type="button"
@@ -284,108 +193,119 @@ export default function FullLog({ daily, onOpenDate }) {
                 onClick={async () => {
                   setActionsOpen(false);
                   const confirmation = window.prompt(
-                    'This permanently deletes your saved Daily Log entries. Type CLEAR to continue.',
+                    "This permanently deletes your saved Daily Log entries. Type CLEAR to continue.",
                   );
                   if (confirmation === "CLEAR") await daily.clearAllLogs();
                 }}
               >
-                {daily.clearingHistory ? "Clearing history…" : "Clear my saved history"}
+                {daily.clearingHistory
+                  ? "Clearing history…"
+                  : "Clear my saved history"}
               </button>
             </div>
           )}
         </div>
       </div>
-      <details className="weekly-chart-disclosure">
-        <summary>Weekly study chart</summary>
-        <WeeklyChart rows={daily.allLogs} />
-      </details>
 
       {daily.allLogsLoading ? (
-        <p className="daily-full-empty">Loading full log…</p>
+        <p className="daily-full-empty" role="status">
+          Loading your activity…
+        </p>
       ) : daily.allLogs.length === 0 ? (
         <p className="daily-full-empty">No saved daily logs yet.</p>
       ) : (
-        <div className="weekly-log-groups">
-          {weeks.map((week, index) => (
-            <details className="weekly-log-group" key={week.key} open={index === 0}>
-              <summary>
-                <span className="weekly-log-week">
-                  Week of{" "}
-                  {new Date(`${week.key}T00:00:00`).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </span>
-                <span className="weekly-log-summary">
-                  {formatDuration(week.total)} studied
-                  <span aria-hidden="true"> · </span>
-                  {week.averageSleep
-                    ? `${formatDuration(week.averageSleep)} avg sleep`
-                    : "No sleep data"}
-                  <span aria-hidden="true"> · </span>
-                  {week.rows.length} {week.rows.length === 1 ? "day" : "days"}
-                </span>
-              </summary>
-              <div className="weekly-log-table-wrap">
-                <table className="weekly-log-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Sleep</th>
-                      <th>Activities</th>
-                      <th>Study · solved</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {week.rows.map((row) => {
-                      const totals = rowTotals(row);
-                      const slept = sleepTotal(row);
-                      const problems = daily.problemCounts[row.date] || 0;
-                      return (
-                        <tr
-                          key={row.date}
-                          tabIndex={0}
+        <>
+          <div className="full-log-overview" aria-label="Activity totals">
+            <Stat label="Days logged" value={overview.days} />
+            <Stat label="Study time" value={formatDuration(overview.studied)} />
+            <Stat label="Problems solved" value={overview.problems} />
+            <Stat
+              label="Average sleep"
+              value={overview.averageSleep ? formatDuration(overview.averageSleep) : "—"}
+            />
+          </div>
+
+          <div className="full-log-week-list">
+            {weeks.map((week, index) => (
+              <details
+                className="full-log-week"
+                key={week.key}
+                open={index === 0}
+              >
+                <summary>
+                  <span className="full-log-week-title">
+                    <ChevronDown size={15} aria-hidden="true" />
+                    {weekLabel(week.key)}
+                  </span>
+                  <span className="full-log-week-stats">
+                    <span>{formatDuration(week.studied)} study</span>
+                    <span>{week.problems} solved</span>
+                    <span>
+                      {week.averageSleep
+                        ? `${formatDuration(week.averageSleep)} avg sleep`
+                        : "— sleep"}
+                    </span>
+                  </span>
+                </summary>
+                <ul className="full-log-days">
+                  {week.rows.map((row) => {
+                    const activities = activityBreakdown(row);
+                    const studied = studyTotal(row);
+                    const slept = sleepTotal(row);
+                    const problems = daily.problemCounts[row.date] || 0;
+                    return (
+                      <li key={row.date}>
+                        <button
+                          type="button"
+                          className="full-log-day"
                           onClick={() => onOpenDate(row.date)}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter" || event.key === " ") {
-                              event.preventDefault();
-                              onOpenDate(row.date);
-                            }
-                          }}
+                          aria-label={`Open log for ${dateLabel(row.date, {
+                            weekday: "long",
+                            month: "long",
+                            day: "numeric",
+                          })}`}
                         >
-                          <th scope="row">
-                            {new Date(`${row.date}T00:00:00`).toLocaleDateString(
-                              undefined,
-                              { weekday: "short", month: "short", day: "numeric" },
-                            )}
-                          </th>
-                          {totals.studied === 0 && slept === 0 ? (
-                            <td colSpan={3} className="weekly-log-empty-cell" data-label="Entries">
-                              Nothing logged
-                              {problems > 0 ? ` · ${problems} problems` : ""}
-                            </td>
-                          ) : (
-                            <>
-                              <td data-label="Sleep">{formatDuration(slept)}</td>
-                              <td data-label="Activities" className="weekly-log-activities">
-                                {activityBreakdown(row) || "Nothing logged"}
-                              </td>
-                              <td data-label="Studied · solved">
-                                {formatDuration(totals.studied)} · {problems}
-                              </td>
-                            </>
-                          )}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </details>
-          ))}
-        </div>
+                          <span className="full-log-day-date">
+                            <strong>
+                              {dateLabel(row.date, {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </strong>
+                            <span>
+                              {activities.length
+                                ? activities.join(" · ")
+                                : problems
+                                  ? "Problems solved"
+                                  : "No timed activities"}
+                            </span>
+                          </span>
+                          <span className="full-log-day-metrics">
+                            <span>
+                              <small>Study</small>
+                              {studied ? formatDuration(studied) : "—"}
+                            </span>
+                            <span>
+                              <small>Solved</small>
+                              {problems}
+                            </span>
+                            <span>
+                              <small>Sleep</small>
+                              {slept ? formatDuration(slept) : "—"}
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </details>
+            ))}
+          </div>
+        </>
       )}
+
       {daily.hasOlderLogs && (
         <button
           type="button"
