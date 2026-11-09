@@ -356,7 +356,7 @@
 }
 
 .clear-daily-history:hover {
-  background: rgb(239 68 68 / 0.1);
+  background: var(--surface-hover);
 }
 
 .clear-daily-history:disabled {

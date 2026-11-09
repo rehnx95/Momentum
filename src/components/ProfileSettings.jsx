@@ -138,12 +138,12 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
         <h1 className="page-title mb-4">Edit profile</h1>
         <form onSubmit={handleSubmit} className="settings-form space-y-4 rounded-xl border border-[#262626] bg-[#0A0A0A] p-4 md:p-5">
           {errorMessage && (
-            <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+            <p role="alert" className="rounded-lg border border-border-strong bg-rowHover p-3 text-sm text-muted">
               {errorMessage}
             </p>
           )}
           {successMessage && (
-            <p role="status" className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-300">
+            <p role="status" className="rounded-lg border border-border-strong bg-rowHover p-3 text-sm text-muted">
               {successMessage}
             </p>
           )}
@@ -176,16 +176,16 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
                     <p role="status" className="text-xs text-[#A1A1A1]">Checking username…</p>
                   )}
                   {usernameAvailability === 'available' && (
-                    <p role="status" className="text-xs text-green-400">Username is available.</p>
+                    <p role="status" className="text-xs text-muted">Username is available.</p>
                   )}
                   {usernameAvailability === 'taken' && (
-                    <p role="status" className="text-xs text-red-400">That username is already taken.</p>
+                    <p role="status" className="text-xs text-muted">That username is already taken.</p>
                   )}
                   {usernameAvailability === 'current' && (
                     <p role="status" className="text-xs text-[#A1A1A1]">This is your current username.</p>
                   )}
                   {usernameAvailability === 'error' && (
-                    <p role="alert" className="text-xs text-red-400">Could not check username availability. You can still try saving.</p>
+                    <p role="alert" className="text-xs text-muted">Could not check username availability. You can still try saving.</p>
                   )}
                 </div>
               )}

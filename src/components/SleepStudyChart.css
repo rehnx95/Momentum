@@ -95,11 +95,7 @@
 }
 
 .sleep-study-card {
-  --study-accent: #4ade80;
-}
-
-:root[data-theme="light"] .sleep-study-card {
-  --study-accent: #15803d;
+  --study-accent: var(--muted);
 }
 
 .sleep-study-bar {

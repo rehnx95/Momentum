@@ -313,7 +313,7 @@ function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
             {error && (
               <p
                 role="alert"
-                className="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300"
+                className="mb-5 rounded-xl border border-border-strong bg-rowHover p-3 text-sm text-muted"
               >
                 {error}
               </p>
@@ -539,7 +539,7 @@ function OnboardingPage({
           </div>
 
           {errors.submit && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-6 text-red-400 text-sm">
+            <div className="bg-rowHover border border-border-strong rounded-lg p-3 mb-6 text-muted text-sm">
               {errors.submit}
             </div>
           )}
@@ -548,7 +548,7 @@ function OnboardingPage({
             {/* Name Field */}
             <div>
               <label className="block text-sm font-medium text-[#EDEDED] mb-2">
-                Full Name <span className="text-red-400">*</span>
+                Full Name <span className="text-muted">*</span>
               </label>
               <div className="relative">
                 <User
@@ -565,14 +565,14 @@ function OnboardingPage({
                 />
               </div>
               {errors.name && (
-                <p className="text-red-400 text-sm mt-1">{errors.name}</p>
+                <p className="text-muted text-sm mt-1">{errors.name}</p>
               )}
             </div>
 
             {/* Username Field */}
             <div>
               <label className="block text-sm font-medium text-[#EDEDED] mb-2">
-                Username (Handle) <span className="text-red-400">*</span>
+                Username (Handle) <span className="text-muted">*</span>
               </label>
               <div className="relative">
                 <User
@@ -587,22 +587,22 @@ function OnboardingPage({
                   placeholder="johndoe"
                   className={`w-full pl-10 pr-4 py-3 bg-[#000000] border rounded-lg text-[#EDEDED] placeholder-[#A1A1A1] focus:outline-none focus:ring-2 transition-all ${
                     usernameAvailable === true
-                      ? "border-green-500 focus:ring-green-500"
+                      ? "border-border-strong focus:ring-border-strong"
                       : usernameAvailable === false
-                        ? "border-red-500 focus:ring-red-500"
+                        ? "border-border-strong focus:ring-border-strong"
                         : "border-[#262626] focus:ring-[#EDEDED]"
                   }`}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
                   {usernameAvailable === true && (
-                    <span className="text-green-400 text-xs flex items-center gap-1">
-                      <span className="inline-block w-2 h-2 bg-green-500 rounded-full" />
+                    <span className="text-muted text-xs flex items-center gap-1">
+                      <span className="inline-block w-2 h-2 bg-muted rounded-full" />
                       Available
                     </span>
                   )}
                   {usernameAvailable === false && (
-                    <span className="text-red-400 text-xs flex items-center gap-1">
-                      <span className="inline-block w-2 h-2 bg-red-500 rounded-full" />
+                    <span className="text-muted text-xs flex items-center gap-1">
+                      <span className="inline-block w-2 h-2 bg-muted rounded-full" />
                       Taken
                     </span>
                   )}
@@ -612,7 +612,7 @@ function OnboardingPage({
                 3+ characters, lowercase letters, numbers, and hyphens only
               </p>
               <p
-                className={`text-sm mt-1 ${validationMessage ? "text-red-400" : "text-[#A1A1A1]"}`}
+                className={`text-sm mt-1 ${validationMessage ? "text-muted" : "text-[#A1A1A1]"}`}
               >
                 {validationMessage}
               </p>
@@ -1911,7 +1911,7 @@ gridStart.setDate(gridStart.getDate() - ((gridStart.getDay() + 6) % 7));
                     Searching people…
                   </p>
                 ) : error ? (
-                  <p role="alert" className="px-4 py-3 text-sm text-red-300">
+                  <p role="alert" className="px-4 py-3 text-sm text-muted">
                     {error}
                   </p>
                 ) : results.length ? (
@@ -2086,7 +2086,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
         <main className="app-page">
           {error && !loading && !profile ? (
             <section className="surface-card rounded-2xl border p-8 text-center">
-              <p className="text-sm font-semibold uppercase tracking-wider text-violet-300">
+              <p className="text-sm font-semibold uppercase tracking-wider text-muted">
                 {error === "This profile could not be found."
                   ? "404"
                   : "Profile"}
@@ -2112,7 +2112,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           ) : error ? (
             <div
               role="alert"
-              className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
+              className="rounded-lg border border-border-strong bg-rowHover p-4 text-sm text-muted"
             >
               {error}
             </div>
@@ -2167,7 +2167,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     )}
                     <a
                       href={`/user/${encodeURIComponent(profile.username)}`}
-                      className="mt-4 block break-all text-xs text-[#A1A1A1] hover:text-violet-300"
+                      className="mt-4 block break-all text-xs text-[#A1A1A1] hover:text-[#EDEDED]"
                     >
                       {window.location.host}/user/{profile.username}
                     </a>
@@ -2234,9 +2234,9 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                               {sheet.title}
                             </span>
                             <span className="shrink-0 tabular-nums text-[#A1A1A1]">
-                              <span className="text-[#46A758]">{sheet.solved} solved</span>
+                              <span className="text-muted">{sheet.solved} solved</span>
                               <span className="mx-2 text-[#4D4D4D]">·</span>
-                              <span className="text-[#F5A623]">{sheet.skipped} skipped</span>
+                              <span className="text-muted">{sheet.skipped} skipped</span>
                               <span className="mx-2 text-[#4D4D4D]">·</span>
                               {sheet.total} total
                             </span>
@@ -2365,7 +2365,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           {(authError || progressError) && (
             <div
               role="alert"
-              className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300"
+              className="mb-6 rounded-lg border border-border-strong bg-rowHover p-3 text-sm text-muted"
             >
               {authError || progressError}
             </div>
@@ -2507,7 +2507,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       className="w-full flex items-center justify-between p-3.5 rounded-lg hover:bg-[#1F1F1F] transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#F5A623]/20 flex items-center justify-center text-[#F5A623]">
+                        <div className="w-10 h-10 rounded-lg bg-[#1F1F1F] flex items-center justify-center text-[#A1A1A1]">
                           <Upload size={20} />
                         </div>
                         <div className="text-left">
@@ -2533,14 +2533,14 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                         );
                         if (confirmed) await reset();
                       }}
-                      className="w-full flex items-center justify-between rounded-lg p-3.5 transition-colors hover:bg-red-500/10"
+                      className="w-full flex items-center justify-between rounded-lg p-3.5 transition-colors hover:bg-[#1F1F1F]"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10 text-red-400">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1F1F1F] text-[#A1A1A1]">
                           <RefreshCcw size={20} />
                         </div>
                         <div className="text-left">
-                          <div className="text-sm font-medium text-red-300">
+                          <div className="text-sm font-medium text-[#EDEDED]">
                             Reset All Sheets
                           </div>
                           <div className="text-xs text-[#A1A1A1]">
@@ -2897,14 +2897,14 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
         {progressError && (
           <div
             role="alert"
-            className="fixed bottom-4 right-4 z-[60] max-w-md rounded-lg border border-red-500/30 bg-[#0A0A0A] p-4 text-sm text-red-300 shadow-xl"
+            className="fixed bottom-4 right-4 z-[60] max-w-md rounded-lg border border-[#383838] bg-[#0A0A0A] p-4 text-sm text-[#A1A1A1] shadow-xl"
           >
             <div className="flex items-start gap-3">
               <p>{progressError}</p>
               <button
                 onClick={() => setProgressError("")}
                 aria-label="Dismiss sync error"
-                className="text-red-200 hover:text-white"
+                className="text-[#A1A1A1] hover:text-white"
               >
                 <X size={16} />
               </button>
@@ -2914,7 +2914,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
         {authError && (
           <div
             role="alert"
-            className="fixed bottom-4 right-4 z-[60] max-w-md rounded-lg border border-red-500/30 bg-[#0A0A0A] p-4 text-sm text-red-300 shadow-xl"
+            className="fixed bottom-4 right-4 z-[60] max-w-md rounded-lg border border-[#383838] bg-[#0A0A0A] p-4 text-sm text-[#A1A1A1] shadow-xl"
           >
             <div className="flex items-start gap-3">
               <p>{authError}</p>
@@ -2973,7 +2973,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           {sheetError && (
             <p
               role="alert"
-              className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300"
+              className="mb-4 rounded-lg border border-border-strong bg-rowHover p-3 text-sm text-muted"
             >
               {sheetError}
             </p>
@@ -3133,7 +3133,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-bold text-[#F5A623] tabular-nums">
+                  <div className="text-lg font-bold text-muted tabular-nums">
                     {skippedCount}
                   </div>
                   <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
@@ -3158,7 +3158,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   if (confirmed)
                     await reset(sheetProblems.map((problem) => problem.id));
                 }}
-                className="w-full text-xs py-1.5 bg-[#1F1F1F] hover:bg-red-500/10 text-[#A1A1A1] hover:text-red-400 rounded-md transition-colors flex items-center justify-center gap-1"
+                className="w-full text-xs py-1.5 bg-[#1F1F1F] hover:bg-[#262626] text-[#A1A1A1] hover:text-[#EDEDED] rounded-md transition-colors flex items-center justify-center gap-1"
               >
                 <RefreshCcw size={12} /> Reset This Sheet
               </button>
@@ -3233,7 +3233,7 @@ function ProgressBar({ done, total }) {
   return (
     <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#262626]" aria-label={`${pct}% complete`}>
       <div
-        className={`h-full rounded-full transition-all duration-300 ease-out ${pct === 100 ? "bg-[#46A758]" : "bg-[#EDEDED]"}`}
+        className={`h-full rounded-full transition-all duration-300 ease-out ${pct === 100 ? "bg-[#A1A1A1]" : "bg-[#EDEDED]"}`}
         style={{
           width: `${pct}%`,
           minWidth: done > 0 ? "2px" : 0,
@@ -3259,7 +3259,7 @@ function ProblemRow({ prob, state, onToggle, onSkip }) {
             ? `Mark ${prob.title} as not done`
             : `Mark ${prob.title} as done`
         }
-        className={`w-[22px] h-[22px] flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${isDone ? "bg-[#46A758] border-[#46A758]" : "border-[#EDEDED]/60 bg-transparent hover:border-[#EDEDED]"}`}
+        className={`w-[22px] h-[22px] flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${isDone ? "bg-[#A1A1A1] border-[#A1A1A1]" : "border-[#EDEDED]/60 bg-transparent hover:border-[#EDEDED]"}`}
       >
         {isDone && (
           <svg
@@ -3267,7 +3267,7 @@ function ProblemRow({ prob, state, onToggle, onSkip }) {
             height="14"
             viewBox="0 0 14 14"
             fill="none"
-            className="text-white"
+            className="text-black"
           >
             <path
               d="M2 7l3.5 3.5L12 4.5"
@@ -3282,7 +3282,7 @@ function ProblemRow({ prob, state, onToggle, onSkip }) {
 
       <button
         onClick={() => onToggle(prob.id)}
-        className={`flex-1 text-left text-[15px] leading-snug transition-all duration-200 ${isDone ? "line-through text-[#A1A1A1]" : "text-[#EDEDED] hover:text-white"}`}
+        className="flex-1 text-left text-[15px] leading-snug text-[#EDEDED] hover:text-white transition-colors duration-200"
       >
         {prob.title}
       </button>
@@ -3290,7 +3290,7 @@ function ProblemRow({ prob, state, onToggle, onSkip }) {
       <button
         onClick={() => onSkip(prob.id)}
         aria-label={isSkip ? `Unskip ${prob.title}` : `Skip ${prob.title}`}
-        className={`flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-md transition-colors duration-200 ${isSkip ? "text-[#F5A623] bg-[#F5A623]/10" : "text-[#A1A1A1] hover:text-[#F5A623] hover:bg-[#F5A623]/10"}`}
+        className={`flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-md transition-colors duration-200 ${isSkip ? "text-muted bg-[#1F1F1F]" : "text-[#A1A1A1] hover:text-[#EDEDED] hover:bg-[#1F1F1F]"}`}
       >
         <SkipForward size={13} />
         <span>Skip</span>

@@ -12,8 +12,8 @@ export default {
         text: '#EDEDED',
         muted: '#A1A1A1',
         accent: '#EDEDED',
-        done: '#46A758',
-        skip: '#F5A623',
+        done: '#A1A1A1',
+        skip: '#A1A1A1',
       },
       fontFamily: {
         sans: ['Inter', 'Segoe UI Variable', 'Segoe UI', 'system-ui', 'sans-serif'],
