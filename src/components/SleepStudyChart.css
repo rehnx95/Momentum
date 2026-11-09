@@ -45,11 +45,11 @@
   width: 0.6rem;
   height: 0.6rem;
   border-radius: 2px;
-  background: var(--text);
+  background: var(--sleep-chart-color);
 }
 
 .study-swatch {
-  background: var(--study-accent);
+  background: var(--study-chart-color);
 }
 
 .sleep-study-chart-wrap {
@@ -70,7 +70,7 @@
 }
 
 .sleep-study-gridline {
-  stroke: var(--border);
+  stroke: var(--border-strong);
   stroke-width: 1;
 }
 
@@ -85,17 +85,13 @@
 }
 
 .sleep-bar {
-  fill: var(--text);
+  fill: var(--sleep-chart-color);
 }
 
 .study-bar {
-  fill: var(--study-accent);
-  stroke: var(--page);
+  fill: var(--study-chart-color);
+  stroke: var(--surface);
   stroke-width: 0.75px;
-}
-
-.sleep-study-card {
-  --study-accent: var(--muted);
 }
 
 .sleep-study-bar {

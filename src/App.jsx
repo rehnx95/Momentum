@@ -3233,9 +3233,10 @@ function ProgressBar({ done, total }) {
   return (
     <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#262626]" aria-label={`${pct}% complete`}>
       <div
-        className="h-full rounded-full bg-[#A1A1A1] transition-all duration-300 ease-out"
+        className="h-full rounded-full transition-all duration-300 ease-out"
         style={{
           width: `${pct}%`,
+          backgroundColor: "var(--text)",
           minWidth: done > 0 ? "2px" : 0,
           borderRadius: pct > 0 && pct < 3 ? "2px" : undefined,
         }}

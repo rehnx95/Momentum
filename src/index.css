@@ -19,6 +19,8 @@
   --positive: #d4d4d4;
   --warning: #a3a3a3;
   --study-accent: #a1a1a1;
+  --sleep-chart-color: #f5f5f5;
+  --study-chart-color: #737373;
   --font-sans: Inter, "Segoe UI", system-ui, sans-serif;
 }
 
@@ -39,6 +41,8 @@
   --positive: #525252;
   --warning: #737373;
   --study-accent: #737373;
+  --sleep-chart-color: #262626;
+  --study-chart-color: #737373;
 }
 
 * {
