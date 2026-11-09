@@ -571,6 +571,7 @@ html {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 0.75rem;
+  align-items: start;
 }
 
 .profile-layout.own-profile-layout .profile-sidebar {
@@ -668,11 +669,20 @@ html {
 }
 
 .own-profile-layout .profile-main {
-  display: contents;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "progress"
+    "heatmap"
+    "recent";
+  align-items: start;
+  gap: 0.75rem;
+  min-width: 0;
 }
 
 .own-profile-layout .profile-main > .profile-top {
-  grid-column: 1 / -1;
+  grid-area: progress;
   grid-template-columns: minmax(0, 1fr);
   gap: 0;
   margin: 0;
@@ -685,15 +695,16 @@ html {
 
 .own-profile-layout .profile-main > .hm-card,
 .own-profile-layout .profile-main > .recent-ac-card {
-  grid-column: 1 / -1;
-  margin: 0 0 0.75rem;
+  margin: 0;
 }
 
 .own-profile-layout .profile-main > .hm-card {
+  grid-area: heatmap;
   padding: 0.85rem;
 }
 
 .own-profile-layout .profile-main > .recent-ac-card {
+  grid-area: recent;
   padding: 0.85rem;
 }
 
@@ -724,7 +735,27 @@ html {
   }
 
   .own-profile-layout .profile-sheet-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-layout.own-profile-layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 0.75rem;
+    row-gap: 1rem;
+  }
+
+  .own-profile-layout .profile-sidebar {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .own-profile-layout .profile-main {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "progress heatmap"
+      "progress recent";
   }
 }
 
