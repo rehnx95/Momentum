@@ -138,9 +138,23 @@ export default function FullLog({ daily, onOpenDate }) {
                 aria-label={`Open log for ${dateLabel(row.date)}`}
               >
                 <span className="full-log-day-main">
-                  <strong className="full-log-day-date">
-                    {dateLabel(row.date)}
-                  </strong>
+                  <span className="full-log-day-meta">
+                    <strong className="full-log-day-date">
+                      {dateLabel(row.date)}
+                    </strong>
+                    <span className="full-log-day-details">
+                      {problems > 0 && (
+                        <span>
+                          <strong>{problems}</strong> solved
+                        </span>
+                      )}
+                      {sleep > 0 && (
+                        <span>
+                          <strong>{formatDuration(sleep)}</strong> sleep
+                        </span>
+                      )}
+                    </span>
+                  </span>
                   {activities.length ? (
                     <span className="full-log-activities">
                       {activities.map((activity, index) => (
@@ -156,18 +170,6 @@ export default function FullLog({ daily, onOpenDate }) {
                   ) : (
                     <span className="full-log-no-activities">
                       No timed activities
-                    </span>
-                  )}
-                </span>
-                <span className="full-log-day-details">
-                  {problems > 0 && (
-                    <span>
-                      <strong>{problems}</strong> solved
-                    </span>
-                  )}
-                  {sleep > 0 && (
-                    <span>
-                      <strong>{formatDuration(sleep)}</strong> sleep
                     </span>
                   )}
                 </span>
