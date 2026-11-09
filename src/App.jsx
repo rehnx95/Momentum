@@ -2627,6 +2627,8 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </div>
             </div>
 
+            <div className="profile-future-slot" aria-hidden="true" />
+
             <div className="profile-main">
               <ActivityHeatmap
                 activity={activityLog}

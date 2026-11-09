@@ -580,6 +580,10 @@ html {
   gap: 0.75rem;
 }
 
+.own-profile-layout .profile-future-slot {
+  display: none;
+}
+
 .profile-layout.own-profile-layout .profile-sidebar {
   display: block;
   position: static;
@@ -761,7 +765,31 @@ html {
 
   .profile-layout.own-profile-layout {
     grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.5fr);
+    grid-template-areas:
+      "profile future"
+      "progress activity";
     column-gap: 1rem;
+  }
+
+  .own-profile-layout .profile-left-column {
+    display: contents;
+  }
+
+  .own-profile-layout .profile-sidebar {
+    grid-area: profile;
+  }
+
+  .own-profile-layout .profile-top {
+    grid-area: progress;
+  }
+
+  .own-profile-layout .profile-future-slot {
+    display: block;
+    grid-area: future;
+  }
+
+  .own-profile-layout .profile-main {
+    grid-area: activity;
   }
 }
 
