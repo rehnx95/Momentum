@@ -579,8 +579,8 @@
   --log-day-bg: #111111;
   --log-summary-bg: #090909;
   --log-item-bg: #1b1b1b;
-  --log-detail-bg: #141414;
-  --log-border: #393939;
+  --log-detail-bg: #222222;
+  --log-border: #4a4a4a;
   --log-label: #c4c4c4;
   --log-detail-text: #d4d4d4;
   display: grid;
@@ -591,8 +591,8 @@
   --log-day-bg: #ffffff;
   --log-summary-bg: #f0f0f0;
   --log-item-bg: #ffffff;
-  --log-detail-bg: #f7f7f7;
-  --log-border: #c8c8c8;
+  --log-detail-bg: #ededed;
+  --log-border: #a8a8a8;
   --log-label: #444444;
   --log-detail-text: #333333;
 }
@@ -662,21 +662,23 @@
   min-width: 0;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.55rem;
+  gap: 0;
+  padding: 0.65rem 0.35rem;
   border: 1px solid var(--log-border);
   border-radius: 0.6rem;
-  background: var(--log-summary-bg);
+  background: var(--log-item-bg);
 }
 
 .full-log-summary-item {
   display: grid;
   min-width: 0;
   gap: 0.2rem;
-  padding: 0.6rem 0.7rem;
-  border: 1px solid var(--log-border);
-  border-radius: 0.55rem;
-  background: var(--log-item-bg);
+  align-content: center;
+  padding: 0.3rem 0.65rem;
+}
+
+.full-log-summary-item + .full-log-summary-item {
+  border-left: 1px solid var(--log-border);
 }
 
 .full-log-summary-item small {
@@ -701,8 +703,8 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: start;
   justify-content: start;
-  gap: 0.5rem;
-  padding: 0 0.65rem 0.65rem;
+  gap: 0.6rem;
+  padding: 0;
 }
 
 .full-log-activity {
@@ -710,12 +712,13 @@
   min-width: 0;
   align-self: start;
   align-content: start;
-  gap: 0.45rem;
-  padding: 0.55rem;
-  border: 1px solid var(--log-border);
-  border-radius: 0.5rem;
-  border-left: 3px solid var(--border-strong);
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border: 1px solid var(--muted);
+  border-left: 4px solid var(--text);
+  border-radius: 0.6rem;
   background: var(--log-detail-bg);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
 }
 
 .full-log-activity-heading {
@@ -724,7 +727,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.35rem;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
 }
 
 .full-log-activity-heading strong:first-child {
@@ -745,7 +748,7 @@
   align-items: center;
   row-gap: 0.2rem;
   color: var(--log-detail-text);
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
 }
 
