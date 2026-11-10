@@ -10,6 +10,11 @@
     grid-column: 1;
     align-content: start;
     gap: 0.75rem;
+    position: sticky;
+    top: calc(var(--header-h) + 1rem);
+    max-height: calc(100vh - var(--header-h) - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .own-profile-layout .profile-main {
@@ -21,6 +26,12 @@
   .profile-layout.own-profile-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .own-profile-layout .profile-left-column {
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
 
   .own-profile-layout .profile-sidebar {

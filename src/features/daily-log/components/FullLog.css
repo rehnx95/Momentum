@@ -154,7 +154,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.35rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .full-log-activity-identity {
@@ -204,7 +204,8 @@
 
 .full-log-activity-heading strong {
   color: var(--text);
-  font-weight: 650;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .full-log-no-activities {

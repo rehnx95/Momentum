@@ -40,8 +40,8 @@ html {
 }
 
 .app-header .track-sheet-brand-name {
-  font-size: 1.05rem;
-  line-height: 1.35rem;
+  font-size: 1.2rem;
+  line-height: 1.45rem;
 }
 
 .app-header-actions {
@@ -212,4 +212,3 @@ html {
   padding: 0.25rem 0.5rem 0.25rem 0;
   border-radius: 0.6rem;
 }
-
