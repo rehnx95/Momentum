@@ -23,7 +23,7 @@ export default function AuthenticatedApp({
 }) {
   const [dialog, setDialog] = useState(null);
   const dialogResolver = useRef(null);
-  const showNotice = useCallback((message, title = "Track Sheet") => {
+  const showNotice = useCallback((message, title = "Momentum") => {
     setDialog({ type: "notice", title, message });
   }, []);
   const askConfirmation = useCallback((message, title = "Are you sure?") => (

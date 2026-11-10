@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../shared/lib/supabase";
-import TrackSheetBrand from "../../shared/components/TrackSheetBrand";
+import MomentumBrand from "../../shared/components/MomentumBrand";
 import Tooltip from "../../shared/components/Tooltip";
 import { User, LogOut } from "lucide-react";
 
@@ -152,7 +152,7 @@ export default function OnboardingPage({
       <header className="dashboard-header bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
         <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <TrackSheetBrand
+            <MomentumBrand
               onNavigate={onGoToDashboard}
               subtitle="Complete your profile"
             />
@@ -174,11 +174,11 @@ export default function OnboardingPage({
         <div className="onboarding-panel bg-[#0A0A0A] rounded-2xl border border-[#262626] p-6 md:p-8">
           <div className="mb-6">
             <h2 className="text-2xl font-bold mb-2">
-              Welcome to Track Sheet
+              Welcome to Momentum
             </h2>
             <p className="text-[#A1A1A1]">
-              Let's set up your profile to get started with tracking your coding
-              journey.
+              Set up your profile to make Momentum yours. Keep your learning,
+              routines, and daily progress moving forward.
             </p>
           </div>
 

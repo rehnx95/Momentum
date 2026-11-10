@@ -7,7 +7,7 @@ import {
   User,
   Users,
 } from "lucide-react";
-import TrackSheetBrand from "./TrackSheetBrand";
+import MomentumBrand from "./MomentumBrand";
 import Tooltip from "./Tooltip";
 
 const NAV = [
@@ -27,7 +27,7 @@ export default function AppHeader({
   return (
     <header className="app-header">
       <div className="app-header-inner">
-        <TrackSheetBrand onNavigate={() => onNavigate("/")} />
+        <MomentumBrand onNavigate={() => onNavigate("/")} />
         <nav className="app-nav" aria-label="Main navigation">
           {NAV.map(({ id, label, path, icon: Icon }) => (
             <button

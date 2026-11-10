@@ -1,4 +1,4 @@
-.track-sheet-brand-context {
+.momentum-brand-context {
   width: 5.25rem;
   height: 1rem;
   max-width: 100%;
@@ -17,7 +17,7 @@
   white-space: nowrap;
 }
 
-.track-sheet-brand {
+.momentum-brand {
   position: absolute;
   left: 4.25rem;
   top: 50%;
@@ -28,19 +28,19 @@
   z-index: 3;
 }
 
-.track-sheet-brand-logo {
+.momentum-brand-logo {
   width: 2rem;
   height: 2rem;
   flex: 0 0 2rem;
 }
 
-.track-sheet-brand-copy {
+.momentum-brand-copy {
   width: 7.25rem;
   height: 2.75rem;
   flex: 0 0 7.25rem;
 }
 
-.track-sheet-brand-name {
+.momentum-brand-name {
   height: 1.25rem;
   white-space: nowrap;
   line-height: 1.25rem;
@@ -48,7 +48,7 @@
 
 @media (min-width: 768px) {
 
-  .track-sheet-brand {
+  .momentum-brand {
     left: 5rem;
   }
 
@@ -57,7 +57,7 @@
   }
 }
 
-.track-sheet-brand > span:last-child {
+.momentum-brand > span:last-child {
   display: flex;
   min-height: 2.75rem;
   flex-direction: column;
@@ -169,4 +169,3 @@
 .app-dialog-confirm:hover {
   background: var(--accent-hover);
 }
-

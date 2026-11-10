@@ -8,7 +8,7 @@ export const AppState = {
   AUTHENTICATED: "AUTHENTICATED",
 };
 
-const ACCOUNT_CACHE_KEY = "track-sheet-account-cache";
+const ACCOUNT_CACHE_KEY = "momentum:account-cache";
 
 function readCachedAccount() {
   try {

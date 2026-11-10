@@ -1,4 +1,4 @@
-const CACHE_PREFIX = "track-sheet-user-data:";
+const CACHE_PREFIX = "momentum:user-data:";
 const MAX_CACHE_SIZE = 2_500_000;
 
 function cacheKey(userId, section) {

@@ -21,7 +21,9 @@ export default function useSheetLibrary(user, askConfirmation) {
   const [deletingSheetId, setDeletingSheetId] = useState(null);
   const [sheetError, setSheetError] = useState("");
   const uploadSheetInput = useRef(null);
-  const savedSheetIdRef = useRef(localStorage.getItem("dsa-active-sheet"));
+  const savedSheetIdRef = useRef(
+    localStorage.getItem("momentum:learning-active-sheet"),
+  );
   const [selectedSheetId, setSelectedSheetId] = useState(
     () => savedSheetIdRef.current || "",
   );
@@ -124,7 +126,7 @@ export default function useSheetLibrary(user, askConfirmation) {
 
   useEffect(() => {
     if (selectedSheet) {
-      localStorage.setItem("dsa-active-sheet", selectedSheet.id);
+      localStorage.setItem("momentum:learning-active-sheet", selectedSheet.id);
     }
   }, [selectedSheet]);
 
@@ -174,7 +176,7 @@ export default function useSheetLibrary(user, askConfirmation) {
       };
       setCustomSheets((current) => [...current, nextSheet]);
       setSelectedSheetId(nextSheet.id);
-      localStorage.setItem("dsa-active-sheet", nextSheet.id);
+      localStorage.setItem("momentum:learning-active-sheet", nextSheet.id);
     } catch (error) {
       console.error("Failed to upload sheet:", error);
       setSheetError(
@@ -228,8 +230,11 @@ export default function useSheetLibrary(user, askConfirmation) {
           (availableSheet) => availableSheet.id !== sheet.id,
         );
         setSelectedSheetId(nextSheet?.id || "");
-        if (nextSheet) localStorage.setItem("dsa-active-sheet", nextSheet.id);
-        else localStorage.removeItem("dsa-active-sheet");
+        if (nextSheet) {
+          localStorage.setItem("momentum:learning-active-sheet", nextSheet.id);
+        } else {
+          localStorage.removeItem("momentum:learning-active-sheet");
+        }
       }
     } catch (error) {
       console.error("Failed to permanently delete sheet:", error);

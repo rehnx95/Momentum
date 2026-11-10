@@ -42,7 +42,7 @@ export async function bootstrapBuiltInSheets(userId, isActive = () => true) {
     builtInSheets.find((sheet) => sheet.id === "dsa")?.id ||
     builtInSheets[0]?.id;
   const manifestVersion = getSheetManifestVersion(builtInSheets);
-  const bootstrapKey = `track-sheet-builtins:${userId}`;
+  const bootstrapKey = `momentum:builtins:${userId}`;
   let isBootstrapped = false;
   try {
     isBootstrapped = localStorage.getItem(bootstrapKey) === manifestVersion;

@@ -1,6 +1,6 @@
 {
-  "name": "track-sheet",
-  "description": "A multi-user tracker for built-in and user-uploaded problem sheets.",
+  "name": "momentum",
+  "description": "A personal progress workspace for learning tracks, daily routines, activity logs, and progress analytics.",
   "private": true,
   "version": "1.0.0",
   "type": "module",

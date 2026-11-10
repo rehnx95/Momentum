@@ -1,4 +1,4 @@
-import { ChevronRight, CheckSquare } from "lucide-react";
+import { ChevronRight, Activity } from "lucide-react";
 
 export default function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
   return (
@@ -8,13 +8,14 @@ export default function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
           <div className="auth-panel">
             <div className="auth-simple-brand">
               <div className="brand-mark">
-                <CheckSquare size={20} className="text-black" />
+                <Activity size={21} strokeWidth={2.25} className="text-black" />
               </div>
-              <span>Track Sheet</span>
+              <span>Momentum</span>
             </div>
-            <h1 className="auth-simple-title">Your practice, in one place.</h1>
+            <h1 className="auth-simple-title">Make progress every day.</h1>
             <p className="auth-panel-description">
-              Sign in to track problems, build consistency, and see your progress.
+              Bring your learning, routines, and daily progress together in one
+              place.
             </p>
             {error && (
               <p

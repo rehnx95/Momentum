@@ -27,7 +27,7 @@ html {
   padding-inline: 1rem;
 }
 
-.app-header .track-sheet-brand {
+.app-header .momentum-brand {
   display: flex;
   position: static;
   left: auto;
@@ -40,7 +40,7 @@ html {
   transform: none;
 }
 
-.app-header .track-sheet-brand-logo {
+.app-header .momentum-brand-logo {
   display: flex;
   width: 2.5rem;
   height: 2.5rem;
@@ -51,19 +51,19 @@ html {
   box-shadow: 0 1px 2px rgb(0 0 0 / 18%);
 }
 
-.app-header .track-sheet-brand-logo svg {
+.app-header .momentum-brand-logo svg {
   width: 1.4rem;
   height: 1.4rem;
 }
 
-.app-header .track-sheet-brand-copy {
+.app-header .momentum-brand-copy {
   display: block;
   width: auto;
   height: auto;
   flex: 0 1 auto;
 }
 
-.app-header .track-sheet-brand-name {
+.app-header .momentum-brand-name {
   height: auto;
   color: var(--text);
   font-size: 1.2rem;
@@ -73,23 +73,23 @@ html {
 }
 
 @media (max-width: 767px) {
-  .app-header .track-sheet-brand {
+  .app-header .momentum-brand {
     gap: 0.55rem;
   }
 
-  .app-header .track-sheet-brand-logo {
+  .app-header .momentum-brand-logo {
     width: 2.15rem;
     height: 2.15rem;
     flex-basis: 2.15rem;
     border-radius: 0.65rem;
   }
 
-  .app-header .track-sheet-brand-logo svg {
+  .app-header .momentum-brand-logo svg {
     width: 1.2rem;
     height: 1.2rem;
   }
 
-  .app-header .track-sheet-brand-name {
+  .app-header .momentum-brand-name {
     font-size: 1.05rem;
     letter-spacing: -0.025em;
   }

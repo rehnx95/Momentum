@@ -2,11 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function useProblemTree({ data, progress, getState, update }) {
   const [search, setSearch] = useState(
-    () => localStorage.getItem("dsa-search") || "",
+    () => localStorage.getItem("momentum:learning-search") || "",
   );
   const [expandedSteps, setExpandedSteps] = useState(() => {
     try {
-      const stored = localStorage.getItem("dsa-expanded-steps");
+      const stored = localStorage.getItem("momentum:learning-expanded-steps");
       return stored ? new Set(JSON.parse(stored)) : new Set();
     } catch {
       return new Set();
@@ -14,7 +14,7 @@ export default function useProblemTree({ data, progress, getState, update }) {
   });
   const [expandedSubs, setExpandedSubs] = useState(() => {
     try {
-      const stored = localStorage.getItem("dsa-expanded-subs");
+      const stored = localStorage.getItem("momentum:learning-expanded-subs");
       return stored ? new Set(JSON.parse(stored)) : new Set();
     } catch {
       return new Set();
@@ -22,35 +22,35 @@ export default function useProblemTree({ data, progress, getState, update }) {
   });
   const [hideSkipped, setHideSkipped] = useState(() => {
     try {
-      return localStorage.getItem("dsa-hide-skipped") === "true";
+      return localStorage.getItem("momentum:learning-hide-skipped") === "true";
     } catch {
       return false;
     }
   });
   const [activeFilter, setActiveFilter] = useState(
-    () => localStorage.getItem("dsa-filter") || "all",
+    () => localStorage.getItem("momentum:learning-filter") || "all",
   );
 
   useEffect(() => {
     localStorage.setItem(
-      "dsa-expanded-steps",
+      "momentum:learning-expanded-steps",
       JSON.stringify([...expandedSteps]),
     );
   }, [expandedSteps]);
   useEffect(() => {
     localStorage.setItem(
-      "dsa-expanded-subs",
+      "momentum:learning-expanded-subs",
       JSON.stringify([...expandedSubs]),
     );
   }, [expandedSubs]);
   useEffect(() => {
-    localStorage.setItem("dsa-hide-skipped", String(hideSkipped));
+    localStorage.setItem("momentum:learning-hide-skipped", String(hideSkipped));
   }, [hideSkipped]);
   useEffect(() => {
-    localStorage.setItem("dsa-filter", activeFilter);
+    localStorage.setItem("momentum:learning-filter", activeFilter);
   }, [activeFilter]);
   useEffect(() => {
-    localStorage.setItem("dsa-search", search);
+    localStorage.setItem("momentum:learning-search", search);
   }, [search]);
 
   const totalProblems = data.steps.reduce(

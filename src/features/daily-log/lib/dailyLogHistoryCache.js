@@ -1,8 +1,8 @@
 const CACHE_DURATION = 60_000;
 const cache = new Map();
-const HISTORY_STORAGE_PREFIX = "track-sheet-log-history:";
-const DAY_STORAGE_PREFIX = "track-sheet-day-log:";
-const FULL_LOG_STORAGE_PREFIX = "track-sheet-full-log:";
+const HISTORY_STORAGE_PREFIX = "momentum:log-history:";
+const DAY_STORAGE_PREFIX = "momentum:day-log:";
+const FULL_LOG_STORAGE_PREFIX = "momentum:full-log:";
 
 export function getDailyLogHistoryCache(userId) {
   let entry = cache.get(userId);
