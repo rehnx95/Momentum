@@ -178,66 +178,53 @@ export default function FullLog({ daily }) {
                 <div className="full-log-day-content">
                   <header className="full-log-day-heading">
                     <strong className="full-log-day-date">{dateLabel(row.date)}</strong>
-                    <span className="full-log-sleep-schedule">
-                      <span>Sleep <strong>{formatTime(row.sleep_time)}</strong></span>
-                      <span aria-hidden="true">→</span>
-                      <span>Wake <strong>{formatTime(row.wake_time)}</strong></span>
-                    </span>
                   </header>
                   <div className="full-log-summary">
-                    <div className="full-log-summary-item sleep">
+                    <div className="full-log-summary-item">
+                      <small>Sleep</small>
+                      <strong>{formatTime(row.sleep_time)}</strong>
+                    </div>
+                    <div className="full-log-summary-item">
+                      <small>Wake</small>
+                      <strong>{formatTime(row.wake_time)}</strong>
+                    </div>
+                    <div className="full-log-summary-item">
                       <small>Sleep duration</small>
                       <strong>{sleep ? formatDuration(sleep) : "—"}</strong>
                     </div>
-                    <div className="full-log-summary-item solved">
-                      <small>Problems solved</small>
+                    <div className="full-log-summary-item">
+                      <small>Solved</small>
                       <strong>{problems}</strong>
                     </div>
-                    <div className="full-log-summary-item studied">
-                      <small>Study time</small>
+                    <div className="full-log-summary-item">
+                      <small>Studied</small>
                       <strong>{studied ? formatDuration(studied) : "—"}</strong>
                     </div>
                   </div>
                   {activities.length ? (
-                    <details className="full-log-activity-details">
-                      <summary>
-                        <span className="full-log-activity-overview">
-                          <strong>
-                            {activities.length} {activities.length === 1 ? "activity" : "activities"}
-                          </strong>
-                          <span className="full-log-activity-names">
-                            {activities.slice(0, 3).map((activity) => activity.name).join(" · ")}
-                            {activities.length > 3 && ` +${activities.length - 3}`}
-                          </span>
-                        </span>
-                        <strong className="full-log-activity-total">
-                          {formatDuration(studied)}
-                        </strong>
-                      </summary>
-                      <div className="full-log-activities">
-                        {activities.map((activity, index) => (
-                          <div
-                            className="full-log-activity"
-                            key={`${activity.name}-${index}`}
-                          >
-                            <div className="full-log-activity-heading">
-                              <strong>{activity.name}</strong>
-                              <strong>{formatDuration(activity.minutes)}</strong>
-                            </div>
-                            <div className="full-log-activity-slots">
-                              {activity.slots.map((slot, slotIndex) => (
-                                <span
-                                  className="full-log-activity-slot"
-                                  key={`${slot.start}-${slot.end}-${slotIndex}`}
-                                >
-                                  {formatTime(slot.start)}–{formatTime(slot.end)}
-                                </span>
-                              ))}
-                            </div>
+                    <div className="full-log-activities">
+                      {activities.map((activity, index) => (
+                        <div
+                          className="full-log-activity"
+                          key={`${activity.name}-${index}`}
+                        >
+                          <div className="full-log-activity-heading">
+                            <strong>{activity.name}</strong>
+                            <strong>{formatDuration(activity.minutes)}</strong>
                           </div>
-                        ))}
-                      </div>
-                    </details>
+                          <div className="full-log-activity-slots">
+                            {activity.slots.map((slot, slotIndex) => (
+                              <span
+                                className="full-log-activity-slot"
+                                key={`${slot.start}-${slot.end}-${slotIndex}`}
+                              >
+                                {formatTime(slot.start)}–{formatTime(slot.end)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   ) : (
                     <p className="full-log-no-activities">
                       No timed activities

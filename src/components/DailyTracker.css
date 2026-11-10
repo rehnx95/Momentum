@@ -638,45 +638,27 @@
   letter-spacing: -0.015em;
 }
 
-.full-log-sleep-schedule {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  color: var(--muted);
-  font-size: 0.7rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.full-log-sleep-schedule span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.full-log-sleep-schedule strong {
-  color: var(--text);
-  font-size: 0.75rem;
-  font-weight: 650;
-}
-
 .full-log-summary {
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
   gap: 0.55rem;
+  padding: 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
 }
 
 .full-log-summary-item {
   display: grid;
   min-width: 0;
   gap: 0.2rem;
-  padding: 0.6rem 0.7rem;
+  padding: 0.55rem 0.65rem;
   border: 1px solid var(--border);
-  border-left: 3px solid var(--border-strong);
   border-radius: 0.55rem;
-  background: var(--surface);
+  background: var(--surface-raised);
 }
 
 .full-log-summary-item small {
@@ -692,84 +674,6 @@
   font-weight: 750;
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
-}
-
-.full-log-summary-item.sleep {
-  border-left-color: var(--sleep-chart-color);
-}
-
-.full-log-summary-item.solved {
-  border-left-color: #45a875;
-}
-
-:root[data-theme="light"] .full-log-summary-item.solved {
-  border-left-color: #21834f;
-}
-
-.full-log-summary-item.studied {
-  border-left-color: var(--study-chart-color);
-}
-
-.full-log-activity-details {
-  min-width: 0;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 0.6rem;
-  background: var(--surface);
-}
-
-.full-log-activity-details > summary {
-  display: flex;
-  min-height: 2.8rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.65rem;
-  padding: 0.55rem 0.7rem;
-  color: var(--text);
-  cursor: pointer;
-  list-style: none;
-}
-
-.full-log-activity-details > summary::-webkit-details-marker {
-  display: none;
-}
-
-.full-log-activity-details > summary::after {
-  flex: none;
-  color: var(--muted);
-  content: "+";
-  font-size: 1.1rem;
-  line-height: 1;
-}
-
-.full-log-activity-details[open] > summary::after {
-  content: "−";
-}
-
-.full-log-activity-overview {
-  display: grid;
-  min-width: 0;
-  gap: 0.05rem;
-}
-
-.full-log-activity-overview > strong {
-  font-size: 0.76rem;
-  font-weight: 700;
-}
-
-.full-log-activity-names {
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 0.68rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.full-log-activity-total {
-  flex: none;
-  color: var(--study-chart-color);
-  font-size: 0.78rem;
-  font-variant-numeric: tabular-nums;
 }
 
 .full-log-activities {
@@ -792,7 +696,7 @@
   padding: 0.55rem;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
-  border-left: 3px solid var(--study-chart-color);
+  border-left: 3px solid var(--border-strong);
   background: var(--surface-raised);
 }
 
@@ -896,22 +800,26 @@
 }
 
 @container full-log-day (max-width: 760px) {
+  .full-log-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .full-log-activities {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @container full-log-day (max-width: 500px) {
+  .full-log-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .full-log-activities {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .full-log-day {
     padding: 0.7rem;
-  }
-
-  .full-log-summary {
-    gap: 0.35rem;
   }
 
   .full-log-summary-item {
