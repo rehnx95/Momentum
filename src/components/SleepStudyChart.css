@@ -66,6 +66,35 @@
   background: var(--surface-raised);
 }
 
+.sleep-study-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0 0 0.4rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.sleep-study-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sleep-study-legend-swatch {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+}
+
+.sleep-study-legend-swatch.sleep {
+  background: var(--sleep-chart-color);
+}
+
+.sleep-study-legend-swatch.study {
+  background: var(--study-chart-color);
+}
+
 .sleep-study-chart {
   display: block;
   width: 100%;
@@ -105,6 +134,13 @@
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 100ms ease-out;
+}
+
+.sleep-study-point.is-active {
+  transform: scale(1.35);
 }
 
 .sleep-study-point-target {

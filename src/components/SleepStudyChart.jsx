@@ -45,6 +45,7 @@ function formatHours(minutes) {
 function SleepStudyGraph({ days, title, series }) {
   const chartWrapRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
+  const [activePoint, setActivePoint] = useState(null);
   const [chartWidth, setChartWidth] = useState(DEFAULT_CHART_WIDTH);
 
   useLayoutEffect(() => {
@@ -68,25 +69,33 @@ function SleepStudyGraph({ days, title, series }) {
     0,
     ...days.flatMap((day) => series.map((key) => day[key])),
   );
-  const maxHours = Math.max(8, Math.ceil(maxMinutes / 120) * 2);
+  const maxHours = maxMinutes > 12 * 60 ? 24 : 12;
   const currentYear = new Date().getFullYear();
   const yFor = (minutes) =>
-    PLOT.top + plotHeight - (minutes / 60 / maxHours) * plotHeight;
+    PLOT.top +
+    plotHeight -
+    (Math.min(minutes / 60, 24) / maxHours) * plotHeight;
   const xFor = (index) =>
     PLOT.left + (plotWidth * index) / Math.max(1, days.length - 1);
-  const ticks = [0, maxHours / 2, maxHours];
+  const ticks = [0, 1, 2, 3, 4].map((step) => (maxHours * step) / 4);
   const showTooltip = (event) => {
     const target = event.target.closest?.("[data-tip]");
     if (!target) {
       setTooltip(null);
+      setActivePoint(null);
       return;
     }
     const rect = target.getBoundingClientRect();
-    setTooltip({
-      text: target.dataset.tip,
-      x: rect.left + rect.width / 2,
-      y: rect.top,
-    });
+    const point = target.dataset.point;
+    setActivePoint(point);
+    setTooltip((current) => current?.point === point
+      ? current
+      : {
+          text: target.dataset.tip,
+          x: rect.left + rect.width / 2,
+          y: rect.top,
+          point,
+        });
   };
 
   return (
@@ -101,7 +110,10 @@ function SleepStudyGraph({ days, title, series }) {
           role="img"
           aria-label={`${title} over the last 30 days, measured in hours`}
           onMouseOver={showTooltip}
-          onMouseLeave={() => setTooltip(null)}
+          onMouseLeave={() => {
+            setTooltip(null);
+            setActivePoint(null);
+          }}
         >
           {ticks.map((hours) => {
             const y = yFor(hours * 60);
@@ -137,10 +149,11 @@ function SleepStudyGraph({ days, title, series }) {
                       r="9"
                       aria-label={`${day.label}: ${formatHours(day[key])} ${key}`}
                       data-tip={`${formatDuration(day[key])} ${key} on ${formatTooltipDate(new Date(`${day.dateKey}T00:00:00`), currentYear)}`}
+                      data-point={`${key}:${day.dateKey}`}
                       onFocus={showTooltip}
                     />
                     <circle
-                      className="sleep-study-point"
+                      className={`sleep-study-point${activePoint === `${key}:${day.dateKey}` ? " is-active" : ""}`}
                       cx={xFor(index)}
                       cy={yFor(day[key])}
                       r="2.8"
@@ -354,6 +367,16 @@ export default function SleepStudyChart({ userId }) {
             aria-labelledby={`sleep-study-tab-${selectedChart}`}
             className="sleep-study-tabpanel"
           >
+            <div className="sleep-study-legend" aria-label="Graph legend">
+              <span>
+                <i className="sleep-study-legend-swatch sleep" aria-hidden="true" />
+                Sleep
+              </span>
+              <span>
+                <i className="sleep-study-legend-swatch study" aria-hidden="true" />
+                Study
+              </span>
+            </div>
             <SleepStudyGraph
               days={days}
               title={activeChart.title}
