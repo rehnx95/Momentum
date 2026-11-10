@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { supabase } from "../lib/supabase";
 import {
   getDailyLogHistoryCache,
@@ -35,8 +42,24 @@ function formatHours(minutes) {
 }
 
 function SleepStudyGraph({ days, title, series }) {
+  const chartWrapRef = useRef(null);
   const [activeDayIndex, setActiveDayIndex] = useState(null);
-  const chartWidth = DEFAULT_CHART_WIDTH;
+  const [chartWidth, setChartWidth] = useState(DEFAULT_CHART_WIDTH);
+
+  useLayoutEffect(() => {
+    const element = chartWrapRef.current;
+    if (!element) return undefined;
+
+    const measure = () => {
+      const width = Math.round(element.clientWidth);
+      if (width > 0) setChartWidth((current) => current === width ? current : width);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   const plotWidth = chartWidth - PLOT.left - PLOT.right;
   const plotHeight = CHART_HEIGHT - PLOT.top - PLOT.bottom;
@@ -54,6 +77,7 @@ function SleepStudyGraph({ days, title, series }) {
   return (
     <section className="sleep-study-graph" aria-label={title}>
       <div
+        ref={chartWrapRef}
         className="sleep-study-chart-wrap"
         onPointerLeave={() => setActiveDayIndex(null)}
       >
@@ -137,8 +161,13 @@ function SleepStudyGraph({ days, title, series }) {
             className="sleep-study-tooltip"
             role="tooltip"
             style={{
-              left: `${(xFor(activeDayIndex) / chartWidth) * 100}%`,
-              top: `${(PLOT.top / CHART_HEIGHT) * 100}%`,
+              left: `${Math.max(
+                72,
+                Math.min(chartWidth - 72, xFor(activeDayIndex)),
+              )}px`,
+              top: `${Math.min(
+                ...series.map((key) => yFor(days[activeDayIndex][key])),
+              )}px`,
             }}
           >
             <strong>{days[activeDayIndex].label}</strong>
