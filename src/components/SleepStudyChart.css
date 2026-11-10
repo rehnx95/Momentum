@@ -110,9 +110,7 @@
 .sleep-study-point-target {
   fill: transparent;
   stroke: transparent;
-  stroke-width: 10;
-  vector-effect: non-scaling-stroke;
-  pointer-events: stroke;
+  pointer-events: all;
 }
 
 .sleep-series .sleep-study-line,

@@ -12,6 +12,7 @@ import {
   setDailyLogHistoryCache,
 } from "../lib/dailyLogHistoryCache";
 import { formatDuration, getSleepMinutes, getStudyMinutes } from "../utils/time";
+import { formatTooltipDate } from "../utils/heatmap";
 import "./SleepStudyChart.css";
 
 const DAY_COUNT = 30;
@@ -68,27 +69,24 @@ function SleepStudyGraph({ days, title, series }) {
     ...days.flatMap((day) => series.map((key) => day[key])),
   );
   const maxHours = Math.max(8, Math.ceil(maxMinutes / 120) * 2);
+  const currentYear = new Date().getFullYear();
   const yFor = (minutes) =>
     PLOT.top + plotHeight - (minutes / 60 / maxHours) * plotHeight;
   const xFor = (index) =>
     PLOT.left + (plotWidth * index) / Math.max(1, days.length - 1);
   const ticks = [0, maxHours / 2, maxHours];
   const showTooltip = (event) => {
-    const target = event.target;
-    const text = target.dataset?.tip;
-    if (!text) {
+    const target = event.target.closest?.("[data-tip]");
+    if (!target) {
       setTooltip(null);
       return;
     }
-
-    const svg = target.ownerSVGElement;
-    const matrix = svg?.getScreenCTM();
-    if (!svg || !matrix) return;
-    const point = svg.createSVGPoint();
-    point.x = Number(target.getAttribute("cx"));
-    point.y = Number(target.getAttribute("cy"));
-    const screenPoint = point.matrixTransform(matrix);
-    setTooltip({ text, x: screenPoint.x, y: screenPoint.y });
+    const rect = target.getBoundingClientRect();
+    setTooltip({
+      text: target.dataset.tip,
+      x: rect.left + rect.width / 2,
+      y: rect.top,
+    });
   };
 
   return (
@@ -136,9 +134,9 @@ function SleepStudyGraph({ days, title, series }) {
                       className="sleep-study-point-target"
                       cx={xFor(index)}
                       cy={yFor(day[key])}
-                      r="0"
+                      r="9"
                       aria-label={`${day.label}: ${formatHours(day[key])} ${key}`}
-                      data-tip={`${day.label} · Sleep: ${formatHours(day.sleep)} · Study: ${formatHours(day.study)}`}
+                      data-tip={`${formatDuration(day[key])} ${key} on ${formatTooltipDate(new Date(`${day.dateKey}T00:00:00`), currentYear)}`}
                       onFocus={showTooltip}
                     />
                     <circle
