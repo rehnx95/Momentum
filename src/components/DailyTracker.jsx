@@ -33,15 +33,11 @@ export default function DailyTracker({ user, sheets, askConfirmation }) {
       </header>
 
       {daily.viewMode === "daily" ? (
-        daily.loading ? (
-          <p className="daily-full-empty" role="status">Loading daily log…</p>
-        ) : (
-          <DayView daily={daily} sheets={sheets} askConfirmation={askConfirmation} />
-        )
+        <DayView daily={daily} sheets={sheets} askConfirmation={askConfirmation} />
       ) : (
         <FullLog daily={daily} />
       )}
-      {daily.viewMode === "full" && daily.message && (
+      {daily.message && (
         <p className="daily-error-message" role="alert">{daily.message}</p>
       )}
     </section>

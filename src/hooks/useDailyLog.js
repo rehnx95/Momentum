@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { invalidateDailyLogHistoryCache } from "../lib/dailyLogHistoryCache";
+import {
+  clearDailyLogCaches,
+  getDailyLogCache,
+  invalidateDailyLogHistoryCache,
+  setDailyLogCache,
+} from "../lib/dailyLogHistoryCache";
 import {
   getSleepMinutes,
   getStudyMinutes,
@@ -76,11 +81,20 @@ function timerStorageGet(userId) {
 export default function useDailyLog(user) {
   const [date, setDateState] = useState(() => getLocalDateKey());
   const dateRef = useRef(date);
-  const [log, setLogState] = useState(() => emptyLog(getLocalDateKey()));
+  const [log, setLogState] = useState(() => {
+    const dateKey = getLocalDateKey();
+    return normalizeLog(getDailyLogCache(user.id, dateKey), dateKey);
+  });
   const logRef = useRef(log);
-  const [savedSnapshot, setSavedSnapshot] = useState(null);
-  const savedSnapshotRef = useRef(null);
-  const [loading, setLoading] = useState(true);
+  const [savedSnapshot, setSavedSnapshot] = useState(() => {
+    const dateKey = getLocalDateKey();
+    const cached = getDailyLogCache(user.id, dateKey);
+    return cached ? JSON.stringify(normalizeLog(cached, dateKey)) : null;
+  });
+  const savedSnapshotRef = useRef(savedSnapshot);
+  const [loading, setLoading] = useState(
+    () => !getDailyLogCache(user.id, getLocalDateKey()),
+  );
   const [loadFailed, setLoadFailed] = useState(false);
   const [loadRequest, setLoadRequest] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -154,6 +168,7 @@ export default function useDailyLog(user) {
       );
       if (error) throw error;
       invalidateDailyLogHistoryCache(user.id);
+      setDailyLogCache(user.id, nextDate, normalizeLog(nextDraft, nextDate));
       if (nextDate === dateRef.current) {
         savedSnapshotRef.current = snapshot;
         setSavedSnapshot(snapshot);
@@ -220,10 +235,12 @@ export default function useDailyLog(user) {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    const cachedLog = getDailyLogCache(user.id, date);
+    setLoading(!cachedLog);
     setLoadFailed(false);
     setStatus("");
-    setMessage("");
+    if (!cachedLog) setMessage("");
+    const snapshotAtRequestStart = savedSnapshotRef.current;
     supabase
       .from("daily_logs")
       .select("date, sleep_time, wake_time, custom_tasks")
@@ -233,8 +250,15 @@ export default function useDailyLog(user) {
       .then(({ data, error }) => {
         if (!active) return;
         if (error) throw error;
+        if (savedSnapshotRef.current !== snapshotAtRequestStart) return;
         const nextLog = normalizeLog(data, date);
+        const hasUnsavedChanges =
+          logRef.current.date === date &&
+          savedSnapshotRef.current !== null &&
+          JSON.stringify(logRef.current) !== savedSnapshotRef.current;
+        if (hasUnsavedChanges) return;
         const snapshot = JSON.stringify(nextLog);
+        setDailyLogCache(user.id, date, nextLog);
         savedSnapshotRef.current = snapshot;
         setSavedSnapshot(snapshot);
         setLog(nextLog);
@@ -244,9 +268,14 @@ export default function useDailyLog(user) {
       .catch((error) => {
         if (!active) return;
         console.error("Failed to load daily log:", error);
-        setLoadFailed(true);
-        setStatus("Could not load");
-        setMessage("Could not load this daily log.");
+        if (!cachedLog) {
+          setLoadFailed(true);
+          setStatus("Could not load");
+          setMessage("Could not load this daily log.");
+        } else {
+          setStatus("Offline");
+          setMessage("Showing your saved copy; the latest Daily Log could not be fetched.");
+        }
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -310,10 +339,18 @@ export default function useDailyLog(user) {
     if (!saved) return false;
     savedSnapshotRef.current = null;
     setSavedSnapshot(null);
-    setLog(emptyLog(selectedDate));
+    const cachedLog = getDailyLogCache(user.id, selectedDate);
+    const nextLog = cachedLog
+      ? normalizeLog(cachedLog, selectedDate)
+      : emptyLog(selectedDate);
+    const snapshot = cachedLog ? JSON.stringify(nextLog) : null;
+    savedSnapshotRef.current = snapshot;
+    setSavedSnapshot(snapshot);
+    setLog(nextLog);
+    setLoading(!cachedLog);
     setDate(selectedDate);
     return true;
-  }, [flushPendingSave, loading, setDate, setLog]);
+  }, [flushPendingSave, loading, setDate, setLog, user.id]);
 
   const shiftDate = useCallback((days) => {
     const [year, month, day] = dateRef.current.split("-").map(Number);
@@ -528,7 +565,7 @@ export default function useDailyLog(user) {
         .delete()
         .eq("user_id", user.id);
       if (error) throw error;
-      invalidateDailyLogHistoryCache(user.id);
+      clearDailyLogCaches(user.id);
     } catch (error) {
       console.error("Failed to clear this user's daily logs:", error);
       setMessage("Could not clear all Daily Log data. Refresh and check your history before retrying.");
@@ -544,6 +581,7 @@ export default function useDailyLog(user) {
     setSavedSnapshot(snapshot);
     setAllLogs([]);
     setHasOlderLogs(false);
+    setDailyLogCache(user.id, dateRef.current, clearedLog);
     setLoadRequest((current) => current + 1);
     setStatus("Saved");
     setMessage("All saved Daily Log entries for your account were cleared.");
@@ -687,6 +725,7 @@ export default function useDailyLog(user) {
         );
         if (saveError) throw saveError;
         invalidateDailyLogHistoryCache(user.id);
+        setDailyLogCache(user.id, segment.date, previous);
       }
       if (segments.some((segment) => segment.date === currentDate)) {
         const savedCurrentDate = await saveLogRef.current(
@@ -783,6 +822,7 @@ export default function useDailyLog(user) {
         );
         if (saveError) throw saveError;
         invalidateDailyLogHistoryCache(user.id);
+        setDailyLogCache(user.id, segment.date, previous);
       }
       return true;
     } catch (error) {

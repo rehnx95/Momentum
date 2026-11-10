@@ -151,7 +151,6 @@ export default function SleepStudyChart({ userId }) {
   const [selectedChart, setSelectedChart] = useState("sleep");
   const tabRefs = useRef({});
   const [hasHistory, setHasHistory] = useState(Boolean(cachedHistory));
-  const [loading, setLoading] = useState(!cachedHistory);
   const [error, setError] = useState("");
   const [requestId, setRequestId] = useState(0);
 
@@ -179,12 +178,10 @@ export default function SleepStudyChart({ userId }) {
     setLogs(cachedHistory?.logs || []);
     setHasHistory(Boolean(cachedHistory));
     if (cachedHistory?.isFresh) {
-      setLoading(false);
       return () => {
         active = false;
       };
     }
-    if (!cachedHistory) setLoading(true);
     setError("");
 
     loadLogs()
@@ -201,7 +198,7 @@ export default function SleepStudyChart({ userId }) {
         setError("Could not load sleep and study history.");
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (active) setHasHistory(Boolean(getDailyLogHistoryCache(userId)));
       });
 
     return () => {
@@ -263,11 +260,7 @@ export default function SleepStudyChart({ userId }) {
         </div>
       </header>
 
-      {loading ? (
-        <p className="sleep-study-message" role="status">
-          Loading sleep and study history…
-        </p>
-      ) : error && !hasHistory ? (
+      {error && !hasHistory ? (
         <div className="sleep-study-message" role="alert">
           <span>{error}</span>
           <button type="button" onClick={() => setRequestId((current) => current + 1)}>

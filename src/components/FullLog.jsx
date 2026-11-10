@@ -95,17 +95,13 @@ export default function FullLog({ daily }) {
     <div className="daily-full-log">
       <header className="full-log-header">
         <p className="full-log-status" aria-live="polite">
-          {daily.allLogsLoading
-            ? "Loading latest days…"
-            : daily.olderLogsLoading
-              ? "Loading older days…"
-              : entries.length === 0
-                ? "No saved days"
-                : `${entries.length} days shown · ${
-                    daily.hasOlderLogs
-                      ? "More older days available"
-                      : "All saved days shown"
-                  }`}
+          {entries.length === 0
+            ? daily.allLogsLoading ? "" : "No saved days"
+            : `${entries.length} days shown · ${
+                daily.hasOlderLogs
+                  ? "More older days available"
+                  : "All saved days shown"
+              }`}
         </p>
         <div className="full-log-menu-wrap" ref={actionsRef}>
           <button
@@ -158,11 +154,7 @@ export default function FullLog({ daily }) {
           }
           onClick={() => daily.loadOlderLogs()}
         >
-          {daily.olderLogsLoading || daily.allLogsLoading
-            ? "Loading…"
-            : daily.hasOlderLogs
-              ? "Load 10 older days"
-              : "No older days"}
+          {daily.hasOlderLogs ? "Load 10 older days" : "No older days"}
         </button>
         <button
           type="button"
@@ -174,19 +166,11 @@ export default function FullLog({ daily }) {
           }
           onClick={() => daily.loadOlderLogs(true)}
         >
-          {daily.olderLogsLoading || daily.allLogsLoading
-            ? "Loading all days…"
-            : daily.hasOlderLogs
-              ? "Show all days"
-              : "All days shown"}
+          {daily.hasOlderLogs ? "Show all days" : "All days shown"}
         </button>
       </div>
 
-      {daily.allLogsLoading ? (
-        <p className="daily-full-empty" role="status">
-          Loading recent days…
-        </p>
-      ) : entries.length ? (
+      {entries.length ? (
         <ul className="full-log-day-list">
           {entries.map(({ row, activities, sleep, studied, problems }) => (
             <li key={row.date}>
@@ -251,6 +235,8 @@ export default function FullLog({ daily }) {
             </li>
           ))}
         </ul>
+      ) : daily.allLogsLoading ? (
+        <div className="daily-full-empty" aria-hidden="true" />
       ) : (
         <p className="daily-full-empty">No saved daily logs yet.</p>
       )}

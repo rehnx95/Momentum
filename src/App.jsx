@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "./lib/supabase";
 import { useProgress } from "./hooks/useProgress";
+import { readUserDataCache, writeUserDataCache } from "./lib/userDataCache";
 import AppHeader from "./components/AppHeader";
 import SheetSwitcher from "./components/SheetSwitcher";
 import ActivityHeatmap from "./components/ActivityHeatmap";
@@ -108,6 +109,16 @@ function handleActivityScroll(event) {
 
 function normalizeProblemTitle(title) {
   return String(title).normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function getSheetManifestVersion(sheets) {
+  let hash = 2166136261;
+  const manifest = JSON.stringify(sheets.map(({ id, title, sheet }) => ({ id, title, sheet })));
+  for (let index = 0; index < manifest.length; index += 1) {
+    hash ^= manifest.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
 }
 
 function getPeopleRoute(pathname = window.location.pathname) {
@@ -788,7 +799,10 @@ function AuthenticatedApp({
   onProfileUpdated,
   onSignOut,
 }) {
-  const [customSheetsLoading, setCustomSheetsLoading] = useState(true);
+  const [cachedSheets] = useState(() => readUserDataCache(user.id, "sheets"));
+  const [customSheetsLoading, setCustomSheetsLoading] = useState(
+    () => !Array.isArray(cachedSheets),
+  );
   const [sheetBootstrapComplete, setSheetBootstrapComplete] = useState(false);
   const [dialog, setDialog] = useState(null);
   const dialogResolver = useRef(null);
@@ -806,7 +820,9 @@ function AuthenticatedApp({
     setTheme,
     reset,
   } = useProgress(sheetBootstrapComplete ? user : null);
-  const [customSheets, setCustomSheets] = useState([]);
+  const [customSheets, setCustomSheets] = useState(
+    () => Array.isArray(cachedSheets) ? cachedSheets : [],
+  );
   const [uploadingSheet, setUploadingSheet] = useState(false);
   const [deletingSheetId, setDeletingSheetId] = useState(null);
   const [sheetError, setSheetError] = useState("");
@@ -823,6 +839,11 @@ function AuthenticatedApp({
     () => [...customSheets].sort((a, b) => a.title.localeCompare(b.title)),
     [customSheets],
   );
+  useEffect(() => {
+    if (!customSheetsLoading) {
+      writeUserDataCache(user.id, "sheets", customSheets);
+    }
+  }, [customSheets, customSheetsLoading, user.id]);
   const savedSheetIdRef = useRef(localStorage.getItem("dsa-active-sheet"));
   const [selectedSheetId, setSelectedSheetId] = useState(() => {
     const savedSheetId = savedSheetIdRef.current;
@@ -898,6 +919,15 @@ function AuthenticatedApp({
     activity: {},
     years: [],
   });
+
+  useEffect(() => {
+    void import("./components/DailyTracker").catch((error) => {
+      console.warn("Could not preload the Daily Log page:", error);
+    });
+    void import("./components/SleepStudyChart").catch((error) => {
+      console.warn("Could not preload profile charts:", error);
+    });
+  }, []);
 
   useEffect(() => {
     setPublicHeatmapYear(null);
@@ -1196,17 +1226,33 @@ function AuthenticatedApp({
           builtInSheets.find((sheet) => sheet.id === "dsa")?.id ||
           builtInSheets[0]?.id;
 
-        const { error: bootstrapError } = await supabase.rpc(
-          "ensure_builtin_sheet_copies",
-          {
-            requested_sheets: builtInSheets.map((sheet) => ({
-              id: sheet.id,
-              title: sheet.title,
-              sheet_data: sheet.sheet,
-            })),
-          },
-        );
-        if (bootstrapError) throw bootstrapError;
+        const manifestVersion = getSheetManifestVersion(builtInSheets);
+        const bootstrapKey = `track-sheet-builtins:${user.id}`;
+        let isBootstrapped = false;
+        try {
+          isBootstrapped =
+            localStorage.getItem(bootstrapKey) === manifestVersion;
+        } catch {
+          isBootstrapped = false;
+        }
+        if (!isBootstrapped) {
+          const { error: bootstrapError } = await supabase.rpc(
+            "ensure_builtin_sheet_copies",
+            {
+              requested_sheets: builtInSheets.map((sheet) => ({
+                id: sheet.id,
+                title: sheet.title,
+                sheet_data: sheet.sheet,
+              })),
+            },
+          );
+          if (bootstrapError) throw bootstrapError;
+          try {
+            localStorage.setItem(bootstrapKey, manifestVersion);
+          } catch (error) {
+            console.warn("Could not cache built-in sheet setup locally:", error);
+          }
+        }
         if (!active) return;
         setSheetBootstrapComplete(true);
 
@@ -2685,9 +2731,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             <div className="profile-main">
               <Suspense
                 fallback={
-                  <div className="surface-card profile-chart-placeholder" role="status">
-                    Preparing chart…
-                  </div>
+                  <div className="surface-card profile-chart-placeholder" aria-hidden="true" />
                 }
               >
                 <SleepStudyChart userId={user.id} />
@@ -2858,11 +2902,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
       <>
         <Suspense
           fallback={
-            <div className="app-page app-page-narrow" role="status">
-              <div className="surface-card rounded-xl border p-4 text-sm text-[#A1A1A1]">
-              Loading profile settings…
-              </div>
-            </div>
+            <div className="app-page app-page-narrow" aria-hidden="true" />
           }
         >
           <ProfileSettings
@@ -2889,12 +2929,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
           <main className="app-page">
             <Suspense
               fallback={
-                <div
-                  className="surface-card rounded-xl border p-4 text-sm text-[#A1A1A1]"
-                  role="status"
-                >
-                  Preparing your daily log…
-                </div>
+                <div className="daily-tracker surface-card" aria-hidden="true" />
               }
             >
               <DailyTracker
@@ -2961,7 +2996,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             <SheetSwitcher
               sheets={availableSheets}
               selected={selectedSheet}
-              loading={customSheetsLoading}
               onSelect={setSelectedSheetId}
               onUpload={() => uploadSheetInput.current?.click()}
               uploading={uploadingSheet}

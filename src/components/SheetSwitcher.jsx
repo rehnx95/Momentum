@@ -11,7 +11,6 @@ import {
 export default function SheetSwitcher({
   sheets,
   selected,
-  loading,
   onSelect,
   onUpload,
   uploading,
@@ -49,7 +48,7 @@ export default function SheetSwitcher({
       >
         <BookOpen size={20} className="shrink-0" />
         <span className="page-title truncate">
-          {selected?.title || (loading ? "Loading…" : "No sheet")}
+          {selected?.title || "Select sheet"}
         </span>
         <ChevronDown
           size={18}

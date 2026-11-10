@@ -1,11 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import { readUserDataCache, writeUserDataCache } from '../lib/userDataCache';
 
 function getLocalDateKey(date = new Date()) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function isRecord(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 export function useProgress(user) {
@@ -21,6 +26,14 @@ export function useProgress(user) {
   const [error, setError] = useState('');
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   const writeQueue = useRef(Promise.resolve());
+  const cacheProgress = useCallback((userId, nextProgress, nextActivity, nextCompletedOn, nextCompletedAt) => {
+    writeUserDataCache(userId, 'progress', {
+      progress: nextProgress,
+      activityLog: nextActivity,
+      completedOn: nextCompletedOn,
+      completedAt: nextCompletedAt,
+    });
+  }, []);
 
   const replaceProgress = useCallback((nextProgress) => {
     progressRef.current = nextProgress;
@@ -43,13 +56,24 @@ export function useProgress(user) {
   }, []);
 
   const save = useCallback((operation) => {
-    const write = writeQueue.current.then(operation);
+    const write = writeQueue.current.then(async () => {
+      await operation();
+      if (user?.id) {
+        cacheProgress(
+          user.id,
+          progressRef.current,
+          activityRef.current,
+          completedOnRef.current,
+          completedAtRef.current,
+        );
+      }
+    });
     writeQueue.current = write.catch((saveError) => {
       console.error('Failed to save user data to Supabase:', saveError);
       setError('Some changes could not be saved. Check your connection and reload to sync your account.');
     });
     return write.then(() => true, () => false);
-  }, []);
+  }, [cacheProgress, user]);
 
   useEffect(() => {
     if (!user || !supabase) {
@@ -62,12 +86,19 @@ export function useProgress(user) {
     }
 
     let active = true;
-    setLoading(true);
+    const cached = readUserDataCache(user.id, 'progress');
+    const hasCachedData = Boolean(
+      isRecord(cached?.progress) &&
+      isRecord(cached?.activityLog) &&
+      isRecord(cached?.completedOn) &&
+      isRecord(cached?.completedAt),
+    );
     setError('');
-    replaceProgress({});
-    replaceActivity({});
-    replaceCompletedOn({});
-    replaceCompletedAt({});
+    replaceProgress(hasCachedData ? cached.progress : {});
+    replaceActivity(hasCachedData ? cached.activityLog : {});
+    replaceCompletedOn(hasCachedData ? cached.completedOn : {});
+    replaceCompletedAt(hasCachedData ? cached.completedAt : {});
+    setLoading(!hasCachedData);
 
     Promise.all([
       supabase
@@ -103,6 +134,7 @@ export function useProgress(user) {
       replaceActivity(activityMap);
       replaceCompletedOn(completedOnMap);
       replaceCompletedAt(completedAtMap);
+      cacheProgress(user.id, progressMap, activityMap, completedOnMap, completedAtMap);
     }).catch((loadError) => {
       if (!active) return;
       console.error('Failed to load user data from Supabase:', loadError);
@@ -114,7 +146,7 @@ export function useProgress(user) {
     return () => {
       active = false;
     };
-  }, [user, replaceActivity, replaceCompletedAt, replaceCompletedOn, replaceProgress]);
+  }, [user, cacheProgress, replaceActivity, replaceCompletedAt, replaceCompletedOn, replaceProgress]);
 
   useEffect(() => {
     localStorage.setItem('theme', theme);

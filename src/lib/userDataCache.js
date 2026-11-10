@@ -1,0 +1,29 @@
+const CACHE_PREFIX = "track-sheet-user-data:";
+const MAX_CACHE_SIZE = 2_500_000;
+
+function cacheKey(userId, section) {
+  return `${CACHE_PREFIX}${userId}:${section}`;
+}
+
+export function readUserDataCache(userId, section) {
+  try {
+    const stored = localStorage.getItem(cacheKey(userId, section));
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function writeUserDataCache(userId, section, data) {
+  try {
+    const serialized = JSON.stringify(data);
+    const key = cacheKey(userId, section);
+    if (serialized.length > MAX_CACHE_SIZE) {
+      localStorage.removeItem(key);
+      return;
+    }
+    localStorage.setItem(key, serialized);
+  } catch (error) {
+    console.warn(`Could not cache ${section} data locally:`, error);
+  }
+}
