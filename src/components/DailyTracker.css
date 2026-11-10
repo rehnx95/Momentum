@@ -576,8 +576,25 @@
 }
 
 .daily-full-log {
+  --log-day-bg: #111111;
+  --log-summary-bg: #090909;
+  --log-item-bg: #1b1b1b;
+  --log-detail-bg: #141414;
+  --log-border: #393939;
+  --log-label: #c4c4c4;
+  --log-detail-text: #d4d4d4;
   display: grid;
   gap: 0.6rem;
+}
+
+:root[data-theme="light"] .daily-full-log {
+  --log-day-bg: #ffffff;
+  --log-summary-bg: #f0f0f0;
+  --log-item-bg: #ffffff;
+  --log-detail-bg: #f7f7f7;
+  --log-border: #c8c8c8;
+  --log-label: #444444;
+  --log-detail-text: #333333;
 }
 
 .full-log-header {
@@ -605,15 +622,15 @@
   display: block;
   width: 100%;
   padding: 0.85rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--log-border);
   border-radius: 0.8rem;
-  background: var(--surface-raised);
+  background: var(--log-day-bg);
   text-align: left;
   transition: border-color 150ms ease, background-color 150ms ease;
 }
 
 .full-log-day:hover {
-  border-color: var(--border-strong);
+  border-color: var(--muted);
 }
 
 .full-log-day-content {
@@ -633,9 +650,10 @@
 
 .full-log-day-date {
   color: var(--text);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 750;
   letter-spacing: -0.015em;
+  line-height: 1.35;
 }
 
 .full-log-summary {
@@ -646,31 +664,31 @@
   align-items: center;
   gap: 0.55rem;
   padding: 0.55rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--log-border);
   border-radius: 0.6rem;
-  background: var(--surface);
+  background: var(--log-summary-bg);
 }
 
 .full-log-summary-item {
   display: grid;
   min-width: 0;
   gap: 0.2rem;
-  padding: 0.55rem 0.65rem;
-  border: 1px solid var(--border);
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--log-border);
   border-radius: 0.55rem;
-  background: var(--surface-raised);
+  background: var(--log-item-bg);
 }
 
 .full-log-summary-item small {
-  color: var(--muted);
-  font-size: 0.68rem;
-  font-weight: 600;
+  color: var(--log-label);
+  font-size: 0.72rem;
+  font-weight: 650;
   line-height: 1.3;
 }
 
 .full-log-summary-item strong {
   color: var(--text);
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 750;
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
@@ -694,10 +712,10 @@
   align-content: start;
   gap: 0.45rem;
   padding: 0.55rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--log-border);
   border-radius: 0.5rem;
   border-left: 3px solid var(--border-strong);
-  background: var(--surface-raised);
+  background: var(--log-detail-bg);
 }
 
 .full-log-activity-heading {
@@ -726,8 +744,8 @@
   flex-wrap: wrap;
   align-items: center;
   row-gap: 0.2rem;
-  color: var(--muted);
-  font-size: 0.72rem;
+  color: var(--log-detail-text);
+  font-size: 0.76rem;
   font-variant-numeric: tabular-nums;
 }
 
