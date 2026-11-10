@@ -146,7 +146,7 @@ function SleepStudyGraph({ days, title, series }) {
                       className="sleep-study-point-target"
                       cx={xFor(index)}
                       cy={yFor(day[key])}
-                      r="12"
+                      r="15"
                       aria-label={`${day.label}: ${formatHours(day[key])} ${key}`}
                       data-tip={`${formatDuration(day[key])} ${key} on ${formatTooltipDate(new Date(`${day.dateKey}T00:00:00`), currentYear)}`}
                       data-point={`${key}:${day.dateKey}`}
@@ -156,7 +156,7 @@ function SleepStudyGraph({ days, title, series }) {
                       className={`sleep-study-point${activePoint === `${key}:${day.dateKey}` ? " is-active" : ""}`}
                       cx={xFor(index)}
                       cy={yFor(day[key])}
-                      r="3.5"
+                      r="4.5"
                       aria-hidden="true"
                     />
                   </g>
