@@ -43,7 +43,7 @@ function formatHours(minutes) {
 
 function SleepStudyGraph({ days, title, series }) {
   const chartWrapRef = useRef(null);
-  const [activeDayIndex, setActiveDayIndex] = useState(null);
+  const [activePoint, setActivePoint] = useState(null);
   const [chartWidth, setChartWidth] = useState(DEFAULT_CHART_WIDTH);
 
   useLayoutEffect(() => {
@@ -73,13 +73,30 @@ function SleepStudyGraph({ days, title, series }) {
   const xFor = (index) =>
     PLOT.left + (plotWidth * index) / Math.max(1, days.length - 1);
   const ticks = [0, maxHours / 2, maxHours];
+  const showTooltip = (event, index, key) => {
+    const svg = event.currentTarget.ownerSVGElement;
+    const matrix = svg?.getScreenCTM();
+    const wrapper = chartWrapRef.current;
+    if (!matrix || !wrapper) return;
+
+    const point = svg.createSVGPoint();
+    point.x = xFor(index);
+    point.y = yFor(days[index][key]);
+    const screenPoint = point.matrixTransform(matrix);
+    const wrapperRect = wrapper.getBoundingClientRect();
+    setActivePoint({
+      index,
+      x: screenPoint.x - wrapperRect.left,
+      y: screenPoint.y - wrapperRect.top,
+    });
+  };
 
   return (
     <section className="sleep-study-graph" aria-label={title}>
       <div
         ref={chartWrapRef}
         className="sleep-study-chart-wrap"
-        onPointerLeave={() => setActiveDayIndex(null)}
+        onPointerLeave={() => setActivePoint(null)}
       >
         <svg
           className="sleep-study-chart"
@@ -120,8 +137,8 @@ function SleepStudyGraph({ days, title, series }) {
                       cy={yFor(day[key])}
                       r="9"
                       aria-label={`${day.label}: ${formatHours(day[key])} ${key}`}
-                      onPointerEnter={() => setActiveDayIndex(index)}
-                      onFocus={() => setActiveDayIndex(index)}
+                      onPointerEnter={(event) => showTooltip(event, index, key)}
+                      onFocus={(event) => showTooltip(event, index, key)}
                     />
                     <circle
                       className="sleep-study-point"
@@ -156,23 +173,18 @@ function SleepStudyGraph({ days, title, series }) {
             );
           })}
         </svg>
-        {activeDayIndex !== null && days[activeDayIndex] && (
+        {activePoint !== null && days[activePoint.index] && (
           <div
             className="sleep-study-tooltip"
             role="tooltip"
             style={{
-              left: `${Math.max(
-                72,
-                Math.min(chartWidth - 72, xFor(activeDayIndex)),
-              )}px`,
-              top: `${Math.min(
-                ...series.map((key) => yFor(days[activeDayIndex][key])),
-              )}px`,
+              left: `${activePoint.x}px`,
+              top: `${activePoint.y}px`,
             }}
           >
-            <strong>{days[activeDayIndex].label}</strong>
-            <span>Sleep: {formatHours(days[activeDayIndex].sleep)}</span>
-            <span>Study: {formatHours(days[activeDayIndex].study)}</span>
+            <strong>{days[activePoint.index].label}</strong>
+            <span>Sleep: {formatHours(days[activePoint.index].sleep)}</span>
+            <span>Study: {formatHours(days[activePoint.index].study)}</span>
           </div>
         )}
       </div>

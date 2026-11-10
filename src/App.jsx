@@ -35,6 +35,7 @@ import ActivityHeatmap from "./components/ActivityHeatmap";
 import TrackSheetBrand from "./components/TrackSheetBrand";
 import Tooltip from "./components/Tooltip";
 import StatStrip from "./components/StatStrip";
+import SleepStudyChart from "./components/SleepStudyChart";
 import {
   countSheetProblems,
   parseSheet,
@@ -43,7 +44,6 @@ import {
 
 const ProfileSettings = lazy(() => import("./components/ProfileSettings"));
 const DailyTracker = lazy(() => import("./components/DailyTracker"));
-const SleepStudyChart = lazy(() => import("./components/SleepStudyChart"));
 
 const sheetModules = import.meta.glob("./data/*.json", {
   import: "default",
@@ -923,9 +923,6 @@ function AuthenticatedApp({
   useEffect(() => {
     void import("./components/DailyTracker").catch((error) => {
       console.warn("Could not preload the Daily Log page:", error);
-    });
-    void import("./components/SleepStudyChart").catch((error) => {
-      console.warn("Could not preload profile charts:", error);
     });
   }, []);
 
@@ -2729,13 +2726,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </div>
 
             <div className="profile-main">
-              <Suspense
-                fallback={
-                  <div className="surface-card profile-chart-placeholder" aria-hidden="true" />
-                }
-              >
-                <SleepStudyChart userId={user.id} />
-              </Suspense>
+              <SleepStudyChart userId={user.id} />
 
               <ActivityHeatmap
                 activity={activityLog}
