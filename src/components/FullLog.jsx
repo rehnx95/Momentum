@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { formatDuration, slotMinutes } from "../utils/time";
-import TimeInput from "./TimeInput";
 
 function slotTotal(slots = []) {
   return slots.reduce((total, slot) => {
@@ -57,13 +56,7 @@ function activityBreakdown(row) {
 
 export default function FullLog({ daily }) {
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [editVersion, setEditVersion] = useState(0);
   const actionsRef = useRef(null);
-
-  const updateTime = async (date, field, value) => {
-    const saved = await daily.updateFullLogTime(date, field, value);
-    if (!saved) setEditVersion((version) => version + 1);
-  };
 
   useEffect(() => {
     const closeOnOutsideClick = (event) => {
@@ -180,39 +173,23 @@ export default function FullLog({ daily }) {
                   <div className="full-log-summary">
                     <div className="full-log-summary-item">
                       <small>Sleep</small>
-                      <TimeInput
-                        key={`${row.date}-sleep-${editVersion}`}
-                        value={row.sleep_time}
-                        disabled={daily.clearingHistory}
-                        onChange={(value) => void updateTime(row.date, "sleep_time", value)}
-                        label={`${dateLabel(row.date)} sleep time`}
-                      />
+                      <strong>{formatTime(row.sleep_time)}</strong>
                     </div>
                     <div className="full-log-summary-item">
                       <small>Wake</small>
-                      <TimeInput
-                        key={`${row.date}-wake-${editVersion}`}
-                        value={row.wake_time}
-                        disabled={daily.clearingHistory}
-                        onChange={(value) => void updateTime(row.date, "wake_time", value)}
-                        label={`${dateLabel(row.date)} wake time`}
-                      />
+                      <strong>{formatTime(row.wake_time)}</strong>
                     </div>
                     <div className="full-log-summary-item">
                       <small>Sleep duration</small>
-                      <output className="full-log-summary-value">
-                        {sleep ? formatDuration(sleep) : "—"}
-                      </output>
+                      <strong>{sleep ? formatDuration(sleep) : "—"}</strong>
                     </div>
                     <div className="full-log-summary-item">
                       <small>Solved</small>
-                      <output className="full-log-summary-value">{problems}</output>
+                      <strong>{problems}</strong>
                     </div>
                     <div className="full-log-summary-item">
                       <small>Studied</small>
-                      <output className="full-log-summary-value">
-                        {studied ? formatDuration(studied) : "—"}
-                      </output>
+                      <strong>{studied ? formatDuration(studied) : "—"}</strong>
                     </div>
                   </div>
                   {activities.length ? (

@@ -468,19 +468,15 @@
   align-items: center;
   gap: 0.35rem;
   min-width: 0;
-  flex-wrap: wrap;
 }
 
 .daily-slot-row label {
   min-width: 0;
-  flex: 0 0 4.7rem;
+  flex: 1;
 }
 
 .slot-arrow {
-  width: 1rem;
-  flex: none;
   color: var(--muted);
-  text-align: center;
 }
 
 .slot-hours {
@@ -653,20 +649,25 @@
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: stretch;
-  gap: 0.45rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
+  gap: 0;
+  padding: 0.65rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface-raised);
 }
 
 .full-log-summary-item {
   display: grid;
   min-width: 0;
-  gap: 0.35rem;
-  align-content: start;
-  padding: 0.55rem 0.65rem;
-  border: 1px solid var(--border);
-  border-radius: 0.6rem;
-  background: var(--surface-raised);
+  gap: 0.2rem;
+  align-content: center;
+  padding: 0.3rem 0.65rem;
+}
+
+.full-log-summary-item + .full-log-summary-item {
+  border-left: 1px solid var(--border);
 }
 
 .full-log-summary-item small {
@@ -676,27 +677,19 @@
   line-height: 1.3;
 }
 
-.full-log-summary-value {
-  display: flex;
-  min-width: 0;
-  min-height: 1.85rem;
-  align-items: center;
-  padding: 0 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 0.55rem;
-  background: var(--surface);
+.full-log-summary-item strong {
   color: var(--text);
-  font-size: 0.85rem;
+  font-size: 1.1rem;
   font-weight: 750;
   font-variant-numeric: tabular-nums;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .full-log-activities {
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: start;
   justify-content: start;
   gap: 0.6rem;
@@ -741,21 +734,19 @@
   min-width: 0;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--text);
+  row-gap: 0.2rem;
+  color: var(--muted);
   font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
 }
 
 .full-log-activity-slot {
-  display: inline-flex;
-  min-height: 1.65rem;
-  align-items: center;
-  padding: 0.15rem 0.4rem;
-  border: 1px solid var(--border);
-  border-radius: 0.45rem;
-  background: var(--surface);
+  padding: 0 0.35rem;
   white-space: nowrap;
+}
+
+.full-log-activity-slot + .full-log-activity-slot {
+  border-left: 1px solid var(--border-strong);
 }
 
 .full-log-activity-heading strong {
@@ -843,6 +834,14 @@
   .full-log-summary-item {
     padding: 0.5rem;
   }
+
+  .full-log-summary-item small {
+    font-size: 0.62rem;
+  }
+
+  .full-log-summary-item strong {
+    font-size: 0.95rem;
+  }
 }
 
 @media (max-width: 520px) {
@@ -851,11 +850,11 @@
   }
 
   .daily-slot-row {
-    gap: 0.25rem;
+    flex-wrap: wrap;
   }
 
   .daily-slot-row label {
-    flex-basis: 4.7rem;
+    flex: 1 1 35%;
   }
 
   .slot-remove {

@@ -19,7 +19,7 @@ function commitTime(hour, minute, onChange) {
 
 export function navigateTimeSegments(event) {
   if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-  const view = event.currentTarget.closest(".daily-day-view, .full-log-summary");
+  const view = event.currentTarget.closest(".daily-day-view");
   if (!view) return;
 
   const inputs = [...view.querySelectorAll(

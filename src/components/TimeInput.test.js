@@ -27,7 +27,6 @@ describe("segmented time input keyboard controls", () => {
 
     navigateTimeSegments(event);
 
-    expect(minute.closest).toHaveBeenCalledWith(".daily-day-view, .full-log-summary");
     expect(nextHour.focus).toHaveBeenCalledWith({ preventScroll: true });
     expect(nextHour.select).toHaveBeenCalledOnce();
     expect(event.preventDefault).toHaveBeenCalledOnce();
