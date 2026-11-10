@@ -42,6 +42,7 @@ function formatHours(minutes) {
 }
 
 function SleepStudyGraph({ days, title, series }) {
+  const chartWrapRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
   const [chartWidth, setChartWidth] = useState(DEFAULT_CHART_WIDTH);
 
@@ -93,6 +94,7 @@ function SleepStudyGraph({ days, title, series }) {
   return (
     <section className="sleep-study-graph" aria-label={title}>
       <div
+        ref={chartWrapRef}
         className="sleep-study-chart-wrap"
       >
         <svg
