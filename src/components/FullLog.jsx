@@ -1,15 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { useMemo } from "react";
+import { Clock3, Trash2 } from "lucide-react";
 import { formatDuration, slotMinutes } from "../utils/time";
 
+function slotDuration(slot) {
+  if (slot.endDayOffset === 1 && slot.end === "00:00") {
+    const start = slotMinutes({ start: slot.start, end: "23:59" });
+    return start === null ? 1 : start + 1;
+  }
+  return slotMinutes(slot);
+}
+
 function slotTotal(slots = []) {
-  return slots.reduce((total, slot) => {
-    if (slot.endDayOffset === 1 && slot.end === "00:00") {
-      const start = slotMinutes({ start: slot.start, end: "23:59" });
-      return total + (start === null ? 1 : start + 1);
-    }
-    return total + (slotMinutes(slot) || 0);
-  }, 0);
+  return slots.reduce((total, slot) => total + (slotDuration(slot) || 0), 0);
 }
 
 function formatTime(value) {
@@ -55,24 +57,6 @@ function activityBreakdown(row) {
 }
 
 export default function FullLog({ daily }) {
-  const [actionsOpen, setActionsOpen] = useState(false);
-  const actionsRef = useRef(null);
-
-  useEffect(() => {
-    const closeOnOutsideClick = (event) => {
-      if (!actionsRef.current?.contains(event.target)) setActionsOpen(false);
-    };
-    const closeOnEscape = (event) => {
-      if (event.key === "Escape") setActionsOpen(false);
-    };
-    document.addEventListener("pointerdown", closeOnOutsideClick);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOnOutsideClick);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, []);
-
   const entries = useMemo(
     () =>
       daily.allLogs.map((row) => {
@@ -94,44 +78,26 @@ export default function FullLog({ daily }) {
   return (
     <div className="daily-full-log">
       <header className="full-log-header">
-        <div className="full-log-menu-wrap" ref={actionsRef}>
-          <button
-            type="button"
-            className="full-log-menu-trigger"
-            aria-label="Full log actions"
-            aria-haspopup="menu"
-            aria-expanded={actionsOpen}
-            onClick={() => setActionsOpen((open) => !open)}
-          >
-            <MoreHorizontal size={18} />
-          </button>
-          {actionsOpen && (
-            <div className="full-log-menu" role="menu">
-              <button
-                type="button"
-                role="menuitem"
-                className="clear-daily-history"
-                disabled={
-                  daily.clearingHistory ||
-                  daily.allLogsLoading ||
-                  daily.olderLogsLoading ||
-                  daily.loading
-                }
-                onClick={async () => {
-                  setActionsOpen(false);
-                  const confirmation = window.prompt(
-                    "This permanently deletes your saved Daily Log entries. Type CLEAR to continue.",
-                  );
-                  if (confirmation === "CLEAR") await daily.clearAllLogs();
-                }}
-              >
-                {daily.clearingHistory
-                  ? "Clearing history…"
-                  : "Clear my saved history"}
-              </button>
-            </div>
-          )}
-        </div>
+        <button
+          type="button"
+          className="full-log-clear-button"
+          aria-label="Clear my saved history"
+          title="Clear my saved history"
+          disabled={
+            daily.clearingHistory ||
+            daily.allLogsLoading ||
+            daily.olderLogsLoading ||
+            daily.loading
+          }
+          onClick={async () => {
+            const confirmation = window.prompt(
+              "This permanently deletes your saved Daily Log entries. Type CLEAR to continue.",
+            );
+            if (confirmation === "CLEAR") await daily.clearAllLogs();
+          }}
+        >
+          <Trash2 size={16} aria-hidden="true" />
+        </button>
       </header>
 
       <div className="full-log-pagination">
@@ -200,18 +166,34 @@ export default function FullLog({ daily }) {
                           key={`${activity.name}-${index}`}
                         >
                           <div className="full-log-activity-heading">
-                            <strong>{activity.name}</strong>
+                            <div className="full-log-activity-identity">
+                              <Clock3 size={15} aria-hidden="true" />
+                              <strong>{activity.name}</strong>
+                            </div>
                             <strong>{formatDuration(activity.minutes)}</strong>
                           </div>
                           <div className="full-log-activity-slots">
-                            {activity.slots.map((slot, slotIndex) => (
-                              <span
-                                className="full-log-activity-slot"
-                                key={`${slot.start}-${slot.end}-${slotIndex}`}
-                              >
-                                {formatTime(slot.start)} – {formatTime(slot.end)}
-                              </span>
-                            ))}
+                            {activity.slots.map((slot, slotIndex) => {
+                              const duration = slotDuration(slot);
+                              return (
+                                <div
+                                  className="full-log-activity-slot"
+                                  key={`${slot.start}-${slot.end}-${slotIndex}`}
+                                  aria-label={`${activity.name} slot ${slotIndex + 1}`}
+                                >
+                                  <span className="time-input full-log-readonly-time">
+                                    {formatTime(slot.start)}
+                                  </span>
+                                  <span className="slot-arrow" aria-hidden="true">→</span>
+                                  <span className="time-input full-log-readonly-time">
+                                    {formatTime(slot.end)}
+                                  </span>
+                                  <span className="slot-hours">
+                                    {duration === null ? "—" : formatDuration(duration)}
+                                  </span>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       ))}

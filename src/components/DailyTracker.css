@@ -1,4 +1,5 @@
 .daily-tracker {
+  container: daily-tracker / inline-size;
   margin-bottom: 1rem;
   padding: 0.75rem;
   border: 1px solid var(--border);
@@ -282,11 +283,7 @@
   font-weight: 700;
 }
 
-.full-log-menu-wrap {
-  position: relative;
-}
-
-.full-log-menu-trigger {
+.full-log-clear-button {
   display: grid;
   width: 2rem;
   height: 2rem;
@@ -294,39 +291,14 @@
   border: 1px solid var(--border-strong);
   border-radius: 0.55rem;
   color: var(--text);
-  font-size: 1.25rem;
-  line-height: 1;
+  cursor: pointer;
 }
 
-.full-log-menu {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 0.35rem);
-  right: 0;
-  min-width: 12rem;
-  padding: 0.35rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 0.65rem;
-  background: var(--surface);
-  box-shadow: 0 12px 32px var(--shadow);
-}
-
-.clear-daily-history {
-  width: 100%;
-  min-height: 2.2rem;
-  padding: 0.45rem 0.55rem;
-  border-radius: 0.45rem;
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-align: left;
-}
-
-.clear-daily-history:hover {
+.full-log-clear-button:hover:not(:disabled) {
   background: var(--surface-hover);
 }
 
-.clear-daily-history:disabled {
+.full-log-clear-button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
@@ -338,17 +310,20 @@
 }
 
 .daily-activity-list {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
   gap: 0.5rem;
 }
 
 .activity-card {
-  width: max-content;
+  position: relative;
+  width: 100%;
   max-width: 100%;
   min-width: 0;
-  padding: 0.4rem 0.5rem;
+  min-height: 7rem;
+  padding: 0.55rem;
+  overflow: visible;
   border: 1px solid var(--border);
   border-left: 2px solid var(--border-strong);
   border-radius: 0.75rem;
@@ -356,9 +331,22 @@
 }
 
 .activity-card-heading {
+  min-width: 0;
   gap: 0.45rem;
+  padding-right: 2.25rem;
   margin-bottom: 0.3rem;
   color: var(--text);
+}
+
+.activity-card-identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.activity-card-identity > svg {
+  flex: none;
 }
 
 .activity-card-heading strong {
@@ -394,6 +382,28 @@
   cursor: pointer;
 }
 
+.activity-remove {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border-radius: 0.4rem;
+  color: var(--muted);
+}
+
+.activity-remove:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.activity-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .activity-menu-label {
   display: grid;
   gap: 0.3rem;
@@ -404,28 +414,30 @@
 
 .daily-slot-list {
   display: grid;
-  width: max-content;
-  max-width: 100%;
+  width: 100%;
+  min-width: 0;
   gap: 0.2rem;
 }
 
 .daily-slot-row {
-  display: flex;
+  position: relative;
+  display: grid;
   align-items: center;
-  justify-content: flex-start;
   gap: 0.3rem;
-  width: max-content;
+  width: 100%;
   max-width: 100%;
+  grid-template-columns: 4.15rem 0.85rem 4.15rem minmax(2.4rem, 1fr) 1.45rem;
 }
 
 .daily-slot-row label {
   display: block;
-  width: 4.7rem;
-  flex: none;
+  width: 100%;
+  min-width: 0;
 }
 
 .daily-slot-row .time-input {
-  width: 4.7rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .slot-arrow {
@@ -439,31 +451,27 @@
 }
 
 .slot-hours {
-  flex: none;
-  width: 3rem;
+  min-width: 0;
   color: var(--muted);
   text-align: right;
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
 }
 
-.slot-next-day,
-.slot-fix-badge {
-  flex: none;
+.slot-next-day {
   color: var(--muted);
   font-size: 0.63rem;
   font-weight: 700;
-}
-
-.slot-next-day {
-  color: var(--muted);
+  position: absolute;
+  top: -0.55rem;
+  right: 2rem;
 }
 
 .slot-remove {
   display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
-  flex: none;
+  width: 1.45rem;
+  height: 1.45rem;
+  min-width: 0;
   place-items: center;
   border-radius: 0.45rem;
   color: var(--muted);
@@ -554,7 +562,7 @@
 .full-log-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 0.75rem;
 }
 
@@ -648,17 +656,17 @@
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
   justify-content: start;
   gap: 0.6rem;
   padding: 0;
 }
 
 .full-log-activity {
+  min-height: 7rem;
   display: grid;
   min-width: 0;
-  align-self: start;
   align-content: start;
   gap: 0.5rem;
   padding: 0.7rem;
@@ -677,13 +685,24 @@
   font-size: 0.84rem;
 }
 
-.full-log-activity-heading strong:first-child {
+.full-log-activity-identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.full-log-activity-identity > svg {
+  flex: none;
+}
+
+.full-log-activity-identity strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.full-log-activity-heading strong:last-child {
+.full-log-activity-heading > strong:last-child {
   flex: none;
   font-variant-numeric: tabular-nums;
 }
@@ -691,24 +710,29 @@
 .full-log-activity-slots {
   display: grid;
   min-width: 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.3rem;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-variant-numeric: tabular-nums;
+  gap: 0.2rem;
 }
 
 .full-log-activity-slot {
-  display: block;
+  display: grid;
+  grid-template-columns: 4.15rem 0.85rem 4.15rem minmax(2.4rem, 1fr);
+  align-items: center;
+  gap: 0.3rem;
   min-width: 0;
-  padding: 0.25rem 0.4rem;
-  overflow: hidden;
-  border: 1px solid var(--border-strong);
-  border-radius: 0.45rem;
-  background: var(--surface);
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.full-log-readonly-time {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 0.2rem;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.full-log-activity-slot .slot-hours {
+  text-align: right;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .full-log-activity-heading strong {
@@ -770,30 +794,10 @@
   .full-log-summary {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-
-  .full-log-activities {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .full-log-activity-slots {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @container full-log-day (max-width: 500px) {
   .full-log-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .full-log-activities {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .full-log-activity-slots {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .daily-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -827,10 +831,6 @@
     opacity: 1;
   }
 
-  .slot-fix-badge {
-    order: 4;
-  }
-
   .daily-save-status {
     align-items: flex-start;
     flex-direction: column;
@@ -839,4 +839,40 @@
 
 @media (max-width: 420px) {
   .full-log-pagination > button { flex: 1; }
+}
+
+@container daily-tracker (max-width: 1050px) {
+  .daily-activity-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container daily-tracker (max-width: 790px) {
+  .daily-activity-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container daily-tracker (max-width: 520px) {
+  .daily-activity-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container full-log-day (max-width: 1050px) {
+  .full-log-activities {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container full-log-day (max-width: 790px) {
+  .full-log-activities {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container full-log-day (max-width: 520px) {
+  .full-log-activities {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

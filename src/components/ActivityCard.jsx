@@ -54,14 +54,16 @@ export default function ActivityCard({
   return (
     <section className="activity-card">
       <header className="activity-card-heading">
-        <Clock3 size={15} aria-hidden="true" />
-        <strong className="activity-card-name">{activityName}</strong>
+        <div className="activity-card-identity">
+          <Clock3 size={15} aria-hidden="true" />
+          <strong className="activity-card-name">{activityName}</strong>
+        </div>
         <span className="activity-total">{formatDuration(totalMinutes)}</span>
         <div className="activity-menu-wrap" ref={menuRef}>
           <button
             type="button"
             className="activity-menu-trigger"
-            aria-label={`More ${activityName} actions`}
+            aria-label={`Rename ${activityName}`}
             aria-expanded={menuOpen}
             aria-haspopup="menu"
             onClick={() => setMenuOpen((open) => !open)}
@@ -84,20 +86,19 @@ export default function ActivityCard({
                   }}
                 />
               </label>
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={async () => {
-                  await onRemoveActivity();
-                  setMenuOpen(false);
-                }}
-              >
-                <Trash2 size={14} />
-                Remove activity
-              </button>
             </div>
           )}
         </div>
+        <button
+          type="button"
+          className="activity-remove"
+          aria-label={`Remove ${activityName}`}
+          title={`Remove ${activityName}`}
+          disabled={disabled}
+          onClick={onRemoveActivity}
+        >
+          <Trash2 size={14} aria-hidden="true" />
+        </button>
       </header>
       <div className="daily-slot-list">
         {slots.map((slot, index) => (

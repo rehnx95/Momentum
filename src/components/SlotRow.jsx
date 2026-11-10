@@ -13,15 +13,6 @@ export default function SlotRow({
 }) {
   const duration = slotMinutes(slot);
   const start = toMinutes(slot.start);
-  const end = toMinutes(slot.end);
-  const invalidOrder =
-    Boolean(slot.start && slot.end) &&
-    (end <= start) &&
-    !(slot.endDayOffset === 1 && slot.end === "00:00");
-  const invalidInput =
-    Boolean(slot.start || slot.end) &&
-    (start === null || end === null);
-
   return (
     <div className="daily-slot-row" id={`slot-${activityId}-${index}`}>
       <label>
@@ -51,9 +42,6 @@ export default function SlotRow({
             : "—"}
       </span>
       {slot.endDayOffset === 1 && <span className="slot-next-day">+1 day</span>}
-      {(invalidOrder || invalidInput) && (
-        <span className="slot-fix-badge" role="status">Fix this slot</span>
-      )}
       <button
         type="button"
         className="slot-remove"

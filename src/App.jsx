@@ -2199,60 +2199,61 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </div>
           ) : (
             profile && (
-              <div className="profile-layout public-profile-layout">
-                <aside className="profile-sidebar">
+              <div className="profile-layout own-profile-layout public-profile-layout">
+                <div className="profile-left-column">
+                  <aside className="profile-sidebar">
                   <section className="profile-hero">
                     <div className="profile-avatar">
                       {(profile.name || profile.username || "U")
                         .charAt(0)
                         .toUpperCase()}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h2 className="text-2xl font-bold text-[#EDEDED]">
-                        {profile.name || profile.username}
-                      </h2>
-                      <p className="mt-1 text-sm text-[#A1A1A1]">
-                        @{profile.username}
-                      </p>
-                      {profile.location && (
-                        <div className="mt-3 flex items-center gap-2 text-sm text-[#A1A1A1]">
-                          <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            aria-hidden="true"
+                    <div className="profile-user-details">
+                      <div className="profile-identity">
+                        <h1 className="text-2xl font-bold text-[#EDEDED]">
+                          {profile.name || profile.username}
+                        </h1>
+                        <p className="mt-1 text-sm text-[#A1A1A1]">
+                          @{profile.username}
+                        </p>
+                        {profile.location && (
+                          <div className="mt-3 flex items-center gap-2 text-sm text-[#A1A1A1]">
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              aria-hidden="true"
+                            >
+                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                              <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            {profile.location}
+                          </div>
+                        )}
+                        {profile.website && (
+                          <a
+                            href={profile.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-block break-all text-sm text-[#A1A1A1] hover:text-white hover:underline"
                           >
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                            <circle cx="12" cy="10" r="3" />
-                          </svg>
-                          {profile.location}
-                        </div>
-                      )}
-                      {profile.website && (
-                        <a
-                          href={profile.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-2 inline-block break-all text-sm text-[#A1A1A1] hover:text-white hover:underline"
-                        >
-                          {profile.website}
-                        </a>
-                      )}
-                      <a
-                        href={`/user/${encodeURIComponent(profile.username)}`}
-                        className="mt-4 block break-all text-xs text-[#A1A1A1] hover:text-[#EDEDED]"
-                      >
-                        {window.location.host}/user/{profile.username}
-                      </a>
+                            {profile.website}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    <div className="profile-hero-actions flex flex-wrap gap-2">
                       <button
                         type="button"
+                        className="btn-secondary"
                         onClick={onCopyLink}
-                        className="btn-secondary mt-4"
+                        aria-label={copied ? "Profile link copied" : "Share profile"}
+                        title={copied ? "Link copied" : "Share profile"}
                       >
-                        {copied ? "Link copied" : "Share profile"}
+                        <Link2 size={16} />
                       </button>
                     </div>
                     <StatStrip
@@ -2284,18 +2285,21 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       ]}
                     />
                   </section>
+                  </aside>
 
                   <section
                     className="profile-sheet-progress surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
                     aria-labelledby="public-profile-sheet-progress"
                   >
-                    <h2
-                      id="public-profile-sheet-progress"
-                      className="mb-4 text-lg font-semibold text-[#EDEDED]"
-                    >
-                      Sheet progress
-                    </h2>
-                    <div className="profile-sheet-grid space-y-4">
+                    <header className="profile-progress-heading">
+                      <h2
+                        id="public-profile-sheet-progress"
+                        className="text-lg font-semibold text-[#EDEDED]"
+                      >
+                        Sheet progress
+                      </h2>
+                    </header>
+                    <div className="profile-sheet-grid">
                       {profileSheetStats.map((sheet) => {
                         const percentage = sheet.total
                           ? Math.round((sheet.solved / sheet.total) * 100)
@@ -2318,10 +2322,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                             >
                               <div
                                 className="profile-sheet-progress-fill h-full rounded-full bg-[#EDEDED] transition-all"
-                                style={{
-                                  width: `${percentage}%`,
-                                  minWidth: sheet.solved > 0 ? "2px" : 0,
-                                }}
+                                style={{ width: `${percentage}%` }}
                               />
                             </div>
                             <span className="profile-sheet-counts">
@@ -2334,9 +2335,9 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       })}
                     </div>
                   </section>
-                </aside>
+                </div>
 
-                <div className="profile-main public-profile-main">
+                <div className="profile-main">
                   <ActivityHeatmap
                     activity={publicHeatmap.username === selectedPublicUsername ? publicHeatmap.activity : {}}
                     years={publicHeatmap.years}
