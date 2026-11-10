@@ -67,7 +67,7 @@ function permissions determine what the request can access.
 
 1. `src/main.jsx` imports global CSS and mounts `App` inside a React error
    boundary.
-2. `src/lib/supabase.js` reads `VITE_SUPABASE_URL` and
+2. `src/shared/lib/supabase.js` reads `VITE_SUPABASE_URL` and
    `VITE_SUPABASE_ANON_KEY`. If either is absent, the browser client is not
    created and the UI reports that Supabase is not configured.
 3. `App` asks Supabase Auth for the restored session and subscribes to auth
@@ -131,23 +131,46 @@ can be swiped horizontally.
 | Module | Responsibility |
 | --- | --- |
 | `src/main.jsx` | React entry point, global stylesheet import, render error boundary. |
-| `src/App.jsx` | Authentication state machine, onboarding, history-based navigation, tracker, sheets, profiles, import/export, and custom dialogs. |
-| `src/hooks/useProgress.js` | Loads and updates cloud progress/activity, applies optimistic updates, serializes writes, and manages theme. |
-| `src/hooks/useDailyLog.js` | Loads, validates, saves, and paginates daily-log data. |
-| `src/components/DailyTracker.jsx` | Daily and paginated full-log views. |
-| `src/components/ProfileSettings.jsx` | Profile edit form and save/availability flow. |
-| `src/components/SleepStudyChart.jsx` | Owner-only 30-day sleep and study chart, backed by RLS-protected daily logs. |
-| `src/components/TrackSheetBrand.jsx` | Shared clickable product branding and current-page/track label. |
-| `src/components/Tooltip.jsx` | Accessible themed tooltip behavior for interactive controls. |
-| `src/lib/supabase.js` | Creates the browser Supabase client from the public Vite environment variables. |
-| `src/utils/parseSheet.js` | Parses user-uploaded TXT sheets and exports the sample format. |
-| `src/utils/time.js` | Shared daily-log duration, validation, and interval helpers. |
-| `src/data/*.json` | Built-in sheet templates included at build time. |
+| `src/App.jsx` | Top-level authentication screen selection. |
+| `src/features/auth/useAuthentication.js` | Authentication state, session restoration, sign-in, and sign-out. |
+| `src/features/auth/SignInPage.jsx` | Unauthenticated sign-in screen. |
+| `src/features/auth/OnboardingPage.jsx` | New-user profile setup. |
+| `src/features/dashboard/AuthenticatedApp.jsx` | Signed-in screen coordination and shared actions. |
+| `src/features/dashboard/AuthenticatedScreens.jsx` | Selects and renders the authenticated feature screens. |
+| `src/features/dashboard/TrackerDashboard.jsx` | Problem-tracker dashboard view. |
+| `src/features/dashboard/usePeopleNavigation.js` | Route state, people search, public-profile loading, and public activity heatmaps. |
+| `src/features/people/PeopleSearchPage.jsx` | Username search screen. |
+| `src/features/people/PublicProfilePage.jsx` | Other users' profile view. |
+| `src/features/profile/pages/ProfilePage.jsx` | Signed-in user's profile and progress summary. |
+| `src/features/profile/hooks/useProfileMetrics.js` | Derives profile statistics and recent accepted problems. |
+| `src/features/profile/hooks/useProgressBackup.js` | Imports and exports per-sheet progress backups. |
+| `src/features/problem-tracker/hooks/useProgress.js` | Loads and updates cloud progress/activity, applies optimistic updates, serializes writes, and manages theme. |
+| `src/features/daily-log/hooks/useDailyLog.js` | Coordinates daily-log state, date changes, and log actions. |
+| `src/features/daily-log/hooks/useDailyLogActivities.js` | Edits activities and their time slots. |
+| `src/features/daily-log/hooks/useDailyLogPersistence.js` | Loads, validates, saves, and autosaves daily logs. |
+| `src/features/daily-log/hooks/useDailyLogHistory.js` | Full-log loading, pagination, and history clearing. |
+| `src/features/daily-log/hooks/useDailyLogTimer.js` | Activity timers and quick-add time entries. |
+| `src/features/daily-log/lib/dailyLogModel.js` | Daily-log normalization and timer-storage helpers. |
+| `src/features/daily-log/components/DailyTracker.jsx` | Daily and paginated full-log views. |
+| `src/features/daily-log/components/FullLog.css` | Full Log-specific styling. |
+| `src/features/profile/pages/ProfileSettings.jsx` | Profile edit form and save/availability flow. |
+| `src/features/activity/components/SleepStudyChart.jsx` | Owner-only 30-day sleep and study chart, backed by RLS-protected daily logs. |
+| `src/features/sheets/data/bootstrapBuiltInSheets.js` | Built-in template bootstrap and version tracking. |
+| `src/features/sheets/components/SheetSwitcherMenu.jsx` | Sheet selection and sheet actions menu. |
+| `src/shared/components/TrackSheetBrand.jsx` | Shared clickable product branding and current-page/track label. |
+| `src/shared/components/Tooltip.jsx` | Accessible themed tooltip behavior for interactive controls. |
+| `src/shared/lib/supabase.js` | Creates the browser Supabase client from the public Vite environment variables. |
+| `src/features/sheets/utils/parseSheet.js` | Parses user-uploaded TXT sheets and exports the sample format. |
+| `src/shared/utils/time.js` | Shared daily-log duration, validation, and interval helpers. |
+| `src/features/sheets/data/*.json` | Built-in sheet templates included at build time. |
 | `api/search.js` | Authenticated username-prefix search function. |
 | `supabase/migrations/*.sql` | Database schema, RLS policies, triggers, indexes, and RPC implementations. |
 
-Most product UI and route composition live in `App.jsx`; reusable profile,
-daily-log, and shared interface pieces are extracted into `src/components/`.
+Feature-specific modules live under `src/features/<feature>/`; components and
+services reused across features live under `src/shared/`. Global CSS is in
+`src/styles/`, split into shared, authentication, dashboard, navigation, and
+profile modules. Daily Log styles are separated into date/view, activity-editor,
+status, and Full Log stylesheets.
 
 ## 6. Sheets and problem identifiers
 
@@ -170,7 +193,7 @@ Sheet
             └── defaultSkip
 ```
 
-The frontend loads all valid `src/data/*.json` files at build time. A
+The frontend loads all valid `src/features/sheets/data/*.json` files at build time. A
 filename becomes the template ID (`dsa.json` → `dsa`); titles are derived from
 that ID, with DSA displayed as “DSA”.
 
@@ -449,7 +472,7 @@ Two independent tools handle text sheets:
 
 - `scripts/convert-sheet.cjs` converts repository-maintained source text into
   build-time JSON templates.
-- `src/utils/parseSheet.js` parses user-uploaded text in the browser.
+- `src/features/sheets/utils/parseSheet.js` parses user-uploaded text in the browser.
 
 The upload parser normalizes CRLF line endings, recognizes Step and optional
 subsection headings using em dash, en dash, or hyphen separators, handles
@@ -465,8 +488,9 @@ and existing saved sheet JSON.
 
 The default theme is dark. `useProgress` reads and writes the `theme` local
 storage value and applies `data-theme="light"` to the document root for light
-mode. `src/index.css` defines CSS variables for page, surface, border, text,
-and theme colors; some components also use Tailwind utility colors.
+mode. `src/styles/index.css` defines CSS variables for page, surface, border, text,
+and theme colors; authentication, dashboard, and profile styles are separated
+into their own stylesheets. Some components also use Tailwind utility colors.
 
 The authenticated interface includes:
 

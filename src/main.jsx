@@ -1,9 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import { supabase } from './lib/supabase';
+import "./styles/index.css";
+import "./styles/shared-components.css";
+import "./styles/interaction-layout.css";
+import "./styles/theme-and-status.css";
+import "./styles/auth.css";
+import "./styles/auth-showcase.css";
+import "./styles/auth-responsive.css";
+import "./styles/dashboard.css";
+import "./styles/profile.css";
+import "./styles/layout.css";
+import "./styles/tracker-layout.css";
+import "./styles/profile-layout.css";
+import "./styles/public-profile-layout.css";
+import "./styles/own-profile-layout.css";
+import "./styles/profile-responsive.css";
+import { supabase } from "./shared/lib/supabase";
 import App from './App';
-import './layout.css';
 
 class AppErrorBoundary extends React.Component {
   state = { hasError: false };

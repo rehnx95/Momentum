@@ -41,6 +41,31 @@ Vercel serves the built application and runs the small username-search
 function. The browser uses the public Supabase anon/publishable key; it does
 not connect to PostgreSQL with a database password.
 
+## Source structure
+
+```text
+src/
+  App.jsx                         Authentication and top-level screen routing
+  main.jsx                        React entry point and error boundary
+  features/
+    activity/                     Heatmap and sleep/study charts
+    auth/                         Sign-in and onboarding pages
+    daily-log/                    Daily/full logs, time inputs, and log data
+    dashboard/                    Signed-in app orchestration
+    people/                       People search and public profile pages
+    problem-tracker/              Problem tree and progress state
+    profile/                      Profile pages and settings
+    sheets/                       Sheet selection, parsing, and built-in data
+  shared/
+    components/                   UI reused by multiple features
+    lib/                          Supabase client and browser data caches
+    utils/                        Cross-feature date and time helpers
+  styles/                         Global and layout stylesheets
+```
+
+Feature-specific code stays together; `shared/` is reserved for code used by
+more than one feature.
+
 ## Technology
 
 - React 18, Vite 5, JavaScript, and Tailwind CSS
@@ -100,8 +125,8 @@ The built-in sheets are data files bundled into the frontend:
 
 | File | Track | Problems |
 | --- | --- | ---: |
-| [`src/data/dsa.json`](./src/data/dsa.json) | DSA | 518 |
-| [`src/data/backend.json`](./src/data/backend.json) | Backend | 84 |
+| [`src/features/sheets/data/dsa.json`](./src/features/sheets/data/dsa.json) | DSA | 518 |
+| [`src/features/sheets/data/backend.json`](./src/features/sheets/data/backend.json) | Backend | 84 |
 
 Their editable text sources live in [`source/`](./source/). To update a
 built-in sheet:
@@ -109,7 +134,7 @@ built-in sheet:
 1. Update or add its TXT source.
 2. Run `npm run convert-sheet`, or pass a filename such as
    `npm run convert-sheet -- backend.txt`.
-3. Review the generated JSON in `src/data/`.
+3. Review the generated JSON in `src/features/sheets/data/`.
 4. Commit both source and generated data.
 
 These JSON files are templates. When an account initializes its sheets,
@@ -137,7 +162,7 @@ Step 2 — Dynamic Programming
 
 Step headings and numbered problems are required. Subsection headings,
 `(LC number)`, and `(Skip)` are optional. The upload parser and sample format
-are in [`src/utils/parseSheet.js`](./src/utils/parseSheet.js).
+are in [`src/features/sheets/utils/parseSheet.js`](./src/features/sheets/utils/parseSheet.js).
 
 ## Main routes
 
@@ -196,14 +221,18 @@ api/                    Vercel serverless API
 scripts/                Sheet conversion and maintenance utilities
 source/                 TXT sources for built-in tracks
 src/
-  App.jsx               Authentication flow, routing, tracker, profile UI
-  components/           Profile charts, tracker views, settings, and shared UI
-  data/                 Bundled built-in track templates
-  hooks/                 Progress sync and daily-log state
-  lib/supabase.js       Browser Supabase client
-  utils/parseSheet.js   TXT upload parser and sample template
-  index.css              Theme and component styles
-  layout.css             Shared page and responsive layout rules
+  App.jsx               Top-level authentication screen selection
+  features/
+    auth/               Sign-in, onboarding, and authentication state
+    activity/           Sleep/study charts and activity heatmaps
+    daily-log/          Daily/full-log views, state, history, and timers
+    dashboard/          Signed-in coordination and tracker dashboard
+    people/             People search and public profiles
+    problem-tracker/    Problem tree, progress state, and controls
+    profile/            Account profile, metrics, and backup workflows
+    sheets/             Sheet selection, upload, parsing, and templates
+  shared/               Reusable UI, Supabase, caches, and utilities
+  styles/               Global, feature, and page-layout stylesheets
   main.jsx              React entry point and render error boundary
 supabase/migrations/    Database schema, access policies, and RPC history
 architecture.md         System design and operating guide

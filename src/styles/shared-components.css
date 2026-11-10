@@ -1,0 +1,172 @@
+.track-sheet-brand-context {
+  width: 5.25rem;
+  height: 1rem;
+  max-width: 100%;
+  overflow: hidden;
+  margin-top: 0.15rem;
+  padding: 0.12rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.015em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track-sheet-brand {
+  position: absolute;
+  left: 4.25rem;
+  top: 50%;
+  height: 2.75rem;
+  flex: 0 0 auto;
+  width: 11rem;
+  transform: translateY(-50%);
+  z-index: 3;
+}
+
+.track-sheet-brand-logo {
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
+}
+
+.track-sheet-brand-copy {
+  width: 7.25rem;
+  height: 2.75rem;
+  flex: 0 0 7.25rem;
+}
+
+.track-sheet-brand-name {
+  height: 1.25rem;
+  white-space: nowrap;
+  line-height: 1.25rem;
+}
+
+@media (min-width: 768px) {
+
+  .track-sheet-brand {
+    left: 5rem;
+  }
+
+  .unified-header-actions {
+    right: 1.5rem;
+  }
+}
+
+.track-sheet-brand > span:last-child {
+  display: flex;
+  min-height: 2.75rem;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.app-tooltip-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.app-tooltip {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 50%;
+  z-index: 100;
+  max-width: calc(100vw - 1rem);
+  padding: 0.4rem 0.65rem;
+  transform: translate(-50%, -0.15rem);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.55rem;
+  background: var(--surface-raised);
+  box-shadow: 0 8px 24px var(--shadow);
+  color: var(--text);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+}
+
+.app-tooltip-anchor:hover .app-tooltip,
+.app-tooltip-anchor:has(:focus-visible) .app-tooltip {
+  transform: translate(-50%, 0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.app-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(4px);
+}
+
+.app-dialog {
+  width: min(100%, 26rem);
+  padding: 1.35rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  color: var(--text);
+}
+
+.app-dialog h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.app-dialog p {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.app-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 1.35rem;
+}
+
+.app-dialog-actions button {
+  min-height: 2.5rem;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.app-dialog-cancel {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+.app-dialog-cancel:hover {
+  background: var(--surface-hover);
+}
+
+.app-dialog-confirm {
+  border-color: var(--accent) !important;
+  background: var(--accent);
+  color: var(--page);
+}
+
+.app-dialog-confirm:hover {
+  background: var(--accent-hover);
+}
+

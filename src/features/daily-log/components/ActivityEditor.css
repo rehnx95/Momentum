@@ -1,0 +1,324 @@
+.daily-entry-heading {
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.65rem 0 0.35rem;
+}
+
+.daily-entry-heading h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.new-activity-wrap,
+.activity-menu-wrap {
+  position: relative;
+}
+
+.new-activity-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 1.9rem;
+  padding: 0 0.55rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: var(--text);
+  color: var(--page);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.new-activity-menu,
+.activity-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  display: grid;
+  min-width: 10rem;
+  gap: 0.2rem;
+  padding: 0.4rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.7rem;
+  background: var(--surface);
+  box-shadow: 0 12px 32px var(--shadow);
+}
+
+.new-activity-menu {
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.activity-menu {
+  max-height: 20rem;
+  min-width: 13rem;
+  overflow-y: auto;
+}
+
+.new-activity-menu .activity-menu-label {
+  padding: 0.4rem 0.5rem 0.2rem;
+  font-weight: 700;
+}
+
+.new-activity-empty {
+  padding: 0.35rem 0.5rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.new-activity-menu button,
+.activity-menu > button {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.4rem;
+  color: var(--text);
+  text-align: left;
+  font-size: 0.75rem;
+}
+
+.new-activity-menu button:hover,
+.activity-menu > button:hover {
+  background: var(--surface-hover);
+}
+
+.daily-new-inline {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.daily-new-inline input {
+  min-width: 0;
+  flex: 1;
+}
+
+.daily-new-inline button,
+.load-older-button {
+  min-height: 2.25rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.6rem;
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.daily-new-inline button[type="submit"] {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--page);
+}
+
+.daily-activity-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.activity-card {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 7rem;
+  padding: 0.55rem;
+  overflow: visible;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--border-strong);
+  border-radius: 0.75rem;
+  background: var(--surface-raised);
+}
+
+.activity-card-heading {
+  min-width: 0;
+  gap: 0.45rem;
+  padding-right: 2.25rem;
+  margin-bottom: 0.3rem;
+  color: var(--text);
+}
+
+.activity-card-identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.activity-card-identity > svg {
+  flex: none;
+}
+
+.activity-card-heading strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-total {
+  margin-left: auto;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.4rem;
+  background: var(--surface-hover);
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.activity-menu-trigger {
+  display: grid;
+  width: 1.35rem;
+  height: 1.35rem;
+  place-items: center;
+  flex: none;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.activity-menu-trigger:hover,
+.activity-menu-trigger[aria-expanded="true"] {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.activity-remove-wrap {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+}
+
+.activity-remove {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border-radius: 0.4rem;
+  color: var(--muted);
+}
+
+.activity-remove:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.activity-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.activity-menu-label {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.35rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.daily-slot-list {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.daily-slot-row {
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+  max-width: 100%;
+  grid-template-columns: 4.15rem 0.85rem 4.15rem minmax(2.4rem, 1fr) 1.45rem;
+}
+
+.daily-slot-row label {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.daily-slot-row .time-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.slot-arrow {
+  display: inline-flex;
+  width: 0.9rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  text-align: center;
+}
+
+.slot-hours {
+  min-width: 0;
+  color: var(--muted);
+  text-align: right;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot-next-day {
+  color: var(--muted);
+  font-size: 0.63rem;
+  font-weight: 700;
+  position: absolute;
+  top: -0.55rem;
+  right: 2rem;
+}
+
+.slot-remove {
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  min-width: 0;
+  place-items: center;
+  border-radius: 0.45rem;
+  color: var(--muted);
+  opacity: 0;
+}
+
+.daily-slot-row:hover .slot-remove,
+.daily-slot-row:focus-within .slot-remove {
+  opacity: 1;
+}
+
+.slot-remove:hover {
+  color: var(--muted);
+}
+
+.slot-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.slot-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 1.75rem;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.slot-add:hover {
+  color: var(--text);
+}

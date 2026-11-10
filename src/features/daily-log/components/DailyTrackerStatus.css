@@ -1,0 +1,103 @@
+
+.daily-warnings,
+.daily-errors {
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+  font-size: 0.75rem;
+}
+
+.daily-empty-state {
+  margin: 0.3rem 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.daily-warnings {
+  color: var(--warning);
+}
+
+.daily-errors,
+.daily-error-message {
+  color: var(--muted);
+}
+
+.daily-save-status {
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.daily-save-status span {
+  color: var(--muted);
+}
+
+.daily-save-status button {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.daily-save-status button:hover {
+  background: var(--surface-hover);
+}
+
+@media (hover: none) {
+  .slot-remove {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 700px) {
+  .daily-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .daily-day-header {
+    align-items: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .custom-calendar {
+    width: min(18rem, calc(100vw - 2rem));
+  }
+
+  .daily-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .daily-toolbar {
+    align-items: flex-start;
+  }
+
+  .slot-remove {
+    opacity: 1;
+  }
+
+  .daily-save-status {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@container daily-tracker (max-width: 1050px) {
+  .daily-activity-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container daily-tracker (max-width: 790px) {
+  .daily-activity-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container daily-tracker (max-width: 520px) {
+  .daily-activity-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,106 @@
+
+.auth-panel-wrap {
+  width: auto;
+  min-height: 0;
+  padding: 0;
+}
+
+.auth-panel {
+  width: 100%;
+  padding: clamp(1.6rem, 3vw, 2.4rem);
+  border-radius: 1.2rem;
+  background: rgba(9, 9, 9, 0.82);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(16px);
+}
+
+.auth-mobile-mark {
+  display: none;
+}
+
+.auth-panel h2 {
+  max-width: 16ch;
+  font-size: clamp(1.65rem, 2.2vw, 2rem);
+  line-height: 1.12;
+}
+
+.google-signin-button {
+  min-height: 3.5rem;
+  border-radius: 0.75rem;
+}
+
+.google-signin-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 760px) {
+  .auth-layout {
+    width: min(100%, 38rem);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.75rem;
+    padding: 2.5rem clamp(1.1rem, 5vw, 2rem);
+  }
+
+  .auth-showcase {
+    padding: 0;
+  }
+
+  .auth-showcase-copy {
+    margin-top: 2.2rem;
+  }
+
+  .auth-showcase-copy h1 {
+    max-width: 12ch;
+    font-size: clamp(2.8rem, 11vw, 4.5rem);
+  }
+
+  .auth-showcase-copy p {
+    max-width: 34rem;
+  }
+
+  .auth-preview,
+  .auth-showcase-footnote {
+    display: none;
+  }
+
+  .auth-panel-wrap {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .auth-preview-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+:root[data-theme="light"] .auth-shell {
+  background: #fafafa !important;
+}
+
+:root[data-theme="light"] .auth-preview {
+  border-color: var(--border);
+  background: linear-gradient(145deg, var(--surface), var(--surface-raised));
+  box-shadow: 0 24px 70px var(--shadow);
+}
+
+:root[data-theme="light"] .auth-preview-cell.level-0 { background: #ebedf0; }
+:root[data-theme="light"] .auth-preview-cell.level-1 { background: #d4d4d4; }
+:root[data-theme="light"] .auth-preview-cell.level-2 { background: #a3a3a3; }
+:root[data-theme="light"] .auth-preview-cell.level-3 { background: #525252; }
+:root[data-theme="light"] .auth-preview-cell.level-4 { background: #171717; }
+
+:root[data-theme="light"] .auth-panel {
+  background: var(--surface);
+  box-shadow: 0 28px 90px var(--shadow);
+}
+
+:root[data-theme="light"] .auth-showcase-footnote {
+  color: var(--muted);
+}
+
+.auth-simple-title {
+  letter-spacing: -0.045em;
+  line-height: 1.12;
+}

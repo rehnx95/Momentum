@@ -1,0 +1,229 @@
+.tracker-controls {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--page-overlay);
+  backdrop-filter: blur(12px);
+}
+
+.tracker-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.tracker-side {
+  position: sticky;
+  top: calc(var(--header-h) + 1rem);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.btn-secondary:hover {
+  background: var(--surface-hover);
+}
+
+.btn-danger {
+  color: var(--muted);
+}
+
+.btn-danger:hover {
+  background: var(--surface-hover);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 2.5rem;
+  padding: 2.5rem 1rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: 0.9rem;
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.empty-state strong {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface);
+}
+
+.stat-icon {
+  flex: none;
+  color: var(--muted);
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value small {
+  margin-left: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.data-actions {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.data-actions .btn-secondary {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+@media (min-width: 768px) {
+  .app-header-inner,
+  .app-page {
+    padding-inline: 1.5rem;
+  }
+
+  .daily-basics {
+    grid-template-columns: 10rem 10rem 1fr;
+  }
+
+  .daily-total {
+    grid-column: auto;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .signout-label {
+    display: inline;
+    margin-left: 0.35rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tracker-grid {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    align-items: start;
+  }
+}
+
+@media (hover: none) {
+  .popover-trash {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .app-header-inner {
+    grid-template-columns: 1fr auto;
+  }
+
+  .app-nav {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 50;
+    justify-content: space-around;
+    padding: 0.4rem 0.5rem calc(0.4rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--page-overlay);
+    backdrop-filter: blur(12px);
+  }
+
+  .app-nav button {
+    flex-direction: column;
+    gap: 0.15rem;
+    height: auto;
+    min-width: 4.25rem;
+    min-height: 2.75rem;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.68rem;
+  }
+
+  body {
+    padding-bottom: 4.5rem;
+  }
+}
+
+.tracker-dashboard-shell .dashboard-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 1.5rem;
+  padding-top: 1.5rem !important;
+}
+
+.tracker-dashboard-shell .dashboard-content {
+  min-width: 0;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 0 !important;
+}
+
+.profile-shell > main.app-page,
+.profile-settings-shell > main.app-page,
+.dashboard-shell > main.app-page {
+  padding-top: 1.5rem !important;
+}
+
+@media (min-width: 1024px) {
+  .tracker-dashboard-shell .dashboard-main {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .stat-icon {
+    display: none;
+  }
+
+  .stat-chip {
+    padding: 0.6rem 0.7rem;
+  }
+}

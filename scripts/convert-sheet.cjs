@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SOURCE_DIR = path.join(__dirname, '../source');
-const OUTPUT_DIR = path.join(__dirname, '../src/data');
+const OUTPUT_DIR = path.join(__dirname, '../src/features/sheets/data');
 
 // Title used for problems that sit directly under a Step (no "N.M — Title" header).
 // Set to null so the UI can simply skip rendering a subsection heading.
