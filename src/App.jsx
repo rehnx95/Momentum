@@ -2199,148 +2199,144 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             </div>
           ) : (
             profile && (
-              <div className="profile-layout">
+              <div className="profile-layout public-profile-layout">
                 <aside className="profile-sidebar">
-                <section className="profile-hero">
-                  <div className="profile-avatar">
-                    {(profile.name || profile.username || "U")
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-2xl font-bold text-[#EDEDED]">
-                      {profile.name || profile.username}
-                    </h2>
-                    <p className="mt-1 text-sm text-[#A1A1A1]">
-                      @{profile.username}
-                    </p>
-                    {profile.location && (
-                      <div className="mt-3 flex items-center gap-2 text-sm text-[#A1A1A1]">
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          aria-hidden="true"
+                  <section className="profile-hero">
+                    <div className="profile-avatar">
+                      {(profile.name || profile.username || "U")
+                        .charAt(0)
+                        .toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-2xl font-bold text-[#EDEDED]">
+                        {profile.name || profile.username}
+                      </h2>
+                      <p className="mt-1 text-sm text-[#A1A1A1]">
+                        @{profile.username}
+                      </p>
+                      {profile.location && (
+                        <div className="mt-3 flex items-center gap-2 text-sm text-[#A1A1A1]">
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            aria-hidden="true"
+                          >
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                          </svg>
+                          {profile.location}
+                        </div>
+                      )}
+                      {profile.website && (
+                        <a
+                          href={profile.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 inline-block break-all text-sm text-[#A1A1A1] hover:text-white hover:underline"
                         >
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                          <circle cx="12" cy="10" r="3" />
-                        </svg>
-                        {profile.location}
-                      </div>
-                    )}
-                    {profile.website && (
+                          {profile.website}
+                        </a>
+                      )}
                       <a
-                        href={profile.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-block break-all text-sm text-[#A1A1A1] hover:text-white hover:underline"
+                        href={`/user/${encodeURIComponent(profile.username)}`}
+                        className="mt-4 block break-all text-xs text-[#A1A1A1] hover:text-[#EDEDED]"
                       >
-                        {profile.website}
+                        {window.location.host}/user/{profile.username}
                       </a>
-                    )}
-                    <a
-                      href={`/user/${encodeURIComponent(profile.username)}`}
-                      className="mt-4 block break-all text-xs text-[#A1A1A1] hover:text-[#EDEDED]"
+                      <button
+                        type="button"
+                        onClick={onCopyLink}
+                        className="btn-secondary mt-4"
+                      >
+                        {copied ? "Link copied" : "Share profile"}
+                      </button>
+                    </div>
+                    <StatStrip
+                      className="profile-overview-stats"
+                      items={[
+                        {
+                          label: "Current streak",
+                          value: Number(profile.current_streak || 0),
+                          unit: Number(profile.current_streak || 0) === 1 ? "day" : "days",
+                          icon: Calendar,
+                        },
+                        {
+                          label: "Best streak",
+                          value: Number(profile.longest_streak || 0),
+                          unit: Number(profile.longest_streak || 0) === 1 ? "day" : "days",
+                          icon: Trophy,
+                        },
+                        {
+                          label: "Problems solved",
+                          value: profileProblemsSolved,
+                          unit: `/ ${profileProblemsTotal}`,
+                          icon: Target,
+                        },
+                        {
+                          label: "Active days",
+                          value: activeDays,
+                          icon: Calendar,
+                        },
+                      ]}
+                    />
+                  </section>
+
+                  <section
+                    className="profile-sheet-progress surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
+                    aria-labelledby="public-profile-sheet-progress"
+                  >
+                    <h2
+                      id="public-profile-sheet-progress"
+                      className="mb-4 text-lg font-semibold text-[#EDEDED]"
                     >
-                      {window.location.host}/user/{profile.username}
-                    </a>
-                    <button
-                      type="button"
-                      onClick={onCopyLink}
-                      className="btn-secondary mt-4"
-                    >
-                      {copied ? "Link copied" : "Share profile"}
-                    </button>
-                  </div>
-                </section>
+                      Sheet progress
+                    </h2>
+                    <div className="profile-sheet-grid space-y-4">
+                      {profileSheetStats.map((sheet) => {
+                        const percentage = sheet.total
+                          ? Math.round((sheet.solved / sheet.total) * 100)
+                          : 0;
+                        return (
+                          <div className="profile-sheet-tile" key={sheet.id}>
+                            <div className="profile-sheet-tile-heading">
+                              <span className="truncate font-medium text-[#EDEDED]">
+                                {sheet.title}
+                              </span>
+                              <span className="profile-sheet-percent">{percentage}%</span>
+                            </div>
+                            <div
+                              className="profile-sheet-progress-track h-2 overflow-hidden rounded-full bg-[#262626]"
+                              role="progressbar"
+                              aria-label={`${sheet.title} progress`}
+                              aria-valuemin={0}
+                              aria-valuemax={sheet.total}
+                              aria-valuenow={sheet.solved}
+                            >
+                              <div
+                                className="profile-sheet-progress-fill h-full rounded-full bg-[#EDEDED] transition-all"
+                                style={{
+                                  width: `${percentage}%`,
+                                  minWidth: sheet.solved > 0 ? "2px" : 0,
+                                }}
+                              />
+                            </div>
+                            <span className="profile-sheet-counts">
+                              {sheet.solved} / {sheet.total} solved
+                              <span aria-hidden="true"> · </span>
+                              {sheet.skipped} skipped
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
                 </aside>
 
-                <div className="profile-main">
-                <StatStrip
-                  items={[
-                    {
-                      label: "Current streak",
-                      value: Number(profile.current_streak || 0),
-                      unit:
-                        Number(profile.current_streak || 0) === 1
-                          ? "day"
-                          : "days",
-                      icon: Calendar,
-                    },
-                    {
-                      label: "Best streak",
-                      value: Number(profile.longest_streak || 0),
-                      unit:
-                        Number(profile.longest_streak || 0) === 1
-                          ? "day"
-                          : "days",
-                      icon: Trophy,
-                    },
-                    {
-                      label: "Problems solved",
-                      value: profileProblemsSolved,
-                      unit: `/ ${profileProblemsTotal}`,
-                      icon: Target,
-                    },
-                  ]}
-                />
-
-                <section
-                  className="surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
-                  aria-labelledby="public-profile-sheet-progress"
-                >
-                  <h2
-                    id="public-profile-sheet-progress"
-                    className="mb-4 text-lg font-semibold text-[#EDEDED]"
-                  >
-                    Sheet progress
-                  </h2>
-                  <div className="space-y-4">
-                    {profileSheetStats.map((sheet) => {
-                      const percentage = sheet.total
-                        ? Math.round((sheet.solved / sheet.total) * 100)
-                        : 0;
-                      return (
-                        <div key={sheet.id}>
-                          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2 text-sm">
-                            <span className="truncate font-medium text-[#EDEDED]">
-                              {sheet.title}
-                            </span>
-                            <span className="shrink-0 tabular-nums text-[#A1A1A1]">
-                              <span className="text-muted">{sheet.solved} solved</span>
-                              <span className="mx-2 text-[#4D4D4D]">·</span>
-                              <span className="text-muted">{sheet.skipped} skipped</span>
-                              <span className="mx-2 text-[#4D4D4D]">·</span>
-                              {sheet.total} total
-                            </span>
-                          </div>
-                          <div
-                            className="h-2 overflow-hidden rounded-full bg-[#262626]"
-                            role="progressbar"
-                            aria-label={`${sheet.title} progress`}
-                            aria-valuemin={0}
-                            aria-valuemax={sheet.total}
-                            aria-valuenow={sheet.solved}
-                          >
-                            <div
-                              className="h-full rounded-full bg-[#EDEDED] transition-all"
-                              style={{
-                                width: `${percentage}%`,
-                                minWidth: sheet.solved > 0 ? "2px" : 0,
-                                borderRadius: percentage > 0 && percentage < 3 ? "2px" : undefined,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-
-                <div className="public-profile-activity">
+                <div className="profile-main public-profile-main">
                   <ActivityHeatmap
                     activity={publicHeatmap.username === selectedPublicUsername ? publicHeatmap.activity : {}}
                     years={publicHeatmap.years}
@@ -2417,7 +2413,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                     </p>
                   )}
                   </section>
-                </div>
                 </div>
               </div>
             )

@@ -1,19 +1,6 @@
 import { Trash2 } from "lucide-react";
 import { formatDuration, slotMinutes, toMinutes } from "../utils/time";
-
-export function navigateTimeFields(event) {
-  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-  const view = event.currentTarget.closest(".daily-day-view");
-  if (!view) return;
-  const inputs = [...view.querySelectorAll(
-    'input[type="time"][data-time-navigation]:not(:disabled)',
-  )];
-  const currentIndex = inputs.indexOf(event.currentTarget);
-  const nextInput = inputs[currentIndex + (event.key === "ArrowRight" ? 1 : -1)];
-  if (!nextInput) return;
-  event.preventDefault();
-  nextInput.focus({ preventScroll: true });
-}
+import TimeInput from "./TimeInput";
 
 export default function SlotRow({
   activityId,
@@ -39,27 +26,21 @@ export default function SlotRow({
     <div className="daily-slot-row" id={`slot-${activityId}-${index}`}>
       <label>
         <span className="sr-only">{activityName} start time</span>
-        <input
-          type="time"
+        <TimeInput
           value={slot.start}
           disabled={disabled}
-          onChange={(event) => onChange(index, "start", event.target.value)}
-          onKeyDown={navigateTimeFields}
-          data-time-navigation
-          aria-label={`${activityName} slot ${index + 1} start time`}
+          onChange={(value) => onChange(index, "start", value)}
+          label={`${activityName} slot ${index + 1} start time`}
         />
       </label>
       <span className="slot-arrow" aria-hidden="true">→</span>
       <label>
         <span className="sr-only">{activityName} end time</span>
-        <input
-          type="time"
+        <TimeInput
           value={slot.end}
           disabled={disabled}
-          onChange={(event) => onChange(index, "end", event.target.value)}
-          onKeyDown={navigateTimeFields}
-          data-time-navigation
-          aria-label={`${activityName} slot ${index + 1} end time`}
+          onChange={(value) => onChange(index, "end", value)}
+          label={`${activityName} slot ${index + 1} end time`}
         />
       </label>
       <span className="slot-hours">
