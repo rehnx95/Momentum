@@ -2935,6 +2935,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
               <DailyTracker
                 user={user}
                 sheets={availableSheets}
+                activityLog={activityLog}
                 askConfirmation={askConfirmation}
               />
             </Suspense>

@@ -69,7 +69,36 @@
 .sleep-study-chart {
   display: block;
   width: 100%;
+  height: auto;
+  aspect-ratio: 720 / 220;
   overflow: visible;
+}
+
+.sleep-study-chart-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.sleep-study-tooltip {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  gap: 0.15rem;
+  max-width: 11rem;
+  padding: 0.5rem 0.65rem;
+  transform: translate(-50%, 0);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.55rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 30%);
+}
+
+.sleep-study-tooltip strong {
+  margin-bottom: 0.1rem;
 }
 
 .sleep-study-chart text {
@@ -97,6 +126,13 @@
   stroke: var(--surface-raised);
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.sleep-study-point-target {
+  fill: transparent;
+  stroke: transparent;
+  pointer-events: all;
 }
 
 .sleep-series .sleep-study-line,

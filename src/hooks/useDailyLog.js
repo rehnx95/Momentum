@@ -2,9 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
 import {
   clearDailyLogCaches,
+  getFullLogCache,
   getDailyLogCache,
   invalidateDailyLogHistoryCache,
+  invalidateFullLogCache,
   setDailyLogCache,
+  setFullLogCache,
 } from "../lib/dailyLogHistoryCache";
 import {
   getSleepMinutes,
@@ -13,8 +16,8 @@ import {
   validateDay,
 } from "../utils/time";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const PAGE_SIZE = 10;
+const FULL_LOG_CACHE_DURATION = 60_000;
 const TIMER_STORAGE = (userId) => `track-sheet-running-timer:${userId}`;
 export function getLocalDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -78,7 +81,7 @@ function timerStorageGet(userId) {
   }
 }
 
-export default function useDailyLog(user) {
+export default function useDailyLog(user, activityLog = {}) {
   const [date, setDateState] = useState(() => getLocalDateKey());
   const dateRef = useRef(date);
   const [log, setLogState] = useState(() => {
@@ -103,12 +106,29 @@ export default function useDailyLog(user) {
   const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
   const [viewMode, setViewMode] = useState("daily");
-  const [currentStreak, setCurrentStreak] = useState(0);
-  const [problemCounts, setProblemCounts] = useState({});
+  const currentStreak = useMemo(() => {
+    const activeDates = new Set(
+      Object.entries(activityLog)
+        .filter(([, count]) => Number(count) > 0)
+        .map(([activeDate]) => activeDate),
+    );
+    const today = getLocalDateKey();
+    const cursor = new Date(`${today}T00:00:00`);
+    if (!activeDates.has(today)) cursor.setDate(cursor.getDate() - 1);
+    let streak = 0;
+    while (activeDates.has(getLocalDateKey(cursor))) {
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return streak;
+  }, [activityLog]);
   const logsRequestRef = useRef(0);
-  const [allLogs, setAllLogs] = useState([]);
+  const [cachedFullLog] = useState(() => getFullLogCache(user.id));
+  const [allLogs, setAllLogs] = useState(() => cachedFullLog?.logs || []);
   const [allLogsLoading, setAllLogsLoading] = useState(false);
-  const [hasOlderLogs, setHasOlderLogs] = useState(false);
+  const [hasOlderLogs, setHasOlderLogs] = useState(
+    () => cachedFullLog?.hasOlderLogs || false,
+  );
   const [olderLogsLoading, setOlderLogsLoading] = useState(false);
   const [runningTimer, setRunningTimer] = useState(() => timerStorageGet(user.id));
   const [timerNow, setTimerNow] = useState(Date.now());
@@ -128,6 +148,13 @@ export default function useDailyLog(user) {
   const validation = useMemo(() => validateDay(log), [log]);
   const studiedMinutes = useMemo(() => getStudyMinutes(log), [log]);
   const sleptMinutes = useMemo(() => getSleepMinutes(log), [log]);
+  const problemCounts = useMemo(
+    () => Object.fromEntries(
+      [...new Set([date, ...allLogs.map((entry) => entry.date)])]
+        .map((entryDate) => [entryDate, Number(activityLog[entryDate] || 0)]),
+    ),
+    [activityLog, allLogs, date],
+  );
   const dirty = savedSnapshot !== null && JSON.stringify(log) !== savedSnapshot;
   const activeCustomTasks = log.custom_tasks;
 
@@ -168,6 +195,7 @@ export default function useDailyLog(user) {
       );
       if (error) throw error;
       invalidateDailyLogHistoryCache(user.id);
+      invalidateFullLogCache(user.id);
       setDailyLogCache(user.id, nextDate, normalizeLog(nextDraft, nextDate));
       if (nextDate === dateRef.current) {
         savedSnapshotRef.current = snapshot;
@@ -199,39 +227,6 @@ export default function useDailyLog(user) {
 
   const saveLogRef = useRef(saveLog);
   saveLogRef.current = saveLog;
-
-  useEffect(() => {
-    let active = true;
-    const cutoff = getLocalDateKey(new Date(Date.now() - 366 * DAY_MS));
-    supabase
-      .from("activity_log")
-      .select("date")
-      .eq("user_id", user.id)
-      .gte("date", cutoff)
-      .order("date", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) throw error;
-        if (!active) return;
-        const activeDates = new Set((data || []).map((item) => item.date));
-        const today = getLocalDateKey();
-        const cursor = new Date(`${today}T00:00:00`);
-        if (!activeDates.has(today)) cursor.setDate(cursor.getDate() - 1);
-        let streak = 0;
-        while (activeDates.has(getLocalDateKey(cursor))) {
-          streak += 1;
-          cursor.setDate(cursor.getDate() - 1);
-        }
-        setCurrentStreak(streak);
-      })
-      .catch((error) => {
-        if (!active) return;
-        console.error("Failed to load the Daily Log streak:", error);
-        setMessage("Could not load the current streak.");
-      });
-    return () => {
-      active = false;
-    };
-  }, [user.id]);
 
   useEffect(() => {
     let active = true;
@@ -460,7 +455,14 @@ export default function useDailyLog(user) {
 
   const loadLogs = useCallback(async () => {
     const requestId = ++logsRequestRef.current;
-    setAllLogsLoading(true);
+    const cached = getFullLogCache(user.id);
+    if (cached) {
+      setAllLogs(cached.logs);
+      setHasOlderLogs(cached.hasOlderLogs);
+      if (Date.now() - cached.loadedAt < FULL_LOG_CACHE_DURATION) return;
+    } else {
+      setAllLogsLoading(true);
+    }
     try {
       const logsResult = await supabase
         .from("daily_logs")
@@ -472,23 +474,18 @@ export default function useDailyLog(user) {
       if (requestId !== logsRequestRef.current) return;
       const fetched = logsResult.data || [];
       const rows = fetched.slice(0, PAGE_SIZE);
-      let activityData = [];
-      if (rows.length) {
-        const activityResult = await supabase
-          .from("activity_log")
-          .select("date, count")
-          .eq("user_id", user.id)
-          .gte("date", rows[rows.length - 1].date)
-          .lte("date", rows[0].date);
-        if (activityResult.error) throw activityResult.error;
-        activityData = activityResult.data || [];
-      }
-      if (requestId !== logsRequestRef.current) return;
-      setAllLogs(rows);
-      setProblemCounts(Object.fromEntries(
-        activityData.map((item) => [item.date, Number(item.count || 0)]),
-      ));
-      setHasOlderLogs(fetched.length > PAGE_SIZE);
+      const currentDates = new Set(rows.map((row) => row.date));
+      const retainedRows = (cached?.logs || []).filter(
+        (row) => !currentDates.has(row.date),
+      );
+      const refreshedRows = [...rows, ...retainedRows].sort((a, b) =>
+        b.date.localeCompare(a.date),
+      );
+      setAllLogs(refreshedRows);
+      const nextHasOlderLogs =
+        fetched.length > PAGE_SIZE || retainedRows.length > 0;
+      setHasOlderLogs(nextHasOlderLogs);
+      setFullLogCache(user.id, refreshedRows, nextHasOlderLogs);
     } catch (error) {
       if (requestId !== logsRequestRef.current) return;
       console.error("Failed to load full daily log:", error);
@@ -508,6 +505,7 @@ export default function useDailyLog(user) {
     setOlderLogsLoading(true);
     let cursor = oldest;
     let more = true;
+    let accumulatedLogs = allLogs;
     try {
       while (more) {
         const logsResult = await supabase
@@ -521,28 +519,13 @@ export default function useDailyLog(user) {
         const fetched = logsResult.data || [];
         const rows = fetched.slice(0, PAGE_SIZE);
         const oldestFetched = rows[rows.length - 1]?.date;
-        let activityData = [];
-        if (oldestFetched) {
-          const activityResult = await supabase
-            .from("activity_log")
-            .select("date, count")
-            .eq("user_id", user.id)
-            .gte("date", oldestFetched)
-            .lt("date", cursor);
-          if (activityResult.error) throw activityResult.error;
-          activityData = activityResult.data || [];
-        }
         if (rows.length) {
-          setAllLogs((current) => [...current, ...rows]);
-          setProblemCounts((current) => ({
-            ...current,
-            ...Object.fromEntries(
-              activityData.map((item) => [item.date, Number(item.count || 0)]),
-            ),
-          }));
+          accumulatedLogs = [...accumulatedLogs, ...rows];
+          setAllLogs(accumulatedLogs);
         }
         more = fetched.length > PAGE_SIZE;
         setHasOlderLogs(more);
+        setFullLogCache(user.id, accumulatedLogs, more);
         if (!loadAll || !oldestFetched) break;
         cursor = oldestFetched;
       }
@@ -581,38 +564,13 @@ export default function useDailyLog(user) {
     setSavedSnapshot(snapshot);
     setAllLogs([]);
     setHasOlderLogs(false);
+    invalidateFullLogCache(user.id);
     setDailyLogCache(user.id, dateRef.current, clearedLog);
     setLoadRequest((current) => current + 1);
     setStatus("Saved");
     setMessage("All saved Daily Log entries for your account were cleared.");
     return true;
   }, [setLog, user.id]);
-
-  useEffect(() => {
-    let active = true;
-    supabase
-      .from("activity_log")
-      .select("count")
-      .eq("user_id", user.id)
-      .eq("date", date)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (error) throw error;
-        if (active) setProblemCounts((current) => ({
-          ...current,
-          [date]: Number(data?.count || 0),
-        }));
-      })
-      .catch((error) => {
-        if (active) {
-          console.error("Failed to load daily problem count:", error);
-          setMessage("Could not load the problem count.");
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [user.id, date]);
 
   const startTimer = useCallback((activityId, activityName, color) => {
     if (runningTimer) return false;

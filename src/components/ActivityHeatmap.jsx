@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { buildHeatmap, formatTooltipDate } from '../utils/heatmap';
 import { formatDuration } from '../utils/time';
@@ -8,8 +8,15 @@ const WEEKDAYS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 const GAP = 2;
 const LABEL_W = 34;
 const MIN_CELL = 4;
+const getHourLevel = (hours) => {
+  if (hours <= 0) return 0;
+  if (hours < 1) return 1;
+  if (hours < 3) return 2;
+  if (hours < 5) return 3;
+  return 4;
+};
 
-export default function ActivityHeatmap({
+const ActivityHeatmap = memo(function ActivityHeatmap({
   activity,
   todayKey,
   years = [],
@@ -27,16 +34,7 @@ export default function ActivityHeatmap({
   const yearMenuId = useId();
   const currentYear = Number(todayKey.slice(0, 4));
 
-  const levelFn =
-    mode === 'hours'
-      ? (hours) => {
-          if (hours <= 0) return 0;
-          if (hours < 1) return 1;
-          if (hours < 3) return 2;
-          if (hours < 5) return 3;
-          return 4;
-        }
-      : undefined;
+  const levelFn = mode === 'hours' ? getHourLevel : undefined;
   const heat = useMemo(
     () => buildHeatmap({ activity, todayKey, year: selectedYear, levelFn }),
     [activity, todayKey, selectedYear, levelFn],
@@ -47,6 +45,7 @@ export default function ActivityHeatmap({
     for (const [key, count] of Object.entries(activity || {})) {
       if (count > 0) set.add(Number(key.slice(0, 4)));
     }
+
     return [...set].filter(Number.isFinite).sort((a, b) => b - a);
   }, [activity, years, currentYear]);
 
@@ -70,17 +69,16 @@ export default function ActivityHeatmap({
   }, [yearMenuOpen]);
 
   // Size the cells so the grid fills the available width.
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = scrollRef.current;
     if (!el) return undefined;
     const measure = () => {
       const usable = el.clientWidth - LABEL_W - (heat.columns - 1) * GAP - 6;
-      setCell(
-        Math.min(
-          12,
-          Math.max(MIN_CELL, Math.floor((usable / heat.columns) * 10) / 10),
-        ),
+      const nextCell = Math.min(
+        12,
+        Math.max(MIN_CELL, Math.floor((usable / heat.columns) * 10) / 10),
       );
+      setCell((current) => current === nextCell ? current : nextCell);
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -91,7 +89,7 @@ export default function ActivityHeatmap({
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollLeft = selectedYear == null ? el.scrollWidth : 0;
-  }, [heat.columns, selectedYear, cell]);
+  }, [heat.columns, selectedYear]);
 
   const showTip = (event) => {
     const target = event.target;
@@ -236,4 +234,6 @@ export default function ActivityHeatmap({
       )}
     </section>
   );
-}
+});
+
+export default ActivityHeatmap;

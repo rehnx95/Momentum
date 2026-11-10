@@ -3,8 +3,8 @@ import FullLog from "./FullLog";
 import useDailyLog from "../hooks/useDailyLog";
 import "./DailyTracker.css";
 
-export default function DailyTracker({ user, sheets, askConfirmation }) {
-  const daily = useDailyLog(user);
+export default function DailyTracker({ user, sheets, activityLog, askConfirmation }) {
+  const daily = useDailyLog(user, activityLog);
 
   return (
     <section className="daily-tracker surface-card" aria-labelledby="daily-log-title">

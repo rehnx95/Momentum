@@ -2,6 +2,7 @@ const CACHE_DURATION = 60_000;
 const cache = new Map();
 const HISTORY_STORAGE_PREFIX = "track-sheet-log-history:";
 const DAY_STORAGE_PREFIX = "track-sheet-day-log:";
+const FULL_LOG_STORAGE_PREFIX = "track-sheet-full-log:";
 
 export function getDailyLogHistoryCache(userId) {
   let entry = cache.get(userId);
@@ -65,6 +66,7 @@ export function clearDailyLogCaches(userId) {
   cache.delete(userId);
   try {
     localStorage.removeItem(`${HISTORY_STORAGE_PREFIX}${userId}`);
+    localStorage.removeItem(`${FULL_LOG_STORAGE_PREFIX}${userId}`);
     const dayPrefix = `${DAY_STORAGE_PREFIX}${userId}:`;
     const keys = [];
     for (let index = 0; index < localStorage.length; index += 1) {
@@ -74,5 +76,34 @@ export function clearDailyLogCaches(userId) {
     keys.forEach((key) => localStorage.removeItem(key));
   } catch (error) {
     console.warn("Could not clear cached Daily Log data:", error);
+  }
+}
+
+export function getFullLogCache(userId) {
+  try {
+    const stored = localStorage.getItem(`${FULL_LOG_STORAGE_PREFIX}${userId}`);
+    const entry = stored ? JSON.parse(stored) : null;
+    return entry && Array.isArray(entry.logs) ? entry : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setFullLogCache(userId, logs, hasOlderLogs) {
+  try {
+    localStorage.setItem(
+      `${FULL_LOG_STORAGE_PREFIX}${userId}`,
+      JSON.stringify({ logs, hasOlderLogs, loadedAt: Date.now() }),
+    );
+  } catch (error) {
+    console.warn("Could not cache Full Log history locally:", error);
+  }
+}
+
+export function invalidateFullLogCache(userId) {
+  try {
+    localStorage.removeItem(`${FULL_LOG_STORAGE_PREFIX}${userId}`);
+  } catch (error) {
+    console.warn("Could not invalidate cached Full Log history:", error);
   }
 }
