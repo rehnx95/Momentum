@@ -106,25 +106,11 @@ export default function useDailyLog(user, activityLog = {}) {
   const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
   const [viewMode, setViewMode] = useState("daily");
-  const currentStreak = useMemo(() => {
-    const activeDates = new Set(
-      Object.entries(activityLog)
-        .filter(([, count]) => Number(count) > 0)
-        .map(([activeDate]) => activeDate),
-    );
-    const today = getLocalDateKey();
-    const cursor = new Date(`${today}T00:00:00`);
-    if (!activeDates.has(today)) cursor.setDate(cursor.getDate() - 1);
-    let streak = 0;
-    while (activeDates.has(getLocalDateKey(cursor))) {
-      streak += 1;
-      cursor.setDate(cursor.getDate() - 1);
-    }
-    return streak;
-  }, [activityLog]);
   const logsRequestRef = useRef(0);
   const [cachedFullLog] = useState(() => getFullLogCache(user.id));
   const [allLogs, setAllLogs] = useState(() => cachedFullLog?.logs || []);
+  const allLogsRef = useRef(cachedFullLog?.logs || []);
+  const fullLogSaveQueueRef = useRef(Promise.resolve(true));
   const [allLogsLoading, setAllLogsLoading] = useState(false);
   const [hasOlderLogs, setHasOlderLogs] = useState(
     () => cachedFullLog?.hasOlderLogs || false,
@@ -143,6 +129,12 @@ export default function useDailyLog(user, activityLog = {}) {
     const next = typeof update === "function" ? update(logRef.current) : update;
     logRef.current = next;
     setLogState(next);
+  }, []);
+
+  const setFullLogRows = useCallback((update) => {
+    const next = typeof update === "function" ? update(allLogsRef.current) : update;
+    allLogsRef.current = next;
+    setAllLogs(next);
   }, []);
 
   const validation = useMemo(() => validateDay(log), [log]);
@@ -302,6 +294,86 @@ export default function useDailyLog(user, activityLog = {}) {
     return saveLog(logRef.current, dateRef.current);
   }, [loading, loadFailed, saveLog]);
 
+  const updateFullLogTime = useCallback((targetDate, field, value) => {
+    if (
+      (field !== "sleep_time" && field !== "wake_time") ||
+      clearingHistory
+    ) {
+      return Promise.resolve(false);
+    }
+
+    const save = async () => {
+      try {
+        if (targetDate === dateRef.current && !(await flushPendingSave())) {
+          setMessage("Could not save this time. Fix the current Daily Log errors and try again.");
+          return false;
+        }
+
+        const previous =
+          targetDate === dateRef.current
+            ? logRef.current
+            : allLogsRef.current.find((entry) => entry.date === targetDate);
+        if (!previous) {
+          setMessage("Could not find this saved log entry. Refresh the Full Log and try again.");
+          return false;
+        }
+
+        const timeChanges = value
+          ? { [field]: value }
+          : { sleep_time: "", wake_time: "" };
+        const nextLog = normalizeLog({ ...previous, ...timeChanges }, targetDate);
+        const validationResult = validateDay(nextLog);
+        if (validationResult.errors.length) {
+          setMessage(validationResult.errors[0].message);
+          return false;
+        }
+
+        const { error } = await supabase.from("daily_logs").upsert(
+          {
+            user_id: user.id,
+            date: targetDate,
+            sleep_time: nextLog.sleep_time || null,
+            wake_time: nextLog.wake_time || null,
+            dsa_slots: [],
+            backend_slots: [],
+            custom_tasks: nextLog.custom_tasks,
+            dsa_hours: null,
+            backend_hours: null,
+          },
+          { onConflict: "user_id,date" },
+        );
+        if (error) throw error;
+
+        invalidateDailyLogHistoryCache(user.id);
+        setDailyLogCache(user.id, targetDate, nextLog);
+        const updatedRows = [
+          nextLog,
+          ...allLogsRef.current.filter((entry) => entry.date !== targetDate),
+        ].sort((a, b) => b.date.localeCompare(a.date));
+        setFullLogRows(updatedRows);
+        setFullLogCache(user.id, updatedRows, hasOlderLogs);
+
+        if (targetDate === dateRef.current) {
+          const snapshot = JSON.stringify(nextLog);
+          setLog(nextLog);
+          savedSnapshotRef.current = snapshot;
+          setSavedSnapshot(snapshot);
+          setStatus("Saved");
+        }
+        setMessage("");
+        return true;
+      } catch (error) {
+        console.error("Failed to update sleep or wake time in the full log:", error);
+        setMessage("Could not save this time. Your saved entry was not changed.");
+        return false;
+      }
+    };
+
+    const queuedPromise = fullLogSaveQueueRef.current.then(save, save);
+    fullLogSaveQueueRef.current = queuedPromise;
+    return queuedPromise;
+  }, [clearingHistory, flushPendingSave, hasOlderLogs, setFullLogRows, setLog, user.id]);
+
   const changeViewMode = useCallback(async (nextMode) => {
     if (nextMode === viewMode) return true;
     if (viewMode === "daily" && !(await flushPendingSave())) return false;
@@ -457,7 +529,7 @@ export default function useDailyLog(user, activityLog = {}) {
     const requestId = ++logsRequestRef.current;
     const cached = getFullLogCache(user.id);
     if (cached) {
-      setAllLogs(cached.logs);
+      setFullLogRows(cached.logs);
       setHasOlderLogs(cached.hasOlderLogs);
       if (Date.now() - cached.loadedAt < FULL_LOG_CACHE_DURATION) return;
     } else {
@@ -481,7 +553,7 @@ export default function useDailyLog(user, activityLog = {}) {
       const refreshedRows = [...rows, ...retainedRows].sort((a, b) =>
         b.date.localeCompare(a.date),
       );
-      setAllLogs(refreshedRows);
+      setFullLogRows(refreshedRows);
       const nextHasOlderLogs =
         fetched.length > PAGE_SIZE || retainedRows.length > 0;
       setHasOlderLogs(nextHasOlderLogs);
@@ -493,7 +565,7 @@ export default function useDailyLog(user, activityLog = {}) {
     } finally {
       if (requestId === logsRequestRef.current) setAllLogsLoading(false);
     }
-  }, [user.id]);
+  }, [setFullLogRows, user.id]);
 
   useEffect(() => {
     if (viewMode === "full") void loadLogs();
@@ -521,7 +593,7 @@ export default function useDailyLog(user, activityLog = {}) {
         const oldestFetched = rows[rows.length - 1]?.date;
         if (rows.length) {
           accumulatedLogs = [...accumulatedLogs, ...rows];
-          setAllLogs(accumulatedLogs);
+          setFullLogRows(accumulatedLogs);
         }
         more = fetched.length > PAGE_SIZE;
         setHasOlderLogs(more);
@@ -535,13 +607,13 @@ export default function useDailyLog(user, activityLog = {}) {
     } finally {
       setOlderLogsLoading(false);
     }
-  }, [allLogs, user.id]);
+  }, [allLogs, setFullLogRows, user.id]);
 
   const clearAllLogs = useCallback(async () => {
     window.clearTimeout(autosaveTimer.current);
     setClearingHistory(true);
     try {
-      await saveQueueRef.current;
+      await Promise.all([saveQueueRef.current, fullLogSaveQueueRef.current]);
       logsRequestRef.current += 1;
       const { error } = await supabase
         .from("daily_logs")
@@ -562,7 +634,7 @@ export default function useDailyLog(user, activityLog = {}) {
     setLog(clearedLog);
     savedSnapshotRef.current = snapshot;
     setSavedSnapshot(snapshot);
-    setAllLogs([]);
+    setFullLogRows([]);
     setHasOlderLogs(false);
     invalidateFullLogCache(user.id);
     setDailyLogCache(user.id, dateRef.current, clearedLog);
@@ -570,7 +642,7 @@ export default function useDailyLog(user, activityLog = {}) {
     setStatus("Saved");
     setMessage("All saved Daily Log entries for your account were cleared.");
     return true;
-  }, [setLog, user.id]);
+  }, [setFullLogRows, setLog, user.id]);
 
   const startTimer = useCallback((activityId, activityName, color) => {
     if (runningTimer) return false;
@@ -794,12 +866,12 @@ export default function useDailyLog(user, activityLog = {}) {
     date, log, setLog, loading, loadFailed,
     saving, clearingHistory, status, message, setMessage,
     viewMode, setViewMode, changeViewMode,
-    activeCustomTasks, currentStreak, problemCounts, allLogs, allLogsLoading,
+    activeCustomTasks, problemCounts, allLogs, allLogsLoading,
     hasOlderLogs, olderLogsLoading, runningTimer, timerNow, validation, dirty,
     studiedMinutes, sleptMinutes, changeDate, shiftDate, updateField, updateSlot,
     addSlot, removeSlot, addCustomTask, addSheetActivity, removeCustomTask,
     renameCustomTask, saveLog, loadOlderLogs, clearAllLogs, startTimer,
-    stopTimer, quickAdd,
+    stopTimer, quickAdd, updateFullLogTime,
     saveNow: flushPendingSave,
     retryLoad: () => setLoadRequest((current) => current + 1),
   };

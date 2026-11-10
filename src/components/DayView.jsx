@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  Flame,
   Moon,
   Plus,
   Target,
@@ -122,7 +121,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
               value: daily.problemCounts[daily.date] || 0,
               icon: Target,
             },
-            { label: "Streak", value: daily.currentStreak, unit: "days", icon: Flame },
           ]}
         />
       </section>
