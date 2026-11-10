@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Clock3, Trash2 } from "lucide-react";
 import { formatDuration, slotMinutes } from "../utils/time";
+import Tooltip from "./Tooltip";
 
 function slotDuration(slot) {
   if (slot.endDayOffset === 1 && slot.end === "00:00") {
@@ -104,26 +105,27 @@ export default function FullLog({ daily }) {
             {daily.hasOlderLogs ? "Show all days" : "All days shown"}
           </button>
         </div>
-        <button
-          type="button"
-          className="full-log-clear-button"
-          aria-label="Clear my saved history"
-          title="Clear my saved history"
-          disabled={
-            daily.clearingHistory ||
-            daily.allLogsLoading ||
-            daily.olderLogsLoading ||
-            daily.loading
-          }
-          onClick={async () => {
-            const confirmation = window.prompt(
-              "This permanently deletes your saved Daily Log entries. Type CLEAR to continue.",
-            );
-            if (confirmation === "CLEAR") await daily.clearAllLogs();
-          }}
-        >
-          <Trash2 size={16} aria-hidden="true" />
-        </button>
+        <Tooltip label="Clear my saved history">
+          <button
+            type="button"
+            className="full-log-clear-button"
+            aria-label="Clear my saved history"
+            disabled={
+              daily.clearingHistory ||
+              daily.allLogsLoading ||
+              daily.olderLogsLoading ||
+              daily.loading
+            }
+            onClick={async () => {
+              const confirmation = window.prompt(
+                "This permanently deletes your saved Daily Log entries. Type CLEAR to continue.",
+              );
+              if (confirmation === "CLEAR") await daily.clearAllLogs();
+            }}
+          >
+            <Trash2 size={16} aria-hidden="true" />
+          </button>
+        </Tooltip>
       </header>
 
       {entries.length ? (

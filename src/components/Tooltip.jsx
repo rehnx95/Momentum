@@ -1,6 +1,6 @@
 import { cloneElement, useId } from 'react';
 
-function Tooltip({ children, label }) {
+function Tooltip({ children, label, className = "" }) {
   const tooltipId = useId();
   const describedBy = [
     children.props['aria-describedby'],
@@ -8,7 +8,7 @@ function Tooltip({ children, label }) {
   ].filter(Boolean).join(' ');
 
   return (
-    <span className="app-tooltip-anchor">
+    <span className={`app-tooltip-anchor ${className}`.trim()}>
       {cloneElement(children, { 'aria-describedby': describedBy })}
       <span id={tooltipId} role="tooltip" className="app-tooltip">
         {label}

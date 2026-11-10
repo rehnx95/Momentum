@@ -469,6 +469,22 @@ html {
   white-space: nowrap;
 }
 
+.app-tooltip-anchor.recent-ac-tooltip {
+  display: block;
+  min-width: 0;
+}
+
+.recent-ac-tooltip > .recent-ac-title,
+.recent-ac-tooltip > .recent-ac-topic {
+  margin: 0;
+}
+
+.recent-ac-tooltip > :focus-visible {
+  border-radius: 0.2rem;
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
+}
+
 .recent-ac-topic {
   min-width: 0;
   overflow: hidden;

@@ -8,6 +8,7 @@ import {
   Users,
 } from "lucide-react";
 import TrackSheetBrand from "./TrackSheetBrand";
+import Tooltip from "./Tooltip";
 
 const NAV = [
   { id: "tracker", label: "Tracker", path: "/", icon: LayoutList },
@@ -52,16 +53,17 @@ export default function AppHeader({
           >
             {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <button
-            type="button"
-            className="icon-btn signout-btn"
-            aria-label="Sign out"
-            title="Sign out"
-            onClick={onSignOut}
-          >
-            <LogOut size={18} />
-            <span className="signout-label">Sign out</span>
-          </button>
+          <Tooltip label="Sign out">
+            <button
+              type="button"
+              className="icon-btn signout-btn"
+              aria-label="Sign out"
+              onClick={onSignOut}
+            >
+              <LogOut size={18} />
+              <span className="signout-label">Sign out</span>
+            </button>
+          </Tooltip>
         </div>
       </div>
     </header>

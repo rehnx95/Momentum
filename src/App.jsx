@@ -2246,15 +2246,16 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       </div>
                     </div>
                     <div className="profile-hero-actions flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        className="btn-secondary"
-                        onClick={onCopyLink}
-                        aria-label={copied ? "Profile link copied" : "Share profile"}
-                        title={copied ? "Link copied" : "Share profile"}
-                      >
-                        <Link2 size={16} />
-                      </button>
+                      <Tooltip label={copied ? "Link copied" : "Share profile"}>
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          onClick={onCopyLink}
+                          aria-label={copied ? "Profile link copied" : "Share profile"}
+                        >
+                          <Link2 size={16} />
+                        </button>
+                      </Tooltip>
                     </div>
                     <StatStrip
                       className="profile-overview-stats"
@@ -2375,18 +2376,16 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                             <div className="recent-ac-check" aria-hidden="true">
                               ✓
                             </div>
-                            <p
-                              className="recent-ac-title"
-                              title={problem.title}
-                            >
-                              {problem.title}
-                            </p>
-                            <span
-                              className="recent-ac-topic"
-                              title={problem.sheetTitle}
-                            >
-                              {problem.sheetTitle}
-                            </span>
+                            <Tooltip label={problem.title} className="recent-ac-tooltip">
+                              <p className="recent-ac-title" tabIndex={0}>
+                                {problem.title}
+                              </p>
+                            </Tooltip>
+                            <Tooltip label={problem.sheetTitle} className="recent-ac-tooltip">
+                              <span className="recent-ac-topic" tabIndex={0}>
+                                {problem.sheetTitle}
+                              </span>
+                            </Tooltip>
                             {problem.acceptedOn ? (
                               <time
                                 className="recent-ac-date"
@@ -2493,28 +2492,30 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   </div>
                 </div>
                 <div className="profile-hero-actions flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={openProfileSettings}
-                    aria-label="Edit profile"
-                    title="Edit profile"
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  {userUsername && (
+                  <Tooltip label="Edit profile">
                     <button
                       type="button"
                       className="btn-secondary"
-                      onClick={() => {
-                        publicProfileReturnPath.current = "/profile";
-                        navigateTo(`/u/${encodeURIComponent(userUsername)}`);
-                      }}
-                      aria-label="Public view"
-                      title="Public view"
+                      onClick={openProfileSettings}
+                      aria-label="Edit profile"
                     >
-                      <Link2 size={16} />
+                      <Pencil size={16} />
                     </button>
+                  </Tooltip>
+                  {userUsername && (
+                    <Tooltip label="Public view">
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => {
+                          publicProfileReturnPath.current = "/profile";
+                          navigateTo(`/u/${encodeURIComponent(userUsername)}`);
+                        }}
+                        aria-label="Public view"
+                      >
+                        <Link2 size={16} />
+                      </button>
+                    </Tooltip>
                   )}
                 </div>
                 <StatStrip
@@ -2758,18 +2759,16 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                           <div className="recent-ac-check" aria-hidden="true">
                             ✓
                           </div>
-                          <p
-                            className="recent-ac-title"
-                            title={problem.title}
-                          >
-                            {problem.title}
-                          </p>
-                          <span
-                            className="recent-ac-topic"
-                            title={problem.sheetTitle}
-                          >
-                            {problem.sheetTitle}
-                          </span>
+                          <Tooltip label={problem.title} className="recent-ac-tooltip">
+                            <p className="recent-ac-title" tabIndex={0}>
+                              {problem.title}
+                            </p>
+                          </Tooltip>
+                          <Tooltip label={problem.sheetTitle} className="recent-ac-tooltip">
+                            <span className="recent-ac-topic" tabIndex={0}>
+                              {problem.sheetTitle}
+                            </span>
+                          </Tooltip>
                           {problem.acceptedOn ? (
                             <time
                               className="recent-ac-date"
