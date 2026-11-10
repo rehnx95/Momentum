@@ -33,6 +33,17 @@ html {
   transform: none;
 }
 
+.app-header .track-sheet-brand-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-basis: 2.5rem;
+}
+
+.app-header .track-sheet-brand-name {
+  font-size: 1.05rem;
+  line-height: 1.35rem;
+}
+
 .app-header-actions {
   position: relative;
   display: flex;

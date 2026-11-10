@@ -8,6 +8,7 @@ import {
 import { formatDuration, getSleepMinutes, slotMinutes } from "../utils/time";
 import { getLocalDateKey } from "../hooks/useDailyLog";
 import ActivityCard from "./ActivityCard";
+import CustomDatePicker from "./CustomDatePicker";
 import TimeInput from "./TimeInput";
 
 function activityTotal(slots) {
@@ -87,16 +88,12 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
           >
             <ChevronLeft size={16} />
           </button>
-          <label className="daily-date">
-            <span className="sr-only">Log date</span>
-            <input
-              type="date"
-              value={daily.date}
-              max={getLocalDateKey()}
-              disabled={daily.loading}
-              onChange={(event) => daily.changeDate(event.target.value)}
-            />
-          </label>
+          <CustomDatePicker
+            value={daily.date}
+            max={getLocalDateKey()}
+            disabled={daily.loading}
+            onChange={(date) => daily.changeDate(date)}
+          />
           <button
             type="button"
             aria-label="Next day"

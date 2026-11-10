@@ -9,7 +9,7 @@ function TrackSheetBrand({ onNavigate, subtitle }) {
       className="track-sheet-brand flex min-w-0 cursor-pointer items-center gap-2.5 rounded-lg text-left"
     >
       <span className="track-sheet-brand-logo flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[#EDEDED]">
-        <CheckSquare size={16} className="text-black" />
+        <CheckSquare size={20} className="text-black" />
       </span>
       <span className="track-sheet-brand-copy min-w-0">
         <span className="track-sheet-brand-name block font-bold tracking-tight">Track Sheet</span>

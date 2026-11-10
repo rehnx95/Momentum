@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Clock3, Pencil, Plus, Trash2 } from "lucide-react";
 import { formatDuration } from "../utils/time";
+import Tooltip from "./Tooltip";
 import SlotRow from "./SlotRow";
 
 export default function ActivityCard({
@@ -58,17 +59,18 @@ export default function ActivityCard({
           <Clock3 size={15} aria-hidden="true" />
           <strong className="activity-card-name">{activityName}</strong>
           <div className="activity-menu-wrap" ref={menuRef}>
-            <button
-              type="button"
-              className="activity-menu-trigger"
-              aria-label={`Edit ${activityName}`}
-              title={`Edit ${activityName}`}
-              aria-expanded={menuOpen}
-              aria-haspopup="menu"
-              onClick={() => setMenuOpen((open) => !open)}
-            >
-              <Pencil size={13} />
-            </button>
+            <Tooltip label={`Edit ${activityName}`}>
+              <button
+                type="button"
+                className="activity-menu-trigger"
+                aria-label={`Edit ${activityName}`}
+                aria-expanded={menuOpen}
+                aria-haspopup="menu"
+                onClick={() => setMenuOpen((open) => !open)}
+              >
+                <Pencil size={13} />
+              </button>
+            </Tooltip>
             {menuOpen && (
               <div className="activity-menu">
                 <label className="activity-menu-label">
@@ -90,16 +92,19 @@ export default function ActivityCard({
           </div>
         </div>
         <span className="activity-total">{formatDuration(totalMinutes)}</span>
-        <button
-          type="button"
-          className="activity-remove"
-          aria-label={`Remove ${activityName}`}
-          title={`Remove ${activityName}`}
-          disabled={disabled}
-          onClick={onRemoveActivity}
-        >
-          <Trash2 size={14} aria-hidden="true" />
-        </button>
+        <span className="activity-remove-wrap">
+          <Tooltip label={`Remove ${activityName}`}>
+            <button
+              type="button"
+              className="activity-remove"
+              aria-label={`Remove ${activityName}`}
+              disabled={disabled}
+              onClick={onRemoveActivity}
+            >
+              <Trash2 size={14} aria-hidden="true" />
+            </button>
+          </Tooltip>
+        </span>
       </header>
       <div className="daily-slot-list">
         {slots.map((slot, index) => (
