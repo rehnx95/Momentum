@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Clock3, Ellipsis, Plus, Trash2 } from "lucide-react";
+import { Clock3, Pencil, Plus, Trash2 } from "lucide-react";
 import { formatDuration } from "../utils/time";
 import SlotRow from "./SlotRow";
 
@@ -57,38 +57,39 @@ export default function ActivityCard({
         <div className="activity-card-identity">
           <Clock3 size={15} aria-hidden="true" />
           <strong className="activity-card-name">{activityName}</strong>
+          <div className="activity-menu-wrap" ref={menuRef}>
+            <button
+              type="button"
+              className="activity-menu-trigger"
+              aria-label={`Edit ${activityName}`}
+              title={`Edit ${activityName}`}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              <Pencil size={13} />
+            </button>
+            {menuOpen && (
+              <div className="activity-menu">
+                <label className="activity-menu-label">
+                  Rename
+                  <input
+                    value={renameValue}
+                    onChange={(event) => setRenameValue(event.target.value)}
+                    onBlur={(event) => {
+                      const name = event.currentTarget.value.trim();
+                      if (name && name !== activityName) onRename(name);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") event.currentTarget.blur();
+                    }}
+                  />
+                </label>
+              </div>
+            )}
+          </div>
         </div>
         <span className="activity-total">{formatDuration(totalMinutes)}</span>
-        <div className="activity-menu-wrap" ref={menuRef}>
-          <button
-            type="button"
-            className="activity-menu-trigger"
-            aria-label={`Rename ${activityName}`}
-            aria-expanded={menuOpen}
-            aria-haspopup="menu"
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            <Ellipsis size={17} />
-          </button>
-          {menuOpen && (
-            <div className="activity-menu">
-              <label className="activity-menu-label">
-                Rename
-                <input
-                  value={renameValue}
-                  onChange={(event) => setRenameValue(event.target.value)}
-                  onBlur={(event) => {
-                    const name = event.currentTarget.value.trim();
-                    if (name && name !== activityName) onRename(name);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") event.currentTarget.blur();
-                  }}
-                />
-              </label>
-            </div>
-          )}
-        </div>
         <button
           type="button"
           className="activity-remove"

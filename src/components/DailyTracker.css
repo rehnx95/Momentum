@@ -371,15 +371,21 @@
 
 .activity-menu-trigger {
   display: grid;
-  width: 1.8rem;
-  height: 1.8rem;
+  width: 1.35rem;
+  height: 1.35rem;
   place-items: center;
   flex: none;
   border: 0;
-  border-radius: 0.45rem;
+  border-radius: 0.35rem;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
+}
+
+.activity-menu-trigger:hover,
+.activity-menu-trigger[aria-expanded="true"] {
+  background: var(--surface-hover);
+  color: var(--text);
 }
 
 .activity-remove {
@@ -556,14 +562,14 @@
 
 .daily-full-log {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.35rem;
 }
 
 .full-log-header {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .full-log-day-list {
@@ -682,7 +688,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.35rem;
-  font-size: 0.84rem;
+  font-size: 0.8rem;
 }
 
 .full-log-activity-identity {
@@ -700,11 +706,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.full-log-activity-heading > strong:last-child {
-  flex: none;
-  font-variant-numeric: tabular-nums;
 }
 
 .full-log-activity-slots {
@@ -770,7 +771,7 @@
 .full-log-pagination {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.5rem;
 }
 
@@ -838,7 +839,15 @@
 }
 
 @media (max-width: 420px) {
-  .full-log-pagination > button { flex: 1; }
+  .full-log-pagination {
+    flex: 1;
+    gap: 0.35rem;
+  }
+
+  .full-log-pagination > button {
+    flex: 1;
+    padding-inline: 0.4rem;
+  }
 }
 
 @container daily-tracker (max-width: 1050px) {

@@ -78,6 +78,32 @@ export default function FullLog({ daily }) {
   return (
     <div className="daily-full-log">
       <header className="full-log-header">
+        <div className="full-log-pagination">
+          <button
+            type="button"
+            className="load-older-button"
+            disabled={
+              daily.allLogsLoading ||
+              daily.olderLogsLoading ||
+              !daily.hasOlderLogs
+            }
+            onClick={() => daily.loadOlderLogs()}
+          >
+            {daily.hasOlderLogs ? "Load 10 older days" : "No older days"}
+          </button>
+          <button
+            type="button"
+            className="load-older-button full-log-show-all"
+            disabled={
+              daily.allLogsLoading ||
+              daily.olderLogsLoading ||
+              !daily.hasOlderLogs
+            }
+            onClick={() => daily.loadOlderLogs(true)}
+          >
+            {daily.hasOlderLogs ? "Show all days" : "All days shown"}
+          </button>
+        </div>
         <button
           type="button"
           className="full-log-clear-button"
@@ -99,33 +125,6 @@ export default function FullLog({ daily }) {
           <Trash2 size={16} aria-hidden="true" />
         </button>
       </header>
-
-      <div className="full-log-pagination">
-        <button
-          type="button"
-          className="load-older-button"
-          disabled={
-            daily.allLogsLoading ||
-            daily.olderLogsLoading ||
-            !daily.hasOlderLogs
-          }
-          onClick={() => daily.loadOlderLogs()}
-        >
-          {daily.hasOlderLogs ? "Load 10 older days" : "No older days"}
-        </button>
-        <button
-          type="button"
-          className="load-older-button full-log-show-all"
-          disabled={
-            daily.allLogsLoading ||
-            daily.olderLogsLoading ||
-            !daily.hasOlderLogs
-          }
-          onClick={() => daily.loadOlderLogs(true)}
-        >
-          {daily.hasOlderLogs ? "Show all days" : "All days shown"}
-        </button>
-      </div>
 
       {entries.length ? (
         <ul className="full-log-day-list">
@@ -170,7 +169,9 @@ export default function FullLog({ daily }) {
                               <Clock3 size={15} aria-hidden="true" />
                               <strong>{activity.name}</strong>
                             </div>
-                            <strong>{formatDuration(activity.minutes)}</strong>
+                            <span className="activity-total">
+                              {formatDuration(activity.minutes)}
+                            </span>
                           </div>
                           <div className="full-log-activity-slots">
                             {activity.slots.map((slot, slotIndex) => {
