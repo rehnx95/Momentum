@@ -42,8 +42,7 @@ function formatHours(minutes) {
 }
 
 function SleepStudyGraph({ days, title, series }) {
-  const chartWrapRef = useRef(null);
-  const [activePoint, setActivePoint] = useState(null);
+  const [tooltip, setTooltip] = useState(null);
   const [chartWidth, setChartWidth] = useState(DEFAULT_CHART_WIDTH);
 
   useLayoutEffect(() => {
@@ -73,36 +72,36 @@ function SleepStudyGraph({ days, title, series }) {
   const xFor = (index) =>
     PLOT.left + (plotWidth * index) / Math.max(1, days.length - 1);
   const ticks = [0, maxHours / 2, maxHours];
-  const showTooltip = (event, index, key) => {
-    const svg = event.currentTarget.ownerSVGElement;
-    const matrix = svg?.getScreenCTM();
-    const wrapper = chartWrapRef.current;
-    if (!matrix || !wrapper) return;
+  const showTooltip = (event) => {
+    const target = event.target;
+    const text = target.dataset?.tip;
+    if (!text) {
+      setTooltip(null);
+      return;
+    }
 
+    const svg = target.ownerSVGElement;
+    const matrix = svg?.getScreenCTM();
+    if (!svg || !matrix) return;
     const point = svg.createSVGPoint();
-    point.x = xFor(index);
-    point.y = yFor(days[index][key]);
+    point.x = Number(target.getAttribute("cx"));
+    point.y = Number(target.getAttribute("cy"));
     const screenPoint = point.matrixTransform(matrix);
-    const wrapperRect = wrapper.getBoundingClientRect();
-    setActivePoint({
-      index,
-      x: screenPoint.x - wrapperRect.left,
-      y: screenPoint.y - wrapperRect.top,
-    });
+    setTooltip({ text, x: screenPoint.x, y: screenPoint.y });
   };
 
   return (
     <section className="sleep-study-graph" aria-label={title}>
       <div
-        ref={chartWrapRef}
         className="sleep-study-chart-wrap"
-        onPointerLeave={() => setActivePoint(null)}
       >
         <svg
           className="sleep-study-chart"
           viewBox={`0 0 ${chartWidth} ${CHART_HEIGHT}`}
           role="img"
           aria-label={`${title} over the last 30 days, measured in hours`}
+          onMouseOver={showTooltip}
+          onMouseLeave={() => setTooltip(null)}
         >
           {ticks.map((hours) => {
             const y = yFor(hours * 60);
@@ -135,10 +134,10 @@ function SleepStudyGraph({ days, title, series }) {
                       className="sleep-study-point-target"
                       cx={xFor(index)}
                       cy={yFor(day[key])}
-                      r="9"
+                      r="0"
                       aria-label={`${day.label}: ${formatHours(day[key])} ${key}`}
-                      onPointerEnter={(event) => showTooltip(event, index, key)}
-                      onFocus={(event) => showTooltip(event, index, key)}
+                      data-tip={`${day.label} · Sleep: ${formatHours(day.sleep)} · Study: ${formatHours(day.study)}`}
+                      onFocus={showTooltip}
                     />
                     <circle
                       className="sleep-study-point"
@@ -173,18 +172,16 @@ function SleepStudyGraph({ days, title, series }) {
             );
           })}
         </svg>
-        {activePoint !== null && days[activePoint.index] && (
+        {tooltip && (
           <div
-            className="sleep-study-tooltip"
+            className="hm-tip"
             role="tooltip"
             style={{
-              left: `${activePoint.x}px`,
-              top: `${activePoint.y}px`,
+              left: tooltip.x,
+              top: tooltip.y,
             }}
           >
-            <strong>{days[activePoint.index].label}</strong>
-            <span>Sleep: {formatHours(days[activePoint.index].sleep)}</span>
-            <span>Study: {formatHours(days[activePoint.index].study)}</span>
+            {tooltip.text}
           </div>
         )}
       </div>
