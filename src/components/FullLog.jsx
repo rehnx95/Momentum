@@ -94,15 +94,6 @@ export default function FullLog({ daily }) {
   return (
     <div className="daily-full-log">
       <header className="full-log-header">
-        <p className="full-log-status" aria-live="polite">
-          {entries.length === 0
-            ? daily.allLogsLoading ? "" : "No saved days"
-            : `${entries.length} days shown · ${
-                daily.hasOlderLogs
-                  ? "More older days available"
-                  : "All saved days shown"
-              }`}
-        </p>
         <div className="full-log-menu-wrap" ref={actionsRef}>
           <button
             type="button"
@@ -218,7 +209,7 @@ export default function FullLog({ daily }) {
                                 className="full-log-activity-slot"
                                 key={`${slot.start}-${slot.end}-${slotIndex}`}
                               >
-                                {formatTime(slot.start)}–{formatTime(slot.end)}
+                                {formatTime(slot.start)} – {formatTime(slot.end)}
                               </span>
                             ))}
                           </div>

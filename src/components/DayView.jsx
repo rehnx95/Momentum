@@ -11,6 +11,7 @@ import {
 import { formatDuration, slotMinutes } from "../utils/time";
 import { getLocalDateKey } from "../hooks/useDailyLog";
 import ActivityCard from "./ActivityCard";
+import { navigateTimeFields } from "./SlotRow";
 import StatStrip from "./StatStrip";
 
 function activityTotal(slots) {
@@ -139,6 +140,8 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
               value={daily.log.sleep_time}
               disabled={entryDisabled}
               onChange={(event) => daily.updateField("sleep_time", event.target.value)}
+              onKeyDown={navigateTimeFields}
+              data-time-navigation
             />
           </label>
           <label>
@@ -148,6 +151,8 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
               value={daily.log.wake_time}
               disabled={entryDisabled}
               onChange={(event) => daily.updateField("wake_time", event.target.value)}
+              onKeyDown={navigateTimeFields}
+              data-time-navigation
             />
           </label>
         </div>

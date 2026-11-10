@@ -1,6 +1,20 @@
 import { Trash2 } from "lucide-react";
 import { formatDuration, slotMinutes, toMinutes } from "../utils/time";
 
+export function navigateTimeFields(event) {
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+  const view = event.currentTarget.closest(".daily-day-view");
+  if (!view) return;
+  const inputs = [...view.querySelectorAll(
+    'input[type="time"][data-time-navigation]:not(:disabled)',
+  )];
+  const currentIndex = inputs.indexOf(event.currentTarget);
+  const nextInput = inputs[currentIndex + (event.key === "ArrowRight" ? 1 : -1)];
+  if (!nextInput) return;
+  event.preventDefault();
+  nextInput.focus({ preventScroll: true });
+}
+
 export default function SlotRow({
   activityId,
   activityName,
@@ -30,6 +44,8 @@ export default function SlotRow({
           value={slot.start}
           disabled={disabled}
           onChange={(event) => onChange(index, "start", event.target.value)}
+          onKeyDown={navigateTimeFields}
+          data-time-navigation
           aria-label={`${activityName} slot ${index + 1} start time`}
         />
       </label>
@@ -41,6 +57,8 @@ export default function SlotRow({
           value={slot.end}
           disabled={disabled}
           onChange={(event) => onChange(index, "end", event.target.value)}
+          onKeyDown={navigateTimeFields}
+          data-time-navigation
           aria-label={`${activityName} slot ${index + 1} end time`}
         />
       </label>

@@ -2340,22 +2340,23 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                   </div>
                 </section>
 
-                <ActivityHeatmap
-                  activity={publicHeatmap.username === selectedPublicUsername ? publicHeatmap.activity : {}}
-                  years={publicHeatmap.years}
-                  todayKey={todayDateKey}
-                  selectedYear={publicHeatmapYear}
-                  onSelectYear={setPublicHeatmapYear}
-                  loading={
-                    publicHeatmap.username !== selectedPublicUsername ||
-                    publicHeatmap.year !== publicHeatmapYear
-                  }
-                />
+                <div className="public-profile-activity">
+                  <ActivityHeatmap
+                    activity={publicHeatmap.username === selectedPublicUsername ? publicHeatmap.activity : {}}
+                    years={publicHeatmap.years}
+                    todayKey={todayDateKey}
+                    selectedYear={publicHeatmapYear}
+                    onSelectYear={setPublicHeatmapYear}
+                    loading={
+                      publicHeatmap.username !== selectedPublicUsername ||
+                      publicHeatmap.year !== publicHeatmapYear
+                    }
+                  />
 
-                <section
-                  className="recent-ac-card surface-card"
-                  aria-labelledby="public-recent-ac-heading"
-                >
+                  <section
+                    className="recent-ac-card surface-card"
+                    aria-labelledby="public-recent-ac-heading"
+                  >
                   <div className="recent-ac-heading">
                     <div>
                       <h2 id="public-recent-ac-heading">Recent AC</h2>
@@ -2415,7 +2416,8 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       Accepted problems will show here as they are solved.
                     </p>
                   )}
-                </section>
+                  </section>
+                </div>
                 </div>
               </div>
             )

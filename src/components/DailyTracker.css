@@ -587,12 +587,6 @@
   gap: 0.75rem;
 }
 
-.full-log-status {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.75rem;
-}
-
 .full-log-day-list {
   display: grid;
   gap: 0.55rem;
