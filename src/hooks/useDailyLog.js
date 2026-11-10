@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { invalidateDailyLogHistoryCache } from "../lib/dailyLogHistoryCache";
 import {
   getSleepMinutes,
   getStudyMinutes,
@@ -152,6 +153,7 @@ export default function useDailyLog(user) {
         { onConflict: "user_id,date" },
       );
       if (error) throw error;
+      invalidateDailyLogHistoryCache(user.id);
       if (nextDate === dateRef.current) {
         savedSnapshotRef.current = snapshot;
         setSavedSnapshot(snapshot);
@@ -526,6 +528,7 @@ export default function useDailyLog(user) {
         .delete()
         .eq("user_id", user.id);
       if (error) throw error;
+      invalidateDailyLogHistoryCache(user.id);
     } catch (error) {
       console.error("Failed to clear this user's daily logs:", error);
       setMessage("Could not clear all Daily Log data. Refresh and check your history before retrying.");
@@ -683,6 +686,7 @@ export default function useDailyLog(user) {
           { onConflict: "user_id,date" },
         );
         if (saveError) throw saveError;
+        invalidateDailyLogHistoryCache(user.id);
       }
       if (segments.some((segment) => segment.date === currentDate)) {
         const savedCurrentDate = await saveLogRef.current(
@@ -778,6 +782,7 @@ export default function useDailyLog(user) {
           { onConflict: "user_id,date" },
         );
         if (saveError) throw saveError;
+        invalidateDailyLogHistoryCache(user.id);
       }
       return true;
     } catch (error) {

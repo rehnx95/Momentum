@@ -70,7 +70,11 @@ export function useProgress(user) {
     replaceCompletedAt({});
 
     Promise.all([
-      supabase.from('progress').select('problem_id, state, completed_on, updated_at').eq('user_id', user.id),
+      supabase
+        .from('progress')
+        .select('problem_id, state, completed_on, updated_at')
+        .eq('user_id', user.id)
+        .in('state', ['done', 'skipped']),
       supabase.from('activity_log').select('date, count').eq('user_id', user.id),
     ]).then(([progressResult, activityResult]) => {
       if (progressResult.error) throw progressResult.error;

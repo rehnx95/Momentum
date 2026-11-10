@@ -751,7 +751,6 @@ function AuthenticatedApp({
     activityLog,
     completedOn,
     completedAt,
-    loading: progressLoading,
     error: progressError,
     setError: setProgressError,
     update,
@@ -839,6 +838,7 @@ function AuthenticatedApp({
   const [publicProfile, setPublicProfile] = useState(null);
   const [publicProfileLoading, setPublicProfileLoading] = useState(false);
   const [publicProfileError, setPublicProfileError] = useState("");
+  const publicProfileCache = useRef(new Map());
   const publicProfileReturnPath = useRef(
     getPeopleRoute().page === "people" ? "/people" : "/",
   );
@@ -1014,13 +1014,18 @@ function AuthenticatedApp({
     }
 
     let active = true;
-    let requestInFlight = false;
-    setPublicProfile(null);
-    setPublicProfileLoading(true);
+    const cachedProfile = publicProfileCache.current.get(selectedPublicUsername);
+    setPublicProfile(cachedProfile?.profile || null);
+    setPublicProfileLoading(!cachedProfile);
     setPublicProfileError("");
-    const refreshPublicProfile = async () => {
-      if (!active || requestInFlight) return;
-      requestInFlight = true;
+    if (cachedProfile && Date.now() - cachedProfile.loadedAt < 60_000) {
+      setPublicProfileLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    const loadPublicProfile = async () => {
       try {
         const { data, error } = await supabase.rpc("get_public_profile", {
           requested_username: selectedPublicUsername,
@@ -1034,6 +1039,14 @@ function AuthenticatedApp({
           setPublicProfileError("This profile could not be found.");
           return;
         }
+        publicProfileCache.current.set(selectedPublicUsername, {
+          profile: profileData,
+          loadedAt: Date.now(),
+        });
+        if (publicProfileCache.current.size > 20) {
+          const oldestUsername = publicProfileCache.current.keys().next().value;
+          publicProfileCache.current.delete(oldestUsername);
+        }
         setPublicProfile(profileData);
         setPublicProfileError("");
       } catch (error) {
@@ -1043,23 +1056,13 @@ function AuthenticatedApp({
           "Could not load this profile. Apply the latest public profile migrations and try again.",
         );
       } finally {
-        requestInFlight = false;
         if (active) setPublicProfileLoading(false);
       }
     };
-    const refreshWhenVisible = () => {
-      if (document.visibilityState === "visible") refreshPublicProfile();
-    };
-    refreshPublicProfile();
-    const refreshTimer = window.setInterval(refreshWhenVisible, 15_000);
-    window.addEventListener("focus", refreshPublicProfile);
-    document.addEventListener("visibilitychange", refreshWhenVisible);
+    loadPublicProfile();
 
     return () => {
       active = false;
-      window.clearInterval(refreshTimer);
-      window.removeEventListener("focus", refreshPublicProfile);
-      document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
   }, [selectedPublicUsername]);
 
@@ -1841,22 +1844,6 @@ gridStart.setDate(gridStart.getDate() - ((gridStart.getDay() + 6) % 7));
         />
         {renderDialog()}
       </>
-    );
-  }
-
-  if (customSheetsLoading || progressLoading) {
-    return (
-      <div className="app-loading-screen" role="status" aria-live="polite">
-        <p className="app-loading-label">
-          {customSheetsLoading ? "Preparing your sheets…" : "Syncing your saved progress…"}
-        </p>
-        <div className="app-loading-skeleton" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-        </div>
-      </div>
     );
   }
 
@@ -2825,8 +2812,10 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
       <>
         <Suspense
           fallback={
-            <div className="app-loading-screen" role="status">
+            <div className="app-page app-page-narrow" role="status">
+              <div className="surface-card rounded-xl border p-4 text-sm text-[#A1A1A1]">
               Loading profile settings…
+              </div>
             </div>
           }
         >

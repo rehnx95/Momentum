@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
+import {
+  getDailyLogHistoryCache,
+  setDailyLogHistoryCache,
+} from "../lib/dailyLogHistoryCache";
 import { formatDuration, getSleepMinutes, getStudyMinutes } from "../utils/time";
 import "./SleepStudyChart.css";
 
@@ -140,10 +144,14 @@ function SleepStudyGraph({ days, title, series }) {
 }
 
 export default function SleepStudyChart({ userId }) {
-  const [logs, setLogs] = useState([]);
+  const cachedHistory = getDailyLogHistoryCache(userId);
+  const [logs, setLogs] = useState(
+    () => cachedHistory?.logs || [],
+  );
   const [selectedChart, setSelectedChart] = useState("sleep");
   const tabRefs = useRef({});
-  const [loading, setLoading] = useState(true);
+  const [hasHistory, setHasHistory] = useState(Boolean(cachedHistory));
+  const [loading, setLoading] = useState(!cachedHistory);
   const [error, setError] = useState("");
   const [requestId, setRequestId] = useState(0);
 
@@ -167,12 +175,25 @@ export default function SleepStudyChart({ userId }) {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    const cachedHistory = getDailyLogHistoryCache(userId);
+    setLogs(cachedHistory?.logs || []);
+    setHasHistory(Boolean(cachedHistory));
+    if (cachedHistory?.isFresh) {
+      setLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+    if (!cachedHistory) setLoading(true);
     setError("");
 
     loadLogs()
       .then((data) => {
-        if (active) setLogs(data);
+        if (active) {
+          setDailyLogHistoryCache(userId, data);
+          setLogs(data);
+          setHasHistory(true);
+        }
       })
       .catch((loadError) => {
         if (!active) return;
@@ -186,7 +207,7 @@ export default function SleepStudyChart({ userId }) {
     return () => {
       active = false;
     };
-  }, [loadLogs, requestId]);
+  }, [loadLogs, requestId, userId]);
 
   const days = useMemo(() => {
     const byDate = new Map(logs.map((log) => [log.date, log]));
@@ -246,7 +267,7 @@ export default function SleepStudyChart({ userId }) {
         <p className="sleep-study-message" role="status">
           Loading sleep and study history…
         </p>
-      ) : error ? (
+      ) : error && !hasHistory ? (
         <div className="sleep-study-message" role="alert">
           <span>{error}</span>
           <button type="button" onClick={() => setRequestId((current) => current + 1)}>
@@ -255,6 +276,14 @@ export default function SleepStudyChart({ userId }) {
         </div>
       ) : (
         <>
+          {error && (
+            <div className="sleep-study-message" role="alert">
+              <span>{error}</span>
+              <button type="button" onClick={() => setRequestId((current) => current + 1)}>
+                Try again
+              </button>
+            </div>
+          )}
           <div
             className="sleep-study-tabs"
             role="tablist"
