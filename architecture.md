@@ -632,7 +632,8 @@ service-role key.
 ### Start locally
 
 1. Install Node.js and npm.
-2. Create `.env` in the repository root with the browser variables above.
+2. Copy `.env.example` to `.env` in the repository root and replace the
+   placeholders with the Supabase project URL and public anon/publishable key.
 3. Apply the database migrations to the Supabase project.
 4. Configure Google OAuth if testing sign-in.
 5. Run:
@@ -643,6 +644,10 @@ service-role key.
    ```
 
 Vite uses port `5173` by default.
+
+`.env` is ignored by Git; `.env.example` contains placeholders only and is safe
+to commit. Never place a service-role key in `.env` under a `VITE_` name,
+because Vite exposes those variables to the browser.
 
 ### Validate changes
 
