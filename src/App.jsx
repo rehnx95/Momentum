@@ -3006,7 +3006,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                 onChange={(event) => setSearch(event.target.value)}
                 aria-label="Search problems"
                 placeholder="Search problems…"
-                className="h-10 w-full rounded-lg border border-[#262626] bg-[#0A0A0A] pl-9 pr-9 text-sm text-[#EDEDED] placeholder-[#A1A1A1] outline-none transition-colors focus:border-[#EDEDED]"
+                className="h-10 w-full rounded-lg border border-[#262626] bg-[#0A0A0A] pl-9 pr-9 text-sm text-[#EDEDED] placeholder-[#A1A1A1] outline-none transition-colors focus:border-[#EDEDED] focus:outline-none"
               />
               {search && (
                 <button

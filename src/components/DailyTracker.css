@@ -295,8 +295,8 @@
 }
 
 .time-input:focus-within {
-  outline: 2px solid var(--border-strong);
-  outline-offset: 1px;
+  border-color: var(--text);
+  outline: none;
 }
 
 .time-input input {
