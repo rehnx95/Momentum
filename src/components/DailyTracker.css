@@ -203,8 +203,6 @@
   font-weight: 700;
 }
 
-.daily-date input,
-.sleep-entry input,
 .daily-new-inline input,
 .activity-menu input {
   min-height: 2.3rem;
@@ -216,8 +214,6 @@
   padding-inline: 0.55rem;
 }
 
-:root[data-theme="light"] .daily-date input,
-:root[data-theme="light"] .sleep-entry input,
 :root[data-theme="light"] .daily-new-inline input {
   color-scheme: light;
 }

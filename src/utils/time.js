@@ -18,6 +18,14 @@ export function slotMinutes(slot, { wrap = false } = {}) {
   return duration;
 }
 
+export function getSlotDurationMinutes(slot) {
+  if (slot?.endDayOffset === 1 && slot?.end === "00:00") {
+    const start = slotMinutes({ start: slot.start, end: "23:59" });
+    return start === null ? 1 : start + 1;
+  }
+  return slotMinutes(slot);
+}
+
 export function getSleepMinutes(log) {
   if (!log?.sleep_time || !log?.wake_time) return 0;
   const sleepTime = String(log.sleep_time).slice(0, 5);

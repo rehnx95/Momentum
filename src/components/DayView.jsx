@@ -5,19 +5,19 @@ import {
   Moon,
   Plus,
 } from "lucide-react";
-import { formatDuration, getSleepMinutes, slotMinutes } from "../utils/time";
-import { getLocalDateKey } from "../hooks/useDailyLog";
+import {
+  formatDuration,
+  getSleepMinutes,
+  getSlotDurationMinutes,
+} from "../utils/time";
+import { getLocalDateKey } from "../utils/date";
 import ActivityCard from "./ActivityCard";
 import CustomDatePicker from "./CustomDatePicker";
 import TimeInput from "./TimeInput";
 
 function activityTotal(slots) {
   return slots.reduce((total, slot) => {
-    if (slot.endDayOffset === 1 && slot.end === "00:00") {
-      const start = slotMinutes({ start: slot.start, end: "23:59" });
-      return total + (start === null ? 1 : start + 1);
-    }
-    return total + (slotMinutes(slot) || 0);
+    return total + (getSlotDurationMinutes(slot) || 0);
   }, 0);
 }
 

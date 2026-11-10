@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   findOverlaps,
   formatDuration,
+  getSlotDurationMinutes,
   getSleepMinutes,
   getStudyMinutes,
   slotMinutes,
@@ -22,6 +23,24 @@ describe("time helpers", () => {
     expect(slotMinutes({ start: "23:00", end: "01:00" })).toBeNull();
     expect(slotMinutes({ start: "23:00", end: "01:00" }, { wrap: true })).toBe(120);
     expect(slotMinutes({ start: "12:00", end: "12:00" }, { wrap: true })).toBe(1440);
+  });
+
+  it("calculates slots that end at midnight", () => {
+    expect(
+      getSlotDurationMinutes({
+        start: "23:30",
+        end: "00:00",
+        endDayOffset: 1,
+      }),
+    ).toBe(30);
+    expect(getSlotDurationMinutes({ start: "09:00", end: "09:45" })).toBe(45);
+    expect(
+      getSlotDurationMinutes({
+        start: "invalid",
+        end: "00:00",
+        endDayOffset: 1,
+      }),
+    ).toBe(1);
   });
 
   it("formats durations without decimal-hour rounding", () => {

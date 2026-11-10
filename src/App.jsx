@@ -41,6 +41,7 @@ import {
   parseSheet,
   sampleSheetTemplate,
 } from "./utils/parseSheet";
+import { getLocalDateKey } from "./utils/date";
 
 const ProfileSettings = lazy(() => import("./components/ProfileSettings"));
 const DailyTracker = lazy(() => import("./components/DailyTracker"));
@@ -76,35 +77,12 @@ function readCachedAccount() {
   }
 }
 
-function getLocalDateKey(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function getActivityLevel(count) {
   if (count <= 0) return 0;
   if (count === 1) return 1;
   if (count <= 3) return 2;
   if (count <= 6) return 3;
   return 4;
-}
-
-const activityScrollTimers = new WeakMap();
-
-function handleActivityScroll(event) {
-  const container = event.currentTarget;
-  const previousTimer = activityScrollTimers.get(container);
-  if (previousTimer) window.clearTimeout(previousTimer);
-  container.classList.add("is-scrolling");
-  activityScrollTimers.set(
-    container,
-    window.setTimeout(() => {
-      container.classList.remove("is-scrolling");
-      activityScrollTimers.delete(container);
-    }, 700),
-  );
 }
 
 function normalizeProblemTitle(title) {

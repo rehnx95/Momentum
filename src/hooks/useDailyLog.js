@@ -15,17 +15,11 @@ import {
   splitIntervalByDay,
   validateDay,
 } from "../utils/time";
+import { getLocalDateKey } from "../utils/date";
 
 const PAGE_SIZE = 10;
 const FULL_LOG_CACHE_DURATION = 60_000;
 const TIMER_STORAGE = (userId) => `track-sheet-running-timer:${userId}`;
-export function getLocalDateKey(date = new Date()) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function formatTime(value) {
   return value ? String(value).slice(0, 5) : "";
 }

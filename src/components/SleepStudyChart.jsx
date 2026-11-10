@@ -13,6 +13,7 @@ import {
 } from "../lib/dailyLogHistoryCache";
 import { formatDuration, getSleepMinutes, getStudyMinutes } from "../utils/time";
 import { formatTooltipDate } from "../utils/heatmap";
+import { getLocalDateKey } from "../utils/date";
 import "./SleepStudyChart.css";
 
 const DAY_COUNT = 30;
@@ -30,13 +31,6 @@ const CHARTS = [
     series: ["study", "sleep"],
   },
 ];
-
-function getLocalDateKey(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
 
 function formatHours(minutes) {
   return `${(minutes / 60).toFixed(1)}h`;

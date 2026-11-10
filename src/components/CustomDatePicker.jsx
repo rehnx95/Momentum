@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
-import { getLocalDateKey } from "../hooks/useDailyLog";
+import { getLocalDateKey } from "../utils/date";
 import Tooltip from "./Tooltip";
 
 function parseDateKey(value) {

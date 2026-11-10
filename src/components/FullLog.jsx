@@ -1,18 +1,13 @@
 import { useMemo } from "react";
 import { Clock3, Trash2 } from "lucide-react";
-import { formatDuration, slotMinutes } from "../utils/time";
+import { formatDuration, getSlotDurationMinutes } from "../utils/time";
 import Tooltip from "./Tooltip";
 
-function slotDuration(slot) {
-  if (slot.endDayOffset === 1 && slot.end === "00:00") {
-    const start = slotMinutes({ start: slot.start, end: "23:59" });
-    return start === null ? 1 : start + 1;
-  }
-  return slotMinutes(slot);
-}
-
 function slotTotal(slots = []) {
-  return slots.reduce((total, slot) => total + (slotDuration(slot) || 0), 0);
+  return slots.reduce(
+    (total, slot) => total + (getSlotDurationMinutes(slot) || 0),
+    0,
+  );
 }
 
 function formatTime(value) {
@@ -177,7 +172,7 @@ export default function FullLog({ daily }) {
                           </div>
                           <div className="full-log-activity-slots">
                             {activity.slots.map((slot, slotIndex) => {
-                              const duration = slotDuration(slot);
+                              const duration = getSlotDurationMinutes(slot);
                               return (
                                 <div
                                   className="full-log-activity-slot"
