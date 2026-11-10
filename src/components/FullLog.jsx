@@ -184,12 +184,12 @@ export default function FullLog({ daily }) {
                       <strong>{sleep ? formatDuration(sleep) : "—"}</strong>
                     </div>
                     <div className="full-log-summary-item">
-                      <small>Solved</small>
-                      <strong>{problems}</strong>
-                    </div>
-                    <div className="full-log-summary-item">
                       <small>Studied</small>
                       <strong>{studied ? formatDuration(studied) : "—"}</strong>
+                    </div>
+                    <div className="full-log-summary-item">
+                      <small>Solved</small>
+                      <strong>{problems}</strong>
                     </div>
                   </div>
                   {activities.length ? (

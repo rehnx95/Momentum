@@ -2,17 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  Flame,
   Moon,
   Plus,
-  Target,
-  Timer,
 } from "lucide-react";
-import { formatDuration, slotMinutes } from "../utils/time";
+import { formatDuration, getSleepMinutes, slotMinutes } from "../utils/time";
 import { getLocalDateKey } from "../hooks/useDailyLog";
 import ActivityCard from "./ActivityCard";
 import TimeInput from "./TimeInput";
-import StatStrip from "./StatStrip";
 
 function activityTotal(slots) {
   return slots.reduce((total, slot) => {
@@ -112,45 +108,44 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
         </div>
       </div>
 
-      <section className="daily-overview" aria-label="Day overview">
-        <StatStrip
-          items={[
-            { label: "Studied", value: formatDuration(daily.studiedMinutes), icon: Timer },
-            { label: "Sleep", value: formatDuration(daily.sleptMinutes), icon: Moon },
-            {
-              label: "Problems solved",
-              value: daily.problemCounts[daily.date] || 0,
-              icon: Target,
-            },
-            { label: "Streak", value: daily.currentStreak, unit: "days", icon: Flame },
-          ]}
-        />
-      </section>
-
-      <section className="activity-card sleep-entry" aria-label="Sleep times">
-        <header className="activity-card-heading">
-          <Moon size={15} aria-hidden="true" />
-          <strong>Sleep</strong>
-        </header>
-        <div className="sleep-entry-fields">
-          <label>
-            <span>Sleep</span>
+      <section className="daily-summary full-log-summary" aria-label="Day summary">
+        <div className="full-log-summary-item">
+          <small>Sleep</small>
+          <strong>
             <TimeInput
               value={daily.log.sleep_time}
               disabled={entryDisabled}
               onChange={(value) => daily.updateField("sleep_time", value)}
               label="Sleep time"
             />
-          </label>
-          <label>
-            <span>Wake</span>
+          </strong>
+        </div>
+        <div className="full-log-summary-item">
+          <small>Wake</small>
+          <strong>
             <TimeInput
               value={daily.log.wake_time}
               disabled={entryDisabled}
               onChange={(value) => daily.updateField("wake_time", value)}
               label="Wake time"
             />
-          </label>
+          </strong>
+        </div>
+        <div className="full-log-summary-item">
+          <small>Sleep duration</small>
+          <strong>
+            {daily.log.sleep_time && daily.log.wake_time
+              ? formatDuration(getSleepMinutes(daily.log))
+              : "—"}
+          </strong>
+        </div>
+        <div className="full-log-summary-item">
+          <small>Studied</small>
+          <strong>{formatDuration(daily.studiedMinutes)}</strong>
+        </div>
+        <div className="full-log-summary-item">
+          <small>Solved</small>
+          <strong>{daily.problemCounts[daily.date] || 0}</strong>
         </div>
       </section>
 
