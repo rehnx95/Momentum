@@ -676,7 +676,8 @@ for future code changes.
    | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase Publishable key |
 
 4. Click **Deploy**. Copy the resulting production URL and make sure it exactly
-   matches the production URL you will add to Supabase and Google.
+   matches the production URL you will add to Supabase and Google. The current
+   production URL is `https://momentum-rehnx.vercel.app`.
 
 #### 3. Configure Google sign-in
 
@@ -684,7 +685,7 @@ for future code changes.
    consent screen. If the app is in Testing mode, add your Google account as a
    test user.
 2. Create an OAuth client with application type **Web application**.
-3. Add the exact production Momentum origin from Vercel and the local origin
+3. Add `https://momentum-rehnx.vercel.app` and the local origin
    `http://localhost:5173` to **Authorized JavaScript origins** (origins only,
    with no path).
 4. In Supabase **Authentication → Providers → Google**, copy the displayed
@@ -694,8 +695,9 @@ for future code changes.
    Google's Client ID and Client Secret into the Supabase Google provider
    settings and enable the provider.
 6. In Supabase **Authentication → URL Configuration**, set **Site URL** to
-   the production Momentum URL. Add
-   `http://localhost:5173/**` and the production URL with `/**` to
+   `https://momentum-rehnx.vercel.app`. Add
+   `http://localhost:5173/**` and
+   `https://momentum-rehnx.vercel.app/**` to
    **Redirect URLs**. Add any Vercel Preview URLs you plan to use as well.
 
 Google sends the OAuth response back to Supabase; Supabase then returns the
