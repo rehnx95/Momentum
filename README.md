@@ -1,59 +1,85 @@
 # Momentum
 
-**A personal progress workspace for the things you want to keep moving.**
+**A personal progress workspace for turning consistent effort into visible
+progress.**
 
-Momentum brings learning tracks, daily routines, and personal progress into
-one place. Organize a learning plan, log daily activities and sleep, and use
-progress summaries to understand your consistency over time. Coding practice
-is supported alongside personal tracks for other subjects. Profiles let you
-share a curated view of your learning journey.
+Momentum brings structured learning, daily routines, and personal analytics
+into one account-based workspace. People can build a learning track for any
+subject, record daily activity and sleep, and review how their habits develop
+over time. Coding practice is one use case, supported by included DSA and
+Backend tracks.
 
-**Live application:** [momentum-rehnx.vercel.app](https://momentum-rehnx.vercel.app/)
+**Live application:** [Open Momentum](https://momentum-rehnx.vercel.app/)
 
-## Why Momentum
+## Product capabilities
 
-Progress is easier to sustain when plans, daily effort, and reflection live
-together. Momentum turns a learning goal into a track of manageable tasks,
-lets you record time spent on activities and sleep, and makes consistency
-visible through summaries and history.
+- **Organize learning.** Work through a built-in track or create a private
+  track from a text file. Search, filter, expand, and update problem states.
+- **Record daily activity.** Log sleep and activity intervals, then revisit
+  previous entries in the paginated Full Log.
+- **Understand progress.** Review completion totals, streaks, activity
+  history, and sleep/study visualizations.
+- **Share selectively.** Find profiles by username and share a curated
+  progress view with other signed-in users; private sheet content and account
+  details stay private.
+- **Keep ownership of your data.** Export progress and restore it to a
+  matching learning track.
 
-The product is designed to work beyond a single curriculum. It includes DSA
-and Backend learning tracks, while personal tracks can represent another
-subject or plan. The same workspace connects task progress with daily logs
-and profile-level views of progress.
+## Engineering highlights
 
-## What you can do
+- Feature-oriented React modules separate authentication, learning tracks,
+  problem progress, Daily Log, profiles, and analytics.
+- Supabase Auth and PostgreSQL row-level security scope account data to the
+  signed-in user. Public profile reads use purpose-specific database
+  functions that return curated fields.
+- Optimistic progress updates and account-scoped browser caches keep the
+  interface responsive while server data remains authoritative.
+- Daily Log state, editing, persistence, history, and timer behavior are
+  separated into focused hooks.
+- Vite builds the SPA; Vercel hosts the application and authenticated
+  username-search endpoint.
 
-- **Build a learning plan.** Use a built-in track or create a private track
-  from a text file. Break work into steps and problems, then search, filter,
-  and mark items as you go.
-- **Capture daily effort.** Record sleep and activity intervals, use timers or
-  quick-add entries, and review previous days in the Full Log.
-- **See progress in context.** Follow completion totals and streaks, revisit
-  recent activity, and explore activity and sleep/study visualizations.
-- **Keep control of your data.** Your personal tracks and progress belong to
-  your account. Export progress and restore it to a matching track when
-  needed.
-- **Share a curated profile.** Find profiles by username and let other signed
-  in users view selected learning progress without exposing private track
-  contents or account details.
+## Technology
 
-## Built with
+| Area | Stack |
+| --- | --- |
+| UI | React 18, JavaScript, Tailwind CSS, component-scoped CSS |
+| Build and development | Vite 5 |
+| Authentication and data | Supabase Auth, PostgreSQL, PostgREST, RLS, SQL functions |
+| Hosting and API | Vercel |
+| Tests | Vitest |
+| Icons | Lucide React |
 
-Momentum is a full-stack web application built with React 18 and Vite. Supabase
-provides sign-in, PostgreSQL storage, and database access controls; Vercel
-hosts the application and its username-search endpoint. The interface uses
-Tailwind CSS, focused CSS modules, and Lucide icons.
+## Repository map
 
-The project also includes focused unit tests and a production build check.
-Core engineering considerations include account-scoped data, optimistic
-progress updates, local caching for responsive screens, and careful handling
-of public profile data.
+```text
+src/
+  features/
+    activity/         Heatmap and sleep/study charts
+    auth/             Sign-in, onboarding, and auth state
+    daily-log/        Day and Full Log UI, hooks, and data model
+    dashboard/        Signed-in composition and tracker controls
+    people/           People search and public profiles
+    problem-tracker/  Problem tree, progress, and filtering
+    profile/          Profile views, metrics, and backup
+    sheets/           Track library, templates, and TXT parsing
+  shared/
+    components/       Reusable interface components
+    lib/              Supabase client and browser data cache
+    utils/            Shared date and time logic
+  styles/             Global theme, layout, and responsive styles
+api/                  Vercel username-search endpoint
+source/               Editable text sources for bundled tracks
+supabase/migrations/  Database schema, policies, and SQL functions
+```
+
+Feature-specific behavior stays with its feature. Component styles live
+beside their components; shared UI and cross-feature utilities live under
+`src/shared/`.
 
 ## Run locally
 
-You need Node.js, npm, and a Supabase project. In PowerShell, from the project
-folder:
+**Prerequisites:** Node.js, npm, and a Supabase project.
 
 ```powershell
 Copy-Item .env.example .env
@@ -61,28 +87,26 @@ npm install
 npm run dev
 ```
 
-Open `.env` and replace its two example values with the Supabase project
-URL and publishable key. Configure Google sign-in and apply the database
-migrations once; the
-[setup guide](./architecture.md#14-local-development-and-deployment) has the
-step-by-step Supabase, Google, and Vercel setup. Use `npx vercel dev` instead
-of `npm run dev` only when testing `/api/search` locally.
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env`, then
+open the local Vite URL (port `5173`). Configure Google sign-in and apply the
+Supabase migrations before testing authenticated workflows. For complete
+instructions, see [Local development and deployment](./architecture.md#local-development-and-deployment).
 
-## Deploy
+Use `npx vercel dev` instead of `npm run dev` when you need to exercise
+`/api/search` locally.
 
-1. Import the GitHub repository into Vercel and deploy with the Vite preset.
-2. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in Vercel's
-   Environment Variables.
-3. Add the new Vercel URL to Supabase Auth's allowed redirect URLs.
-4. Deploy again if you added the environment variables after the first build.
+## Useful commands
 
-For a first-time launch—including database setup and Google sign-in—follow
-the [deployment checklist](./architecture.md#14-local-development-and-deployment).
+```bash
+npm test                 # Run unit tests
+npm run build            # Create the production bundle
+npm run preview          # Preview the production bundle locally
+npm run convert-sheet    # Regenerate bundled JSON from source/ text files
+```
 
-## Project documentation
+## Documentation
 
-- [Architecture and operations](./architecture.md): implementation guide for
-  code ownership, runtime/data flows, database and access control, migrations,
-  Google OAuth, environment configuration, development, and deployment.
-- [Learning-track sources](./source/): editable source files for the bundled
+- [Architecture and operations](./architecture.md) — system boundaries,
+  source ownership, data flows, security model, migrations, and deployment.
+- [Learning-track sources](./source/) — editable text sources for bundled
   templates.
