@@ -1,4 +1,4 @@
-import { memo, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { buildHeatmap, formatTooltipDate } from "../utils/heatmap";
 import { formatDuration } from "../../../shared/utils/time";
@@ -6,10 +6,7 @@ import "./ActivityHeatmap.css";
 import "./ActivityHeatmap.responsive.css";
 
 const WEEKDAYS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
-const GAP = 1;
-const LABEL_W = 34;
-const MIN_CELL = 6;
-const MAX_CELL = 16;
+const CELL = 10;
 const getHourLevel = (hours) => {
   if (hours <= 0) return 0;
   if (hours < 1) return 1;
@@ -30,7 +27,6 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
   const scrollRef = useRef(null);
   const yearMenuRef = useRef(null);
   const yearTriggerRef = useRef(null);
-  const [cell, setCell] = useState(12);
   const [tip, setTip] = useState(null);
   const [yearMenuOpen, setYearMenuOpen] = useState(false);
   const yearMenuId = useId();
@@ -69,24 +65,6 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [yearMenuOpen]);
-
-  // Size the cells so the grid fills the available width.
-  useLayoutEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return undefined;
-    const measure = () => {
-      const usable = el.clientWidth - LABEL_W - (heat.columns - 1) * GAP - 6;
-      const nextCell = Math.min(
-        MAX_CELL,
-        Math.max(MIN_CELL, Math.floor((usable / heat.columns) * 10) / 10),
-      );
-      setCell((current) => current === nextCell ? current : nextCell);
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [heat.columns]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -171,7 +149,7 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
           <div className="hm-scroll" ref={scrollRef} onScroll={() => setTip(null)}>
             <div
               className="hm-inner"
-              style={{ '--hm-weeks': heat.columns, '--hm-cell': `${cell}px` }}
+              style={{ '--hm-weeks': heat.columns, '--hm-cell': `${CELL}px` }}
             >
               <div className="hm-months">
                 {heat.labels.map((label, i) => (

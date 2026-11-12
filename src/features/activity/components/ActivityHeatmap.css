@@ -12,8 +12,8 @@
 }
 
 .hm-card {
-  --hm-cell: 12px;
-  --hm-gap: 1px;
+  --hm-cell: 10px;
+  --hm-gap: 3px;
   margin-bottom: 1rem;
   padding: 1rem;
   border: 1px solid var(--hm-border);
@@ -76,7 +76,21 @@
 .hm-year-menu button[aria-pressed="true"] { background: var(--hm-hover); color: var(--hm-text); }
 .hm-body { min-width: 0; }
 .hm-main { min-width: 0; flex: 1; }
-.hm-scroll { display: flex; overflow-x: auto; padding-bottom: 0.5rem; }
+.hm-scroll {
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hm-muted) transparent;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.hm-scroll::-webkit-scrollbar { height: 6px; }
+.hm-scroll::-webkit-scrollbar-track { background: transparent; }
+.hm-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--hm-muted);
+}
 .hm-inner { width: max-content; flex: none; margin-inline: auto; }
 
 .hm-months {
