@@ -8,7 +8,7 @@ progress summaries to understand your consistency over time. Coding practice
 is supported alongside personal tracks for other subjects. Profiles let you
 share a curated view of your learning journey.
 
-**Live application:** [tracksheet-rehnx.vercel.app](https://tracksheet-rehnx.vercel.app/)
+**Live application:** [momentum-rehnx.vercel.app](https://momentum-rehnx.vercel.app/)
 
 ## Why Momentum
 
