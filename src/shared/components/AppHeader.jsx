@@ -23,6 +23,7 @@ export default function AppHeader({
   theme,
   setTheme,
   onSignOut,
+  testDataTools,
 }) {
   return (
     <header className="app-header">
@@ -43,6 +44,7 @@ export default function AppHeader({
           ))}
         </nav>
         <div className="app-header-actions">
+          {testDataTools}
           <button
             type="button"
             className="icon-btn"

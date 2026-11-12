@@ -13,6 +13,7 @@ import {
 } from "../../daily-log/lib/dailyLogHistoryCache";
 import { formatDuration, getSleepMinutes, getStudyMinutes } from "../../../shared/utils/time";
 import { formatTooltipDate } from "../utils/heatmap";
+import { getSleepStudySummary } from "../utils/sleepStudySummary";
 import { getLocalDateKey } from "../../../shared/utils/date";
 import "./SleepStudyChart.css";
 import "./SleepStudyChart.responsive.css";
@@ -203,7 +204,7 @@ function SleepStudyGraph({ days, title, series }) {
   );
 }
 
-export default function SleepStudyChart({ userId }) {
+export default function SleepStudyChart({ userId, showSummary = false }) {
   const cachedHistory = getDailyLogHistoryCache(userId);
   const [logs, setLogs] = useState(
     () => cachedHistory?.logs || [],
@@ -282,11 +283,13 @@ export default function SleepStudyChart({ userId }) {
           month: "short",
           day: "numeric",
         }),
+        logged: Boolean(log),
         sleep: log ? getSleepMinutes(log) : 0,
         study: log ? getStudyMinutes(log) : 0,
       };
     });
   }, [logs]);
+  const summary = useMemo(() => getSleepStudySummary(days), [days]);
   const activeChart = CHARTS.find((chart) => chart.id === selectedChart);
   const handleTabKeyDown = (event, currentIndex) => {
     let nextIndex = currentIndex;
@@ -314,7 +317,7 @@ export default function SleepStudyChart({ userId }) {
       aria-labelledby="sleep-study-heading"
     >
       <header className="sleep-study-heading">
-        <div>
+        <div className="sleep-study-heading-copy">
           <h2 id="sleep-study-heading">Sleep &amp; study trends</h2>
           <p>
             <span className="sleep-study-range-desktop">
@@ -325,25 +328,7 @@ export default function SleepStudyChart({ userId }) {
             </span>
           </p>
         </div>
-      </header>
-
-      {error && !hasHistory ? (
-        <div className="sleep-study-message" role="alert">
-          <span>{error}</span>
-          <button type="button" onClick={() => setRequestId((current) => current + 1)}>
-            Try again
-          </button>
-        </div>
-      ) : (
-        <>
-          {error && (
-            <div className="sleep-study-message" role="alert">
-              <span>{error}</span>
-              <button type="button" onClick={() => setRequestId((current) => current + 1)}>
-                Try again
-              </button>
-            </div>
-          )}
+        {!(error && !hasHistory) && (
           <div
             className="sleep-study-tabs"
             role="tablist"
@@ -369,6 +354,26 @@ export default function SleepStudyChart({ userId }) {
               </button>
             ))}
           </div>
+        )}
+      </header>
+
+      {error && !hasHistory ? (
+        <div className="sleep-study-message" role="alert">
+          <span>{error}</span>
+          <button type="button" onClick={() => setRequestId((current) => current + 1)}>
+            Try again
+          </button>
+        </div>
+      ) : (
+        <>
+          {error && (
+            <div className="sleep-study-message" role="alert">
+              <span>{error}</span>
+              <button type="button" onClick={() => setRequestId((current) => current + 1)}>
+                Try again
+              </button>
+            </div>
+          )}
           <div
             id="sleep-study-tabpanel"
             role="tabpanel"
@@ -394,6 +399,41 @@ export default function SleepStudyChart({ userId }) {
           <p className="sleep-study-footnote">
             Days without a saved log appear as 0h.
           </p>
+          {showSummary && (
+            <div className="sleep-study-summary" aria-label="Sleep and study summaries">
+              <article className="sleep-study-summary-card">
+                <span>Avg study, 7 days</span>
+                <strong>
+                  {summary.averageStudy === null
+                    ? "—"
+                    : formatDuration(summary.averageStudy)}
+                </strong>
+              </article>
+              <article className="sleep-study-summary-card">
+                <span>Avg sleep, 7 days</span>
+                <strong>
+                  {summary.averageSleep === null
+                    ? "—"
+                    : formatDuration(summary.averageSleep)}
+                </strong>
+              </article>
+              <article className="sleep-study-summary-card">
+                <span>Best study day</span>
+                <strong>
+                  {summary.bestStudyDay
+                    ? formatDuration(summary.bestStudyDay.study)
+                    : "—"}
+                </strong>
+                <small>{summary.bestStudyDay?.label || "No saved days"}</small>
+              </article>
+              <article className="sleep-study-summary-card">
+                <span>Days logged</span>
+                <strong>
+                  {summary.daysLogged} / {summary.daysTotal}
+                </strong>
+              </article>
+            </div>
+          )}
           <ul className="sr-only">
             {days.map((day) => (
               <li key={day.dateKey}>

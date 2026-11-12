@@ -113,10 +113,12 @@
 }
 
 @container daily-tracker (max-width: 520px) {
-  .full-log-overview {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.6rem;
+  .full-log-history-toolbar-top {
+    align-items: flex-start;
+  }
+
+  .full-log-pagination {
+    gap: 0.35rem;
   }
 
   .full-log-day-totals {
@@ -128,7 +130,8 @@
     font-size: 0.95rem;
   }
 
-  .full-log-overview-controls {
-    justify-content: space-between;
+  .full-log-pagination > button {
+    flex: 1 1 7rem;
+    padding-inline: 0.4rem;
   }
 }

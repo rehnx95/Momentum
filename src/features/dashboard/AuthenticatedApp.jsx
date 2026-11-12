@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useRef,
@@ -11,8 +13,11 @@ import useProfileMetrics from "../profile/hooks/useProfileMetrics";
 import useProgressBackup from "../profile/hooks/useProgressBackup";
 import useSheetLibrary from "../sheets/hooks/useSheetLibrary";
 import useProblemTree from "../problem-tracker/hooks/useProblemTree";
+import { isTestDataToolsEnabled } from "../testing/lib/testDataMode";
 import AuthenticatedScreens from "./AuthenticatedScreens";
 import usePeopleNavigation from "./usePeopleNavigation";
+
+const SampleDataTools = lazy(() => import("../testing/components/SampleDataTools"));
 
 export default function AuthenticatedApp({
   user,
@@ -180,7 +185,22 @@ export default function AuthenticatedApp({
   const userUsername = profile?.username || "";
   const userLocation = profile?.location || "";
   const userWebsite = profile?.website || "";
-  const headerProps = { onNavigate: navigateTo, theme, setTheme, onSignOut };
+  const testDataTools = isTestDataToolsEnabled ? (
+    <Suspense fallback={null}>
+      <SampleDataTools
+        userId={user.id}
+        userEmail={user.email}
+        sheets={availableSheets}
+      />
+    </Suspense>
+  ) : null;
+  const headerProps = {
+    onNavigate: navigateTo,
+    theme,
+    setTheme,
+    onSignOut,
+    testDataTools,
+  };
 
   const openProfileSettings = () => {
     navigateTo("/profile/edit");

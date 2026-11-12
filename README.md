@@ -63,6 +63,7 @@ src/
     problem-tracker/  Problem tree, progress, and filtering
     profile/          Profile views, metrics, and backup
     sheets/           Track library, templates, and TXT parsing
+    testing/          Test-mode-only sample data tools
   shared/
     components/       Reusable interface components
     lib/              Supabase client and browser data cache
@@ -94,6 +95,30 @@ instructions, see [Local development and deployment](./architecture.md#local-dev
 
 Use `npx vercel dev` instead of `npm run dev` when you need to exercise
 `/api/search` locally.
+
+## Test with sample data
+
+Use your existing Supabase project with a **dedicated second Google account**.
+The seeder writes only for the currently signed-in user through Supabase RLS;
+verify the displayed email before confirming. Allow `http://localhost:5174`
+in Supabase Auth's redirect URLs. The local test mode inherits the existing
+project URL and publishable key from `.env`:
+
+```powershell
+Copy-Item .env.test.example .env.test.local
+npm run dev:test
+```
+
+Create or sign in with the second account on the live site, then sign in with
+that same account at `http://localhost:5174`. The **Generate sample data** and
+**Remove sample data** buttons appear beside the theme control in the local header.
+Generated history then appears for that account on both the local app and the
+live site. It includes irregular Daily Log entries across the last 365 days
+and solved/skipped problem history across 2025 and the current year. Removing
+data clears all Daily Log, problem-progress, and activity-history records for
+the signed-in account; profile details and learning sheets remain. These
+controls are available only in the test-mode development server and use the
+signed-in session, not a service-role key.
 
 ## Useful commands
 

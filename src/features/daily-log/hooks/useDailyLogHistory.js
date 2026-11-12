@@ -69,7 +69,7 @@ export default function useDailyLogHistory(userId, viewMode, setMessage) {
 
   const loadOlderLogs = useCallback(async (loadAll = false) => {
     const oldest = allLogs[allLogs.length - 1]?.date;
-    if (!oldest) return;
+    if (!oldest) return false;
     setOlderLogsLoading(true);
     let cursor = oldest;
     let more = true;
@@ -97,9 +97,11 @@ export default function useDailyLogHistory(userId, viewMode, setMessage) {
         if (!loadAll || !oldestFetched) break;
         cursor = oldestFetched;
       }
+      return true;
     } catch (error) {
       console.error("Failed to load older daily logs:", error);
       setMessage("Could not load older log entries.");
+      return false;
     } finally {
       setOlderLogsLoading(false);
     }

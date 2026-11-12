@@ -11,7 +11,9 @@ import {
 import { getLocalDateKey } from "../../../shared/utils/date";
 import {
   emptyLog,
+  getDailyLogViewMode,
   normalizeLog,
+  setDailyLogViewMode,
 } from "../lib/dailyLogModel";
 import useDailyLogHistory from "./useDailyLogHistory";
 import useDailyLogTimer from "./useDailyLogTimer";
@@ -39,7 +41,7 @@ export default function useDailyLog(user, activityLog = {}) {
   const [loadRequest, setLoadRequest] = useState(0);
   const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
-  const [viewMode, setViewMode] = useState("daily");
+  const [viewMode, setViewMode] = useState(() => getDailyLogViewMode(user.id));
   const {
     allLogs,
     allLogsLoading,
@@ -138,11 +140,15 @@ export default function useDailyLog(user, activityLog = {}) {
     });
 
   const changeViewMode = useCallback(async (nextMode) => {
+    if (!["daily", "full", "trends"].includes(nextMode)) return false;
     if (nextMode === viewMode) return true;
     if (viewMode === "daily" && !(await flushPendingSave())) return false;
     setViewMode(nextMode);
+    if (!setDailyLogViewMode(user.id, nextMode)) {
+      setMessage("Could not save the Daily Log view preference.");
+    }
     return true;
-  }, [flushPendingSave, viewMode]);
+  }, [flushPendingSave, setMessage, user.id, viewMode]);
 
   const changeDate = useCallback(async (selectedDate) => {
     if (
@@ -197,7 +203,7 @@ export default function useDailyLog(user, activityLog = {}) {
   return {
     date, log, setLog, loading, loadFailed,
     saving, clearingHistory, status, message, setMessage,
-    viewMode, setViewMode, changeViewMode,
+    viewMode, changeViewMode,
     activeCustomTasks, currentStreak, problemCounts, allLogs, allLogsLoading,
     hasOlderLogs, olderLogsLoading, runningTimer, timerNow, validation, dirty,
     studiedMinutes, sleptMinutes, changeDate, shiftDate, updateField, updateSlot,

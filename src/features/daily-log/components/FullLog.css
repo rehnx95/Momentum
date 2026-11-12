@@ -67,23 +67,34 @@
   margin-left: auto;
 }
 
-.full-log-overview {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.full-log-overview-controls,
+.full-log-history-toolbar-top,
 .full-log-legend {
   display: flex;
   align-items: center;
 }
 
-.full-log-overview-controls {
-  flex: none;
-  gap: 0.85rem;
+.full-log-history {
+  display: grid;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.full-log-history-toolbar {
+  display: grid;
+  gap: 0.55rem;
+  margin-bottom: 0.55rem;
+}
+
+.full-log-history-toolbar-top {
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.full-log-history-scroll {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .full-log-legend {
@@ -137,30 +148,29 @@
   opacity: 0.55;
 }
 
-.full-log-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.55rem;
-}
-
 .daily-full-log {
-  display: grid;
-  gap: 0.35rem;
+  min-width: 0;
 }
 
 .full-log-day-list {
   display: grid;
   gap: 0.55rem;
+  min-width: 0;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.full-log-day-list > li {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .full-log-day {
   display: block;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   padding: 0.85rem;
   border: 1px solid var(--border);
   border-radius: 0.8rem;
@@ -175,6 +185,7 @@
 
 .full-log-day-content {
   display: grid;
+  min-width: 0;
   gap: 0.7rem;
 }
 
@@ -299,12 +310,19 @@
 .full-log-activity-chips {
   display: flex;
   min-width: 0;
+  max-width: 100%;
   flex-wrap: wrap;
   gap: 0.45rem;
 }
 
 .full-log-activity-chip {
+  min-width: 0;
+  max-width: 100%;
   padding: 0.15rem 0.2rem 0.15rem 0.6rem;
+}
+
+.full-log-activity-chip > span {
+  overflow-wrap: anywhere;
 }
 
 .full-log-footer {
@@ -345,4 +363,26 @@
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 0.5rem;
+}
+
+.full-log-show-latest {
+  justify-self: start;
+  min-height: 2rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.55rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.full-log-show-latest:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.full-log-show-latest:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }

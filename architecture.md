@@ -56,6 +56,7 @@ src/
     problem-tracker/      Problem tree, progress, and filtering
     profile/              Profile screens, metrics, and progress backup
     sheets/               Track library, templates, and TXT parsing
+    testing/              Test-mode-only sample data tools
   shared/
     components/           Reusable interface components
     lib/                  Supabase client and generic browser cache
@@ -77,6 +78,7 @@ supabase/migrations/      Database schema, policies, and SQL functions
 | Daily Log | `src/features/daily-log/hooks/useDailyLog.js` | Compose the daily editing, persistence, history, and timer hooks. |
 | Profiles and people | `src/features/profile/`, `src/features/people/`, `src/features/dashboard/usePeopleNavigation.js` | Owner profile metrics, public profile views, search, and profile navigation. |
 | Activity analytics | `src/features/activity/` | Activity heatmaps and sleep/study charts. |
+| Test data | `src/features/testing/` | Generate isolated sample history from the test-mode development server. |
 | Shared platform code | `src/shared/` | Supabase client, generic cache, common UI, and cross-feature date/time helpers. |
 
 The Daily Log keeps styles close to the components they describe:
