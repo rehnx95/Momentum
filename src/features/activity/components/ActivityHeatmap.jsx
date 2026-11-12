@@ -3,11 +3,13 @@ import { ChevronDown } from 'lucide-react';
 import { buildHeatmap, formatTooltipDate } from "../utils/heatmap";
 import { formatDuration } from "../../../shared/utils/time";
 import "./ActivityHeatmap.css";
+import "./ActivityHeatmap.responsive.css";
 
 const WEEKDAYS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
-const GAP = 2;
+const GAP = 1;
 const LABEL_W = 34;
-const MIN_CELL = 4;
+const MIN_CELL = 6;
+const MAX_CELL = 16;
 const getHourLevel = (hours) => {
   if (hours <= 0) return 0;
   if (hours < 1) return 1;
@@ -75,7 +77,7 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
     const measure = () => {
       const usable = el.clientWidth - LABEL_W - (heat.columns - 1) * GAP - 6;
       const nextCell = Math.min(
-        12,
+        MAX_CELL,
         Math.max(MIN_CELL, Math.floor((usable / heat.columns) * 10) / 10),
       );
       setCell((current) => current === nextCell ? current : nextCell);

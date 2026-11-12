@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  Moon,
   Plus,
 } from "lucide-react";
 import {
@@ -13,7 +12,7 @@ import {
 import { getLocalDateKey } from "../../../shared/utils/date";
 import ActivityCard from "./ActivityCard";
 import CustomDatePicker from "./CustomDatePicker";
-import TimeInput from "./TimeInput";
+import LogSummary from "./LogSummary";
 
 function activityTotal(slots) {
   return slots.reduce((total, slot) => {
@@ -103,48 +102,39 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             <ChevronRight size={16} />
           </button>
         </div>
+        <div className="daily-save-status" role="status" aria-live="polite">
+          {daily.saving
+            ? "Saving…"
+            : daily.validation.errors.length
+              ? "Fix errors to save"
+              : daily.status === "Saved"
+                ? "Saved ✓"
+                : daily.status || "Saved"}
+          {daily.message && <span>{daily.message}</span>}
+          {daily.dirty && !daily.saving && daily.validation.errors.length === 0 && (
+            <button type="button" onClick={() => void daily.saveNow()}>
+              Save now
+            </button>
+          )}
+        </div>
       </div>
 
-      <section className="daily-summary full-log-summary" aria-label="Day summary">
-        <div className="full-log-summary-item">
-          <small>Sleep</small>
-          <strong>
-            <TimeInput
-              value={daily.log.sleep_time}
-              disabled={entryDisabled}
-              onChange={(value) => daily.updateField("sleep_time", value)}
-              label="Sleep time"
-            />
-          </strong>
-        </div>
-        <div className="full-log-summary-item">
-          <small>Wake</small>
-          <strong>
-            <TimeInput
-              value={daily.log.wake_time}
-              disabled={entryDisabled}
-              onChange={(value) => daily.updateField("wake_time", value)}
-              label="Wake time"
-            />
-          </strong>
-        </div>
-        <div className="full-log-summary-item">
-          <small>Sleep duration</small>
-          <strong>
-            {daily.log.sleep_time && daily.log.wake_time
-              ? formatDuration(getSleepMinutes(daily.log))
-              : "—"}
-          </strong>
-        </div>
-        <div className="full-log-summary-item">
-          <small>Studied</small>
-          <strong>{formatDuration(daily.studiedMinutes)}</strong>
-        </div>
-        <div className="full-log-summary-item">
-          <small>Solved</small>
-          <strong>{daily.problemCounts[daily.date] || 0}</strong>
-        </div>
-      </section>
+      <LogSummary
+        className="daily-summary"
+        ariaLabel="Day summary"
+        sleepTime={daily.log.sleep_time}
+        wakeTime={daily.log.wake_time}
+        sleepDuration={
+          daily.log.sleep_time && daily.log.wake_time
+            ? formatDuration(getSleepMinutes(daily.log))
+            : "—"
+        }
+        studied={formatDuration(daily.studiedMinutes)}
+        solved={daily.problemCounts[daily.date] || 0}
+        onSleepTimeChange={(value) => daily.updateField("sleep_time", value)}
+        onWakeTimeChange={(value) => daily.updateField("wake_time", value)}
+        disabled={entryDisabled}
+      />
 
       <div className="daily-entry-heading">
         <h3>Activities</h3>
@@ -228,13 +218,16 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
       <div className="daily-activity-list">
         {activities.map((activity) => (
           <ActivityCard
-            key={activity.id}
+            key={`${daily.date}-${activity.id}`}
             activityId={activity.id}
             activityName={activity.name}
             slots={activity.slots}
             totalMinutes={activityTotal(activity.slots)}
             disabled={entryDisabled}
+            runningTimer={daily.runningTimer}
+            timerNow={daily.timerNow}
             onAddSlot={() => daily.addSlot(activity.id)}
+            onStopTimer={daily.stopTimer}
             onChangeSlot={(index, field, value) =>
               updateActivitySlot(activity.id, index, field, value)
             }
@@ -263,21 +256,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
           ))}
         </ul>
       )}
-      <div className="daily-save-status" role="status" aria-live="polite">
-        {daily.saving
-          ? "Saving…"
-          : daily.validation.errors.length
-            ? "Fix errors to save"
-            : daily.status === "Saved"
-              ? "Saved ✓"
-              : daily.status || "Saved"}
-        {daily.message && <span>{daily.message}</span>}
-        {daily.dirty && !daily.saving && daily.validation.errors.length === 0 && (
-          <button type="button" onClick={() => void daily.saveNow()}>
-            Save now
-          </button>
-        )}
-      </div>
     </div>
   );
 }

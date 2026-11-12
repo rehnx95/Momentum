@@ -22,6 +22,7 @@ export default function SlotRow({
           disabled={disabled}
           onChange={(value) => onChange(index, "start", value)}
           label={`${activityName} slot ${index + 1} start time`}
+          showPlaceholder
         />
       </label>
       <span className="slot-arrow" aria-hidden="true">→</span>
@@ -32,6 +33,7 @@ export default function SlotRow({
           disabled={disabled}
           onChange={(value) => onChange(index, "end", value)}
           label={`${activityName} slot ${index + 1} end time`}
+          showPlaceholder
         />
       </label>
       <span className="slot-hours">

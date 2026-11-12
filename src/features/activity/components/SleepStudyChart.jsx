@@ -15,10 +15,13 @@ import { formatDuration, getSleepMinutes, getStudyMinutes } from "../../../share
 import { formatTooltipDate } from "../utils/heatmap";
 import { getLocalDateKey } from "../../../shared/utils/date";
 import "./SleepStudyChart.css";
+import "./SleepStudyChart.responsive.css";
 
 const DAY_COUNT = 30;
+const MOBILE_DAY_COUNT = 7;
 const DEFAULT_CHART_WIDTH = 720;
 const CHART_HEIGHT = 220;
+const MOBILE_CHART_HEIGHT = 240;
 const PLOT = { left: 42, right: 12, top: 14, bottom: 30 };
 const DATE_LABEL_INDEXES = [0, 7, 14, 21, 29];
 const CHARTS = [
@@ -57,20 +60,24 @@ function SleepStudyGraph({ days, title, series }) {
     return () => observer.disconnect();
   }, []);
 
+  const isMobileChart = chartWidth <= 520;
+  const visibleDays = isMobileChart ? days.slice(-MOBILE_DAY_COUNT) : days;
   const plotWidth = chartWidth - PLOT.left - PLOT.right;
-  const plotHeight = CHART_HEIGHT - PLOT.top - PLOT.bottom;
+  const chartHeight = isMobileChart ? MOBILE_CHART_HEIGHT : CHART_HEIGHT;
+  const plotHeight = chartHeight - PLOT.top - PLOT.bottom;
   const maxMinutes = Math.max(
     0,
-    ...days.flatMap((day) => series.map((key) => day[key])),
+    ...visibleDays.flatMap((day) => series.map((key) => day[key])),
   );
   const maxHours = maxMinutes > 12 * 60 ? 24 : 12;
   const currentYear = new Date().getFullYear();
+  const dateLabelIndexes = isMobileChart ? [0, 3, 6] : DATE_LABEL_INDEXES;
   const yFor = (minutes) =>
     PLOT.top +
     plotHeight -
     (Math.min(minutes / 60, 24) / maxHours) * plotHeight;
   const xFor = (index) =>
-    PLOT.left + (plotWidth * index) / Math.max(1, days.length - 1);
+    PLOT.left + (plotWidth * index) / Math.max(1, visibleDays.length - 1);
   const ticks = [0, 1, 2, 3, 4].map((step) => (maxHours * step) / 4);
   const showTooltip = (event) => {
     const target = event.target.closest?.("[data-tip]");
@@ -100,9 +107,9 @@ function SleepStudyGraph({ days, title, series }) {
       >
         <svg
           className="sleep-study-chart"
-          viewBox={`0 0 ${chartWidth} ${CHART_HEIGHT}`}
+          viewBox={`0 0 ${chartWidth} ${chartHeight}`}
           role="img"
-          aria-label={`${title} over the last 30 days, measured in hours`}
+          aria-label={`${title} over the last ${visibleDays.length} days, measured in hours`}
           onMouseOver={showTooltip}
           onMouseLeave={() => {
             setTooltip(null);
@@ -128,13 +135,13 @@ function SleepStudyGraph({ days, title, series }) {
           })}
           {series.map((key) => {
             const colorClass = `${key}-series`;
-            const points = days
+            const points = visibleDays
               .map((day, index) => `${xFor(index)},${yFor(day[key])}`)
               .join(" ");
             return (
               <g key={key} className={colorClass}>
                 <polyline className="sleep-study-line" points={points} />
-                {days.map((day, index) => (
+                {visibleDays.map((day, index) => (
                   <g key={day.dateKey}>
                     <circle
                       className="sleep-study-point-target"
@@ -158,18 +165,18 @@ function SleepStudyGraph({ days, title, series }) {
               </g>
             );
           })}
-          {DATE_LABEL_INDEXES.map((index) => {
-            const day = days[index];
+          {dateLabelIndexes.map((index) => {
+            const day = visibleDays[index];
             if (!day) return null;
             return (
               <text
                 key={day.dateKey}
                 x={xFor(index)}
-                y={CHART_HEIGHT - 8}
+                y={chartHeight - 8}
                 textAnchor={
                   index === 0
                     ? "start"
-                    : index === days.length - 1
+                    : index === visibleDays.length - 1
                       ? "end"
                       : "middle"
                 }
@@ -309,7 +316,14 @@ export default function SleepStudyChart({ userId }) {
       <header className="sleep-study-heading">
         <div>
           <h2 id="sleep-study-heading">Sleep &amp; study trends</h2>
-          <p>Daily hours over the last 30 days</p>
+          <p>
+            <span className="sleep-study-range-desktop">
+              Daily hours over the last 30 days
+            </span>
+            <span className="sleep-study-range-mobile">
+              Daily hours over the last 7 days
+            </span>
+          </p>
         </div>
       </header>
 

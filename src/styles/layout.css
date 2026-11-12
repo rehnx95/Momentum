@@ -72,29 +72,6 @@ html {
   letter-spacing: -0.035em;
 }
 
-@media (max-width: 767px) {
-  .app-header .momentum-brand {
-    gap: 0.55rem;
-  }
-
-  .app-header .momentum-brand-logo {
-    width: 2.15rem;
-    height: 2.15rem;
-    flex-basis: 2.15rem;
-    border-radius: 0.65rem;
-  }
-
-  .app-header .momentum-brand-logo svg {
-    width: 1.2rem;
-    height: 1.2rem;
-  }
-
-  .app-header .momentum-brand-name {
-    font-size: 1.05rem;
-    letter-spacing: -0.025em;
-  }
-}
-
 .app-header-actions {
   position: relative;
   display: flex;

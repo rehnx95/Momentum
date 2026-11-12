@@ -40,7 +40,13 @@ export function adjustTimeSegment(value, segment, amount) {
   return String((currentValue + amount + maximum + 1) % (maximum + 1)).padStart(2, "0");
 }
 
-export default function TimeInput({ value, onChange, disabled, label }) {
+export default function TimeInput({
+  value,
+  onChange,
+  disabled,
+  label,
+  showPlaceholder = false,
+}) {
   const [segments, setSegments] = useState(() => getSegments(value));
 
   useEffect(() => {
@@ -117,6 +123,7 @@ export default function TimeInput({ value, onChange, disabled, label }) {
         autoComplete="off"
         maxLength={2}
         value={segments.hour}
+        placeholder={showPlaceholder ? "--" : undefined}
         disabled={disabled}
         data-time-navigation
         data-time-segment="hour"
@@ -133,6 +140,7 @@ export default function TimeInput({ value, onChange, disabled, label }) {
         autoComplete="off"
         maxLength={2}
         value={segments.minute}
+        placeholder={showPlaceholder ? "--" : undefined}
         disabled={disabled}
         data-time-navigation
         data-time-segment="minute"

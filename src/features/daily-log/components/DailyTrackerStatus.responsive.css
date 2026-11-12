@@ -1,0 +1,164 @@
+@media (max-width: 700px) {
+  .daily-day-header {
+    align-items: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .custom-calendar {
+    width: min(18rem, calc(100vw - 1.5rem));
+    max-width: calc(100vw - 1.5rem);
+  }
+
+  .daily-toolbar,
+  .daily-save-status {
+    align-items: flex-start;
+  }
+
+  .daily-toolbar {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .daily-toolbar > .page-title {
+    flex: 1 1 8rem;
+    font-size: clamp(1.15rem, 6vw, 1.5rem);
+  }
+
+  .daily-view-switch {
+    flex: none;
+    max-width: 100%;
+  }
+
+  .daily-view-switch button {
+    padding-inline: 0.45rem;
+    font-size: 0.68rem;
+  }
+
+  .daily-day-header {
+    align-items: flex-start;
+  }
+
+  .daily-date-nav {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .daily-date-nav > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .daily-save-status {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .daily-load-error {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@container daily-tracker (max-width: 1050px) {
+  .daily-activity-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container daily-tracker (min-width: 791px) {
+  .daily-activity-list > .activity-card:last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
+  }
+}
+
+@container daily-tracker (max-width: 790px) {
+  .daily-activity-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container daily-tracker (min-width: 521px) and (max-width: 790px) {
+  .daily-activity-list > .activity-card:last-child:nth-child(2n + 1) {
+    grid-column: 1 / -1;
+  }
+}
+
+@container daily-tracker (max-width: 520px) {
+  .daily-activity-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .activity-card-heading {
+    gap: 0.2rem;
+  }
+
+  .activity-card {
+    padding: 0.7rem 0.85rem;
+  }
+
+  .activity-card-identity {
+    flex: 1 1 0;
+    gap: 0.25rem;
+  }
+
+  .activity-card-heading strong {
+    font-size: 0.8rem;
+  }
+
+  .activity-menu-trigger {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .activity-card-heading > .activity-total {
+    flex: none;
+    margin-left: auto;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.78rem;
+  }
+
+  .daily-slot-row {
+    grid-template-columns: minmax(4rem, 4.7rem) 0.6rem minmax(4rem, 4.7rem) 1.45rem;
+    gap: 0.3rem;
+  }
+
+  .daily-slot-row .time-input {
+    height: 2.3rem;
+    min-height: 2.3rem;
+    font-size: 0.8rem;
+  }
+
+  .time-input {
+    width: 100%;
+  }
+
+  .daily-entry-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@container daily-tracker (max-width: 360px) {
+  .daily-activity-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .daily-slot-row {
+    grid-template-columns: 4.15rem 0.85rem 4.15rem 1.45rem;
+    gap: 0.3rem;
+  }
+
+  .daily-slot-row .time-input {
+    height: 2.3rem;
+    min-height: 2.3rem;
+  }
+
+  .daily-slot-row .time-input input {
+    width: 0.85rem;
+    font-size: 0.72rem;
+  }
+}

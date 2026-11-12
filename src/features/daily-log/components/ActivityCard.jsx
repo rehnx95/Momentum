@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Clock3, Pencil, Plus, Trash2 } from "lucide-react";
+import { Clock3, Ellipsis, Plus, Square, Trash2 } from "lucide-react";
 import { formatDuration } from "../../../shared/utils/time";
 import Tooltip from "../../../shared/components/Tooltip";
 import SlotRow from "./SlotRow";
@@ -10,7 +10,11 @@ export default function ActivityCard({
   slots,
   totalMinutes = 0,
   disabled,
+  runningTimer,
+  timerNow,
   onAddSlot,
+  onStartTimer,
+  onStopTimer,
   onChangeSlot,
   onRemoveSlot,
   onRemoveActivity,
@@ -18,9 +22,21 @@ export default function ActivityCard({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [renameValue, setRenameValue] = useState(activityName);
+  const [pendingEmptySlotIndex, setPendingEmptySlotIndex] = useState(null);
   const menuRef = useRef(null);
   const pendingSlotFocus = useRef(false);
   const previousSlotCount = useRef(slots.length);
+  const visibleSlots = slots
+    .map((slot, index) => ({ slot, index }))
+    .filter(
+      ({ slot, index }) =>
+        Boolean(String(slot.start || "").trim() || String(slot.end || "").trim()) ||
+        index === pendingEmptySlotIndex,
+    );
+  const timerRunningHere = runningTimer?.activityId === activityId;
+  const elapsedMinutes = timerRunningHere
+    ? Math.max(0, Math.floor((timerNow - Date.parse(runningTimer.startedAt)) / 60_000))
+    : 0;
 
   useEffect(() => {
     setRenameValue(activityName);
@@ -58,82 +74,108 @@ export default function ActivityCard({
         <div className="activity-card-identity">
           <Clock3 size={15} aria-hidden="true" />
           <strong className="activity-card-name">{activityName}</strong>
-          <div className="activity-menu-wrap" ref={menuRef}>
-            <Tooltip label={`Edit ${activityName}`}>
-              <button
-                type="button"
-                className="activity-menu-trigger"
-                aria-label={`Edit ${activityName}`}
-                aria-expanded={menuOpen}
-                aria-haspopup="menu"
-                onClick={() => setMenuOpen((open) => !open)}
-              >
-                <Pencil size={13} />
-              </button>
-            </Tooltip>
-            {menuOpen && (
-              <div className="activity-menu">
-                <label className="activity-menu-label">
-                  Rename
-                  <input
-                    value={renameValue}
-                    onChange={(event) => setRenameValue(event.target.value)}
-                    onBlur={(event) => {
-                      const name = event.currentTarget.value.trim();
-                      if (name && name !== activityName) onRename(name);
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") event.currentTarget.blur();
-                    }}
-                  />
-                </label>
-              </div>
-            )}
-          </div>
         </div>
-        <span className="activity-total">{formatDuration(totalMinutes)}</span>
-        <span className="activity-remove-wrap">
-          <Tooltip label={`Remove ${activityName}`}>
+        <span className="activity-total">{formatDuration(totalMinutes + elapsedMinutes)}</span>
+        <div className="activity-menu-wrap" ref={menuRef}>
+          <Tooltip label={`Options for ${activityName}`}>
             <button
               type="button"
-              className="activity-remove"
-              aria-label={`Remove ${activityName}`}
+              className="activity-menu-trigger"
+              aria-label={`Options for ${activityName}`}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
               disabled={disabled}
-              onClick={onRemoveActivity}
+              onClick={() => setMenuOpen((open) => !open)}
             >
-              <Trash2 size={14} aria-hidden="true" />
+              <Ellipsis size={17} aria-hidden="true" />
             </button>
           </Tooltip>
-        </span>
+          {menuOpen && (
+            <div className="activity-menu" role="menu">
+              <label className="activity-menu-label">
+                Rename
+                <input
+                  value={renameValue}
+                  disabled={disabled}
+                  onChange={(event) => setRenameValue(event.target.value)}
+                  onBlur={(event) => {
+                    const name = event.currentTarget.value.trim();
+                    if (name && name !== activityName) onRename(name);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") event.currentTarget.blur();
+                  }}
+                />
+              </label>
+              <button
+                type="button"
+                role="menuitem"
+                disabled={disabled || timerRunningHere}
+                onClick={async () => {
+                  await onRemoveActivity();
+                  setMenuOpen(false);
+                }}
+              >
+                <Trash2 size={14} aria-hidden="true" />
+                Remove activity
+              </button>
+            </div>
+          )}
+        </div>
       </header>
       <div className="daily-slot-list">
-        {slots.map((slot, index) => (
+        {visibleSlots.map(({ slot, index }) => (
           <SlotRow
             key={`${activityId}-${index}`}
             activityId={activityId}
             activityName={activityName}
             index={index}
             slot={slot}
-            onChange={(slotIndex, field, value) =>
-              onChangeSlot(slotIndex, field, value)
-            }
-            onRemove={onRemoveSlot}
+            onChange={(slotIndex, field, value) => {
+              if (slotIndex === pendingEmptySlotIndex) {
+                setPendingEmptySlotIndex(null);
+              }
+              onChangeSlot(slotIndex, field, value);
+            }}
+            onRemove={(slotIndex) => {
+              setPendingEmptySlotIndex((pendingIndex) =>
+                pendingIndex === slotIndex
+                  ? null
+                  : pendingIndex !== null && pendingIndex > slotIndex
+                    ? pendingIndex - 1
+                    : pendingIndex,
+              );
+              onRemoveSlot(slotIndex);
+            }}
             disabled={disabled}
           />
         ))}
-        {!slots.length && <p className="slot-empty">No time recorded yet.</p>}
+        {!visibleSlots.length && <p className="slot-empty">No time recorded yet.</p>}
       </div>
-      <button
-        type="button"
-        className="slot-add"
-        onClick={() => {
-          pendingSlotFocus.current = true;
-          onAddSlot();
-        }}
-        disabled={disabled}
-      >
-        <Plus size={14} /> Add time
-      </button>
+      <div className="activity-card-actions">
+        {timerRunningHere && (
+          <button
+            type="button"
+            className="slot-start is-running"
+            onClick={() => void onStopTimer()}
+            disabled={disabled}
+          >
+            <Square size={13} aria-hidden="true" /> Stop
+          </button>
+        )}
+        <button
+          type="button"
+          className="slot-add"
+          onClick={() => {
+            pendingSlotFocus.current = true;
+            setPendingEmptySlotIndex(slots.length);
+            onAddSlot();
+          }}
+          disabled={disabled}
+        >
+          <Plus size={14} /> Add time
+        </button>
+      </div>
     </section>
   );
 }

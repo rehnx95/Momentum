@@ -1,0 +1,39 @@
+@media (max-width: 520px) {
+  .hm-card {
+    padding: 0.75rem;
+  }
+
+  .hm-header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .hm-title {
+    flex: 1 1 10rem;
+    overflow-wrap: anywhere;
+  }
+
+  .hm-year-picker {
+    max-width: 100%;
+    margin-left: auto;
+  }
+
+  .hm-year-trigger {
+    min-width: 0;
+    max-width: min(10rem, 45vw);
+  }
+
+  .hm-foot {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 360px) {
+  .hm-card {
+    padding: 0.65rem;
+  }
+
+  .hm-foot {
+    gap: 0.5rem;
+  }
+}

@@ -1,0 +1,38 @@
+@media (max-width: 520px) {
+  .sleep-study-card {
+    padding: 0.75rem;
+  }
+
+  .sleep-study-range-desktop {
+    display: none;
+  }
+
+  .sleep-study-range-mobile {
+    display: inline;
+  }
+
+  .sleep-study-heading {
+    overflow-wrap: anywhere;
+  }
+
+  .sleep-study-tabs {
+    gap: 0.25rem;
+  }
+
+  .sleep-study-tab {
+    flex: 1 1 auto;
+    padding-inline: 0.55rem;
+  }
+
+  .sleep-study-tabpanel {
+    padding-inline: 0.35rem;
+  }
+
+  .sleep-study-chart text {
+    font-size: 10px;
+  }
+
+  .sleep-study-message {
+    flex-wrap: wrap;
+  }
+}

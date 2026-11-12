@@ -4,7 +4,11 @@
   padding: 0.75rem;
   border: 1px solid var(--border);
   border-radius: 1rem;
-  background: var(--surface);
+  background: var(--page);
+}
+
+.daily-tracker.surface-card {
+  background: var(--page) !important;
 }
 
 .daily-toolbar,
@@ -35,6 +39,12 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-bottom: 0.4rem;
+}
+
+.daily-day-header .daily-save-status {
+  flex: 1 1 7rem;
+  justify-content: flex-end;
+  margin-top: 0;
 }
 
 .daily-date-nav > button {
@@ -279,7 +289,7 @@
   min-height: 1.85rem;
   border: 1px solid var(--border-strong);
   border-radius: 0.55rem;
-  background: var(--surface);
+  background: var(--log-day-surface);
   color: var(--text);
   font-size: 0.8rem;
 }

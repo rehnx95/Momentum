@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { Clock3, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import {
   formatDuration,
   getSlotDurationMinutes,
   slotMinutes,
 } from "../../../shared/utils/time";
 import Tooltip from "../../../shared/components/Tooltip";
+import FullLogTimeline from "./FullLogTimeline";
 
 function slotTotal(slots = []) {
   return slots.reduce(
@@ -15,7 +16,7 @@ function slotTotal(slots = []) {
 }
 
 function formatTime(value) {
-  if (!value) return "—";
+  if (!value) return "--:--";
   const [hours, minutes] = String(value).slice(0, 5).split(":");
   return `${hours}:${minutes}`;
 }
@@ -23,10 +24,8 @@ function formatTime(value) {
 function dateLabel(value) {
   const date = new Date(`${value}T00:00:00`);
   return date.toLocaleDateString(undefined, {
-    weekday: "short",
     month: "short",
     day: "numeric",
-    year: "numeric",
   });
 }
 
@@ -53,7 +52,7 @@ function activityBreakdown(row) {
       slots: Array.isArray(task.slots) ? task.slots : [],
       minutes: slotTotal(task.slots || []),
     }))
-    .filter((activity) => activity.minutes > 0 || activity.slots.length > 0);
+    .filter((activity) => activity.minutes > 0);
 }
 
 export default function FullLog({ daily }) {
@@ -74,58 +73,60 @@ export default function FullLog({ daily }) {
       }),
     [daily.allLogs, daily.problemCounts],
   );
-
   return (
     <div className="daily-full-log">
-      <header className="full-log-header">
-        <div className="full-log-pagination">
-          <button
-            type="button"
-            className="load-older-button"
-            disabled={
-              daily.allLogsLoading ||
-              daily.olderLogsLoading ||
-              !daily.hasOlderLogs
-            }
-            onClick={() => daily.loadOlderLogs()}
-          >
-            {daily.hasOlderLogs ? "Load 10 older days" : "No older days"}
-          </button>
-          <button
-            type="button"
-            className="load-older-button full-log-show-all"
-            disabled={
-              daily.allLogsLoading ||
-              daily.olderLogsLoading ||
-              !daily.hasOlderLogs
-            }
-            onClick={() => daily.loadOlderLogs(true)}
-          >
-            {daily.hasOlderLogs ? "Show all days" : "All days shown"}
-          </button>
+      <div className="full-log-overview">
+        <div className="full-log-overview-controls">
+          <div className="full-log-legend" aria-label="Timeline legend">
+            <span><i className="sleep" aria-hidden="true" />Sleep</span>
+            <span><i className="study" aria-hidden="true" />Studied</span>
+          </div>
+          <Tooltip label="Clear my saved history">
+            <button
+              type="button"
+              className="full-log-clear-button"
+              disabled={
+                daily.clearingHistory ||
+                daily.allLogsLoading ||
+                daily.olderLogsLoading ||
+                daily.loading
+              }
+              onClick={async () => {
+                const confirmation = window.prompt(
+                  "This permanently deletes your saved Daily Log entries. Type CLEAR to continue.",
+                );
+                if (confirmation === "CLEAR") await daily.clearAllLogs();
+              }}
+            >
+              <Trash2 size={15} aria-hidden="true" />
+              <span>Clear log</span>
+            </button>
+          </Tooltip>
         </div>
-        <Tooltip label="Clear my saved history">
-          <button
-            type="button"
-            className="full-log-clear-button"
-            aria-label="Clear my saved history"
-            disabled={
-              daily.clearingHistory ||
-              daily.allLogsLoading ||
-              daily.olderLogsLoading ||
-              daily.loading
-            }
-            onClick={async () => {
-              const confirmation = window.prompt(
-                "This permanently deletes your saved Daily Log entries. Type CLEAR to continue.",
-              );
-              if (confirmation === "CLEAR") await daily.clearAllLogs();
-            }}
-          >
-            <Trash2 size={16} aria-hidden="true" />
-          </button>
-        </Tooltip>
-      </header>
+      </div>
+
+      {daily.hasOlderLogs && (
+        <header className="full-log-header">
+          <div className="full-log-pagination">
+            <button
+              type="button"
+              className="load-older-button"
+              disabled={daily.allLogsLoading || daily.olderLogsLoading}
+              onClick={() => daily.loadOlderLogs()}
+            >
+              Load 10 older days
+            </button>
+            <button
+              type="button"
+              className="load-older-button full-log-show-all"
+              disabled={daily.allLogsLoading || daily.olderLogsLoading}
+              onClick={() => daily.loadOlderLogs(true)}
+            >
+              Show all days
+            </button>
+          </div>
+        </header>
+      )}
 
       {entries.length ? (
         <ul className="full-log-day-list">
@@ -135,75 +136,36 @@ export default function FullLog({ daily }) {
                 <div className="full-log-day-content">
                   <header className="full-log-day-heading">
                     <strong className="full-log-day-date">{dateLabel(row.date)}</strong>
+                    <div className="full-log-day-totals">
+                      <strong>{formatDuration(studied)}</strong>
+                      <span>{problems} solved</span>
+                    </div>
                   </header>
-                  <div className="full-log-summary">
-                    <div className="full-log-summary-item">
-                      <small>Sleep</small>
-                      <strong>{formatTime(row.sleep_time)}</strong>
+                  <FullLogTimeline row={row} activities={activities} />
+                  {(row.sleep_time || row.wake_time) && (
+                    <div className="full-log-day-sleep">
+                      <span>Sleep</span>
+                      <strong>
+                        {formatTime(row.sleep_time)} → {formatTime(row.wake_time)}
+                        {" · "}
+                        {sleep ? formatDuration(sleep) : "—"}
+                      </strong>
                     </div>
-                    <div className="full-log-summary-item">
-                      <small>Wake</small>
-                      <strong>{formatTime(row.wake_time)}</strong>
-                    </div>
-                    <div className="full-log-summary-item">
-                      <small>Sleep duration</small>
-                      <strong>{sleep ? formatDuration(sleep) : "—"}</strong>
-                    </div>
-                    <div className="full-log-summary-item">
-                      <small>Studied</small>
-                      <strong>{studied ? formatDuration(studied) : "—"}</strong>
-                    </div>
-                    <div className="full-log-summary-item">
-                      <small>Solved</small>
-                      <strong>{problems}</strong>
-                    </div>
-                  </div>
+                  )}
                   {activities.length ? (
-                    <div className="full-log-activities">
+                    <div className="full-log-activity-chips">
                       {activities.map((activity, index) => (
-                        <div
-                          className="full-log-activity"
+                        <span
+                          className="full-log-activity-chip"
                           key={`${activity.name}-${index}`}
                         >
-                          <div className="full-log-activity-heading">
-                            <div className="full-log-activity-identity">
-                              <Clock3 size={15} aria-hidden="true" />
-                              <strong>{activity.name}</strong>
-                            </div>
-                            <span className="activity-total">
-                              {formatDuration(activity.minutes)}
-                            </span>
-                          </div>
-                          <div className="full-log-activity-slots">
-                            {activity.slots.map((slot, slotIndex) => {
-                              const duration = getSlotDurationMinutes(slot);
-                              return (
-                                <div
-                                  className="full-log-activity-slot"
-                                  key={`${slot.start}-${slot.end}-${slotIndex}`}
-                                  aria-label={`${activity.name} slot ${slotIndex + 1}`}
-                                >
-                                  <span className="time-input full-log-readonly-time">
-                                    {formatTime(slot.start)}
-                                  </span>
-                                  <span className="slot-arrow" aria-hidden="true">→</span>
-                                  <span className="time-input full-log-readonly-time">
-                                    {formatTime(slot.end)}
-                                  </span>
-                                  <span className="slot-hours">
-                                    {duration === null ? "—" : formatDuration(duration)}
-                                  </span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
+                          <span>{activity.name}</span>
+                          <strong>{formatDuration(activity.minutes)}</strong>
+                        </span>
                       ))}
                     </div>
                   ) : (
-                    <p className="full-log-no-activities">
-                      No timed activities
-                    </p>
+                    <p className="full-log-no-activities">No timed activities</p>
                   )}
                 </div>
               </article>
@@ -214,6 +176,13 @@ export default function FullLog({ daily }) {
         <div className="daily-full-empty" aria-hidden="true" />
       ) : (
         <p className="daily-full-empty">No saved daily logs yet.</p>
+      )}
+      {entries.length > 0 && !daily.allLogsLoading && (
+        <p className="full-log-footer">
+          {daily.hasOlderLogs
+            ? `Showing ${entries.length} ${entries.length === 1 ? "day" : "days"}`
+            : `Showing all ${entries.length} ${entries.length === 1 ? "day" : "days"}`}
+        </p>
       )}
     </div>
   );

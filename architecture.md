@@ -256,13 +256,16 @@ supabase/
 
 ### Style files
 
-`src/main.jsx` imports shared/global styles in cascade order. `src/styles/`
-contains global tokens, auth, dashboard, shared components, theme/status,
-tracker, profile, and responsive-layout modules. Daily-log component styles
-live beside their components and are imported by `DailyTracker.jsx`.
+`src/main.jsx` imports base styles followed by the domain-specific modules in
+`src/styles/responsive/`. That directory owns viewport adaptations for shared
+layout, auth, dashboard, tracker, and profile screens. Activity charts and
+Daily Log components keep their `.responsive.css` files beside the component
+styles; container queries adapt those cards to their available width.
 
 When moving or splitting CSS, preserve source order: duplicate selectors and
-theme overrides can depend on later rules winning the cascade.
+theme overrides can depend on later rules winning the cascade. Prefer fluid
+grid tracks and wrapping controls over fixed widths so narrow screens do not
+force page-level horizontal scrolling.
 
 ## 6. Problem sheets and identifiers
 

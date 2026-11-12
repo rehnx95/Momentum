@@ -1,0 +1,69 @@
+@media (min-width: 768px) {
+  .app-header-inner,
+  .app-page {
+    padding-inline: 1.5rem;
+  }
+
+  .daily-basics {
+    grid-template-columns: 10rem 10rem minmax(0, 1fr);
+  }
+
+  .daily-total {
+    grid-column: auto;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .signout-label {
+    display: inline;
+    margin-left: 0.35rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tracker-grid,
+  .tracker-dashboard-shell .dashboard-main {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+
+  .tracker-grid {
+    align-items: start;
+  }
+
+  .tracker-dashboard-shell .dashboard-main {
+    align-items: start;
+  }
+}
+
+@media (hover: none) {
+  .popover-trash {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .stat-strip {
+    gap: 0.4rem;
+  }
+
+  .stat-icon {
+    display: none;
+  }
+
+  .stat-chip {
+    min-width: 0;
+    gap: 0.4rem;
+    padding: 0.6rem 0.55rem;
+  }
+
+  .stat-value {
+    font-size: 1.15rem;
+  }
+
+  .stat-value small {
+    font-size: 0.65rem;
+  }
+
+}

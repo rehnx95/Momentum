@@ -1,5 +1,6 @@
 import { RefreshCcw, Search, X } from "lucide-react";
 import AppHeader from "../../shared/components/AppHeader";
+import TrackerControls from "./components/TrackerControls";
 import SheetSwitcher from "../sheets/components/SheetSwitcher";
 import { StepRow } from "../problem-tracker/components/ProblemTree";
 
@@ -139,52 +140,15 @@ export default function TrackerDashboard({ context }) {
                 {sheetError}
               </p>
             )}
-            <div className="tracker-controls">
-              {["all", "done", "skipped", "todo"].map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setActiveFilter(type)}
-                  aria-pressed={activeFilter === type}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${chipActive(type)}`}
-                >
-                  {type === "all"
-                    ? "All"
-                    : type === "done"
-                      ? "Done"
-                      : type === "skipped"
-                        ? "Skipped"
-                        : "To do"}
-                </button>
-              ))}
-              <label className="ml-2 flex cursor-pointer select-none items-center gap-1.5 text-xs text-[#A1A1A1]">
-                <input
-                  type="checkbox"
-                  checked={hideSkipped}
-                  onChange={(event) => setHideSkipped(event.target.checked)}
-                  className="h-3.5 w-3.5 rounded border-[#262626] bg-[#0A0A0A] accent-[#EDEDED]"
-                />
-                Hide skipped
-              </label>
-              <span className="page-head-spacer" />
-              <div className="flex items-center gap-2 text-xs text-[#A1A1A1]">
-                <button
-                  type="button"
-                  onClick={expandAll}
-                  className="transition-colors hover:text-white"
-                >
-                  Expand all
-                </button>
-                <span>·</span>
-                <button
-                  type="button"
-                  onClick={collapseAll}
-                  className="transition-colors hover:text-white"
-                >
-                  Collapse all
-                </button>
-              </div>
-            </div>
+            <TrackerControls
+              activeFilter={activeFilter}
+              chipActive={chipActive}
+              collapseAll={collapseAll}
+              expandAll={expandAll}
+              hideSkipped={hideSkipped}
+              setActiveFilter={setActiveFilter}
+              setHideSkipped={setHideSkipped}
+            />
             <section
               className="mobile-progress-summary surface-card mb-4 rounded-xl border border-[#262626] bg-[#0A0A0A] p-4 lg:hidden"
               aria-label="Overall progress"

@@ -1,0 +1,194 @@
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 0;
+}
+
+body {
+  overflow-x: clip;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+.app-page,
+.dashboard-main,
+.dashboard-content,
+.profile-layout,
+.profile-main,
+.daily-tracker {
+  min-width: 0;
+}
+
+.profile-identity,
+.profile-identity a,
+.profile-identity p {
+  overflow-wrap: anywhere;
+}
+
+.popover {
+  min-width: min(16rem, calc(100vw - 1.5rem));
+  max-width: calc(100vw - 1.5rem);
+}
+
+@media (min-width: 768px) {
+  .momentum-brand {
+    left: 5rem;
+  }
+
+  .unified-header-actions {
+    right: 1.5rem;
+  }
+}
+
+@media (max-width: 1100px) {
+  .app-tooltip {
+    right: 0;
+    left: auto;
+    max-width: calc(100vw - 1rem);
+    transform: translateY(-0.15rem);
+    white-space: normal;
+  }
+
+  .app-tooltip-anchor:hover .app-tooltip,
+  .app-tooltip-anchor:has(:focus-visible) .app-tooltip {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 767px) {
+  .app-tooltip {
+    display: none;
+  }
+
+  .app-header {
+    backdrop-filter: none;
+  }
+
+  .app-header-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  .app-header .momentum-brand {
+    min-width: 0;
+    gap: 0.45rem;
+  }
+
+  .app-header .momentum-brand-logo {
+    width: 2.15rem;
+    height: 2.15rem;
+    flex-basis: 2.15rem;
+    border-radius: 0.65rem;
+  }
+
+  .app-header .momentum-brand-logo svg {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .app-header .momentum-brand-copy {
+    min-width: 0;
+    width: auto;
+    flex: 1 1 auto;
+  }
+
+  .app-header .momentum-brand-name {
+    overflow: hidden;
+    max-width: 100%;
+    font-size: 1.05rem;
+    letter-spacing: -0.025em;
+    text-overflow: ellipsis;
+  }
+
+  .app-header-actions {
+    gap: 0.1rem;
+  }
+
+  .app-nav {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 50;
+    justify-content: space-around;
+    gap: 0.1rem;
+    padding: 0.35rem 0.4rem calc(0.35rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--page-overlay);
+    backdrop-filter: blur(12px);
+  }
+
+  .app-nav button {
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    min-height: 2.75rem;
+    height: auto;
+    padding: 0.35rem 0.15rem;
+    font-size: 0.68rem;
+  }
+
+  .dashboard-shell,
+  .profile-shell {
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 640px) {
+  .momentum-brand {
+    left: 4rem;
+    width: 10rem;
+  }
+
+  .main-page-navigation {
+    order: 10;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .unified-header-inner > .main-page-navigation {
+    position: static;
+    transform: none;
+  }
+
+  .unified-header-actions {
+    position: static;
+    margin-left: auto;
+    transform: none;
+  }
+
+  .main-page-navigation button {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+    height: 2.5rem;
+    padding-inline: 0.25rem;
+    font-size: 0.68rem;
+  }
+
+  .dashboard-shell > main.app-page,
+  .profile-shell > main.app-page {
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+  }
+}
+
+@media (max-width: 420px) {
+  html {
+    font-size: 16px;
+  }
+
+  .app-dialog-actions {
+    flex-wrap: wrap;
+  }
+
+  .app-dialog-actions button {
+    flex: 1 1 8rem;
+  }
+}

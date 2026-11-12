@@ -46,17 +46,6 @@
   line-height: 1.25rem;
 }
 
-@media (min-width: 768px) {
-
-  .momentum-brand {
-    left: 5rem;
-  }
-
-  .unified-header-actions {
-    right: 1.5rem;
-  }
-}
-
 .momentum-brand > span:last-child {
   display: flex;
   min-height: 2.75rem;

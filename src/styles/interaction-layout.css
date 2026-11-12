@@ -121,17 +121,25 @@
   height: 8px;
 }
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
 ::-webkit-scrollbar-track {
   border-radius: 4px;
-  background: var(--surface);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   border-radius: 4px;
-  background: #404040;
+  background: transparent;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #525252;
+.scrollbars-visible {
+  scrollbar-color: var(--muted) transparent;
 }
 
+.scrollbars-visible::-webkit-scrollbar-thumb {
+  background: var(--muted);
+}

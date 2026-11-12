@@ -4,7 +4,9 @@ import useDailyLog from "../hooks/useDailyLog";
 import "./DailyTracker.css";
 import "./ActivityEditor.css";
 import "./DailyTrackerStatus.css";
+import "./DailyTrackerStatus.responsive.css";
 import "./FullLog.css";
+import "./FullLog.responsive.css";
 
 export default function DailyTracker({ user, sheets, activityLog, askConfirmation }) {
   const daily = useDailyLog(user, activityLog);
