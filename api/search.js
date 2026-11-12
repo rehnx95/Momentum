@@ -22,16 +22,14 @@ export default async function handler(req, res) {
   const token = authorization.match(/^Bearer\s+(.+)$/i)?.[1];
   if (!token) return res.status(401).json({ error: "Sign in to search users." });
 
-  const supabaseUrl =
-    process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey =
-    process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseAnonKey) {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const supabasePublishableKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if (!supabaseUrl || !supabasePublishableKey) {
     console.error("User search API is missing Supabase environment variables.");
     return res.status(500).json({ error: "User search is not configured." });
   }
 
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  const supabase = createClient(supabaseUrl, supabasePublishableKey, {
     global: {
       headers: { Authorization: `Bearer ${token}` },
     },

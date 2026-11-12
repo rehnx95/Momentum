@@ -110,8 +110,8 @@ npm run convert-sheet -- backend.txt
    `AppErrorBoundary`. A render exception is logged and shows a reload
    fallback.
 2. `src/shared/lib/supabase.js` reads `VITE_SUPABASE_URL` and
-   `VITE_SUPABASE_ANON_KEY`. Without these values, it reports that Supabase is
-   not configured instead of creating a working client.
+   `VITE_SUPABASE_PUBLISHABLE_KEY`. Without these values, it reports that
+   Supabase is not configured instead of creating a working client.
 3. `useAuthentication` checks for a locally cached account/profile to render
    a previously authenticated screen immediately, then asks Supabase Auth to
    restore the current session and subscribes to auth changes.
@@ -555,15 +555,15 @@ sheet loading will fail with a visible error.
 2. accepts GET only;
 3. validates a 3–48 character alphanumeric/hyphen prefix;
 4. extracts a bearer token and rejects missing tokens;
-5. creates a Supabase client using the public anon key and caller token;
+5. creates a Supabase client using the publishable key and caller token;
 6. validates the caller with Supabase Auth `getUser(token)`;
 7. invokes `search_public_profiles` as that authenticated caller;
 8. returns at most five `{ username, name }` matches.
 
-The endpoint does not use a service-role key. It reads `SUPABASE_URL` and
-`SUPABASE_ANON_KEY`, with `VITE_SUPABASE_URL` and
-`VITE_SUPABASE_ANON_KEY` as fallbacks. Environment values must be set in
-Vercel for production use.
+The endpoint does not use a service-role key. It reads the same
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` variables as the
+browser client. In Vercel, configure these variables for both the build and
+serverless function runtime.
 
 ## 12. Migration history
 
@@ -597,57 +597,39 @@ that depend on them are deployed.
 
 ## 13. Environment and configuration
 
-### Browser environment
+### Shared Supabase environment
 
 | Variable | Required for | Value |
 | --- | --- | --- |
-| `VITE_SUPABASE_URL` | Browser Supabase client | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Browser Supabase client | Public anon/publishable key |
+| `VITE_SUPABASE_URL` | Browser and `/api/search` | Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Browser and `/api/search` | Supabase publishable key |
 
-Vite embeds variables prefixed with `VITE_` into browser-visible output.
-Never put a service-role key or other secret in one.
-
-### Vercel function environment
-
-| Variable | Required for | Value |
-| --- | --- | --- |
-| `SUPABASE_URL` | `/api/search` | Same Supabase project URL |
-| `SUPABASE_ANON_KEY` | `/api/search` | Same public anon/publishable key |
-
-The function accepts the Vite-prefixed names as fallbacks, but dedicated
-serverless-function settings make the deployment configuration explicit.
-The search function validates the caller's token and does not require the
-service-role key.
-
-### Google OAuth
-
-1. Enable the Google provider in Supabase Auth.
-2. Register Supabase's OAuth callback URL with the Google OAuth application.
-3. Configure the Supabase Site URL and allowed local, preview, and production
-   redirect URLs.
-4. Keep provider client secrets in Supabase configuration.
+Vite only exposes `VITE_`-prefixed variables to browser code. These two values
+are public client configuration, so the browser and Vercel function use the
+same names. The publishable key does not bypass database access policies.
+Never use a Supabase secret or service-role key in either variable.
 
 ## 14. Local development and deployment
 
 ### Start locally
 
-1. Install Node.js and npm.
-2. Copy `.env.example` to `.env` in the repository root and replace the
-   placeholders with the Supabase project URL and public anon/publishable key.
-3. Apply the database migrations to the Supabase project.
-4. Configure Google OAuth if testing sign-in.
-5. Run:
+For the normal frontend development loop:
 
-   ```bash
-   npm install
-   npm run dev
-   ```
+```powershell
+Copy-Item .env.example .env
+npm install
+npm run dev
+```
 
-Vite uses port `5173` by default.
+Then edit `.env` and replace the two example values with the Supabase
+project URL and publishable key. Vite uses port `5173` by default. Keep the
+file local; it is ignored by Git. Vite reads both `.env` and `.env.local`;
+these instructions use `.env` because it is the simplest filename.
 
-`.env` is ignored by Git; `.env.example` contains placeholders only and is safe
-to commit. Never place a service-role key in `.env` under a `VITE_` name,
-because Vite exposes those variables to the browser.
+`npm run dev` serves the browser app. To also test Vercel serverless functions
+such as `/api/search`, run `npx vercel dev` instead. The first time, Vercel CLI
+may ask you to log in and link the local folder to a Vercel project.
+Use the normal Vite command unless you specifically need to test `/api/search`.
 
 ### Validate changes
 
@@ -663,23 +645,86 @@ end-to-end test command in `package.json`.
 
 ### Deploy to Vercel
 
-1. Use the repository root as the project root.
-2. Set build command to `npm run build`.
-3. Set output directory to `dist`.
-4. Configure the browser Supabase variables and serverless search variables.
-5. Configure Google and Supabase redirect URLs for the deployment origin.
-6. Apply outstanding database migrations.
-7. Deploy, then test sign-in, onboarding, progress sync, sheet upload/delete,
-   backup import/export, Daily Log, people search, public profile, and direct
-   URL refresh.
+Follow this once for a new Supabase project, then use the short redeploy steps
+for future code changes.
 
-Do not expose a Supabase service-role key in the browser bundle or repository.
+#### 1. Prepare Supabase
+
+1. Reuse the existing Supabase project if you want to keep current accounts
+   and data. Create a new project only if you intend to start with a separate,
+   empty database.
+2. Copy the **Project URL** and **Publishable key** from the project's API
+   settings.
+3. For a brand-new Supabase project, run every `.sql` file from
+   `supabase/migrations/` in **SQL Editor**, in filename order, one at a time.
+   Do not rerun migrations that are already applied.
+4. Never use a Supabase secret or service-role key in the website.
+
+#### 2. Deploy the app to Vercel
+
+1. In Vercel, choose **Add New → Project** and import this GitHub repository.
+2. Choose **Framework Preset: Vite** and keep the defaults:
+   - Build command: `npm run build`
+   - Output directory: `dist`
+   - Install command: `npm install`
+3. Before deploying, add these under **Project Settings → Environment
+   Variables** for Production and Preview:
+
+   | Name | Value |
+   | --- | --- |
+   | `VITE_SUPABASE_URL` | Supabase Project URL |
+   | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase Publishable key |
+
+4. Click **Deploy**. Copy the resulting production URL and make sure it exactly
+   matches the production URL you will add to Supabase and Google.
+
+#### 3. Configure Google sign-in
+
+1. In Google Cloud Console, create/select a project and configure the OAuth
+   consent screen. If the app is in Testing mode, add your Google account as a
+   test user.
+2. Create an OAuth client with application type **Web application**.
+3. Add the exact production Momentum origin from Vercel and the local origin
+   `http://localhost:5173` to **Authorized JavaScript origins** (origins only,
+   with no path).
+4. In Supabase **Authentication → Providers → Google**, copy the displayed
+   callback URL. It has this form:
+   `https://<project-ref>.supabase.co/auth/v1/callback`
+5. Add that exact callback URL to Google's **Authorized redirect URIs**. Copy
+   Google's Client ID and Client Secret into the Supabase Google provider
+   settings and enable the provider.
+6. In Supabase **Authentication → URL Configuration**, set **Site URL** to
+   the production Momentum URL. Add
+   `http://localhost:5173/**` and the production URL with `/**` to
+   **Redirect URLs**. Add any Vercel Preview URLs you plan to use as well.
+
+Google sends the OAuth response back to Supabase; Supabase then returns the
+user to Momentum. While the Google consent screen is in Testing mode, only
+listed test users can sign in. Publish/configure the consent screen before
+opening sign-in to other users. Do not put Google's Client Secret in Vercel
+or in `.env`.
+
+#### 4. Verify it works
+
+Open the deployed site and test Google sign-in. Then confirm onboarding,
+loading sheets, saving progress, Daily Log, and people search. If sign-in
+fails, check that the Google callback is the Supabase callback URL and that
+the app URL is in Supabase's allowed Redirect URLs.
+
+For later code changes, push to the connected GitHub branch; Vercel builds and
+deploys it automatically. Redeploy manually after changing Vercel environment
+variables, since changes only apply to new deployments.
+
+The Supabase publishable key is intended for browser use; account access is
+restricted by the signed-in session and database policies. Never expose a
+Supabase secret or service-role key in Vercel browser variables or the
+repository.
 
 ## 15. Troubleshooting
 
 | Symptom | Checks |
 | --- | --- |
-| “Supabase is not configured” | Set both `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`; restart the dev server. |
+| “Supabase is not configured” | Set both `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`; restart the dev server. |
 | Google sign-in/callback fails | Check provider setup, Supabase callback, Site URL, and allowed redirects. |
 | Owner profile fails to load | Check browser console/network response and confirm profile migrations are applied. |
 | Built-in or uploaded sheets fail | Confirm sheet tables/RPC migrations and authenticated owner policies exist. |

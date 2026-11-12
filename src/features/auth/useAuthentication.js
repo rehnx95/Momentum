@@ -52,7 +52,7 @@ export default function useAuthentication() {
 
     if (!isSupabaseConfigured) {
       setAuthError(
-        "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then restart the app.",
+        "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY, then restart the app.",
       );
       setAppState(AppState.UNAUTHENTICATED);
       return undefined;
