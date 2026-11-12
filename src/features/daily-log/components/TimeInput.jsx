@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./TimeInput.css";
 
 function getSegments(value) {
   const match = /^(\d{2}):(\d{2})$/.exec(String(value || "").slice(0, 5));

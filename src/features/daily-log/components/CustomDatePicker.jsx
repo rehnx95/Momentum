@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { getLocalDateKey } from "../../../shared/utils/date";
 import Tooltip from "../../../shared/components/Tooltip";
+import "./CustomDatePicker.css";
 
 function parseDateKey(value) {
   const [year, month, day] = value.split("-").map(Number);
