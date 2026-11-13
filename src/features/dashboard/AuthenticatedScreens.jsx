@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import AppHeader from "../../shared/components/AppHeader";
-import { useDocumentTitle } from "../../shared/hooks/useDocumentTitle";
 import PeopleSearchPage from "../people/PeopleSearchPage";
 import PublicProfilePage from "../people/PublicProfilePage";
 import ProfilePage from "../profile/pages/ProfilePage";
@@ -102,20 +101,6 @@ export default function AuthenticatedScreens({ context }) {
     yearlyActiveDays,
   } = context;
 
-  const pageTitle = peopleSearchPage
-    ? "People · Momentum"
-    : selectedPublicUsername
-      ? `${selectedPublicUsername} · Momentum`
-      : showSettings
-        ? "Profile · Momentum"
-        : dailyLogPage
-          ? "Daily Log · Momentum"
-          : showProfile
-            ? "Profile · Momentum"
-            : "Tracker · Momentum";
-
-  useDocumentTitle(pageTitle);
-
   if (peopleSearchPage) {
     return (
       <>
@@ -183,7 +168,10 @@ export default function AuthenticatedScreens({ context }) {
   if (dailyLogPage) {
     return (
       <>
-        <div className="dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
+        <div
+          className="dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300"
+          data-theme={theme === "dark" ? undefined : theme}
+        >
           <AppHeader active="daily-log" {...headerProps} />
           <main className="app-page">
             <Suspense

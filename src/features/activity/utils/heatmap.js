@@ -49,7 +49,7 @@ export function buildHeatmap({
 
   const gridStart = addDays(start, -start.getDay());
   const columns = Math.floor(Math.round((end - gridStart) / DAY) / 7) + 1;
-  const visibleFrom = start;
+  const visibleFrom = year == null ? gridStart : start;
 
   const weeks = [];
   let total = 0;

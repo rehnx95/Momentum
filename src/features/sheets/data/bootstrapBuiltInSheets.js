@@ -1,4 +1,3 @@
-import { getItem, setItem } from "../../../shared/lib/safeStorage";
 import { supabase } from "../../../shared/lib/supabase";
 
 const sheetModules = import.meta.glob("./*.json", { import: "default" });
@@ -46,7 +45,7 @@ export async function bootstrapBuiltInSheets(userId, isActive = () => true) {
   const bootstrapKey = `momentum:builtins:${userId}`;
   let isBootstrapped = false;
   try {
-    isBootstrapped = getItem(bootstrapKey) === manifestVersion;
+    isBootstrapped = localStorage.getItem(bootstrapKey) === manifestVersion;
   } catch {
     isBootstrapped = false;
   }
@@ -59,8 +58,10 @@ export async function bootstrapBuiltInSheets(userId, isActive = () => true) {
       })),
     });
     if (error) throw error;
-    if (!setItem(bootstrapKey, manifestVersion)) {
-      console.warn("Could not cache built-in sheet setup locally.");
+    try {
+      localStorage.setItem(bootstrapKey, manifestVersion);
+    } catch (error) {
+      console.warn("Could not cache built-in sheet setup locally:", error);
     }
   }
   return defaultSheetId;

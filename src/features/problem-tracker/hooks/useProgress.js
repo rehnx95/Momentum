@@ -18,6 +18,7 @@ export function useProgress(user) {
   const activityRef = useRef(activityLog);
   const [loading, setLoading] = useState(Boolean(user));
   const [error, setError] = useState('');
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   const writeQueue = useRef(Promise.resolve());
   const cacheProgress = useCallback((userId, nextProgress, nextActivity, nextCompletedOn, nextCompletedAt) => {
     writeUserDataCache(userId, 'progress', {
@@ -140,6 +141,15 @@ export function useProgress(user) {
       active = false;
     };
   }, [user, cacheProgress, replaceActivity, replaceCompletedAt, replaceCompletedOn, replaceProgress]);
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme);
+    if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }, [theme]);
 
   const persistActivity = async (userId, date) => {
     const count = activityRef.current[date] || 0;
@@ -351,6 +361,8 @@ export function useProgress(user) {
     update,
     bulkUpdate,
     getState,
+    theme,
+    setTheme,
     reset,
   };
 }

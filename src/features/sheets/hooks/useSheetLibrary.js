@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getItem, removeItem, setItem } from "../../../shared/lib/safeStorage";
 import { readUserDataCache, writeUserDataCache } from "../../../shared/lib/userDataCache";
 import { supabase } from "../../../shared/lib/supabase";
 import {
@@ -23,7 +22,7 @@ export default function useSheetLibrary(user, askConfirmation) {
   const [sheetError, setSheetError] = useState("");
   const uploadSheetInput = useRef(null);
   const savedSheetIdRef = useRef(
-    getItem("momentum:learning-active-sheet"),
+    localStorage.getItem("momentum:learning-active-sheet"),
   );
   const [selectedSheetId, setSelectedSheetId] = useState(
     () => savedSheetIdRef.current || "",
@@ -127,7 +126,7 @@ export default function useSheetLibrary(user, askConfirmation) {
 
   useEffect(() => {
     if (selectedSheet) {
-      setItem("momentum:learning-active-sheet", selectedSheet.id);
+      localStorage.setItem("momentum:learning-active-sheet", selectedSheet.id);
     }
   }, [selectedSheet]);
 
@@ -177,7 +176,7 @@ export default function useSheetLibrary(user, askConfirmation) {
       };
       setCustomSheets((current) => [...current, nextSheet]);
       setSelectedSheetId(nextSheet.id);
-      setItem("momentum:learning-active-sheet", nextSheet.id);
+      localStorage.setItem("momentum:learning-active-sheet", nextSheet.id);
     } catch (error) {
       console.error("Failed to upload sheet:", error);
       setSheetError(
@@ -232,9 +231,9 @@ export default function useSheetLibrary(user, askConfirmation) {
         );
         setSelectedSheetId(nextSheet?.id || "");
         if (nextSheet) {
-          setItem("momentum:learning-active-sheet", nextSheet.id);
+          localStorage.setItem("momentum:learning-active-sheet", nextSheet.id);
         } else {
-          removeItem("momentum:learning-active-sheet");
+          localStorage.removeItem("momentum:learning-active-sheet");
         }
       }
     } catch (error) {

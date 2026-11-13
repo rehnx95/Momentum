@@ -2,12 +2,12 @@ import {
   ClipboardList,
   LayoutList,
   LogOut,
+  Moon,
+  Sun,
   User,
   Users,
 } from "lucide-react";
-import { THEMES } from "../hooks/useTheme";
 import MomentumBrand from "./MomentumBrand";
-import ThemeMenu from "./ThemeMenu";
 import Tooltip from "./Tooltip";
 
 const NAV = [
@@ -45,7 +45,16 @@ export default function AppHeader({
         </nav>
         <div className="app-header-actions">
           {testDataTools}
-          <ThemeMenu theme={theme} setTheme={setTheme} themes={THEMES} />
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={() =>
+              setTheme((current) => (current === "dark" ? "light" : "dark"))
+            }
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <Tooltip label="Sign out">
             <button
               type="button"

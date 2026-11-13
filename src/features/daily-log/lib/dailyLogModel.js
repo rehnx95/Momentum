@@ -1,12 +1,10 @@
-import { getItem, setItem } from "../../../shared/lib/safeStorage";
-
 const TIMER_STORAGE = (userId) => `momentum:running-timer:${userId}`;
 const VIEW_MODE_STORAGE = (userId) => `momentum:daily-log-view:${userId}`;
 const DAILY_LOG_VIEW_MODES = new Set(["daily", "full", "trends"]);
 
 export function getDailyLogViewMode(userId) {
   try {
-    const storedMode = getItem(VIEW_MODE_STORAGE(userId));
+    const storedMode = localStorage.getItem(VIEW_MODE_STORAGE(userId));
     return DAILY_LOG_VIEW_MODES.has(storedMode) ? storedMode : "daily";
   } catch (error) {
     console.warn("Could not read the Daily Log view preference:", error);
@@ -17,7 +15,8 @@ export function getDailyLogViewMode(userId) {
 export function setDailyLogViewMode(userId, mode) {
   if (!DAILY_LOG_VIEW_MODES.has(mode)) return false;
   try {
-    return setItem(VIEW_MODE_STORAGE(userId), mode);
+    localStorage.setItem(VIEW_MODE_STORAGE(userId), mode);
+    return true;
   } catch (error) {
     console.warn("Could not save the Daily Log view preference:", error);
     return false;
@@ -69,7 +68,7 @@ export function normalizeLog(data, date) {
 
 export function timerStorageGet(userId) {
   try {
-    const value = getItem(TIMER_STORAGE(userId));
+    const value = localStorage.getItem(TIMER_STORAGE(userId));
     return value ? JSON.parse(value) : null;
   } catch (error) {
     console.error("Could not read the running timer:", error);

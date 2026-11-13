@@ -20,7 +20,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
 
   useEffect(() => {
     const username = form.username.trim().toLowerCase();
-    if (!/^(?=.*[a-z0-9])[a-z0-9-]{3,48}$/.test(username)) {
+    if (!/^(?=.*[a-z0-9])[a-z0-9-]{3,30}$/.test(username)) {
       setUsernameAvailability('idle');
       return undefined;
     }
@@ -76,8 +76,8 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
       setErrorMessage('Name is required.');
       return;
     }
-    if (!/^(?=.*[a-z0-9])[a-z0-9-]{3,48}$/.test(values.username)) {
-      setErrorMessage('Username must be 3–48 characters using lowercase letters, numbers, and hyphens.');
+    if (!/^(?=.*[a-z0-9])[a-z0-9-]{3,30}$/.test(values.username)) {
+      setErrorMessage('Username must be 3–30 characters using lowercase letters, numbers, and hyphens.');
       return;
     }
     if (values.website) {
@@ -150,7 +150,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
 
           {[
             { name: 'name', label: 'Name', type: 'text', required: true, maxLength: 100 },
-            { name: 'username', label: 'Username', type: 'text', required: true, maxLength: 48 },
+            { name: 'username', label: 'Username', type: 'text', required: true, maxLength: 30 },
             { name: 'location', label: 'Location', type: 'text', maxLength: 100 },
             { name: 'website', label: 'Website / URL', type: 'url', placeholder: 'https://example.com', maxLength: 2048 },
           ].map(field => (
@@ -171,7 +171,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
               />
               {field.name === 'username' && (
                 <div className="mt-1 space-y-1">
-                  <p className="text-xs text-[#A1A1A1]">3–48 characters; lowercase letters, numbers, and hyphens.</p>
+                  <p className="text-xs text-[#A1A1A1]">3–30 characters; lowercase letters, numbers, and hyphens.</p>
                   {usernameAvailability === 'checking' && (
                     <p role="status" className="text-xs text-[#A1A1A1]">Checking username…</p>
                   )}

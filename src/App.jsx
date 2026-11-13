@@ -44,13 +44,8 @@ function App() {
   if (appState === AppState.LOADING) {
     return (
       <div className="app-loading-screen" role="status" aria-live="polite">
-        <p className="app-loading-label">Loading your account…</p>
-        <div className="app-loading-skeleton" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-        </div>
+        <span className="app-loading-spinner" aria-hidden="true" />
+        <p>Loading your account…</p>
       </div>
     );
   }

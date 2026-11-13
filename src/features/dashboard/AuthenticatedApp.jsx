@@ -7,7 +7,6 @@ import {
   useState,
 } from "react";
 import AppDialog from "../../shared/components/AppDialog";
-import { useTheme } from "../../shared/hooks/useTheme";
 import { getLocalDateKey } from "../../shared/utils/date";
 import { useProgress } from "../problem-tracker/hooks/useProgress";
 import useProfileMetrics from "../profile/hooks/useProfileMetrics";
@@ -60,7 +59,6 @@ export default function AuthenticatedApp({
     handleRemoveSheet: removeSheet,
     downloadSampleFormat,
   } = useSheetLibrary(user, askConfirmation);
-  const { theme, setTheme } = useTheme();
   const {
     progress,
     activityLog,
@@ -71,6 +69,8 @@ export default function AuthenticatedApp({
     update,
     bulkUpdate,
     getState,
+    theme,
+    setTheme,
     reset,
   } = useProgress(sheetBootstrapComplete ? user : null);
   const {
