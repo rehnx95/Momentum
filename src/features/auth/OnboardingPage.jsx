@@ -65,6 +65,7 @@ export default function OnboardingPage({
 
   const validateUsername = (username) => {
     if (username.length < 3) return "Username must be at least 3 characters";
+    if (username.length > 48) return "Username must be 48 characters or fewer";
     if (username.includes(" ")) return "Username cannot contain spaces";
     if (!/^(?=.*[a-z0-9])[a-z0-9-]+$/.test(username))
       return "Username must contain a letter or number and use only lowercase letters, numbers, and hyphens";

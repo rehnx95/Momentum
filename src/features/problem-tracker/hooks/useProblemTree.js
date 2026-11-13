@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getItem, setItem } from "../../../shared/lib/safeStorage";
 
 export default function useProblemTree({ data, progress, getState, update }) {
-  const [search, setSearch] = useState(
-    () => localStorage.getItem("momentum:learning-search") || "",
-  );
+  const [search, setSearch] = useState(() => getItem("momentum:learning-search", ""));
   const [expandedSteps, setExpandedSteps] = useState(() => {
     try {
-      const stored = localStorage.getItem("momentum:learning-expanded-steps");
+      const stored = getItem("momentum:learning-expanded-steps");
       return stored ? new Set(JSON.parse(stored)) : new Set();
     } catch {
       return new Set();
@@ -14,43 +13,29 @@ export default function useProblemTree({ data, progress, getState, update }) {
   });
   const [expandedSubs, setExpandedSubs] = useState(() => {
     try {
-      const stored = localStorage.getItem("momentum:learning-expanded-subs");
+      const stored = getItem("momentum:learning-expanded-subs");
       return stored ? new Set(JSON.parse(stored)) : new Set();
     } catch {
       return new Set();
     }
   });
-  const [hideSkipped, setHideSkipped] = useState(() => {
-    try {
-      return localStorage.getItem("momentum:learning-hide-skipped") === "true";
-    } catch {
-      return false;
-    }
-  });
-  const [activeFilter, setActiveFilter] = useState(
-    () => localStorage.getItem("momentum:learning-filter") || "all",
-  );
+  const [hideSkipped, setHideSkipped] = useState(() => getItem("momentum:learning-hide-skipped") === "true");
+  const [activeFilter, setActiveFilter] = useState(() => getItem("momentum:learning-filter", "all"));
 
   useEffect(() => {
-    localStorage.setItem(
-      "momentum:learning-expanded-steps",
-      JSON.stringify([...expandedSteps]),
-    );
+    setItem("momentum:learning-expanded-steps", JSON.stringify([...expandedSteps]));
   }, [expandedSteps]);
   useEffect(() => {
-    localStorage.setItem(
-      "momentum:learning-expanded-subs",
-      JSON.stringify([...expandedSubs]),
-    );
+    setItem("momentum:learning-expanded-subs", JSON.stringify([...expandedSubs]));
   }, [expandedSubs]);
   useEffect(() => {
-    localStorage.setItem("momentum:learning-hide-skipped", String(hideSkipped));
+    setItem("momentum:learning-hide-skipped", String(hideSkipped));
   }, [hideSkipped]);
   useEffect(() => {
-    localStorage.setItem("momentum:learning-filter", activeFilter);
+    setItem("momentum:learning-filter", activeFilter);
   }, [activeFilter]);
   useEffect(() => {
-    localStorage.setItem("momentum:learning-search", search);
+    setItem("momentum:learning-search", search);
   }, [search]);
 
   const totalProblems = data.steps.reduce(
@@ -74,17 +59,24 @@ export default function useProblemTree({ data, progress, getState, update }) {
   ).length;
   const todoCount = totalProblems - doneCount - skippedCount;
 
+  const problemMap = useMemo(
+    () => new Map(
+      data.steps.flatMap((step) =>
+        step.subsections.flatMap((subsection) =>
+          subsection.problems.map((problem) => [problem.id, problem]),
+        ),
+      ),
+    ),
+    [data],
+  );
+
   const progressState = useCallback(
     (id) => {
-      const problem = data.steps
-        .flatMap((step) =>
-          step.subsections.flatMap((subsection) => subsection.problems),
-        )
-        .find((item) => item.id === id);
+      const problem = problemMap.get(id);
       if (!problem) return "todo";
       return getState(id, problem.defaultSkip);
     },
-    [data, getState],
+    [getState, problemMap],
   );
 
   const handleToggle = useCallback(
@@ -158,8 +150,8 @@ export default function useProblemTree({ data, progress, getState, update }) {
 
   const chipActive = (type) =>
     activeFilter === type
-      ? "bg-[#EDEDED] text-black"
-      : "bg-[#0A0A0A] text-[#A1A1A1] hover:text-white";
+      ? "bg-accent-soft text-accent"
+      : "bg-surface text-muted hover:text-text";
 
   return {
     search,

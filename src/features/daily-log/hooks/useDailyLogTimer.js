@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { removeItem, setItem } from "../../../shared/lib/safeStorage";
 import { supabase } from "../../../shared/lib/supabase";
 import {
   invalidateDailyLogHistoryCache,
@@ -31,7 +32,7 @@ export default function useDailyLogTimer({
       startedAt: new Date().toISOString(),
     };
     try {
-      localStorage.setItem(timerStorageKey(userId), JSON.stringify(timer));
+      setItem(timerStorageKey(userId), JSON.stringify(timer));
       setRunningTimer(timer);
       setTimerNow(Date.now());
       return true;
@@ -145,7 +146,7 @@ export default function useDailyLogTimer({
           return false;
         }
       }
-      localStorage.removeItem(timerStorageKey(userId));
+      removeItem(timerStorageKey(userId));
       setRunningTimer(null);
       return true;
     } catch (error) {

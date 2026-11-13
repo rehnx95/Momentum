@@ -40,7 +40,6 @@ export default function TrackerDashboard({ context }) {
     sheetProblems,
     sheets,
     skippedCount,
-    theme,
     todoCount,
     totalProblems,
     toggleStep,
@@ -51,10 +50,7 @@ export default function TrackerDashboard({ context }) {
 
   return (
     <>
-      <div
-        className="dashboard-shell tracker-dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300"
-        data-theme={theme === "light" ? "light" : undefined}
-      >
+      <div className="dashboard-shell tracker-dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
         <AppHeader active="tracker" {...headerProps} />
         <main className="dashboard-main app-page min-h-0">
           {progressError && (

@@ -1,3 +1,5 @@
+import { getItem, removeItem, setItem } from "./safeStorage";
+
 const CACHE_PREFIX = "momentum:user-data:";
 const MAX_CACHE_SIZE = 2_500_000;
 
@@ -7,7 +9,7 @@ function cacheKey(userId, section) {
 
 export function readUserDataCache(userId, section) {
   try {
-    const stored = localStorage.getItem(cacheKey(userId, section));
+    const stored = getItem(cacheKey(userId, section));
     return stored ? JSON.parse(stored) : null;
   } catch {
     return null;
@@ -19,10 +21,10 @@ export function writeUserDataCache(userId, section, data) {
     const serialized = JSON.stringify(data);
     const key = cacheKey(userId, section);
     if (serialized.length > MAX_CACHE_SIZE) {
-      localStorage.removeItem(key);
+      removeItem(key);
       return;
     }
-    localStorage.setItem(key, serialized);
+    setItem(key, serialized);
   } catch (error) {
     console.warn(`Could not cache ${section} data locally:`, error);
   }

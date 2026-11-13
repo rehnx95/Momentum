@@ -4,51 +4,6 @@
 
 :root {
   color-scheme: dark;
-  --page: #000000;
-  --surface: #0a0a0a;
-  --surface-raised: #111111;
-  --log-day-surface: #0e0e0e;
-  --log-control-surface: #1a1a1a;
-  --surface-hover: #1f1f1f;
-  --border: #303030;
-  --border-strong: #505050;
-  --text: #f5f5f5;
-  --muted: #b8b8b8;
-  --page-overlay: rgba(0, 0, 0, 0.96);
-  --shadow: rgba(0, 0, 0, 0.16);
-  --accent: #ededed;
-  --accent-hover: #ffffff;
-  --positive: #d4d4d4;
-  --warning: #a3a3a3;
-  --study-accent: #a1a1a1;
-  --sleep-chart-color: #e8a34c;
-  --study-chart-color: #df7468;
-  --progress-fill: #ffffff;
-  --font-sans: Inter, "Segoe UI", system-ui, sans-serif;
-}
-
-:root[data-theme="light"] {
-  color-scheme: light;
-  --page: #f5f5f5;
-  --surface: #ffffff;
-  --surface-raised: #fafafa;
-  --log-day-surface: var(--surface);
-  --log-control-surface: var(--surface-hover);
-  --surface-hover: #f0f0f0;
-  --border: #dedede;
-  --border-strong: #aaaaaa;
-  --text: #111111;
-  --muted: #4a4a4a;
-  --page-overlay: rgba(245, 245, 245, 0.92);
-  --shadow: rgba(0, 0, 0, 0.08);
-  --accent: #171717;
-  --accent-hover: #000000;
-  --positive: #525252;
-  --warning: #737373;
-  --study-accent: #737373;
-  --sleep-chart-color: #a85f0b;
-  --study-chart-color: #b5473a;
-  --progress-fill: #000000;
 }
 
 * {
@@ -102,14 +57,74 @@ button {
   color: inherit;
 }
 
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-[tabindex]:focus-visible {
-  outline: 2px solid var(--accent);
+:focus-visible {
+  outline: var(--focus-ring);
   outline-offset: 2px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.5rem;
+  padding: 0 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  transition: background-color var(--ease), border-color var(--ease), color var(--ease);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--muted);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+}
+
+.alert {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 0.75rem 0.85rem;
+  background: var(--surface-hover);
 }
 
 .auth-shell,

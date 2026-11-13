@@ -8,9 +8,26 @@
       name="description"
       content="Momentum brings learning tracks, daily routines, and personal progress together. Log your activities, build consistent habits, and review your progress over time."
     />
+    <meta property="og:title" content="Momentum" />
+    <meta property="og:description" content="Learning tracks, daily routines, and progress tracking in one place." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("theme");
+          if (["dark", "light", "cocoa"].indexOf(t) < 0) {
+            t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (error) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
+    <meta name="theme-color" content="#09090B" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body class="bg-[#000000] text-[#EDEDED]">
     <div id="root"></div>

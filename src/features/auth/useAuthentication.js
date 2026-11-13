@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getItem, removeItem, setItem } from "../../shared/lib/safeStorage";
 import { supabase, isSupabaseConfigured } from "../../shared/lib/supabase";
 
 export const AppState = {
@@ -12,7 +13,7 @@ const ACCOUNT_CACHE_KEY = "momentum:account-cache";
 
 function readCachedAccount() {
   try {
-    const cached = JSON.parse(localStorage.getItem(ACCOUNT_CACHE_KEY) || "null");
+    const cached = JSON.parse(getItem(ACCOUNT_CACHE_KEY, "null"));
     if (
       !cached?.user?.id ||
       !cached.profile?.id ||
@@ -68,7 +69,7 @@ export default function useAuthentication() {
       setAuthError("");
       setUser(session?.user ?? null);
       if (!session) {
-        localStorage.removeItem(ACCOUNT_CACHE_KEY);
+        removeItem(ACCOUNT_CACHE_KEY);
         setProfile(null);
         setAppState(AppState.UNAUTHENTICATED);
       }
@@ -81,7 +82,7 @@ export default function useAuthentication() {
         if (error) throw error;
         setUser(session?.user ?? null);
         if (!session) {
-          localStorage.removeItem(ACCOUNT_CACHE_KEY);
+          removeItem(ACCOUNT_CACHE_KEY);
           setProfile(null);
           setAppState(AppState.UNAUTHENTICATED);
         }
@@ -116,7 +117,7 @@ export default function useAuthentication() {
         if (!active) return;
         if (error) throw error;
         setProfile(profileData);
-        if (!profileData) localStorage.removeItem(ACCOUNT_CACHE_KEY);
+        if (!profileData) removeItem(ACCOUNT_CACHE_KEY);
         setAppState(
           profileData?.onboarding_completed
             ? AppState.AUTHENTICATED
@@ -139,7 +140,7 @@ export default function useAuthentication() {
 
   useEffect(() => {
     if (!user || profile?.id !== user.id) return;
-    localStorage.setItem(
+    setItem(
       ACCOUNT_CACHE_KEY,
       JSON.stringify({
         user: {
@@ -179,7 +180,7 @@ export default function useAuthentication() {
       if (!supabase) return;
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      localStorage.removeItem(ACCOUNT_CACHE_KEY);
+      removeItem(ACCOUNT_CACHE_KEY);
     } catch (error) {
       console.error("Sign out error:", error);
       setAuthError("Could not sign out. Please try again.");
