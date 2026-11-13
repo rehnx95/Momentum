@@ -1,5 +1,5 @@
 .section-kicker {
-  color: #a1a1a1;
+  color: var(--muted);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -80,7 +80,7 @@
 
 .dashboard-shell input::placeholder,
 .profile-settings-shell input::placeholder {
-  color: #777;
+  color: var(--muted);
 }
 
 .surface-card,

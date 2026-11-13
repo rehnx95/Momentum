@@ -92,6 +92,20 @@ button {
   color: var(--text);
 }
 
+.btn-secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.btn-danger {
+  border-color: color-mix(in srgb, var(--danger) 42%, var(--border-strong));
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+  color: var(--text);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 14%, var(--surface-hover));
+}
+
 .btn-ghost {
   display: inline-flex;
   align-items: center;

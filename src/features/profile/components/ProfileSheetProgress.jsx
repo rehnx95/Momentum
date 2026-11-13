@@ -10,13 +10,13 @@ export default function ProfileSheetProgress({
 }) {
   return (
     <section
-      className="profile-sheet-progress surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
+      className="profile-sheet-progress surface-card rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6"
       aria-labelledby="profile-sheet-progress"
     >
       <header className="profile-progress-heading">
         <h2
           id="profile-sheet-progress"
-          className="text-lg font-semibold text-[#EDEDED]"
+          className="text-lg font-semibold text-[var(--text)]"
         >
           Sheet progress
         </h2>
@@ -44,7 +44,7 @@ export default function ProfileSheetProgress({
           return (
             <div className="profile-sheet-tile" key={sheet.id}>
               <div className="profile-sheet-tile-heading">
-                <span className="truncate font-medium text-[#EDEDED]">
+                <span className="truncate font-medium text-[var(--text)]">
                   {sheet.title}
                 </span>
                 <span className="profile-sheet-percent">{percentage}%</span>
