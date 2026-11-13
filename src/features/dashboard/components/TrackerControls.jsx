@@ -1,5 +1,6 @@
 import "./TrackerControls.css";
-import { EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import Tooltip from "../../../shared/components/Tooltip";
 
 const FILTER_OPTIONS = [
   { value: "all", label: "All" },
@@ -35,20 +36,26 @@ export default function TrackerControls({
             {label}
           </button>
         ))}
-        <button
-          type="button"
-          onClick={() => setHideSkipped((hidden) => !hidden)}
-          aria-pressed={hideSkipped}
-          aria-label="Skip"
-          className={`tracker-skip-toggle flex items-center justify-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-            hideSkipped
-              ? "bg-[#EDEDED] text-black"
-              : "bg-[#0A0A0A] text-[#A1A1A1] hover:text-white"
-          }`}
-        >
-          <EyeOff size={15} aria-hidden="true" />
-          <span>Skip</span>
-        </button>
+        <Tooltip label={hideSkipped ? "Show skipped problems" : "Hide skipped problems"}>
+          <button
+            type="button"
+            onClick={() => setHideSkipped((hidden) => !hidden)}
+            aria-pressed={hideSkipped}
+            aria-label={hideSkipped ? "Show skipped problems" : "Hide skipped problems"}
+            className={`tracker-skip-toggle flex items-center justify-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+              hideSkipped
+                ? "bg-[#EDEDED] text-black"
+                : "bg-[#0A0A0A] text-[#A1A1A1] hover:text-white"
+            }`}
+          >
+            {hideSkipped ? (
+              <EyeOff size={15} aria-hidden="true" />
+            ) : (
+              <Eye size={15} aria-hidden="true" />
+            )}
+            <span>Skip</span>
+          </button>
+        </Tooltip>
       </div>
       <span className="tracker-controls-spacer" aria-hidden="true" />
       <div
