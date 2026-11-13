@@ -1,6 +1,6 @@
 @media (max-width: 520px) {
   .hm-card {
-    padding: 0.75rem;
+    padding: 0.65rem 0.45rem;
   }
 
   .hm-header {
@@ -30,7 +30,7 @@
 
 @media (max-width: 360px) {
   .hm-card {
-    padding: 0.65rem;
+    padding: 0.55rem 0.35rem;
   }
 
   .hm-foot {

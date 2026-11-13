@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { toMinutes } from "../../../shared/utils/time";
 
 const TICKS = [
@@ -23,6 +24,7 @@ function timeLabel(value) {
 }
 
 export default function FullLogTimeline({ row, activities }) {
+  const [tooltip, setTooltip] = useState(null);
   const segments = [];
   const sleepSlot = { start: row.sleep_time, end: row.wake_time };
 
@@ -53,9 +55,32 @@ export default function FullLogTimeline({ row, activities }) {
   const description = segments.length
     ? segments.map((segment) => segment.label).join("; ")
     : "No sleep or study periods recorded";
+  const showTooltip = (event) => {
+    const target = event.target.closest?.("[data-tip]");
+    if (!target) {
+      setTooltip(null);
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+    const below = rect.top < 48;
+    setTooltip({
+      text: target.dataset.tip,
+      x: Math.max(12, Math.min(rect.left + rect.width / 2, window.innerWidth - 12)),
+      y: below ? rect.bottom + 8 : rect.top - 8,
+      below,
+    });
+  };
 
   return (
-    <div className="full-log-timeline">
+    <div
+      className="full-log-timeline"
+      onMouseOver={showTooltip}
+      onMouseLeave={() => setTooltip(null)}
+      onFocusCapture={showTooltip}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setTooltip(null);
+      }}
+    >
       <div className="full-log-timeline-axis" aria-hidden="true">
         {TICKS.map(({ minute, label }) => (
           <span
@@ -69,21 +94,33 @@ export default function FullLogTimeline({ row, activities }) {
       </div>
       <div
         className="full-log-timeline-track"
-        role="img"
+        role="group"
         aria-label={description}
       >
         {segments.map((segment) => (
           <span
             key={segment.key}
             className={`full-log-timeline-segment ${segment.kind}`}
+            role="img"
+            data-tip={segment.label}
+            aria-label={segment.label}
+            tabIndex={0}
             style={{
               left: `${(segment.start / 1440) * 100}%`,
               width: `${((segment.end - segment.start) / 1440) * 100}%`,
             }}
-            title={segment.label}
           />
         ))}
       </div>
+      {tooltip && (
+        <div
+          className={`full-log-timeline-tooltip${tooltip.below ? " below" : ""}`}
+          role="tooltip"
+          style={{ left: tooltip.x, top: tooltip.y }}
+        >
+          {tooltip.text}
+        </div>
+      )}
     </div>
   );
 }

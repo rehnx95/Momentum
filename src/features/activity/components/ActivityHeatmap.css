@@ -15,7 +15,7 @@
   --hm-cell: 10px;
   --hm-gap: 3px;
   margin-bottom: 1rem;
-  padding: 1rem;
+  padding: 1rem 0.65rem;
   border: 1px solid var(--hm-border);
   border-radius: 1rem;
   background: var(--hm-surface);
@@ -91,7 +91,7 @@
   border-radius: 999px;
   background: var(--hm-muted);
 }
-.hm-inner { width: max-content; flex: none; margin-inline: auto; }
+.hm-inner { width: max-content; flex: none; margin-inline: 0; }
 
 .hm-months {
   display: grid;

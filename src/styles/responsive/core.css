@@ -63,7 +63,19 @@ textarea {
 
 @media (max-width: 767px) {
   .app-tooltip {
-    display: none;
+    top: auto;
+    right: 0;
+    bottom: calc(100% + 0.4rem);
+    left: auto;
+    transform: translateY(0.15rem);
+    white-space: normal;
+  }
+
+  .app-tooltip-anchor:active .app-tooltip,
+  .app-tooltip-anchor:has(:focus) .app-tooltip {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
   }
 
   .app-header {
