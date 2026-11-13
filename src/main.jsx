@@ -18,7 +18,6 @@ import "./styles/responsive/auth.css";
 import "./styles/responsive/dashboard.css";
 import "./styles/responsive/tracker.css";
 import "./styles/responsive/profile.css";
-import { supabase } from "./shared/lib/supabase";
 import App from './App';
 
 function RevealScrollbarsWhileScrolling() {
@@ -92,9 +91,6 @@ class AppErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
-
-// Initialize Supabase client globally for auth checks
-window.supabase = supabase;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

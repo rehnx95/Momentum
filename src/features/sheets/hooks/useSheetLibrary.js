@@ -21,9 +21,12 @@ export default function useSheetLibrary(user, askConfirmation) {
   const [deletingSheetId, setDeletingSheetId] = useState(null);
   const [sheetError, setSheetError] = useState("");
   const uploadSheetInput = useRef(null);
-  const savedSheetIdRef = useRef(
-    localStorage.getItem("momentum:learning-active-sheet"),
-  );
+  const savedSheetIdRef = useRef(null);
+  try {
+    savedSheetIdRef.current = localStorage.getItem("momentum:learning-active-sheet");
+  } catch {
+    savedSheetIdRef.current = null;
+  }
   const [selectedSheetId, setSelectedSheetId] = useState(
     () => savedSheetIdRef.current || "",
   );
@@ -126,7 +129,11 @@ export default function useSheetLibrary(user, askConfirmation) {
 
   useEffect(() => {
     if (selectedSheet) {
-      localStorage.setItem("momentum:learning-active-sheet", selectedSheet.id);
+      try {
+        localStorage.setItem("momentum:learning-active-sheet", selectedSheet.id);
+      } catch {
+        // ignore quota errors
+      }
     }
   }, [selectedSheet]);
 

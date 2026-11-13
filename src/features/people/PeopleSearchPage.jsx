@@ -32,6 +32,7 @@ export default function PeopleSearchPage({
               aria-label="Search by username"
               autoFocus
               value={query}
+              autoComplete="off"
               onChange={(event) => onQueryChange(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Escape") onQueryChange("");

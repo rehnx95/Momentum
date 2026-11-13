@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getLocalDateKey } from "../../shared/utils/date";
 import AppHeader from "../../shared/components/AppHeader";
 import Tooltip from "../../shared/components/Tooltip";
@@ -26,11 +26,6 @@ export default function PublicProfilePage({
       todayDateKey,
     } = context;
     const [dateKey, setDateKey] = useState(() => getLocalDateKey(new Date()));
-    const activityScrollRef = useRef(null);
-    useEffect(() => {
-      const container = activityScrollRef.current;
-      if (container) container.scrollLeft = container.scrollWidth;
-    }, []);
 
     useEffect(() => {
       const refreshDate = () => {
@@ -119,11 +114,6 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
       (total, sheet) => total + sheet.total,
       0,
     );
-    const solvedPastYear = heatmapData.weeks
-      .flat()
-      .filter((item) => !item.outOfRange)
-      .reduce((total, item) => total + item.count, 0);
-
     return (
       <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
         <AppHeader
@@ -339,7 +329,7 @@ start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
                       <div className="recent-ac-columns" aria-hidden="true">
                         <span />
                         <span>Problem</span>
-                        <span>Topic</span>
+                        <span>Sheet</span>
                         <span>Date</span>
                       </div>
                       <ul className="recent-ac-list">

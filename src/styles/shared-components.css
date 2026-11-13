@@ -140,6 +140,27 @@
   transition: background-color 120ms ease, border-color 120ms ease;
 }
 
+.app-dialog-confirmation {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.app-dialog-confirmation label {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.app-dialog-confirmation input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
 .app-dialog-cancel {
   background: var(--surface-raised);
   color: var(--text);
@@ -158,3 +179,20 @@
 .app-dialog-confirm:hover {
   background: var(--accent-hover);
 }
+
+.app-dialog-confirm-danger {
+  border-color: rgba(239, 68, 68, 0.8) !important;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.app-dialog-confirm-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.app-dialog-confirm:disabled,
+.app-dialog-confirm-danger:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+

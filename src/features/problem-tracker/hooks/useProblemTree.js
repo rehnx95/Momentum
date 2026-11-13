@@ -1,9 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+function safeLocalStorageGet(key, fallback = "") {
+  try {
+    return localStorage.getItem(key) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export default function useProblemTree({ data, progress, getState, update }) {
-  const [search, setSearch] = useState(
-    () => localStorage.getItem("momentum:learning-search") || "",
-  );
+  const [search, setSearch] = useState(() => safeLocalStorageGet("momentum:learning-search", ""));
   const [expandedSteps, setExpandedSteps] = useState(() => {
     try {
       const stored = localStorage.getItem("momentum:learning-expanded-steps");
@@ -28,43 +34,71 @@ export default function useProblemTree({ data, progress, getState, update }) {
     }
   });
   const [activeFilter, setActiveFilter] = useState(
-    () => localStorage.getItem("momentum:learning-filter") || "all",
+    () => safeLocalStorageGet("momentum:learning-filter", "all"),
   );
 
   useEffect(() => {
-    localStorage.setItem(
-      "momentum:learning-expanded-steps",
-      JSON.stringify([...expandedSteps]),
-    );
+    try {
+      localStorage.setItem(
+        "momentum:learning-expanded-steps",
+        JSON.stringify([...expandedSteps]),
+      );
+    } catch {
+      // ignore quota errors
+    }
   }, [expandedSteps]);
   useEffect(() => {
-    localStorage.setItem(
-      "momentum:learning-expanded-subs",
-      JSON.stringify([...expandedSubs]),
-    );
+    try {
+      localStorage.setItem(
+        "momentum:learning-expanded-subs",
+        JSON.stringify([...expandedSubs]),
+      );
+    } catch {
+      // ignore quota errors
+    }
   }, [expandedSubs]);
   useEffect(() => {
-    localStorage.setItem("momentum:learning-hide-skipped", String(hideSkipped));
+    try {
+      localStorage.setItem("momentum:learning-hide-skipped", String(hideSkipped));
+    } catch {
+      // ignore quota errors
+    }
   }, [hideSkipped]);
   useEffect(() => {
-    localStorage.setItem("momentum:learning-filter", activeFilter);
+    try {
+      localStorage.setItem("momentum:learning-filter", activeFilter);
+    } catch {
+      // ignore quota errors
+    }
   }, [activeFilter]);
   useEffect(() => {
-    localStorage.setItem("momentum:learning-search", search);
+    try {
+      localStorage.setItem("momentum:learning-search", search);
+    } catch {
+      // ignore quota errors
+    }
   }, [search]);
 
-  const totalProblems = data.steps.reduce(
-    (sum, step) =>
-      sum +
-      step.subsections.reduce(
-        (subsectionTotal, subsection) =>
-          subsectionTotal + subsection.problems.length,
+  const sheetProblems = useMemo(
+    () =>
+      data.steps.flatMap((step) =>
+        step.subsections.flatMap((subsection) => subsection.problems),
+      ),
+    [data.steps],
+  );
+  const totalProblems = useMemo(
+    () =>
+      data.steps.reduce(
+        (sum, step) =>
+          sum +
+          step.subsections.reduce(
+            (subsectionTotal, subsection) =>
+              subsectionTotal + subsection.problems.length,
+            0,
+          ),
         0,
       ),
-    0,
-  );
-  const sheetProblems = data.steps.flatMap((step) =>
-    step.subsections.flatMap((subsection) => subsection.problems),
+    [data.steps],
   );
   const doneCount = sheetProblems.filter(
     (problem) => progress[problem.id] === "done",
@@ -73,18 +107,21 @@ export default function useProblemTree({ data, progress, getState, update }) {
     (problem) => progress[problem.id] === "skipped",
   ).length;
   const todoCount = totalProblems - doneCount - skippedCount;
+  const problemMap = useMemo(
+    () =>
+      new Map(
+        sheetProblems.map((problem) => [problem.id, problem]),
+      ),
+    [sheetProblems],
+  );
 
   const progressState = useCallback(
     (id) => {
-      const problem = data.steps
-        .flatMap((step) =>
-          step.subsections.flatMap((subsection) => subsection.problems),
-        )
-        .find((item) => item.id === id);
+      const problem = problemMap.get(id);
       if (!problem) return "todo";
       return getState(id, problem.defaultSkip);
     },
-    [data, getState],
+    [getState, problemMap],
   );
 
   const handleToggle = useCallback(

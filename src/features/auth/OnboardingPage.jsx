@@ -65,6 +65,7 @@ export default function OnboardingPage({
 
   const validateUsername = (username) => {
     if (username.length < 3) return "Username must be at least 3 characters";
+    if (username.length > 45) return "Username must be 45 characters or fewer";
     if (username.includes(" ")) return "Username cannot contain spaces";
     if (!/^(?=.*[a-z0-9])[a-z0-9-]+$/.test(username))
       return "Username must contain a letter or number and use only lowercase letters, numbers, and hyphens";
@@ -229,6 +230,7 @@ export default function OnboardingPage({
                   value={formData.username}
                   onChange={handleChange}
                   placeholder="johndoe"
+                  maxLength={45}
                   className={`w-full pl-10 pr-4 py-3 bg-[#000000] border rounded-lg text-[#EDEDED] placeholder-[#A1A1A1] focus:outline-none focus:ring-2 transition-all ${
                     usernameAvailable === true
                       ? "border-border-strong focus:ring-border-strong"
@@ -253,7 +255,7 @@ export default function OnboardingPage({
                 </div>
               </div>
               <p className="text-xs text-[#A1A1A1] mt-1">
-                3+ characters, lowercase letters, numbers, and hyphens only
+                3–45 characters, lowercase letters, numbers, and hyphens only
               </p>
               <p
                 className={`text-sm mt-1 ${validationMessage ? "text-muted" : "text-[#A1A1A1]"}`}

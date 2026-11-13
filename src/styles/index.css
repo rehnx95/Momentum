@@ -18,13 +18,15 @@
   --shadow: rgba(0, 0, 0, 0.16);
   --accent: #ededed;
   --accent-hover: #ffffff;
-  --positive: #d4d4d4;
-  --warning: #a3a3a3;
+  --positive: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --success: #22c55e;
   --study-accent: #a1a1a1;
-  --sleep-chart-color: #e8a34c;
-  --study-chart-color: #df7468;
+  --sleep-chart-color: #60a5fa;
+  --study-chart-color: #f59e0b;
   --progress-fill: #ffffff;
-  --font-sans: Inter, "Segoe UI", system-ui, sans-serif;
+  --font-sans: Geist, Inter, "Segoe UI", system-ui, sans-serif;
 }
 
 :root[data-theme="light"] {
@@ -43,11 +45,13 @@
   --shadow: rgba(0, 0, 0, 0.08);
   --accent: #171717;
   --accent-hover: #000000;
-  --positive: #525252;
-  --warning: #737373;
+  --positive: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --success: #16a34a;
   --study-accent: #737373;
-  --sleep-chart-color: #a85f0b;
-  --study-chart-color: #b5473a;
+  --sleep-chart-color: #3b82f6;
+  --study-chart-color: #f59e0b;
   --progress-fill: #000000;
 }
 

@@ -27,7 +27,10 @@ export function ProblemRow({ prob, state, onToggle, onSkip }) {
       className={`problem-row group flex items-center gap-3 py-2.5 px-3 rounded-lg transition-colors duration-200 ${isSkip ? "opacity-50 bg-[#0A0A0A]/40" : "hover:bg-[#1F1F1F]"}`}
     >
       <button
+        type="button"
         onClick={() => onToggle(prob.id)}
+        role="checkbox"
+        aria-checked={isDone}
         aria-label={
           isDone
             ? `Mark ${prob.title} as not done`

@@ -42,12 +42,6 @@ export default function ProfilePage({ context }) {
       userWebsite,
       yearlyActiveDays,
     } = context;
-    const activityScrollRef = useRef(null);
-    useEffect(() => {
-      const container = activityScrollRef.current;
-      if (container) container.scrollLeft = container.scrollWidth;
-    }, []);
-
     return (
       <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
         <AppHeader active="profile" {...headerProps} />
@@ -166,90 +160,6 @@ export default function ProfilePage({ context }) {
                 />
               </section>
 
-              <section className="profile-data-legacy surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] divide-y divide-[#262626]">
-                <div className="p-4">
-                  <h2 className="mb-4 text-lg font-semibold text-[#EDEDED]">
-                    Progress &amp; Data Management
-                  </h2>
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => setBackupAction("export")}
-                      className="w-full flex items-center justify-between p-3.5 rounded-lg hover:bg-[#1F1F1F] transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#1F1F1F] flex items-center justify-center text-[#EDEDED]">
-                          <Download size={20} />
-                        </div>
-                        <div className="text-left">
-                          <div className="text-sm font-medium text-[#EDEDED]">
-                            Export Progress
-                          </div>
-                          <div className="text-xs text-[#A1A1A1]">
-                            Download your progress as JSON
-                          </div>
-                        </div>
-                      </div>
-                      <ChevronDown
-                        size={16}
-                        className="rotate-90 text-[#A1A1A1]"
-                      />
-                    </button>
-
-                    <button
-                      onClick={() => setBackupAction("import")}
-                      className="w-full flex items-center justify-between p-3.5 rounded-lg hover:bg-[#1F1F1F] transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#1F1F1F] flex items-center justify-center text-[#A1A1A1]">
-                          <Upload size={20} />
-                        </div>
-                        <div className="text-left">
-                          <div className="text-sm font-medium text-[#EDEDED]">
-                            Import Progress
-                          </div>
-                          <div className="text-xs text-[#A1A1A1]">
-                            Restore progress from backup
-                          </div>
-                        </div>
-                      </div>
-                      <ChevronDown
-                        size={16}
-                        className="rotate-90 text-[#A1A1A1]"
-                      />
-                    </button>
-
-                    <button
-                      onClick={async () => {
-                        const confirmed = await askConfirmation(
-                          "Reset all progress across every sheet? This cannot be undone.",
-                          "Reset all progress?",
-                        );
-                        if (confirmed) await reset();
-                      }}
-                      className="w-full flex items-center justify-between rounded-lg p-3.5 transition-colors hover:bg-[#1F1F1F]"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1F1F1F] text-[#A1A1A1]">
-                          <RefreshCcw size={20} />
-                        </div>
-                        <div className="text-left">
-                          <div className="text-sm font-medium text-[#EDEDED]">
-                            Reset All Sheets
-                          </div>
-                          <div className="text-xs text-[#A1A1A1]">
-                            Clear all progress and activity
-                          </div>
-                        </div>
-                      </div>
-                      <ChevronDown
-                        size={16}
-                        className="rotate-90 text-[#A1A1A1]"
-                      />
-                    </button>
-
-                  </div>
-                </div>
-              </section>
             </aside>
 
             <div className="profile-top">
@@ -261,6 +171,7 @@ export default function ProfilePage({ context }) {
                   const confirmed = await askConfirmation(
                     "Reset all progress across every sheet? This cannot be undone.",
                     "Reset all progress?",
+                    { dangerous: true, requireWord: "RESET", confirmText: "Reset" },
                   );
                   if (confirmed) await reset();
                 }}

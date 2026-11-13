@@ -57,7 +57,7 @@ function activityBreakdown(row) {
     .filter((activity) => activity.minutes > 0);
 }
 
-export default function FullLog({ daily }) {
+export default function FullLog({ daily, askConfirmation }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const entries = useMemo(
     () =>
@@ -118,10 +118,12 @@ export default function FullLog({ daily }) {
                   daily.loading
                 }
                 onClick={async () => {
-                  const confirmation = window.prompt(
-                    "This permanently deletes your saved Daily Log entries. Type CLEAR to continue.",
+                  const confirmed = await askConfirmation(
+                    "This permanently deletes your saved Daily Log entries. This cannot be undone.",
+                    "Clear saved log history?",
+                    { dangerous: true, requireWord: "CLEAR", confirmText: "Clear" },
                   );
-                  if (confirmation === "CLEAR") await daily.clearAllLogs();
+                  if (confirmed) await daily.clearAllLogs();
                 }}
               >
                 <Trash2 size={15} aria-hidden="true" />

@@ -136,33 +136,57 @@ function SleepStudyGraph({ days, title, series }) {
           })}
           {series.map((key) => {
             const colorClass = `${key}-series`;
-            const points = visibleDays
-              .map((day, index) => `${xFor(index)},${yFor(day[key])}`)
-              .join(" ");
+            const segments = [];
+            let current = [];
+            visibleDays.forEach((day, index) => {
+              const value = day[key];
+              if (value == null) {
+                if (current.length > 0) {
+                  segments.push(current);
+                  current = [];
+                }
+                return;
+              }
+              current.push(`${xFor(index)},${yFor(value)}`);
+            });
+            if (current.length > 0) segments.push(current);
+
             return (
               <g key={key} className={colorClass}>
-                <polyline className="sleep-study-line" points={points} />
-                {visibleDays.map((day, index) => (
-                  <g key={day.dateKey}>
-                    <circle
-                      className="sleep-study-point-target"
-                      cx={xFor(index)}
-                      cy={yFor(day[key])}
-                      r="15"
-                      aria-label={`${day.label}: ${formatHours(day[key])} ${key}`}
-                      data-tip={`${formatDuration(day[key])} ${key} on ${formatTooltipDate(new Date(`${day.dateKey}T00:00:00`), currentYear)}`}
-                      data-point={`${key}:${day.dateKey}`}
-                      onFocus={showTooltip}
-                    />
-                    <circle
-                      className={`sleep-study-point${activePoint === `${key}:${day.dateKey}` ? " is-active" : ""}`}
-                      cx={xFor(index)}
-                      cy={yFor(day[key])}
-                      r="4.5"
-                      aria-hidden="true"
-                    />
-                  </g>
+                {segments.map((segment, segmentIndex) => (
+                  <polyline
+                    key={`${key}-segment-${segmentIndex}`}
+                    className="sleep-study-line"
+                    points={segment.join(" ")}
+                  />
                 ))}
+                {visibleDays.map((day, index) => {
+                  const value = day[key];
+                  if (value == null) return null;
+                  const x = xFor(index);
+                  const y = yFor(value);
+                  return (
+                    <g key={`${key}:${day.dateKey}`}>
+                      <circle
+                        className="sleep-study-point-target"
+                        cx={x}
+                        cy={y}
+                        r="15"
+                        aria-label={`${day.label}: ${formatHours(value)} ${key}`}
+                        data-tip={`${formatDuration(value)} ${key} on ${formatTooltipDate(new Date(`${day.dateKey}T00:00:00`), currentYear)}`}
+                        data-point={`${key}:${day.dateKey}`}
+                        onFocus={showTooltip}
+                      />
+                      <circle
+                        className={`sleep-study-point${activePoint === `${key}:${day.dateKey}` ? " is-active" : ""}`}
+                        cx={x}
+                        cy={y}
+                        r="4.5"
+                        aria-hidden="true"
+                      />
+                    </g>
+                  );
+                })}
               </g>
             );
           })}
@@ -284,8 +308,8 @@ export default function SleepStudyChart({ userId, showSummary = false }) {
           day: "numeric",
         }),
         logged: Boolean(log),
-        sleep: log ? getSleepMinutes(log) : 0,
-        study: log ? getStudyMinutes(log) : 0,
+        sleep: log ? getSleepMinutes(log) : null,
+        study: log ? getStudyMinutes(log) : null,
       };
     });
   }, [logs]);
@@ -397,7 +421,7 @@ export default function SleepStudyChart({ userId, showSummary = false }) {
             />
           </div>
           <p className="sleep-study-footnote">
-            Days without a saved log appear as 0h.
+            Days without a saved log are shown as gaps.
           </p>
           {showSummary && (
             <div className="sleep-study-summary" aria-label="Sleep and study summaries">

@@ -18,7 +18,7 @@ export default function RecentAcceptedProblems({ problems }) {
           <div className="recent-ac-columns" aria-hidden="true">
             <span />
             <span>Problem</span>
-            <span>Topic</span>
+            <span>Sheet</span>
             <span>Date</span>
           </div>
           <ul className="recent-ac-list">
@@ -33,11 +33,11 @@ export default function RecentAcceptedProblems({ problems }) {
                   </p>
                 </Tooltip>
                 <Tooltip
-                  label={problem.sheetTitle}
+                  label={problem.sheetTitle === "Dsa" ? "DSA" : problem.sheetTitle}
                   className="recent-ac-tooltip"
                 >
                   <span className="recent-ac-topic" tabIndex={0}>
-                    {problem.sheetTitle}
+                    {problem.sheetTitle === "Dsa" ? "DSA" : problem.sheetTitle}
                   </span>
                 </Tooltip>
                 {problem.acceptedOn ? (

@@ -18,7 +18,13 @@ export function useProgress(user) {
   const activityRef = useRef(activityLog);
   const [loading, setLoading] = useState(Boolean(user));
   const [error, setError] = useState('');
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem('theme') || 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
   const writeQueue = useRef(Promise.resolve());
   const cacheProgress = useCallback((userId, nextProgress, nextActivity, nextCompletedOn, nextCompletedAt) => {
     writeUserDataCache(userId, 'progress', {
@@ -143,7 +149,11 @@ export function useProgress(user) {
   }, [user, cacheProgress, replaceActivity, replaceCompletedAt, replaceCompletedOn, replaceProgress]);
 
   useEffect(() => {
-    localStorage.setItem('theme', theme);
+    try {
+      localStorage.setItem('theme', theme);
+    } catch {
+      // ignore quota errors
+    }
     if (theme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
     } else {

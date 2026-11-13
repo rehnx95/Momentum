@@ -18,7 +18,9 @@ export default function SheetSwitcherMenu({
 }) {
   return (
     <div className="popover sheet-switcher-menu left-0 top-full" role="menu">
-      {sheets.map((sheet) => (
+      {sheets.map((sheet) => {
+        const title = sheet.title === "Dsa" ? "DSA" : sheet.title;
+        return (
         <div key={sheet.id} className="popover-row">
           <button
             type="button"
@@ -38,15 +40,17 @@ export default function SheetSwitcherMenu({
                 color: selected?.id === sheet.id ? "var(--text)" : undefined,
               }}
             >
-              {sheet.title}
+              {title}
             </span>
-            <span className="text-xs">{sheet.problemCount}</span>
+            <span className="text-xs tabular-nums text-[#A1A1A1]">
+              {sheet.problemCount} <span className="text-[10px] uppercase tracking-wide">problems</span>
+            </span>
           </button>
           {sheet.customId && (
             <button
               type="button"
               className="popover-trash"
-              aria-label={`Permanently remove ${sheet.title}`}
+              aria-label={`Permanently remove ${title}`}
               disabled={deletingId !== null}
               onClick={() => {
                 onClose();
@@ -57,7 +61,8 @@ export default function SheetSwitcherMenu({
             </button>
           )}
         </div>
-      ))}
+        );
+      })}
       {sheets.length === 0 && (
         <p className="px-3 py-2 text-sm" style={{ color: "var(--muted)" }}>
           No sheets yet.

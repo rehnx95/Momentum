@@ -53,7 +53,7 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
       {daily.viewMode === "daily" ? (
         <DayView daily={daily} sheets={sheets} askConfirmation={askConfirmation} />
       ) : daily.viewMode === "full" ? (
-        <FullLog daily={daily} />
+        <FullLog daily={daily} askConfirmation={askConfirmation} />
       ) : (
         <SleepStudyChart userId={user.id} showSummary />
       )}

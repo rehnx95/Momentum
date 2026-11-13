@@ -81,30 +81,32 @@ export default function useProfileMetrics({
     [availableSheets, completedAt, completedOn, progress],
   );
 
+  const activeDates = useMemo(() => {
+    const uniqueDates = new Set();
+    for (const [problemId, day] of Object.entries(completedOn || {})) {
+      if (!day || progress[problemId] !== "done") continue;
+      uniqueDates.add(String(day).slice(0, 10));
+    }
+    return [...uniqueDates].sort();
+  }, [completedOn, progress]);
+
   const dailyStreak = useMemo(() => {
     let streak = 0;
     const [year, month, day] = todayDateKey.split("-").map(Number);
     let currentDate = new Date(year, month - 1, day);
     currentDate.setHours(0, 0, 0, 0);
-    if (!activityLog[getLocalDateKey(currentDate)]) {
+    const dateKey = getLocalDateKey(currentDate);
+    if (!activeDates.includes(dateKey)) {
       currentDate.setDate(currentDate.getDate() - 1);
     }
-    while (true) {
-      if (activityLog[getLocalDateKey(currentDate)] > 0) {
-        streak++;
-        currentDate.setDate(currentDate.getDate() - 1);
-      } else {
-        break;
-      }
+    while (activeDates.includes(getLocalDateKey(currentDate))) {
+      streak += 1;
+      currentDate.setDate(currentDate.getDate() - 1);
     }
     return streak;
-  }, [activityLog, todayDateKey]);
+  }, [activeDates, todayDateKey]);
 
   const longestStreak = useMemo(() => {
-    const activeDates = Object.entries(activityLog)
-      .filter(([, count]) => count > 0)
-      .map(([date]) => date)
-      .sort();
     let longest = 0;
     let current = 0;
     let previousDate = null;
@@ -124,7 +126,7 @@ export default function useProfileMetrics({
       longest = Math.max(longest, current);
     }
     return longest;
-  }, [activityLog]);
+  }, [activeDates]);
 
   const yearlyActiveDays = useMemo(() => {
     const [year, month, day] = todayDateKey.split("-").map(Number);
@@ -132,13 +134,10 @@ export default function useProfileMetrics({
     today.setHours(0, 0, 0, 0);
     const firstDate = new Date(today);
     firstDate.setDate(firstDate.getDate() - 364);
-    return Object.entries(activityLog).filter(
-      ([date, count]) =>
-        count > 0 &&
-        date >= getLocalDateKey(firstDate) &&
-        date <= getLocalDateKey(today),
-    ).length;
-  }, [activityLog, todayDateKey]);
+    const startKey = getLocalDateKey(firstDate);
+    const endKey = getLocalDateKey(today);
+    return activeDates.filter((date) => date >= startKey && date <= endKey).length;
+  }, [activeDates, todayDateKey]);
 
   return {
     profileSheetStats,
