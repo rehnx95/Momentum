@@ -176,11 +176,15 @@ export default function TrendsView({ daily }) {
         dateKey: key,
         label: dateLabel(date, { month: "short", day: "numeric" }),
         sleep: log ? getSleepMinutes(log) : null,
+        sleepRecorded: Boolean(log?.sleep_time && log?.wake_time),
         study: log ? activeMinutes : null,
       };
     });
     const chartAverages = chartMode.series.flatMap((key) => {
-      const values = chartDays.map((day) => day[key]).filter((value) => value !== null);
+      const values = chartDays
+        .filter((day) => key !== "sleep" || day.sleepRecorded)
+        .map((day) => day[key])
+        .filter((value) => value !== null);
       if (!values.length) return [];
       const label = key === "sleep" ? "Sleep" : chartMode.activityName || "Active";
       return [

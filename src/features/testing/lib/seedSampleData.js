@@ -38,7 +38,6 @@ export default async function seedSampleData({ userId, sheets }) {
   const sample = buildSampleData({ userId, sheets });
   await upsertRows("daily_logs", sample.dailyLogs, "user_id,date");
   await upsertRows("progress", sample.progress, "user_id,problem_id");
-  await upsertRows("activity_log", sample.activityLog, "user_id,date");
   clearDailyLogCaches(userId);
 
   return sample.summary;

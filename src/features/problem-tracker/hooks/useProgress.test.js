@@ -74,6 +74,12 @@ describe("useProgress", () => {
                 updated_at: "2025-03-14T12:00:00.000Z",
               },
               {
+                problem_id: "problem-2",
+                state: "done",
+                completed_on: null,
+                updated_at: "2025-03-14T23:00:00.000Z",
+              },
+              {
                 problem_id: "default-skip-1",
                 state: "todo",
                 completed_on: null,
@@ -101,7 +107,7 @@ describe("useProgress", () => {
     delete globalThis.document;
   });
 
-  it("loads progress and activity metrics from the persisted sources", async () => {
+  it("derives activity metrics from solved progress dates", async () => {
     let hookResult;
     const user = { id: "user-1" };
 
@@ -118,8 +124,51 @@ describe("useProgress", () => {
 
     expect(hookResult.progress["problem-1"]).toBe("done");
     expect(hookResult.getState("default-skip-1", true)).toBe("todo");
-    expect(hookResult.activityLog["2025-03-14"]).toBe(1);
+    expect(hookResult.activityLog["2025-03-14"]).toBe(2);
     expect(hookResult.completedOn["problem-1"]).toBe("2025-03-14");
     expect(progressStateFilterMock).toHaveBeenCalledWith("state", ["todo", "done", "skipped"]);
+  });
+
+  it("does not issue a separate activity-log write when progress changes", async () => {
+    const progressUpsert = vi.fn().mockResolvedValue({ error: null });
+    const activityWrite = vi.fn();
+    fromMock.mockImplementation((table) => {
+      if (table === "progress") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          in: vi.fn().mockResolvedValue({ data: [], error: null }),
+          upsert: progressUpsert,
+        };
+      }
+
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        upsert: activityWrite,
+        delete: vi.fn(() => ({ match: activityWrite })),
+      };
+    });
+
+    let hookResult;
+    const user = { id: "user-1" };
+    function HookHarness() {
+      hookResult = useProgress(user);
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      await hookResult.update("problem-2", "done");
+    });
+
+    expect(progressUpsert).toHaveBeenCalledOnce();
+    expect(activityWrite).not.toHaveBeenCalled();
+    expect(fromMock).not.toHaveBeenCalledWith("activity_log");
   });
 });

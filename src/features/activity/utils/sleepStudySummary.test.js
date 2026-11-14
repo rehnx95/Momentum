@@ -4,9 +4,10 @@ import { getSleepStudySummary } from "./sleepStudySummary";
 describe("sleep and study summary", () => {
   it("averages only saved entries in the latest seven days", () => {
     const days = [
-      { logged: true, study: 120, sleep: 420 },
+      { logged: true, sleepRecorded: true, study: 120, sleep: 420 },
       ...Array.from({ length: 7 }, (_, index) => ({
         logged: index === 1 || index === 5,
+        sleepRecorded: index === 1 || index === 5,
         study: index === 1 ? 180 : 300,
         sleep: index === 1 ? 420 : 480,
       })),
@@ -21,8 +22,21 @@ describe("sleep and study summary", () => {
     });
   });
 
+  it("excludes saved days without recorded sleep from the sleep average", () => {
+    const days = Array.from({ length: 7 }, (_, index) => ({
+      logged: true,
+      sleepRecorded: index === 0,
+      study: 60,
+      sleep: index === 0 ? 420 : 0,
+    }));
+
+    expect(getSleepStudySummary(days).averageSleep).toBe(420);
+  });
+
   it("returns empty averages and best day when no entries are saved", () => {
-    expect(getSleepStudySummary([{ logged: false, study: 0, sleep: 0 }])).toEqual({
+    expect(
+      getSleepStudySummary([{ logged: false, sleepRecorded: false, study: 0, sleep: 0 }]),
+    ).toEqual({
       averageStudy: null,
       averageSleep: null,
       bestStudyDay: null,

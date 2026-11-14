@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../shared/lib/supabase";
 import MomentumBrand from "../../shared/components/MomentumBrand";
 import Tooltip from "../../shared/components/Tooltip";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, CircleCheck, CircleX } from "lucide-react";
+
+const USERNAME_MAX_LENGTH = 20;
 
 export default function OnboardingPage({ user, profile, onGoToDashboard, onComplete, onSignOut }) {
   const [formData, setFormData] = useState({
@@ -51,7 +53,8 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
 
   const validateUsername = (username) => {
     if (username.length < 3) return "Username must be at least 3 characters";
-    if (username.length > 45) return "Username must be 45 characters or fewer";
+    if (username.length > USERNAME_MAX_LENGTH)
+      return `Username must be ${USERNAME_MAX_LENGTH} characters or fewer`;
     if (username.includes(" ")) return "Username cannot contain spaces";
     if (!/^(?=.*[a-z0-9])[a-z0-9-]+$/.test(username))
       return "Username must contain a letter or number and use only lowercase letters, numbers, and hyphens";
@@ -131,12 +134,12 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
   };
 
   return (
-    <div className="profile-settings-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans flex flex-col">
+    <div className="profile-settings-shell onboarding-page min-h-screen bg-[#000000] text-[#EDEDED] font-sans flex flex-col">
       {/* Header */}
       <header className="dashboard-header bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
         <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <MomentumBrand onNavigate={onGoToDashboard} subtitle="Complete your profile" />
+            <MomentumBrand onNavigate={onGoToDashboard} subtitle="" />
           </div>
           <Tooltip label="Sign out of your account">
             <button
@@ -151,11 +154,14 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-2xl mx-auto px-4 md:px-6 py-8">
-        <div className="onboarding-panel bg-[#0A0A0A] rounded-2xl border border-[#262626] p-6 md:p-8">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-2">Welcome to Momentum</h2>
-            <p className="text-[#A1A1A1]">
+      <main className="onboarding-main mx-auto flex w-full max-w-3xl flex-1 items-center px-4 md:px-6">
+        <div
+          className="onboarding-panel w-full rounded-2xl border p-6 md:p-8"
+          aria-labelledby="onboarding-title"
+        >
+          <div className="onboarding-intro">
+            <h1 id="onboarding-title">Welcome to Momentum</h1>
+            <p id="onboarding-description">
               Set up your profile to make Momentum yours. Keep your learning, routines, and daily
               progress moving forward.
             </p>
@@ -167,83 +173,110 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form
+            onSubmit={handleSubmit}
+            className="onboarding-form"
+            aria-describedby="onboarding-description"
+          >
             {/* Name Field */}
             <div>
-              <label className="block text-sm font-medium text-[#EDEDED] mb-2">
+              <label
+                htmlFor="onboarding-name"
+                className="block text-sm font-medium text-[#EDEDED] mb-2"
+              >
                 Full Name <span className="text-muted">*</span>
               </label>
               <div className="relative">
                 <User
                   size={20}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
+                  aria-hidden="true"
                 />
                 <input
+                  id="onboarding-name"
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="John Doe"
+                  aria-invalid={Boolean(errors.name)}
+                  aria-describedby={errors.name ? "onboarding-name-error" : undefined}
                   className="w-full pl-10 pr-4 py-3 bg-[#000000] border border-[#262626] rounded-lg text-[#EDEDED] placeholder-[#A1A1A1] focus:outline-none focus:ring-2 focus:ring-[#EDEDED] focus:border-transparent transition-all"
                 />
               </div>
-              {errors.name && <p className="text-muted text-sm mt-1">{errors.name}</p>}
+              {errors.name && (
+                <p id="onboarding-name-error" className="text-muted text-sm mt-1">
+                  {errors.name}
+                </p>
+              )}
             </div>
 
             {/* Username Field */}
             <div>
-              <label className="block text-sm font-medium text-[#EDEDED] mb-2">
-                Username (Handle) <span className="text-muted">*</span>
+              <label
+                htmlFor="onboarding-username"
+                className="block text-sm font-medium text-[#EDEDED] mb-2"
+              >
+                Username  <span className="text-muted">*</span>
               </label>
-              <div className="relative">
+              <div className="onboarding-username-field">
                 <User
                   size={20}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
+                  className="onboarding-username-icon absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
+                  aria-hidden="true"
                 />
                 <input
+                  id="onboarding-username"
                   type="text"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
                   placeholder="johndoe"
-                  maxLength={45}
-                  className={`w-full pl-10 pr-4 py-3 bg-[#000000] border rounded-lg text-[#EDEDED] placeholder-[#A1A1A1] focus:outline-none focus:ring-2 transition-all ${
-                    usernameAvailable === true
-                      ? "border-border-strong focus:ring-border-strong"
-                      : usernameAvailable === false
-                        ? "border-border-strong focus:ring-border-strong"
-                        : "border-[#262626] focus:ring-[#EDEDED]"
+                  maxLength={USERNAME_MAX_LENGTH}
+                  aria-invalid={Boolean(errors.username) || usernameAvailable === false}
+                  aria-describedby="onboarding-username-status"
+                  className={`onboarding-username-input w-full pr-4 py-3 rounded-lg text-[#EDEDED] placeholder-[#A1A1A1] focus:outline-none focus:ring-2 transition-all ${
+                    usernameAvailable === true && !errors.username
+                      ? "is-available"
+                      : usernameAvailable === false || errors.username
+                        ? "is-taken"
+                        : ""
                   }`}
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                  {usernameAvailable === true && (
-                    <span className="text-muted text-xs flex items-center gap-1">
-                      <span className="inline-block w-2 h-2 bg-muted rounded-full" />
-                      Available
-                    </span>
-                  )}
-                  {usernameAvailable === false && (
-                    <span className="text-muted text-xs flex items-center gap-1">
-                      <span className="inline-block w-2 h-2 bg-muted rounded-full" />
-                      Taken
-                    </span>
-                  )}
-                </div>
               </div>
-              <p className="text-xs text-[#A1A1A1] mt-1">
-                3–45 characters, lowercase letters, numbers, and hyphens only
-              </p>
-              <p className={`text-sm mt-1 ${validationMessage ? "text-muted" : "text-[#A1A1A1]"}`}>
-                {validationMessage}
+              <p
+                id="onboarding-username-status"
+                className={`onboarding-username-status${usernameAvailable === true && !errors.username ? " is-available" : ""}${usernameAvailable === false || errors.username ? " is-taken" : ""}`}
+                aria-live="polite"
+                role={errors.username ? "alert" : undefined}
+              >
+                {errors.username ? (
+                  <>
+                    <CircleX size={16} aria-hidden="true" />
+                    <span>{errors.username}</span>
+                  </>
+                ) : usernameAvailable === true ? (
+                  <>
+                    <CircleCheck size={16} aria-hidden="true" />
+                    <span>Username is available</span>
+                  </>
+                ) : usernameAvailable === false ? (
+                  <>
+                    <CircleX size={16} aria-hidden="true" />
+                    <span>{validationMessage}</span>
+                  </>
+                ) : (
+                  validationMessage
+                )}
               </p>
             </div>
 
             {/* Submit Button */}
-            <div className="pt-4">
+            <div className="onboarding-submit">
               <button
                 type="submit"
                 disabled={isLoading || usernameAvailable === false}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-[#EDEDED] hover:bg-white disabled:bg-[#262626] disabled:text-[#A1A1A1] disabled:cursor-not-allowed text-black font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#EDEDED] focus:ring-offset-2 focus:ring-offset-[#000000] shadow-lg shadow-[#EDEDED]/20"
+                className="onboarding-submit-button w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-[#EDEDED] hover:bg-white disabled:bg-[#262626] disabled:text-[#A1A1A1] disabled:cursor-not-allowed text-black font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#EDEDED] focus:ring-offset-2 focus:ring-offset-[#000000]"
               >
                 {isLoading ? (
                   <>
@@ -271,7 +304,7 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
                   </>
                 ) : (
                   <>
-                    <span>Complete Setup</span>
+                    <span>Get started</span>
                     <svg
                       width="20"
                       height="20"

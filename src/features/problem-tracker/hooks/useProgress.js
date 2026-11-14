@@ -111,22 +111,19 @@ export function useProgress(user) {
     replaceCompletedAt(hasCachedData ? cached.completedAt : {});
     setLoading(!hasCachedData);
 
-    Promise.all([
-      supabase
-        .from("progress")
-        .select("problem_id, state, completed_on, updated_at")
-        .eq("user_id", user.id)
-        .in("state", ["todo", "done", "skipped"]),
-      supabase.from("activity_log").select("date, count").eq("user_id", user.id),
-    ])
-      .then(([progressResult, activityResult]) => {
+    supabase
+      .from("progress")
+      .select("problem_id, state, completed_on, updated_at")
+      .eq("user_id", user.id)
+      .in("state", ["todo", "done", "skipped"])
+      .then((progressResult) => {
         if (progressResult.error) throw progressResult.error;
-        if (activityResult.error) throw activityResult.error;
         if (!active) return;
 
         const progressMap = {};
         const completedOnMap = {};
         const completedAtMap = {};
+        const activityMap = {};
         for (const item of progressResult.data) {
           progressMap[item.problem_id] = item.state;
           if (item.state === "done" && item.completed_on) {
@@ -135,11 +132,13 @@ export function useProgress(user) {
           if (item.state === "done" && item.updated_at) {
             completedAtMap[item.problem_id] = item.updated_at;
           }
-        }
-
-        const activityMap = {};
-        for (const item of activityResult.data) {
-          activityMap[item.date] = item.count;
+          if (item.state === "done") {
+            const timestamp = Date.parse(item.updated_at);
+            const activityDate =
+              item.completed_on ||
+              (Number.isFinite(timestamp) ? new Date(timestamp).toISOString().slice(0, 10) : null);
+            if (activityDate) activityMap[activityDate] = (activityMap[activityDate] || 0) + 1;
+          }
         }
 
         replaceProgress(progressMap);
@@ -183,22 +182,6 @@ export function useProgress(user) {
       document.documentElement.removeAttribute("data-theme");
     }
   }, [theme]);
-
-  const persistActivity = async (userId, date) => {
-    const count = activityRef.current[date] || 0;
-    if (count > 0) {
-      const { error: activityError } = await supabase
-        .from("activity_log")
-        .upsert({ user_id: userId, date, count }, { onConflict: "user_id,date" });
-      if (activityError) throw activityError;
-    } else {
-      const { error: activityError } = await supabase
-        .from("activity_log")
-        .delete()
-        .match({ user_id: userId, date });
-      if (activityError) throw activityError;
-    }
-  };
 
   const update = useCallback(
     async (id, state) => {
@@ -254,7 +237,6 @@ export function useProgress(user) {
           { onConflict: "user_id,problem_id" },
         );
         if (progressError) throw progressError;
-        for (const date of changedDates) await persistActivity(user.id, date);
       });
     },
     [user, replaceActivity, replaceCompletedAt, replaceCompletedOn, replaceProgress, save],
@@ -316,7 +298,6 @@ export function useProgress(user) {
             .upsert(entries, { onConflict: "user_id,problem_id" });
           if (progressError) throw progressError;
         }
-        for (const date of changedDates) await persistActivity(user.id, date);
       });
     },
     [user, replaceActivity, replaceCompletedAt, replaceCompletedOn, replaceProgress, save],
@@ -375,7 +356,6 @@ export function useProgress(user) {
             .eq("user_id", user.id)
             .in("problem_id", idsToReset);
           if (progressError) throw progressError;
-          for (const date of changedDates) await persistActivity(user.id, date);
         });
         return;
       }
@@ -391,11 +371,6 @@ export function useProgress(user) {
           .delete()
           .match({ user_id: user.id });
         if (progressError) throw progressError;
-        const { error: activityError } = await supabase
-          .from("activity_log")
-          .delete()
-          .match({ user_id: user.id });
-        if (activityError) throw activityError;
       });
     },
     [user, replaceActivity, replaceCompletedAt, replaceCompletedOn, replaceProgress, save],

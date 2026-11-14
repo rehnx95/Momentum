@@ -7,6 +7,12 @@ import TrendsView from "./TrendsView";
 
 afterEach(cleanup);
 
+function dateOffsetKey(offset) {
+  const date = new Date(`${getLocalDateKey()}T00:00:00`);
+  date.setDate(date.getDate() + offset);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 describe("TrendsView", () => {
   it("uses the original chart modes and only offers timed activities", () => {
     const daily = {
@@ -113,6 +119,36 @@ describe("TrendsView", () => {
       container.querySelector(".trends-week-navigation .trends-range-label").textContent,
     ).not.toBe(weekRange);
     expect(screen.getByRole("button", { name: "Next 7 days" }).disabled).toBe(false);
+  });
+
+  it("excludes days without recorded sleep from the sleep average line", () => {
+    const daily = {
+      allLogs: [
+        {
+          date: getLocalDateKey(),
+          sleep_time: "23:00",
+          wake_time: "06:00",
+          custom_tasks: [],
+        },
+        {
+          date: dateOffsetKey(-1),
+          sleep_time: "",
+          wake_time: "",
+          custom_tasks: [],
+        },
+      ],
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      hasOlderLogs: false,
+      loadOlderLogs: vi.fn(),
+    };
+    const { container } = render(<TrendsView daily={daily} />);
+    const chartSelect = screen.getByRole("combobox", { name: "Chart activity" });
+
+    fireEvent.click(chartSelect);
+    fireEvent.click(screen.getByRole("option", { name: "Sleep" }));
+
+    expect(container.querySelector(".sleep-average").getAttribute("data-average")).toBe("420");
   });
 
   it("keeps all 30 chart days visible on narrow screens", () => {

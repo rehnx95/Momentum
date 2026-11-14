@@ -24,6 +24,14 @@ export function intervalsFor(slot, wrapMidnight = false) {
     : [];
 }
 
+export function sleepIntervalsFor(sleepTime, wakeTime) {
+  const start = toMinutes(String(sleepTime || "").slice(0, 5));
+  const end = toMinutes(String(wakeTime || "").slice(0, 5));
+  if (start === null || end === null || start === end) return [];
+  if (start > end) return end > 0 ? [[0, end]] : [];
+  return [[start, end]];
+}
+
 function timeLabel(value) {
   if (!value) return "--:--";
   return String(value).slice(0, 5);
@@ -40,7 +48,7 @@ export default function FullLogTimeline({
   const sleepSlot = { start: row.sleep_time, end: row.wake_time };
 
   if (activityFilter === "All" || activityFilter === "Sleep") {
-    intervalsFor(sleepSlot, true).forEach(([start, end], index) => {
+    sleepIntervalsFor(sleepSlot.start, sleepSlot.end).forEach(([start, end], index) => {
       segments.push({
         key: `sleep-${index}`,
         kind: "sleep",

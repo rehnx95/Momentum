@@ -1,12 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { intervalsFor } from "./FullLogTimeline";
+import { intervalsFor, sleepIntervalsFor } from "./FullLogTimeline";
 
 describe("Full Log timeline intervals", () => {
   it("maps a daytime slot to its position in the day", () => {
     expect(intervalsFor({ start: "09:00", end: "13:00" })).toEqual([[540, 780]]);
   });
 
-  it("splits overnight sleep at midnight", () => {
+  it("clips overnight sleep to the wake date", () => {
+    expect(sleepIntervalsFor("22:00", "06:00")).toEqual([[0, 360]]);
+  });
+
+  it("keeps same-day sleep within its recorded date", () => {
+    expect(sleepIntervalsFor("01:00", "07:00")).toEqual([[60, 420]]);
+  });
+
+  it("does not create an empty wake-date interval at midnight", () => {
+    expect(sleepIntervalsFor("22:00", "00:00")).toEqual([]);
+  });
+
+  it("splits generic overnight intervals at midnight", () => {
     expect(intervalsFor({ start: "22:00", end: "06:00" }, true)).toEqual([
       [1320, 1440],
       [0, 360],

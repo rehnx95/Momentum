@@ -318,6 +318,7 @@ export default function SleepStudyChart({ userId, showSummary = false }) {
           day: "numeric",
         }),
         logged: Boolean(log),
+        sleepRecorded: Boolean(log?.sleep_time && log?.wake_time),
         sleep: log ? getSleepMinutes(log) : null,
         study: log ? getStudyMinutes(log) : null,
       };
