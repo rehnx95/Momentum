@@ -116,7 +116,7 @@ export function useProgress(user) {
         .from("progress")
         .select("problem_id, state, completed_on, updated_at")
         .eq("user_id", user.id)
-        .in("state", ["done", "skipped"]),
+        .in("state", ["todo", "done", "skipped"]),
       supabase.from("activity_log").select("date, count").eq("user_id", user.id),
     ])
       .then(([progressResult, activityResult]) => {

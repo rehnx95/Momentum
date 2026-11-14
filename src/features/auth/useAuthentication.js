@@ -16,7 +16,10 @@ function readCachedAccount() {
     if (!cached?.user?.id || !cached.profile?.id || cached.profile.id !== cached.user.id) {
       return null;
     }
-    return cached;
+    const profile = { ...cached.profile };
+    delete profile.location;
+    delete profile.website;
+    return { ...cached, profile };
   } catch {
     return null;
   }
@@ -103,7 +106,7 @@ export default function useAuthentication() {
     if (!hasCachedProfile) setAppState(AppState.LOADING);
     supabase
       .from("profiles")
-      .select("id, name, username, location, website, onboarding_completed")
+      .select("id, name, username, onboarding_completed")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data: profileData, error }) => {

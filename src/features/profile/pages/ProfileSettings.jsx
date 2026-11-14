@@ -102,7 +102,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
         .from("profiles")
         .update({ ...values, updated_at: new Date().toISOString() })
         .eq("id", userId)
-        .select("id, name, username, location, website, onboarding_completed")
+        .select("id, name, username, onboarding_completed")
         .single();
       if (error) throw error;
 

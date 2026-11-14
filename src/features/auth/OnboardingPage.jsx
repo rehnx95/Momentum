@@ -8,8 +8,6 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
   const [formData, setFormData] = useState({
     name: profile?.name || user.user_metadata?.full_name || user.user_metadata?.name || "",
     username: profile?.username || "",
-    location: profile?.location || "",
-    website: profile?.website || "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -108,14 +106,12 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
             id: user.id,
             name: formData.name.trim(),
             username: formData.username.trim().toLowerCase(),
-            location: formData.location.trim(),
-            website: formData.website.trim(),
             onboarding_completed: true,
             updated_at: new Date().toISOString(),
           },
           { onConflict: "id" },
         )
-        .select("id, name, username, location, website, onboarding_completed")
+        .select("id, name, username, onboarding_completed")
         .single();
 
       if (error) throw error;
@@ -240,63 +236,6 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
               <p className={`text-sm mt-1 ${validationMessage ? "text-muted" : "text-[#A1A1A1]"}`}>
                 {validationMessage}
               </p>
-            </div>
-
-            {/* Location Field */}
-            <div>
-              <label className="block text-sm font-medium text-[#EDEDED] mb-2">Location</label>
-              <div className="relative">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
-                >
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  placeholder="New York, USA"
-                  className="w-full pl-10 pr-4 py-3 bg-[#000000] border border-[#262626] rounded-lg text-[#EDEDED] placeholder-[#A1A1A1] focus:outline-none focus:ring-2 focus:ring-[#EDEDED] focus:border-transparent transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Website Field */}
-            <div>
-              <label className="block text-sm font-medium text-[#EDEDED] mb-2">
-                Website / Portfolio
-              </label>
-              <div className="relative">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
-                >
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
-                <input
-                  type="url"
-                  name="website"
-                  value={formData.website}
-                  onChange={handleChange}
-                  placeholder="https://johndoe.dev"
-                  className="w-full pl-10 pr-4 py-3 bg-[#000000] border border-[#262626] rounded-lg text-[#EDEDED] placeholder-[#A1A1A1] focus:outline-none focus:ring-2 focus:ring-[#EDEDED] focus:border-transparent transition-all"
-                />
-              </div>
             </div>
 
             {/* Submit Button */}
