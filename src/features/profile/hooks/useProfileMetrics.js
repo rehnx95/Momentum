@@ -1,8 +1,10 @@
 import { useMemo } from "react";
 import { getLocalDateKey } from "../../../shared/utils/date";
+import { buildHeatmap } from "../../activity/utils/heatmap";
 
 export default function useProfileMetrics({
   availableSheets,
+  activityLog,
   progress,
   completedOn,
   completedAt,
@@ -122,15 +124,8 @@ export default function useProfileMetrics({
   }, [activeDates]);
 
   const yearlyActiveDays = useMemo(() => {
-    const [year, month, day] = todayDateKey.split("-").map(Number);
-    const today = new Date(year, month - 1, day);
-    today.setHours(0, 0, 0, 0);
-    const firstDate = new Date(today);
-    firstDate.setDate(firstDate.getDate() - 364);
-    const startKey = getLocalDateKey(firstDate);
-    const endKey = getLocalDateKey(today);
-    return activeDates.filter((date) => date >= startKey && date <= endKey).length;
-  }, [activeDates, todayDateKey]);
+    return buildHeatmap({ activity: activityLog, todayKey: todayDateKey }).activeDays;
+  }, [activityLog, todayDateKey]);
 
   return {
     profileSheetStats,

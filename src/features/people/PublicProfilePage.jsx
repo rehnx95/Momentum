@@ -1,11 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
-import { getLocalDateKey } from "../../shared/utils/date";
+import { useMemo } from "react";
 import AppHeader from "../../shared/components/AppHeader";
 import Tooltip from "../../shared/components/Tooltip";
 import { Calendar, Trophy, Target, Link2 } from "lucide-react";
 import StatStrip from "../../shared/components/StatStrip";
 import ActivityHeatmap from "../activity/components/ActivityHeatmap";
-import { getLevel } from "../activity/utils/heatmap";
+import { buildHeatmap } from "../activity/utils/heatmap";
 import ProfileSheetProgress from "../profile/components/ProfileSheetProgress";
 
 const EMPTY_ACTIVITY = {};
@@ -30,62 +29,12 @@ export default function PublicProfilePage({
     setPublicHeatmapYear,
     todayDateKey,
   } = context;
-  const [dateKey, setDateKey] = useState(() => getLocalDateKey(new Date()));
-
-  useEffect(() => {
-    const refreshDate = () => {
-      setDateKey((current) => {
-        const today = getLocalDateKey(new Date());
-        return current === today ? current : today;
-      });
-    };
-    const timer = window.setInterval(refreshDate, 60_000);
-    window.addEventListener("focus", refreshDate);
-    document.addEventListener("visibilitychange", refreshDate);
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener("focus", refreshDate);
-      document.removeEventListener("visibilitychange", refreshDate);
-    };
-  }, []);
-
-  const activity = profile?.activity || EMPTY_ACTIVITY;
-  const heatmapData = useMemo(() => {
-    const [year, month, day] = dateKey.split("-").map(Number);
-    const today = new Date(year, month - 1, day);
-    const rangeStart = new Date(today);
-    rangeStart.setDate(rangeStart.getDate() - 364);
-    const start = new Date(rangeStart);
-    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
-    const weeks = [];
-
-    for (let weekIndex = 0; weekIndex < 53; weekIndex++) {
-      const week = [];
-      for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
-        const date = new Date(start);
-        date.setDate(start.getDate() + weekIndex * 7 + dayIndex);
-        const dayKey = getLocalDateKey(date);
-        const outOfRange = date < rangeStart || date > today;
-        const count = outOfRange ? 0 : Number(activity[dayKey] || 0);
-        week.push({
-          date,
-          dateKey: dayKey,
-          count,
-          outOfRange,
-          intensity: getLevel(count),
-        });
-      }
-      weeks.push(week);
-    }
-
-    const monthLabels = weeks.map((week) => {
-      const firstOfMonth = week.find((item) => !item.outOfRange && item.date.getDate() === 1);
-      return firstOfMonth
-        ? firstOfMonth.date.toLocaleDateString(undefined, { month: "short" })
-        : "";
-    });
-    return { weeks, monthLabels };
-  }, [activity, dateKey]);
+  const activity =
+    publicHeatmap.username === selectedPublicUsername ? publicHeatmap.activity : EMPTY_ACTIVITY;
+  const activeDays = useMemo(
+    () => buildHeatmap({ activity, todayKey: todayDateKey }).activeDays,
+    [activity, todayDateKey],
+  );
 
   const customSheets = profile?.custom_sheets || EMPTY_SHEETS;
   const profileSheetStats = useMemo(
@@ -110,9 +59,6 @@ export default function PublicProfilePage({
       })),
     [profile?.custom_recent_accepted],
   );
-  const activeDays = heatmapData.weeks
-    .flat()
-    .filter((item) => !item.outOfRange && item.count > 0).length;
   const profileProblemsSolved = profileSheetStats.reduce((total, sheet) => total + sheet.solved, 0);
   const profileProblemsTotal = profileSheetStats.reduce((total, sheet) => total + sheet.total, 0);
   return (

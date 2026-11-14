@@ -208,6 +208,7 @@ export default function AuthenticatedApp({
     yearlyActiveDays,
   } = useProfileMetrics({
     availableSheets,
+    activityLog,
     progress,
     completedOn,
     completedAt,
