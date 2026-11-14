@@ -51,8 +51,11 @@ src/
       components/         Day and Full Log UI, inputs, cards, and styles
       hooks/              Log editing, persistence, history, and timers
       lib/                Daily-log model and cache
-    dashboard/            Signed-in screen composition and tracker controls
-    people/               People search and public profile screens
+    dashboard/            Authenticated app and screen composition
+      hooks/              Authenticated route state
+      components/         Tracker controls
+    people/                People search and public profile screens
+      hooks/              Search and public profile data
     problem-tracker/      Problem tree, progress, and filtering
     profile/              Profile screens, metrics, and progress backup
     sheets/               Track library, templates, and TXT parsing
@@ -69,17 +72,17 @@ supabase/migrations/      Database schema, policies, and SQL functions
 
 ### Ownership map
 
-| Area                  | Entry points                                                                                     | Owns                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| Authentication        | `src/App.jsx`, `src/features/auth/useAuthentication.js`                                          | Session lifecycle, sign-in, onboarding, and auth-screen selection.              |
-| Signed-in application | `src/features/dashboard/AuthenticatedApp.jsx`, `AuthenticatedScreens.jsx`                        | Compose feature hooks and select the active screen.                             |
-| Learning tracks       | `src/features/sheets/hooks/useSheetLibrary.js`, `src/features/sheets/utils/parseSheet.js`        | Load built-in templates, manage personal copies, and import text tracks.        |
-| Problem progress      | `src/features/problem-tracker/hooks/useProgress.js`, `useProblemTree.js`                         | Persist problem states and derive the searchable, filterable problem tree.      |
-| Daily Log             | `src/features/daily-log/hooks/useDailyLog.js`                                                    | Compose the daily editing, persistence, history, and timer hooks.               |
-| Profiles and people   | `src/features/profile/`, `src/features/people/`, `src/features/dashboard/usePeopleNavigation.js` | Owner profile metrics, public profile views, search, and profile navigation.    |
-| Activity analytics    | `src/features/activity/`                                                                         | Activity heatmaps and sleep/study charts.                                       |
-| Test data             | `src/features/testing/`                                                                          | Generate isolated sample history from the test-mode development server.         |
-| Shared platform code  | `src/shared/`                                                                                    | Supabase client, generic cache, common UI, and cross-feature date/time helpers. |
+| Area                  | Entry points                                                                                                  | Owns                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Authentication        | `src/App.jsx`, `src/features/auth/useAuthentication.js`                                                       | Session lifecycle, sign-in, onboarding, and auth-screen selection.                  |
+| Signed-in application | `src/features/dashboard/AuthenticatedApp.jsx`, `AuthenticatedScreens.jsx`                                     | Compose feature hooks and select the active screen.                                 |
+| Learning tracks       | `src/features/sheets/hooks/useSheetLibrary.js`, `src/features/sheets/utils/parseSheet.js`                     | Load built-in templates, manage personal copies, and import text tracks.            |
+| Problem progress      | `src/features/problem-tracker/hooks/useProgress.js`, `useProblemTree.js`                                      | Persist problem states and derive the searchable, filterable problem tree.          |
+| Daily Log             | `src/features/daily-log/hooks/useDailyLog.js`                                                                 | Compose the daily editing, persistence, history, and timer hooks.                   |
+| Profiles and people   | `src/features/profile/`, `src/features/people/`, `src/features/dashboard/hooks/useAuthenticatedNavigation.js` | Owner profile metrics, public profile views, search, and authenticated route state. |
+| Activity analytics    | `src/features/activity/`                                                                                      | Activity heatmaps and sleep/study charts.                                           |
+| Test data             | `src/features/testing/`                                                                                       | Generate isolated sample history from the test-mode development server.             |
+| Shared platform code  | `src/shared/`                                                                                                 | Supabase client, generic cache, common UI, and cross-feature date/time helpers.     |
 
 The Daily Log keeps styles close to the components they describe:
 `CustomDatePicker.css` styles the date picker, `TimeInput.css` styles the
@@ -113,9 +116,9 @@ authenticated screens within the signed-in application.
 ### Client routes
 
 Navigation uses the browser History API and a `popstate` listener rather than
-a routing package. `usePeopleNavigation` owns route state, history updates,
-people search, and public-profile loading; `AuthenticatedScreens` maps that
-state to screen components.
+a routing package. `useAuthenticatedNavigation` owns route state and history updates.
+`usePeopleSearch` and `usePublicProfile` own people search and public-profile
+data; `AuthenticatedScreens` maps the route state to screen components.
 
 | Path                              | Screen                                                           | Access                      |
 | --------------------------------- | ---------------------------------------------------------------- | --------------------------- |

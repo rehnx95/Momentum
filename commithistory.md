@@ -152,7 +152,7 @@ src/
 │   ├── activity/        heatmap, sleep/study charts
 │   ├── auth/            SignInPage, OnboardingPage, useAuthentication
 │   ├── daily-log/       components, 5 hooks, history cache, model
-│   ├── dashboard/       TrackerDashboard, AuthenticatedApp/Screens, usePeopleNavigation
+│   ├── dashboard/       TrackerDashboard, AuthenticatedApp/Screens, hooks/useAuthenticatedNavigation
 │   ├── people/          PeopleSearchPage, PublicProfilePage
 │   ├── problem-tracker/ ProblemTree, useProblemTree, useProgress
 │   ├── profile/         ProfilePage, ProfileSettings, metrics, backup

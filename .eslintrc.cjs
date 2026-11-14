@@ -13,10 +13,11 @@ module.exports = {
     },
   },
   extends: ["eslint:recommended"],
-  plugins: ["react-hooks"],
+  plugins: ["react", "react-hooks"],
   rules: {
     "no-control-regex": "off",
-    "no-unused-vars": "off",
+    "no-unused-vars": "error",
+    "react/jsx-uses-vars": "error",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
   },

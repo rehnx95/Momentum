@@ -1,16 +1,6 @@
 import AppHeader from "../../../shared/components/AppHeader";
 import Tooltip from "../../../shared/components/Tooltip";
-import {
-  ChevronDown,
-  Download,
-  Upload,
-  RefreshCcw,
-  Calendar,
-  Trophy,
-  Target,
-  Link2,
-  Pencil,
-} from "lucide-react";
+import { Calendar, Trophy, Target, Link2, Pencil } from "lucide-react";
 import StatStrip from "../../../shared/components/StatStrip";
 import ActivityHeatmap from "../../activity/components/ActivityHeatmap";
 import ProfileSheetProgress from "../components/ProfileSheetProgress";

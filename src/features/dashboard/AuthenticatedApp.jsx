@@ -4,11 +4,13 @@ import { getLocalDateKey } from "../../shared/utils/date";
 import { useProgress } from "../problem-tracker/hooks/useProgress";
 import useProfileMetrics from "../profile/hooks/useProfileMetrics";
 import useProgressBackup from "../profile/hooks/useProgressBackup";
+import usePeopleSearch from "../people/hooks/usePeopleSearch";
+import usePublicProfile from "../people/hooks/usePublicProfile";
 import useSheetLibrary from "../sheets/hooks/useSheetLibrary";
 import useProblemTree from "../problem-tracker/hooks/useProblemTree";
 import { isTestDataToolsEnabled } from "../testing/lib/testDataMode";
 import AuthenticatedScreens from "./AuthenticatedScreens";
-import usePeopleNavigation from "./usePeopleNavigation";
+import useAuthenticatedNavigation from "./hooks/useAuthenticatedNavigation";
 
 const SampleDataTools = lazy(() => import("../testing/components/SampleDataTools"));
 
@@ -98,29 +100,41 @@ export default function AuthenticatedApp({
   const handleRemoveSheet = (sheet) => removeSheet(sheet, reset);
   const [todayDateKey, setTodayDateKey] = useState(() => getLocalDateKey(new Date()));
   const {
-    copiedProfileLink,
-    copyPublicProfileLink,
     dailyLogPage,
     navigateTo,
-    openPublicProfile,
-    peopleSearchError,
-    peopleSearchLoading,
     peopleSearchPage,
-    peopleSearchQuery,
-    peopleSearchResults,
-    setPeopleSearchQuery,
-    publicHeatmap,
-    publicHeatmapYear,
-    publicProfile,
-    publicProfileError,
-    publicProfileLoading,
+    openPublicProfile: navigateToPublicProfile,
     publicProfileReturnPath,
     returnFromPublicProfile,
     selectedPublicUsername,
-    setPublicHeatmapYear,
     showProfile,
     showSettings,
-  } = usePeopleNavigation();
+  } = useAuthenticatedNavigation();
+  const {
+    clearSearch,
+    error: peopleSearchError,
+    loading: peopleSearchLoading,
+    query: peopleSearchQuery,
+    results: peopleSearchResults,
+    setQuery: setPeopleSearchQuery,
+  } = usePeopleSearch(peopleSearchPage);
+  const {
+    copiedProfileLink,
+    copyProfileLink: copyPublicProfileLink,
+    error: publicProfileError,
+    heatmap: publicHeatmap,
+    heatmapYear: publicHeatmapYear,
+    loading: publicProfileLoading,
+    profile: publicProfile,
+    setHeatmapYear: setPublicHeatmapYear,
+  } = usePublicProfile(selectedPublicUsername);
+  const openPublicProfile = useCallback(
+    (username) => {
+      clearSearch();
+      navigateToPublicProfile(username);
+    },
+    [clearSearch, navigateToPublicProfile],
+  );
   const [ownHeatmapYear, setOwnHeatmapYear] = useState(null);
 
   useEffect(() => {
