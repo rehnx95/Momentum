@@ -72,9 +72,8 @@ export default function useDailyLog(user, activityLog = {}) {
   const reportActivityColorError = useCallback(
     (message) => {
       setMessage(message);
-      setStatus(message.startsWith("Could not load") ? "Could not load" : "Could not save");
     },
-    [setMessage, setStatus],
+    [setMessage],
   );
   const {
     activityColors,

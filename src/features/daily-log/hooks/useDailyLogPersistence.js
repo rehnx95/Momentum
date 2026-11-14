@@ -87,7 +87,13 @@ export default function useDailyLogPersistence({
           console.error("Failed to save daily log:", error);
           if (nextDate === dateRef.current) {
             setStatus("Could not save");
-            setMessage("Could not save this daily log. Your edits are still here.");
+            const details =
+              error && typeof error === "object"
+                ? [error.message, error.code].filter((value) => typeof value === "string").join(" ")
+                : "";
+            setMessage(
+              `Could not save this daily log. Your edits are still here.${details ? ` ${details}` : ""}`,
+            );
           }
           return false;
         } finally {

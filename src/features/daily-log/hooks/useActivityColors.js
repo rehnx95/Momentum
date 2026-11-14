@@ -8,7 +8,11 @@ export default function useActivityColors(userId, onError) {
   const reportError = useCallback(
     (message, error) => {
       console.error(message, error);
-      onError?.(message);
+      const details =
+        error && typeof error === "object"
+          ? [error.message, error.code].filter((value) => typeof value === "string").join(" ")
+          : "";
+      onError?.(details ? `${message} ${details}` : message);
     },
     [onError],
   );

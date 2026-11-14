@@ -125,4 +125,67 @@ describe("useDailyLogPersistence", () => {
     expect(setStatus).toHaveBeenCalledWith("Saved");
     expect(setLoading).toHaveBeenCalled();
   });
+
+  it("includes the Supabase error code when a daily log save fails", async () => {
+    const setStatus = vi.fn();
+    const setMessage = vi.fn();
+    const date = "2025-03-14";
+    const logRef = {
+      current: { date, sleep_time: "", wake_time: "", custom_tasks: [] },
+    };
+    const savedSnapshotRef = { current: JSON.stringify(logRef.current) };
+    const upsert = vi.fn().mockResolvedValue({
+      error: { code: "42501", message: "new row violates row-level security policy" },
+    });
+    fromMock.mockImplementation(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+      upsert,
+    }));
+    let hookResult;
+
+    function HookHarness() {
+      hookResult = useDailyLogPersistence({
+        date,
+        dateRef: { current: date },
+        dirty: false,
+        loadFailed: false,
+        loadRequest: 0,
+        loading: false,
+        log: logRef.current,
+        logRef,
+        savedSnapshotRef,
+        setLoadFailed: vi.fn(),
+        setLoading: vi.fn(),
+        setLog: vi.fn(),
+        setMessage,
+        setSavedSnapshot: vi.fn(),
+        setStatus,
+        userId: "user-1",
+        validationErrors: [],
+      });
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    let result;
+    await act(async () => {
+      result = await hookResult.saveLog(
+        {
+          ...logRef.current,
+          custom_tasks: [{ id: "task-1", name: "Reading", slots: [{ start: "", end: "" }] }],
+        },
+        date,
+      );
+    });
+
+    expect(result).toBe(false);
+    expect(setMessage).toHaveBeenCalledWith(expect.stringContaining("42501"));
+  });
 });
