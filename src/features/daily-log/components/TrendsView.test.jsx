@@ -67,14 +67,18 @@ describe("TrendsView", () => {
     };
     chooseChart("Active");
     expect(screen.getByRole("img", { name: /Active hours over the last 30 days/ })).toBeTruthy();
+    expect(container.querySelector(".study-average").getAttribute("data-average")).toBe("120");
     chooseChart("Sleep + Active");
     expect(
       screen.getByRole("img", { name: /Sleep \+ active hours over the last 30 days/ }),
     ).toBeTruthy();
+    expect(container.querySelectorAll(".sleep-study-average-line")).toHaveLength(2);
     expect(screen.getByText("Active", { selector: ".sleep-study-legend span" })).toBeTruthy();
 
     chooseChart("Reading");
     expect(screen.getByRole("img", { name: /Reading hours over the last 30 days/ })).toBeTruthy();
+    expect(container.querySelector(".study-average").getAttribute("data-average")).toBe("60");
+    expect(screen.getByText("Average Reading")).toBeTruthy();
 
     const chartRange = container.querySelector(
       ".trends-month-navigation .trends-range-label",
@@ -91,7 +95,7 @@ describe("TrendsView", () => {
     expect(container.querySelector(".trends-chart-summary").textContent).toContain("avg active");
     expect(container.querySelector(".trends-time-total").textContent).toMatch(/total$/);
     expect(container.querySelector(".trends-time-percentage").textContent).toMatch(/%$/);
-    expect(container.querySelector(".sleep-study-legend")).toBeNull();
+    expect(container.querySelector(".sleep-study-legend")).toBeTruthy();
     expect(container.textContent).not.toContain("Current streak");
     expect(container.textContent).not.toContain("Daily totals");
 

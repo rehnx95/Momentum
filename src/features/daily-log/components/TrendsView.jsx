@@ -152,7 +152,7 @@ export default function TrendsView({ daily }) {
   );
   const chartMode = chartModes.find(({ id }) => id === chartSelection) || chartModes[1];
 
-  const { chartDays, chartRangeLabel, chartSummary, chartStartKey } = useMemo(() => {
+  const { chartDays, chartAverages, chartRangeLabel, chartSummary, chartStartKey } = useMemo(() => {
     const logsByDate = new Map(allLogs.map((log) => [log.date, log]));
     const windowEnd = new Date(`${todayKey}T00:00:00`);
     windowEnd.setDate(windowEnd.getDate() + chartOffset * CHART_WINDOW_DAYS);
@@ -179,6 +179,14 @@ export default function TrendsView({ daily }) {
         study: log ? activeMinutes : null,
       };
     });
+    const chartAverages = chartMode.series.flatMap((key) => {
+      const values = chartDays.map((day) => day[key]).filter((value) => value !== null);
+      if (!values.length) return [];
+      const label = key === "sleep" ? "Sleep" : chartMode.activityName || "Active";
+      return [
+        { key, value: values.reduce((total, value) => total + value, 0) / values.length, label },
+      ];
+    });
     const sleepLogs = logsInRange.filter((log) => log.sleep_time && log.wake_time);
     const averageSleep = sleepLogs.length
       ? sleepLogs.reduce((total, log) => total + getSleepMinutes(log), 0) / sleepLogs.length
@@ -197,6 +205,7 @@ export default function TrendsView({ daily }) {
 
     return {
       chartDays,
+      chartAverages,
       chartRangeLabel: formatRangeLabel(windowStart, windowEnd),
       chartStartKey: dateKey(windowStart),
       chartSummary: {
@@ -332,7 +341,7 @@ export default function TrendsView({ daily }) {
           </div>
         </div>
         <div className="sleep-study-tabpanel trends-chart-panel">
-          {legendItems.length > 1 && (
+          {(legendItems.length > 1 || chartAverages.length > 0) && (
             <div className="sleep-study-legend" aria-label="Chart legend">
               {legendItems.map(({ key, label }) => (
                 <span key={key}>
@@ -348,6 +357,12 @@ export default function TrendsView({ daily }) {
                   {label}
                 </span>
               ))}
+              {chartAverages.map(({ key, label }) => (
+                <span key={`${key}-average`}>
+                  <i className="sleep-study-legend-swatch average" aria-hidden="true" />
+                  Average {label}
+                </span>
+              ))}
             </div>
           )}
           <SleepStudyGraph
@@ -356,6 +371,7 @@ export default function TrendsView({ daily }) {
             series={chartMode.series}
             seriesLabels={seriesLabels}
             activityColor={activityColor}
+            averages={chartAverages}
             showAllDays
             chartHeightOverride={315}
           />

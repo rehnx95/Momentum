@@ -77,6 +77,7 @@
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   background: var(--surface-raised);
+  --average-chart-color: #f59e0b;
 }
 
 .sleep-study-legend {
@@ -106,6 +107,13 @@
 
 .sleep-study-legend-swatch.study {
   background: var(--study-chart-color);
+}
+
+.sleep-study-legend-swatch.average {
+  width: 1rem;
+  height: 0;
+  border-top: 2px dotted var(--average-chart-color);
+  border-radius: 0;
 }
 
 .sleep-study-chart {
@@ -139,6 +147,16 @@
   stroke: var(--muted);
   stroke-opacity: 0.3;
   stroke-width: 1;
+}
+
+.sleep-study-average-line {
+  fill: none;
+  stroke: var(--average-chart-color);
+  stroke-width: 2;
+  stroke-dasharray: 2 5;
+  stroke-linecap: round;
+  opacity: 0.85;
+  vector-effect: non-scaling-stroke;
 }
 
 .sleep-study-line {

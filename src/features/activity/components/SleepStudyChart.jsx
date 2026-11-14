@@ -39,6 +39,7 @@ export function SleepStudyGraph({
   series,
   seriesLabels = {},
   activityColor,
+  averages = [],
   showAllDays = false,
   chartHeightOverride,
 }) {
@@ -136,6 +137,18 @@ export function SleepStudyGraph({
               </g>
             );
           })}
+          {averages.map(({ key, value, label }) => (
+            <line
+              key={`${key}-average`}
+              className={`sleep-study-average-line ${key}-average`}
+              x1={PLOT.left}
+              x2={chartWidth - PLOT.right}
+              y1={yFor(value)}
+              y2={yFor(value)}
+              data-average={value}
+              aria-label={`${label} average: ${formatHours(value)}`}
+            />
+          ))}
           {series.map((key) => {
             const seriesLabel = seriesLabels[key] || key;
             const colorClass = `${key}-series`;
