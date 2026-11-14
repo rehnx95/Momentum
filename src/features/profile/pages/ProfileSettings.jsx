@@ -5,8 +5,6 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
   const [form, setForm] = useState({
     name: profile?.name || '',
     username: profile?.username || '',
-    location: profile?.location || '',
-    website: profile?.website || '',
   });
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -68,8 +66,6 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
     const values = {
       name: form.name.trim(),
       username: form.username.trim().toLowerCase(),
-      location: form.location.trim(),
-      website: form.website.trim(),
     };
 
     if (!values.name) {
@@ -80,16 +76,6 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
       setErrorMessage('Username must be 3–45 characters using lowercase letters, numbers, and hyphens.');
       return;
     }
-    if (values.website) {
-      try {
-        const websiteUrl = new URL(values.website);
-        if (!['http:', 'https:'].includes(websiteUrl.protocol)) throw new Error('Invalid URL protocol');
-      } catch {
-        setErrorMessage('Enter a valid website URL starting with http:// or https://.');
-        return;
-      }
-    }
-
     setIsSaving(true);
     setErrorMessage('');
     setSuccessMessage('');
@@ -151,8 +137,6 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
           {[
             { name: 'name', label: 'Name', type: 'text', required: true, maxLength: 100 },
             { name: 'username', label: 'Username', type: 'text', required: true, maxLength: 45 },
-            { name: 'location', label: 'Location', type: 'text', maxLength: 100 },
-            { name: 'website', label: 'Website / URL', type: 'url', placeholder: 'https://example.com', maxLength: 2048 },
           ].map(field => (
             <div key={field.name}>
               <label htmlFor={`profile-${field.name}`} className="mb-1.5 block text-sm font-medium">

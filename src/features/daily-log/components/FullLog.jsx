@@ -232,12 +232,24 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                         weekday: "short",
                       })}
                     </span>
-                    <strong>
+                    <button
+                      type="button"
+                      className="full-log-date-button"
+                      aria-label={`Open daily log for ${new Date(`${row.date}T00:00:00`).toLocaleDateString()}`}
+                      onClick={async () => {
+                        if (
+                          row.date === daily.date ||
+                          await daily.changeDate(row.date)
+                        ) {
+                          await daily.changeViewMode("daily");
+                        }
+                      }}
+                    >
                       {new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
                         day: "numeric",
                         month: "short",
                       })}
-                    </strong>
+                    </button>
                   </span>
                   <FullLogTimeline
                     row={row}

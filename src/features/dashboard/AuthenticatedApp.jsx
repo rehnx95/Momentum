@@ -181,8 +181,6 @@ export default function AuthenticatedApp({
     user.user_metadata?.name ||
     "User";
   const userUsername = profile?.username || "";
-  const userLocation = profile?.location || "";
-  const userWebsite = profile?.website || "";
   const testDataTools = isTestDataToolsEnabled ? (
     <Suspense fallback={null}>
       <SampleDataTools
@@ -305,10 +303,8 @@ export default function AuthenticatedApp({
     uploadSheetInput,
     uploadingSheet,
     user,
-    userLocation,
     userName,
     userUsername,
-    userWebsite,
     yearlyActiveDays,
   };
 

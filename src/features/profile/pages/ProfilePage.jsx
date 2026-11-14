@@ -35,10 +35,8 @@ export default function ProfilePage({ context }) {
       showNotice,
       todayDateKey,
       user,
-      userLocation,
       userName,
       userUsername,
-      userWebsite,
       yearlyActiveDays,
     } = context;
     return (
@@ -73,32 +71,6 @@ export default function ProfilePage({ context }) {
                       <p className="mt-1 break-all text-sm text-[#A1A1A1]">
                         {user.email}
                       </p>
-                    )}
-                    {userLocation && (
-                      <div className="mt-3 flex items-center gap-2 text-sm text-[#A1A1A1]">
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                          <circle cx="12" cy="10" r="3" />
-                        </svg>
-                        {userLocation}
-                      </div>
-                    )}
-                    {userWebsite && (
-                      <a
-                        href={userWebsite}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-block break-all text-sm text-[#A1A1A1] hover:text-white hover:underline"
-                      >
-                        {userWebsite}
-                      </a>
                     )}
                   </div>
                 </div>

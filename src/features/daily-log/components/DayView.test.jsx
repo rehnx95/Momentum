@@ -73,6 +73,7 @@ describe("DayView activity entry", () => {
     );
 
     expect(screen.getByText("Reading", { selector: ".activity-card-name" })).toBeTruthy();
+    expect(screen.queryByText("1 slot")).toBeNull();
     expect(screen.getByRole("button", { name: "Add slot to Reading" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Remove Reading activity" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Remove Reading slot 1" })).toBeTruthy();

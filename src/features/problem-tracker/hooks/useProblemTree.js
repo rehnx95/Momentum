@@ -196,7 +196,7 @@ export default function useProblemTree({ data, progress, getState, update }) {
   const chipActive = (type) =>
     activeFilter === type
       ? "bg-[#EDEDED] text-black"
-      : "bg-[#0A0A0A] text-[#A1A1A1] hover:text-white";
+      : "bg-transparent text-[#A1A1A1] hover:bg-[#1f1f1f] hover:text-white";
 
   return {
     search,

@@ -112,12 +112,38 @@
 }
 
 .daily-log-page-shell .daily-day-header {
-  justify-content: flex-end;
+  justify-content: flex-start;
   margin: 0;
 }
 
 .daily-log-page-shell .daily-date-nav {
   gap: 0.5rem;
+}
+
+.daily-log-page-shell .date-navigation-arrow {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.daily-log-page-shell .date-navigation-trigger {
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
 }
 
 .daily-log-page-shell .daily-date-nav > button,
@@ -172,7 +198,13 @@
   padding: 0.2rem 0 0.9rem;
 }
 
-.daily-log-page-shell .daily-entry-heading h3,
+.daily-log-page-shell .daily-entry-heading h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
 .daily-log-page-shell .quick-log-card h3,
 .daily-log-page-shell .daily-sleep-header h3 {
   margin: 0;
@@ -192,7 +224,7 @@
 
 .daily-log-page-shell .activity-card {
   display: grid;
-  grid-template-columns: minmax(9rem, 170px) minmax(0, 1fr) 4.5rem 4.25rem;
+  grid-template-columns: minmax(0, 1fr) 4.5rem 4.25rem;
   align-items: start;
   column-gap: 0.4rem;
   min-height: 0;
@@ -209,6 +241,8 @@
 
 .daily-log-page-shell .activity-card-identity {
   display: grid;
+  grid-column: 1;
+  grid-row: 1;
   min-width: 0;
   gap: 0.2rem;
 }
@@ -230,8 +264,8 @@
   min-width: 0;
   overflow: hidden;
   color: var(--text);
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 1.15rem;
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -247,7 +281,6 @@
   line-height: 1.25;
 }
 
-.daily-log-page-shell .activity-slot-count,
 .daily-log-page-shell .activity-from-sheet {
   margin: 0;
   padding: 0;
@@ -258,10 +291,6 @@
   font-size: inherit;
   font-weight: 400;
   white-space: nowrap;
-}
-
-.daily-log-page-shell .activity-slot-count::after {
-  content: none;
 }
 
 .daily-log-page-shell .activity-card-meta > :not(:first-child)::before {
@@ -288,14 +317,16 @@
 }
 
 .daily-log-page-shell .daily-slot-list {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(10.75rem, 1fr));
   min-width: 0;
-  flex-wrap: wrap;
   align-items: flex-start;
   gap: 0.4rem;
 }
 
 .daily-log-page-shell .activity-card .daily-slot-list {
+  grid-column: 1 / -1;
+  grid-row: 2;
   margin-left: 0;
   padding-left: 0;
   border-left: 0;
@@ -303,14 +334,13 @@
 
 .daily-log-page-shell .daily-slot-row {
   display: inline-flex;
-  width: 12.5rem;
-  min-width: 12.5rem;
-  max-width: 100%;
+  width: 100%;
+  min-width: 0;
   min-height: 2rem;
   align-items: center;
   justify-content: space-between;
   gap: 0.35rem;
-  padding: 0.1rem 0.35rem 0.1rem 0.55rem;
+  padding: 0.1rem 0.25rem 0.1rem 0.4rem;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   background: var(--surface);
@@ -329,7 +359,7 @@
 }
 
 .daily-log-page-shell .daily-slot-row .time-input {
-  width: 2.65rem;
+  width: 2.4rem;
   min-width: 0;
   height: 1.5rem;
   min-height: 1.5rem;
@@ -341,7 +371,7 @@
 }
 
 .daily-log-page-shell .daily-slot-row .time-input input {
-  width: 1.1rem;
+  width: 1.05rem;
   font-size: inherit;
 }
 
@@ -366,15 +396,17 @@
 }
 
 .daily-log-page-shell .daily-slot-row .slot-hours {
-  flex: 0 0 3.7rem;
+  flex: 0 0 2.8rem;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   text-align: right;
   white-space: nowrap;
 }
 
 .daily-log-page-shell .activity-total {
+  grid-column: 2;
+  grid-row: 1;
   justify-self: end;
   margin: 0;
   padding: 0.1rem 0;
@@ -385,6 +417,8 @@
 }
 
 .daily-log-page-shell .activity-card-actions {
+  grid-column: 3;
+  grid-row: 1;
   display: flex;
   justify-content: flex-end;
   gap: 0.15rem;
@@ -473,21 +507,31 @@
 }
 
 .daily-log-page-shell .daily-sleep-time-range {
-  gap: 0.4rem;
-}
-
-.daily-log-page-shell .daily-sleep-time-range .time-input {
-  width: 5rem;
-  flex: 0 0 5rem;
-  min-height: 2.25rem;
-  border-color: var(--border);
-  border-radius: 0.6rem;
+  width: fit-content;
+  max-width: 100%;
+  gap: 0.2rem;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
   background: var(--surface);
 }
 
+.daily-log-page-shell .daily-sleep-time-range .time-input {
+  width: 3rem;
+  min-width: 0;
+  height: 1.8rem;
+  min-height: 1.8rem;
+  flex: none;
+  gap: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 14px;
+}
+
 .daily-log-page-shell .daily-sleep-time-range .time-input input {
-  width: 1.1rem;
-  font-size: 13px;
+  width: 1.3rem;
+  font-size: inherit;
 }
 
 .daily-log-page-shell .daily-sleep-time-separator {
@@ -518,7 +562,7 @@
 }
 
 .daily-log-page-shell .full-log-filter-dropdown {
-  width: 7.8rem;
+  width: min(9.5rem, 100%);
   flex: none;
 }
 
@@ -655,8 +699,9 @@
 }
 
 .daily-log-page-shell .trends-chart-header label {
-  width: 5.5rem;
-  flex: 0 0 5.5rem;
+  width: min(11rem, 42%);
+  min-width: 7rem;
+  flex: 0 1 11rem;
 }
 
 .daily-log-page-shell .trends-chart-header .trends-activity-select {
@@ -679,34 +724,60 @@
 
 .daily-log-page-shell .trends-month-navigation,
 .daily-log-page-shell .trends-week-navigation {
-  gap: 0.6rem;
-}
-
-.daily-log-page-shell .trends-month-navigation > button,
-.daily-log-page-shell .trends-week-navigation > button {
-  width: 2.25rem;
-  height: 2.25rem;
-  border: 1px solid var(--border);
-  border-radius: 0.65rem;
-  background: var(--surface);
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .daily-log-page-shell .trends-range-label {
-  min-width: 10rem;
-  color: var(--text);
+  display: grid;
+  width: auto;
+  min-width: 8.5rem;
+  min-height: 36px;
+  place-items: center;
+  padding-inline: 0.5rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.daily-log-page-shell .trends-chart-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-width: min(23rem, 52%);
+  gap: 0;
+  padding: 0;
+  border-inline: 1px solid var(--border);
+  color: var(--muted);
   font-size: 13px;
   text-align: center;
 }
 
-.daily-log-page-shell .trends-chart-summary {
-  gap: 1rem;
-  color: var(--muted);
-  font-size: 13px;
+.daily-log-page-shell .trends-chart-summary > span {
+  display: grid;
+  align-content: center;
+  gap: 0.05rem;
+  padding: 0 0.55rem;
+  line-height: 1.1;
+}
+
+.daily-log-page-shell .trends-chart-summary > span + span {
+  border-left: 1px solid var(--border);
 }
 
 .daily-log-page-shell .trends-chart-summary strong {
   color: var(--text);
+  font-size: 1.05rem;
   font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.daily-log-page-shell .trends-chart-summary small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .daily-log-page-shell .trends-chart-panel {
@@ -808,8 +879,14 @@
   }
 
   .daily-log-page-shell .activity-card {
-    grid-template-columns: minmax(8rem, 170px) minmax(0, 1fr) 4.5rem 4.25rem;
-    column-gap: 1rem;
+    grid-template-columns: minmax(0, 1fr) 4.5rem 4.25rem;
+    column-gap: 0.4rem;
+  }
+}
+
+@media (min-width: 981px) and (max-width: 1200px) {
+  .daily-log-page-shell .daily-slot-list {
+    grid-template-columns: repeat(2, minmax(10.75rem, 1fr));
   }
 }
 
@@ -849,6 +926,10 @@
   .daily-log-page-shell .activity-card {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 0.65rem 0.75rem;
+  }
+
+  .daily-log-page-shell .daily-slot-list {
+    grid-template-columns: repeat(3, minmax(10.75rem, 1fr));
   }
 
   .daily-log-page-shell .activity-card-identity {
@@ -893,8 +974,8 @@
   }
 
   .daily-log-page-shell .trends-chart-summary {
-    flex-wrap: wrap;
-    gap: 0.45rem 0.75rem;
+    min-width: 100%;
+    width: 100%;
   }
 
   .daily-log-page-shell .trends-time-header {
@@ -905,5 +986,17 @@
   .daily-log-page-shell .trends-week-navigation {
     width: 100%;
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 630px) {
+  .daily-log-page-shell .daily-slot-list {
+    grid-template-columns: repeat(2, minmax(10.75rem, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .daily-log-page-shell .daily-slot-list {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

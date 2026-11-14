@@ -22,7 +22,7 @@ html {
   align-items: center;
   gap: 1rem;
   height: var(--header-h);
-  max-width: 80rem;
+  max-width: 1200px;
   margin-inline: auto;
   padding-inline: 1rem;
 }
@@ -87,7 +87,9 @@ html {
 
 .app-nav button {
   display: flex;
+  flex: 0 0 7rem;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   height: 2.25rem;
   padding: 0 0.75rem;
@@ -95,6 +97,7 @@ html {
   color: var(--muted);
   font-size: 0.875rem;
   font-weight: 500;
+  white-space: nowrap;
   transition: background-color 0.15s, color 0.15s;
 }
 
@@ -133,7 +136,7 @@ html {
 }
 
 .app-page {
-  max-width: 80rem;
+  max-width: 1200px;
   margin-inline: auto;
   padding: 1.5rem 1rem 3rem;
 }

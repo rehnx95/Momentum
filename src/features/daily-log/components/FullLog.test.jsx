@@ -1,6 +1,13 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getLocalDateKey } from "../../../shared/utils/date";
 import FullLog from "./FullLog";
@@ -68,6 +75,36 @@ describe("FullLog", () => {
     expect(within(screen.getByRole("group", { name: "Activity colors" }))
       .getByText("Reading")).toBeTruthy();
     expect(container.querySelector(".full-log-day-weekday")).toBeTruthy();
+  });
+
+  it("opens the selected date in the daily log", async () => {
+    const date = getLocalDateKey();
+    const daily = {
+      date: "2024-01-01",
+      allLogs: [{
+        date,
+        sleep_time: "",
+        wake_time: "",
+        custom_tasks: [],
+      }],
+      problemCounts: {},
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+      changeDate: vi.fn(async () => true),
+      changeViewMode: vi.fn(),
+    };
+    render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", {
+      name: `Open daily log for ${new Date(`${date}T00:00:00`).toLocaleDateString()}`,
+    }));
+
+    expect(daily.changeDate).toHaveBeenCalledWith(date);
+    await waitFor(() => {
+      expect(daily.changeViewMode).toHaveBeenCalledWith("daily");
+    });
   });
 
   it("renders icon-only history actions in the supplied toolbar target", () => {

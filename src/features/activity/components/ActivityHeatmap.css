@@ -33,7 +33,7 @@
   padding: 0.35rem 0.55rem;
   border: 1px solid var(--hm-border);
   border-radius: 0.45rem;
-  background: var(--hm-hover);
+  background: var(--hm-surface);
   color: var(--hm-text);
   font: inherit;
   font-size: 0.75rem;

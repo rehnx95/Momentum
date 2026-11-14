@@ -86,10 +86,11 @@ function RangeNavigation({
   loading,
 }) {
   return (
-    <div className={className} role="group" aria-label={label}>
+    <div className={`${className} daily-date-nav`} role="group" aria-label={label}>
       <Tooltip label={previousLabel}>
         <button
           type="button"
+          className="date-navigation-arrow"
           aria-label={previousLabel}
           onClick={onPrevious}
           disabled={loading}
@@ -97,10 +98,11 @@ function RangeNavigation({
           <ChevronLeft size={14} aria-hidden="true" />
         </button>
       </Tooltip>
-      <span className="trends-range-label">{rangeLabel}</span>
+      <span className="date-navigation-trigger trends-range-label">{rangeLabel}</span>
       <Tooltip label={nextLabel}>
         <button
           type="button"
+          className="date-navigation-arrow"
           aria-label={nextLabel}
           onClick={onNext}
           disabled={nextDisabled || loading}
@@ -337,9 +339,9 @@ export default function TrendsView({ daily }) {
             loading={olderLogsLoading}
           />
           <div className="trends-chart-summary" aria-label="30-day summary">
-            <span><strong>{chartSummary.daysLogged}</strong> days logged</span>
-            <span><strong>{chartSummary.averageSleep}</strong> avg sleep</span>
-            <span><strong>{chartSummary.averageActive}</strong> avg active</span>
+            <span><strong>{chartSummary.daysLogged}</strong><small>days logged</small></span>
+            <span><strong>{chartSummary.averageSleep}</strong><small>avg sleep</small></span>
+            <span><strong>{chartSummary.averageActive}</strong><small>avg active</small></span>
           </div>
         </div>
         <div className="sleep-study-tabpanel trends-chart-panel">

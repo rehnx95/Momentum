@@ -215,15 +215,15 @@ export default function TrackerDashboard({ context }) {
             </div>
           </section>
           <aside className="tracker-side hidden lg:block space-y-3">
-            <div className="surface-card bg-[#0A0A0A] rounded-2xl border border-[#262626] p-6 relative">
-              <div className="mb-4">
+            <div className="tracker-sheet-progress surface-card bg-[#0A0A0A] rounded-2xl border border-[#262626] p-4 relative">
+              <div className="mb-3">
                 <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
                   {selectedSheet?.title || "Sheet"} progress
                 </h3>
               </div>
               <div className="mb-2">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-bold text-white tabular-nums">
+                  <span className="text-4xl font-bold text-white tabular-nums">
                     {totalProblems > 0
                       ? Math.round((doneCount / totalProblems) * 100)
                       : 0}
@@ -244,8 +244,8 @@ export default function TrackerDashboard({ context }) {
                   />
                 </div>
               </div>
-              <div className="mt-5 pt-4 border-t border-zinc-800/50">
-                <div className="grid grid-cols-3 gap-3 mb-3">
+              <div className="mt-3 pt-3 border-t border-zinc-800/50">
+                <div className="grid grid-cols-3 gap-2 mb-3">
                   <div className="text-center">
                     <div className="text-lg font-bold text-white tabular-nums">
                       {doneCount}

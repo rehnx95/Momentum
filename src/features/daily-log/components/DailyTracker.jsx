@@ -22,7 +22,7 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
   const subtitle = daily.viewMode === "daily"
     ? `Where your hours went on ${new Date(`${daily.date}T00:00:00`).toLocaleDateString(undefined, { weekday: "long" })}.`
     : daily.viewMode === "full"
-      ? "Every day at a glance. Sleep in grey, activity in color."
+      ? "Every day at a glance."
       : "How your days add up over time.";
 
   return (

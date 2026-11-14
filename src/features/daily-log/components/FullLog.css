@@ -104,6 +104,26 @@
   font-weight: 700;
 }
 
+.full-log-date-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.full-log-date-button:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.full-log-date-button:focus-visible {
+  border-radius: 0.2rem;
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
+}
+
 .full-log-sleep-total,
 .full-log-active-total {
   font-size: 0.82rem;

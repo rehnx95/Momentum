@@ -1026,14 +1026,6 @@
   height: 1.45rem;
 }
 
-.activity-slot-count {
-  padding: 0.1rem 0.55rem;
-  border-radius: 999px;
-  background: var(--surface-hover);
-  color: var(--muted);
-  font-size: 0.7rem;
-}
-
 .activity-total {
   justify-self: end;
   margin-left: auto;

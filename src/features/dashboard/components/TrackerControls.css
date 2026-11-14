@@ -22,9 +22,9 @@
 
 .tracker-filter-group {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.15rem;
   padding: 0.2rem;
   border: 1px solid var(--border);
   border-radius: 0.7rem;
@@ -35,17 +35,14 @@
   background-color: #000000 !important;
 }
 
-.tracker-dashboard-shell:not([data-theme="light"]) .tracker-skip-toggle[aria-pressed="false"] {
-  background-color: #000000 !important;
-}
-
 .tracker-dashboard-shell:not([data-theme="light"]) .tracker-skip-toggle[aria-pressed="false"]:hover {
   background-color: #1f1f1f !important;
 }
 
 .tracker-filter-group > button {
   display: flex;
-  width: 4.25rem;
+  min-width: 4rem;
+  flex: 1 1 auto;
   height: 2rem;
   align-items: center;
   justify-content: center;
@@ -59,11 +56,8 @@
 }
 
 .tracker-skip-toggle {
-  min-height: 2.5rem;
-  gap: 0.45rem;
-  padding-inline: 0.8rem;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  min-height: 2rem;
+  white-space: nowrap;
 }
 
 @media (max-width: 767px) {
@@ -77,22 +71,19 @@
   }
 
   .tracker-filter-set {
-    display: grid;
+    display: block;
     grid-area: filters;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 0.35rem;
     width: 100%;
   }
 
   .tracker-filter-group {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 0.15rem;
     min-width: 0;
   }
 
   .tracker-filter-group > button {
-    width: 100%;
     min-width: 0;
     height: 2rem;
     padding-inline: 0.25rem;
@@ -100,14 +91,13 @@
   }
 
   .tracker-skip-toggle {
-    min-height: 2.5rem;
-    padding-inline: 0.6rem;
+    min-height: 2rem;
+    padding-inline: 0.15rem !important;
+    font-size: 0.68rem !important;
   }
 
   .tracker-skip-toggle svg {
-    width: 0.8rem;
-    height: 0.8rem;
-    flex: none;
+    display: none;
   }
 
   .tracker-bulk-actions {

@@ -107,6 +107,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
         <div className="daily-date-nav">
           <button
             type="button"
+            className="date-navigation-arrow"
             aria-label="Previous day"
             disabled={daily.loading}
             onClick={() => daily.shiftDate(-1)}
@@ -121,6 +122,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
           />
           <button
             type="button"
+            className="date-navigation-arrow"
             aria-label="Next day"
             disabled={daily.loading || daily.date >= getLocalDateKey()}
             onClick={() => daily.shiftDate(1)}

@@ -94,6 +94,36 @@ describe("segmented time input keyboard controls", () => {
     expect(onEndChange).toHaveBeenLastCalledWith("10:45");
   });
 
+  it("auto-advances across the sleep time segments", () => {
+    const onSleepChange = vi.fn();
+    const onWakeChange = vi.fn();
+    render(createElement(
+      "div",
+      { className: "daily-sleep-time-range" },
+      createElement(TimeInput, {
+        label: "Sleep time",
+        value: "",
+        onChange: onSleepChange,
+        showPlaceholder: true,
+      }),
+      createElement(TimeInput, {
+        label: "Wake time",
+        value: "",
+        onChange: onWakeChange,
+        showPlaceholder: true,
+      }),
+    ));
+    const sleepHour = screen.getByRole("textbox", { name: "Sleep time hour" });
+    const sleepMinute = screen.getByRole("textbox", { name: "Sleep time minute" });
+    const wakeHour = screen.getByRole("textbox", { name: "Wake time hour" });
+
+    fireEvent.change(sleepHour, { target: { value: "22" } });
+    expect(document.activeElement).toBe(sleepMinute);
+    fireEvent.change(sleepMinute, { target: { value: "30" } });
+    expect(document.activeElement).toBe(wakeHour);
+    expect(onSleepChange).toHaveBeenLastCalledWith("22:30");
+  });
+
   it("commits the current time when Enter is pressed", () => {
     const onChange = vi.fn();
     const onSaveNow = vi.fn();

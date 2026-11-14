@@ -23,7 +23,7 @@ export function ProblemRow({ prob, state, onToggle, onSkip }) {
 
   return (
     <div
-      className={`problem-row group flex items-center gap-3 py-2.5 px-3 rounded-lg transition-colors duration-200 ${isSkip ? "opacity-50 bg-[#0A0A0A]/40" : "hover:bg-[#1F1F1F]"}`}
+      className={`problem-row group flex items-center gap-3 py-2 px-3 rounded-lg transition-colors duration-200 ${isSkip ? "opacity-50 bg-[#0A0A0A]/40" : "hover:bg-[#1F1F1F]"}`}
     >
       <button
         type="button"
@@ -163,11 +163,11 @@ export function StepRow({
   const expanded = expandedSteps.has(step.id);
 
   return (
-    <div className="surface-card mb-3 overflow-hidden rounded-xl border border-[#262626] bg-[#0A0A0A]">
+    <div className="surface-card mb-2 overflow-hidden rounded-xl border border-[#262626] bg-[#0A0A0A]">
       <button
         onClick={() => onToggleStep(step.id)}
         aria-expanded={expanded}
-        className="grid w-full grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[#1F1F1F] md:grid-cols-[1.5rem_minmax(0,1fr)_14rem_3.5rem]"
+        className="grid w-full grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[#1F1F1F] md:grid-cols-[1.5rem_minmax(0,1fr)_14rem_3.5rem]"
       >
         <span className="flex h-6 w-6 items-center justify-center">
           {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}

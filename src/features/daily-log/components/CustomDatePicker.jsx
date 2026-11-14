@@ -122,7 +122,7 @@ export default function CustomDatePicker({ value, max, disabled, onChange }) {
       <Tooltip label="Choose a date">
         <button
           type="button"
-          className="custom-date-trigger"
+          className="custom-date-trigger date-navigation-trigger"
           aria-label={`Choose date, currently ${parseDateKey(value).toLocaleDateString()}`}
           aria-haspopup="dialog"
           aria-expanded={open}

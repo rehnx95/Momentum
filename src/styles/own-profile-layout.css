@@ -16,6 +16,8 @@
   align-items: center;
   gap: 0.55rem 0.75rem;
   padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
 }
 
 .own-profile-layout .profile-avatar {
@@ -113,7 +115,7 @@
   display: grid;
   min-width: 0;
   align-content: start;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
 .own-profile-layout .profile-top {
@@ -169,11 +171,11 @@
 }
 
 .own-profile-layout .profile-main > .hm-card {
-  padding: 0.85rem;
+  padding: 0.75rem;
 }
 
 .own-profile-layout .profile-main > .recent-ac-card {
-  padding: 0.85rem;
+  padding: 0.75rem;
 }
 
 .own-profile-layout .recent-ac-heading {
@@ -207,6 +209,23 @@
 :root:not([data-theme="light"]) .own-profile-layout .profile-hero,
 :root:not([data-theme="light"]) .own-profile-layout .profile-sheet-progress,
 :root:not([data-theme="light"]) .own-profile-layout .recent-ac-card {
+  background: #000000 !important;
+}
+
+:root:not([data-theme="light"]) .own-profile-layout .profile-avatar,
+:root:not([data-theme="light"]) .own-profile-layout .profile-hero-actions .btn-secondary,
+:root:not([data-theme="light"]) .own-profile-layout .recent-ac-count {
+  border-color: #262626;
+  background: #000000 !important;
+}
+
+:root:not([data-theme="light"]) .profile-settings-shell .settings-form {
+  border-color: #262626 !important;
+  background: #000000 !important;
+}
+
+:root:not([data-theme="light"]) .profile-settings-shell .settings-form input {
+  border-color: #262626 !important;
   background: #000000 !important;
 }
 

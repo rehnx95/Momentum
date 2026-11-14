@@ -191,27 +191,40 @@ export default function usePeopleNavigation() {
 
     const loadPublicProfile = async () => {
       try {
-        const { data, error } = await supabase.rpc("get_public_profile", {
-          requested_username: selectedPublicUsername,
-          requested_today: getLocalDateKey(new Date()),
-        });
-        if (error) throw error;
+        const [
+          { data: profileRows, error: profileError },
+          { data: emailRows, error: emailError },
+        ] = await Promise.all([
+          supabase.rpc("get_public_profile", {
+            requested_username: selectedPublicUsername,
+            requested_today: getLocalDateKey(new Date()),
+          }),
+          supabase.rpc("get_public_profile_email", {
+            requested_username: selectedPublicUsername,
+          }),
+        ]);
+        if (profileError) throw profileError;
+        if (emailError) throw emailError;
         if (!active) return;
-        const profileData = data?.[0];
+        const profileData = profileRows?.[0];
         if (!profileData) {
           setPublicProfile(null);
           setPublicProfileError("This profile could not be found.");
           return;
         }
+        const profileWithEmail = {
+          ...profileData,
+          email: emailRows?.[0]?.email || "",
+        };
         publicProfileCache.current.set(selectedPublicUsername, {
-          profile: profileData,
+          profile: profileWithEmail,
           loadedAt: Date.now(),
         });
         if (publicProfileCache.current.size > 20) {
           const oldestUsername = publicProfileCache.current.keys().next().value;
           publicProfileCache.current.delete(oldestUsername);
         }
-        setPublicProfile(profileData);
+        setPublicProfile(profileWithEmail);
         setPublicProfileError("");
       } catch (error) {
         if (!active) return;

@@ -19,7 +19,7 @@ function commitTime(hour, minute, onChange) {
 }
 
 function advanceTimeSegment(input) {
-  const range = input.closest(".slot-time-range");
+  const range = input.closest(".slot-time-range, .daily-sleep-time-range");
   if (!range) return;
 
   const inputs = [...range.querySelectorAll(

@@ -91,9 +91,6 @@ export default function ActivityCard({
           <strong className="activity-card-name">{activityName}</strong>
         </div>
         <div className="activity-card-meta">
-          <span className="activity-slot-count">
-            {slots.length} {slots.length === 1 ? "slot" : "slots"}
-          </span>
           {fromSheet && (
             <span className="activity-from-sheet">From sheet</span>
           )}

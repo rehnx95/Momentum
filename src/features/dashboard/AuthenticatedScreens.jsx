@@ -94,10 +94,8 @@ export default function AuthenticatedScreens({ context }) {
     uploadSheetInput,
     uploadingSheet,
     user,
-    userLocation,
     userName,
     userUsername,
-    userWebsite,
     yearlyActiveDays,
   } = context;
 
@@ -224,10 +222,8 @@ export default function AuthenticatedScreens({ context }) {
             showNotice,
             todayDateKey,
             user,
-            userLocation,
             userName,
             userUsername,
-            userWebsite,
             yearlyActiveDays,
           }}
         />

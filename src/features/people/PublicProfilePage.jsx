@@ -6,6 +6,7 @@ import { Calendar, Trophy, Target, Link2 } from "lucide-react";
 import StatStrip from "../../shared/components/StatStrip";
 import ActivityHeatmap from "../activity/components/ActivityHeatmap";
 import { getLevel } from "../activity/utils/heatmap";
+import ProfileSheetProgress from "../profile/components/ProfileSheetProgress";
 
 const EMPTY_ACTIVITY = {};
 const EMPTY_SHEETS = [];
@@ -186,32 +187,10 @@ export default function PublicProfilePage({
                         <p className="mt-1 text-sm text-[#A1A1A1]">
                           @{profile.username}
                         </p>
-                        {profile.location && (
-                          <div className="mt-3 flex items-center gap-2 text-sm text-[#A1A1A1]">
-                            <svg
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              aria-hidden="true"
-                            >
-                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                              <circle cx="12" cy="10" r="3" />
-                            </svg>
-                            {profile.location}
-                          </div>
-                        )}
-                        {profile.website && (
-                          <a
-                            href={profile.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-2 inline-block break-all text-sm text-[#A1A1A1] hover:text-white hover:underline"
-                          >
-                            {profile.website}
-                          </a>
+                        {profile.email && (
+                          <p className="mt-1 break-all text-sm text-[#A1A1A1]">
+                            {profile.email}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -258,54 +237,10 @@ export default function PublicProfilePage({
                   </section>
                 </aside>
 
-                <section
-                  className="profile-sheet-progress surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
-                  aria-labelledby="public-profile-sheet-progress"
-                >
-                  <header className="profile-progress-heading">
-                    <h2
-                      id="public-profile-sheet-progress"
-                      className="text-lg font-semibold text-[#EDEDED]"
-                    >
-                      Sheet progress
-                    </h2>
-                  </header>
-                  <div className="profile-sheet-grid">
-                    {profileSheetStats.map((sheet) => {
-                      const percentage = sheet.total
-                        ? Math.round((sheet.solved / sheet.total) * 100)
-                        : 0;
-                      return (
-                        <div className="profile-sheet-tile" key={sheet.id}>
-                          <div className="profile-sheet-tile-heading">
-                            <span className="truncate font-medium text-[#EDEDED]">
-                              {sheet.title}
-                            </span>
-                            <span className="profile-sheet-percent">{percentage}%</span>
-                          </div>
-                          <div
-                            className="profile-sheet-progress-track h-2 overflow-hidden rounded-full bg-[#262626]"
-                            role="progressbar"
-                            aria-label={`${sheet.title} progress`}
-                            aria-valuemin={0}
-                            aria-valuemax={sheet.total}
-                            aria-valuenow={sheet.solved}
-                          >
-                            <div
-                              className="profile-sheet-progress-fill h-full rounded-full bg-[#EDEDED] transition-all"
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-                          <span className="profile-sheet-counts">
-                            {sheet.solved} / {sheet.total} solved
-                            <span aria-hidden="true"> · </span>
-                            {sheet.skipped} skipped
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
+                <ProfileSheetProgress
+                  sheets={profileSheetStats}
+                  headingId="public-profile-sheet-progress"
+                />
               </div>
 
               <div className="profile-main">
@@ -315,6 +250,7 @@ export default function PublicProfilePage({
                   todayKey={todayDateKey}
                   selectedYear={publicHeatmapYear}
                   onSelectYear={setPublicHeatmapYear}
+                  fillWidth
                   loading={
                     publicHeatmap.username !== selectedPublicUsername ||
                     publicHeatmap.year !== publicHeatmapYear
@@ -326,10 +262,7 @@ export default function PublicProfilePage({
                     aria-labelledby="public-recent-ac-heading"
                   >
                   <div className="recent-ac-heading">
-                    <div>
-                      <h2 id="public-recent-ac-heading">Recent AC</h2>
-                      <p>Latest accepted problems</p>
-                    </div>
+                    <h2 id="public-recent-ac-heading">Recent AC</h2>
                     <span className="recent-ac-count">Latest {recentAccepted.length}</span>
                   </div>
                   {recentAccepted.length > 0 ? (

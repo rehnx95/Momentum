@@ -36,25 +36,25 @@ export default function TrackerControls({
               {label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => setHideSkipped((hidden) => !hidden)}
+            aria-pressed={hideSkipped}
+            aria-label={hideSkipped ? "Show skipped problems" : "Hide skipped problems"}
+            className={`tracker-skip-toggle flex items-center justify-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+              hideSkipped
+                ? "bg-[#EDEDED] text-black"
+                : "bg-transparent text-[#A1A1A1] hover:bg-[#1f1f1f] hover:text-white"
+            }`}
+          >
+            {hideSkipped ? (
+              <EyeOff size={15} aria-hidden="true" />
+            ) : (
+              <Eye size={15} aria-hidden="true" />
+            )}
+            <span>{hideSkipped ? "Show skip" : "Hide skip"}</span>
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => setHideSkipped((hidden) => !hidden)}
-          aria-pressed={hideSkipped}
-          aria-label={hideSkipped ? "Show skipped problems" : "Hide skipped problems"}
-          className={`tracker-skip-toggle flex items-center justify-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-            hideSkipped
-              ? "bg-[#EDEDED] text-black"
-              : "bg-[#0A0A0A] text-[#A1A1A1] hover:text-white"
-          }`}
-        >
-          {hideSkipped ? (
-            <EyeOff size={15} aria-hidden="true" />
-          ) : (
-            <Eye size={15} aria-hidden="true" />
-          )}
-          <span>Skip</span>
-        </button>
       </div>
       <span className="tracker-controls-spacer" aria-hidden="true" />
       <div
