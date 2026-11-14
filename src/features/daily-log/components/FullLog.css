@@ -347,12 +347,24 @@
 
 @media (max-width: 700px) {
   .full-log-table-header {
-    display: none;
+    display: grid;
+    grid-template-columns:
+      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
+      minmax(1.7rem, 0.5fr);
+    column-gap: 0.4rem;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.58rem;
+    line-height: 1.15;
+    text-transform: none;
+    white-space: normal;
   }
 
   .full-log-day-header {
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
-    column-gap: 0.45rem;
+    grid-template-columns:
+      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
+      minmax(1.7rem, 0.5fr);
+    column-gap: 0.4rem;
     min-height: 0;
     padding: 0.75rem 0.65rem 0.5rem;
   }
@@ -360,42 +372,40 @@
   .full-log-day-date {
     grid-column: 1;
     grid-row: 1;
-  }
-
-  .full-log-day-date {
-    min-width: 0;
+    gap: 0.25rem;
   }
 
   .full-log-day-header > .full-log-timeline {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  .full-log-day-header > .full-log-active-total {
     grid-column: 2;
     grid-row: 1;
   }
 
-  .full-log-day-header > .full-log-sleep-total {
+  .full-log-day-header > .full-log-active-total {
     grid-column: 3;
     grid-row: 1;
   }
 
-  .full-log-day-header > .full-log-solved-total {
+  .full-log-day-header > .full-log-sleep-total {
     grid-column: 4;
+    grid-row: 1;
+  }
+
+  .full-log-day-header > .full-log-solved-total {
+    grid-column: 5;
     grid-row: 1;
   }
 
   .full-log-active-total,
   .full-log-sleep-total,
   .full-log-solved-total {
+    justify-items: end;
     font-size: 0.75rem;
   }
 
   .full-log-active-total small,
   .full-log-sleep-total small,
   .full-log-solved-total small {
-    display: block;
+    display: none;
   }
 
   .full-log-day-details {
@@ -421,15 +431,28 @@
 @media (max-width: 420px) {
   .full-log-table {
     border-radius: 0.9rem;
+    padding-inline: 0.45rem;
+  }
+
+  .full-log-table-header {
+    grid-template-columns:
+      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
+      minmax(1.7rem, 0.5fr);
+    column-gap: 0.25rem;
+    padding-inline: 0.45rem;
+    font-size: 0.54rem;
   }
 
   .full-log-day-header {
-    column-gap: 0.3rem;
+    grid-template-columns:
+      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
+      minmax(1.7rem, 0.5fr);
+    column-gap: 0.25rem;
     padding-inline: 0.45rem;
   }
 
   .full-log-day-date {
-    gap: 0.25rem;
+    min-width: 0;
   }
 
   .full-log-date-button {
@@ -437,7 +460,7 @@
   }
 
   .full-log-date-button > span {
-    font-size: 0.7rem;
+    display: none;
   }
 
   .full-log-date-button > strong {
@@ -448,6 +471,10 @@
   .full-log-sleep-total,
   .full-log-solved-total {
     font-size: 0.68rem;
+  }
+
+  .full-log-activity-breakdown {
+    display: none;
   }
 
   .full-log-activity-breakdown {

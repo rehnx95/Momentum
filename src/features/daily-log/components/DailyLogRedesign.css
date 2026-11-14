@@ -172,7 +172,7 @@
 
 .daily-log-page-shell .daily-shell-layout {
   grid-template-columns: minmax(0, 2.28fr) minmax(260px, 1fr);
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 .daily-log-page-shell .daily-activities-card,
@@ -826,6 +826,7 @@
 @media (max-width: 980px) {
   .daily-log-page-shell .daily-shell-layout {
     grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
   }
 
   .daily-log-page-shell .daily-side-panel {
@@ -866,6 +867,24 @@
     justify-content: space-between;
   }
 
+  .daily-log-page-shell .daily-toolbar-controls[data-view-mode="full"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+    gap: 0.45rem;
+  }
+
+  .daily-log-page-shell .daily-toolbar-controls[data-view-mode="full"] .daily-view-switch {
+    width: max-content;
+    max-width: 100%;
+    justify-self: start;
+    flex: none;
+  }
+
+  .daily-log-page-shell .daily-toolbar-controls[data-view-mode="full"] .daily-view-switch button {
+    flex: none;
+  }
+
   .daily-log-page-shell .daily-view-switch {
     flex: 1;
     justify-content: space-between;
@@ -875,8 +894,29 @@
     flex: 1;
   }
 
+  .daily-log-page-shell .daily-view-switch-content-sized {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    justify-content: flex-start;
+  }
+
+  .daily-log-page-shell .daily-view-switch-content-sized button {
+    flex: 0 0 auto;
+  }
+
   .daily-log-page-shell .daily-side-panel {
     grid-template-columns: minmax(0, 1fr);
+    grid-row: 1;
+  }
+
+  .daily-log-page-shell .daily-activities-card,
+  .daily-log-page-shell .quick-log-card,
+  .daily-log-page-shell .daily-sleep-panel {
+    margin: 0;
+  }
+
+  .daily-log-page-shell .daily-main-column {
+    grid-row: 2;
   }
 
   .daily-log-page-shell .daily-activities-card {
@@ -920,12 +960,24 @@
   }
 
   .daily-log-page-shell .full-log-table-header {
-    display: none;
+    display: grid;
+    grid-template-columns:
+      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
+      minmax(1.7rem, 0.5fr);
+    column-gap: 0.4rem;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.58rem;
+    line-height: 1.15;
+    text-transform: none;
+    white-space: normal;
   }
 
   .daily-log-page-shell .full-log-day-header {
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
-    column-gap: 0.45rem;
+    grid-template-columns:
+      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
+      minmax(1.7rem, 0.5fr);
+    column-gap: 0.4rem;
     min-height: 0;
     padding: 0.75rem 0.65rem 0.5rem;
   }
@@ -936,22 +988,22 @@
   }
 
   .daily-log-page-shell .full-log-day-header > .full-log-timeline {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  .daily-log-page-shell .full-log-day-header > .full-log-active-total {
     grid-column: 2;
     grid-row: 1;
   }
 
-  .daily-log-page-shell .full-log-day-header > .full-log-sleep-total {
+  .daily-log-page-shell .full-log-day-header > .full-log-active-total {
     grid-column: 3;
     grid-row: 1;
   }
 
-  .daily-log-page-shell .full-log-day-header > .full-log-solved-total {
+  .daily-log-page-shell .full-log-day-header > .full-log-sleep-total {
     grid-column: 4;
+    grid-row: 1;
+  }
+
+  .daily-log-page-shell .full-log-day-header > .full-log-solved-total {
+    grid-column: 5;
     grid-row: 1;
   }
 
@@ -964,7 +1016,7 @@
   .daily-log-page-shell .full-log-active-total small,
   .daily-log-page-shell .full-log-sleep-total small,
   .daily-log-page-shell .full-log-solved-total small {
-    display: block;
+    display: none;
   }
 
   .daily-log-page-shell .full-log-day-details {
@@ -1017,13 +1069,47 @@
     padding-inline: 0.45rem;
   }
 
-  .daily-log-page-shell .full-log-day-header {
-    column-gap: 0.3rem;
+  .daily-log-page-shell .full-log-table-header {
+    grid-template-columns:
+      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
+      minmax(1.7rem, 0.5fr);
+    column-gap: 0.25rem;
     padding-inline: 0.45rem;
+    font-size: 0.54rem;
+  }
+
+  .daily-log-page-shell .full-log-day-header {
+    grid-template-columns:
+      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
+      minmax(1.7rem, 0.5fr);
+    column-gap: 0.25rem;
+    padding-inline: 0.45rem;
+  }
+
+  .daily-log-page-shell .full-log-day-date {
+    min-width: 0;
   }
 
   .daily-log-page-shell .full-log-day-details {
     padding-inline: 0.45rem;
+  }
+
+  .daily-log-page-shell .full-log-entry-activity {
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+  }
+
+  .daily-log-page-shell .full-log-entry-name {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .daily-log-page-shell .full-log-date-button > span {
+    display: none;
+  }
+
+  .daily-log-page-shell .full-log-activity-breakdown {
+    display: none;
   }
 
   .daily-log-page-shell .full-log-entry {

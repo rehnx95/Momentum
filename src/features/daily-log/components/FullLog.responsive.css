@@ -1,11 +1,27 @@
 @container daily-tracker (max-width: 460px) {
   .full-log-table-header {
-    display: none;
+    display: grid;
+    grid-template-columns:
+      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
+      minmax(1.7rem, 0.5fr);
+    column-gap: 0.25rem;
+    min-height: 2.5rem;
+    padding: 0.45rem;
+    font-size: 0.54rem;
+    line-height: 1.15;
+    text-transform: none;
+    white-space: normal;
+  }
+
+  .full-log-table {
+    padding-inline: 0.45rem;
   }
 
   .full-log-day-header {
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
-    column-gap: 0.3rem;
+    grid-template-columns:
+      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
+      minmax(1.7rem, 0.5fr);
+    column-gap: 0.25rem;
     min-height: 0;
     padding: 0.75rem 0.45rem 0.5rem;
   }
@@ -16,40 +32,47 @@
   }
 
   .full-log-day-header > .full-log-timeline {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  .full-log-day-header > .full-log-active-total {
     grid-column: 2;
     grid-row: 1;
   }
 
-  .full-log-day-header > .full-log-sleep-total {
+  .full-log-day-header > .full-log-active-total {
     grid-column: 3;
     grid-row: 1;
   }
 
-  .full-log-day-header > .full-log-solved-total {
+  .full-log-day-header > .full-log-sleep-total {
     grid-column: 4;
+    grid-row: 1;
+  }
+
+  .full-log-day-header > .full-log-solved-total {
+    grid-column: 5;
     grid-row: 1;
   }
 
   .full-log-active-total,
   .full-log-sleep-total,
   .full-log-solved-total {
+    justify-items: end;
+    text-align: right;
     font-size: 0.68rem;
   }
 
   .full-log-active-total small,
   .full-log-sleep-total small,
   .full-log-solved-total small {
-    display: block;
+    display: none;
   }
 
   .full-log-day-details {
     display: block;
     padding: 0 0.45rem 0.6rem;
+  }
+
+  .full-log-date-button > span,
+  .full-log-activity-breakdown {
+    display: none;
   }
 
   .full-log-entry {

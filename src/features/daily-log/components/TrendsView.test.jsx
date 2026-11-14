@@ -151,20 +151,36 @@ describe("TrendsView", () => {
     expect(container.querySelector(".sleep-average").getAttribute("data-average")).toBe("420");
   });
 
-  it("keeps all 30 chart days visible on narrow screens", () => {
+  it("limits the chart to the latest seven days on narrow screens", () => {
     const descriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth");
     Object.defineProperty(HTMLElement.prototype, "clientWidth", {
       configurable: true,
       get() {
-        return this.classList?.contains("sleep-study-chart-wrap") ? 360 : 0;
+        return this.classList?.contains("sleep-study-chart-wrap") ||
+          this.classList?.contains("trends-chart-panel-card")
+          ? 360
+          : 0;
       },
     });
 
     try {
-      render(
+      const { container } = render(
         <TrendsView
           daily={{
-            allLogs: [],
+            allLogs: [
+              {
+                date: dateOffsetKey(-20),
+                sleep_time: "23:00",
+                wake_time: "06:00",
+                custom_tasks: [
+                  {
+                    id: "reading",
+                    name: "Reading",
+                    slots: [{ start: "09:00", end: "11:00" }],
+                  },
+                ],
+              },
+            ],
             allLogsLoading: false,
             olderLogsLoading: false,
             hasOlderLogs: false,
@@ -172,7 +188,25 @@ describe("TrendsView", () => {
           }}
         />,
       );
-      expect(screen.getByRole("img", { name: /Active hours over the last 30 days/ })).toBeTruthy();
+      expect(screen.getByRole("img", { name: /Active hours over the last 7 days/ })).toBeTruthy();
+      const chartNavigation = within(
+        screen.getByRole("group", { name: "Select chart period" }),
+      );
+      expect(chartNavigation.getByRole("button", { name: "Previous 7 days" })).toBeTruthy();
+      expect(
+        [...container.querySelectorAll(".trends-chart-summary strong")].map(
+          (metric) => metric.textContent,
+        ),
+      ).toEqual(["0 / 7", "—", "—"]);
+
+      const rangeLabel = document.querySelector(
+        ".trends-month-navigation .trends-range-label",
+      ).textContent;
+      fireEvent.click(chartNavigation.getByRole("button", { name: "Previous 7 days" }));
+      expect(
+        document.querySelector(".trends-month-navigation .trends-range-label").textContent,
+      ).not.toBe(rangeLabel);
+      expect(chartNavigation.getByRole("button", { name: "Next 7 days" }).disabled).toBe(false);
     } finally {
       if (descriptor) {
         Object.defineProperty(HTMLElement.prototype, "clientWidth", descriptor);

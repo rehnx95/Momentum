@@ -273,7 +273,7 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
         <div className="full-log-history-scroll">
           {visibleEntries.length ? (
             <div className="full-log-table">
-              <div className="full-log-table-header" aria-hidden="true">
+              <div className="full-log-table-header">
                 <span>Date</span>
                 <span>Share of active time</span>
                 <span>Active</span>

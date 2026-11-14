@@ -176,9 +176,9 @@ export default function useProblemTree({ data, progress, getState, update }) {
   }, [activeFilter, data, getState, hideSkipped, search]);
 
   const chipActive = (type) =>
-    activeFilter === type
-      ? "bg-[#EDEDED] text-black"
-      : "bg-transparent text-[#A1A1A1] hover:bg-[#1f1f1f] hover:text-white";
+    (type === "skip-visibility" ? hideSkipped : activeFilter === type)
+      ? "tracker-filter-chip-active"
+      : "tracker-filter-chip-inactive";
 
   return {
     search,

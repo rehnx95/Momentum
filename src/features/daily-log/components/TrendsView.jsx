@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   formatDuration,
@@ -13,6 +13,7 @@ import { getActivityColor } from "../lib/activityColor";
 
 const EMPTY_LOGS = [];
 const CHART_WINDOW_DAYS = 30;
+const MOBILE_CHART_WINDOW_DAYS = 7;
 
 function activityName(name) {
   const value = String(name || "").trim();
@@ -114,9 +115,28 @@ export default function TrendsView({ daily }) {
   const [chartSelection, setChartSelection] = useState("active");
   const [chartOffset, setChartOffset] = useState(0);
   const [weekOffset, setWeekOffset] = useState(0);
+  const chartPanelRef = useRef(null);
+  const [chartPanelWidth, setChartPanelWidth] = useState(720);
   const todayKey = getLocalDateKey();
   const allLogs = Array.isArray(daily.allLogs) ? daily.allLogs : EMPTY_LOGS;
   const { allLogsLoading, hasOlderLogs, loadOlderLogs, olderLogsLoading } = daily;
+  const chartWindowDays = chartPanelWidth <= 520 ? MOBILE_CHART_WINDOW_DAYS : CHART_WINDOW_DAYS;
+
+  useLayoutEffect(() => {
+    const element = chartPanelRef.current?.querySelector(".sleep-study-chart-wrap");
+    if (!element) return undefined;
+
+    const measure = () => {
+      const width = Math.round(element.clientWidth);
+      if (width > 0) setChartPanelWidth((current) => (current === width ? current : width));
+    };
+
+    measure();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   const activityOptions = useMemo(() => {
     const byKey = new Map();
@@ -155,10 +175,10 @@ export default function TrendsView({ daily }) {
   const { chartDays, chartAverages, chartRangeLabel, chartSummary, chartStartKey } = useMemo(() => {
     const logsByDate = new Map(allLogs.map((log) => [log.date, log]));
     const windowEnd = new Date(`${todayKey}T00:00:00`);
-    windowEnd.setDate(windowEnd.getDate() + chartOffset * CHART_WINDOW_DAYS);
+    windowEnd.setDate(windowEnd.getDate() + chartOffset * chartWindowDays);
     const windowStart = new Date(windowEnd);
-    windowStart.setDate(windowEnd.getDate() - CHART_WINDOW_DAYS + 1);
-    const dates = Array.from({ length: CHART_WINDOW_DAYS }, (_, index) => {
+    windowStart.setDate(windowEnd.getDate() - chartWindowDays + 1);
+    const dates = Array.from({ length: chartWindowDays }, (_, index) => {
       const date = new Date(windowStart);
       date.setDate(windowStart.getDate() + index);
       return date;
@@ -213,12 +233,12 @@ export default function TrendsView({ daily }) {
       chartRangeLabel: formatRangeLabel(windowStart, windowEnd),
       chartStartKey: dateKey(windowStart),
       chartSummary: {
-        daysLogged: `${daysLogged} / ${CHART_WINDOW_DAYS}`,
+        daysLogged: `${daysLogged} / ${chartWindowDays}`,
         averageSleep: averageSleep === null ? "—" : formatDuration(averageSleep),
         averageActive: averageActive === null ? "—" : formatDuration(averageActive),
       },
     };
-  }, [allLogs, chartMode, chartOffset, todayKey]);
+  }, [allLogs, chartMode, chartOffset, chartWindowDays, todayKey]);
 
   const { weekRangeLabel, timeWent, totalTimeWent, weekStartKey } = useMemo(() => {
     const logsByDate = new Map(allLogs.map((log) => [log.date, log]));
@@ -300,7 +320,7 @@ export default function TrendsView({ daily }) {
 
   return (
     <section className="trends-view" aria-label="Daily log trends">
-      <article className="trends-panel trends-chart-panel-card">
+      <article ref={chartPanelRef} className="trends-panel trends-chart-panel-card">
         <header className="trends-chart-header">
           <h3>{chartMode.title}</h3>
           <label>
@@ -322,14 +342,14 @@ export default function TrendsView({ daily }) {
             className="trends-month-navigation"
             label="Select chart period"
             rangeLabel={chartRangeLabel}
-            previousLabel="Previous 30 days"
-            nextLabel="Next 30 days"
+            previousLabel={`Previous ${chartWindowDays} days`}
+            nextLabel={`Next ${chartWindowDays} days`}
             onPrevious={() => setChartOffset((offset) => offset - 1)}
             onNext={() => setChartOffset((offset) => Math.min(0, offset + 1))}
             nextDisabled={chartOffset >= 0}
             loading={olderLogsLoading}
           />
-          <div className="trends-chart-summary" aria-label="30-day summary">
+          <div className="trends-chart-summary" aria-label={`${chartWindowDays}-day summary`}>
             <span>
               <strong>{chartSummary.daysLogged}</strong>
               <small>days logged</small>
@@ -376,7 +396,6 @@ export default function TrendsView({ daily }) {
             seriesLabels={seriesLabels}
             activityColor={activityColor}
             averages={chartAverages}
-            showAllDays
             chartHeightOverride={315}
           />
         </div>

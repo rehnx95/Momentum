@@ -32,7 +32,7 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
           </h2>
           <p className="daily-toolbar-subtitle">{subtitle}</p>
         </div>
-        <div className="daily-toolbar-controls">
+        <div className="daily-toolbar-controls" data-view-mode={daily.viewMode}>
           {daily.viewMode === "full" && (
             <div
               ref={setFullLogToolbarTarget}
@@ -41,7 +41,10 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
               aria-label="Full log actions"
             />
           )}
-          <div className="daily-view-switch" aria-label="Daily log view">
+          <div
+            className={`daily-view-switch ${daily.viewMode === "full" ? "" : "daily-view-switch-content-sized"}`}
+            aria-label="Daily log view"
+          >
             <button
               type="button"
               className={daily.viewMode === "daily" ? "active" : ""}
