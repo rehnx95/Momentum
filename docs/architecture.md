@@ -1,13 +1,13 @@
-# Momentum | Architecture and Operations
+# Momentum | Technical Architecture and Operations
 
 Momentum is a multi-user progress workspace built as a React single-page
-application with Supabase-backed identity and data. This guide describes the
-system boundaries, where each behavior belongs, how data moves through the
-application, and how to develop and deploy it.
+application with Supabase-backed identity and data. This guide documents the
+system boundaries, key engineering decisions, data flows, and operational
+steps for developing and deploying the application.
 
 ## System overview
 
-```mermaid
+```mermaid  
 flowchart LR
   person[Signed-in user] --> browser
   browser["React 18 SPA<br/>Vite build"]
@@ -33,6 +33,17 @@ user's behalf.
 | RLS and SQL functions | Enforce account ownership and provide narrowly scoped profile operations.                                       |
 | Vercel                | Serve the built SPA, rewrite app routes, and run `api/search.js`.                                               |
 | Browser storage       | Keep preferences and account-scoped caches for the current browser; it is not the cross-device source of truth. |
+
+## Engineering decisions
+
+| Decision                                   | Implementation                                                                                                                                              | Rationale                                                                             |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Organize by feature                        | Screens, hooks, and domain styles live under `src/features/<feature>/`; genuinely reusable code lives in `src/shared/`.                                     | Keeps feature behavior understandable without mixing unrelated domains.               |
+| Enforce account boundaries in the database | Owner-scoped queries are backed by PostgreSQL row-level security. Public profile reads use narrow SQL functions.                                            | Access rules remain enforced even when client code changes.                           |
+| Keep progress as the analytics source      | The client derives active-day counts from solved progress rows. A database trigger maintains `activity_log` in the same transaction for database consumers. | Prevents a solved-state write and its aggregate count from being saved independently. |
+| Treat cached data as a performance layer   | Browser caches are account-scoped and can initialize the UI, while Supabase remains the durable source of truth.                                            | Improves responsiveness without claiming offline synchronization.                     |
+| Model time explicitly                      | Local date keys, interval validation, serialized saves, and timer splitting at midnight keep daily records attached to their intended day.                  | Avoids UTC date shifts and ambiguous cross-day entries.                               |
+| Namespace track problems                   | Problem identifiers include their track identity, including for user-uploaded sheets.                                                                       | Allows different tracks to reuse local IDs without colliding.                         |
 
 ## Repository map
 
@@ -66,6 +77,7 @@ src/
     utils/                Date and time calculations
   styles/                 Global tokens, layout, and responsive styles
 api/search.js             Authenticated username-search endpoint
+docs/                     Architecture, screenshots, and supporting project notes
 source/                   Editable source text for bundled tracks
 supabase/migrations/      Database schema, policies, and SQL functions
 ```
@@ -162,17 +174,17 @@ Problem states are `todo`, `done`, or `skipped`. A missing row is treated as
 `todo`, except where a template defines a default skipped state and the user
 has not saved an override.
 
-`useProgress` reads the user's saved progress and activity counts, consulting
-an account-scoped cache first. A state change updates the UI optimistically,
-then queues the corresponding database writes to preserve order during rapid
-updates. Errors are surfaced to the user. This is not a durable offline
-queue; pending writes are not guaranteed to survive a closed browser.
+`useProgress` reads the user's saved progress, consulting an account-scoped
+cache first. A state change updates the UI optimistically, then queues database
+writes to preserve order during rapid updates. Errors are surfaced to the user.
+This is not a durable offline queue; pending writes are not guaranteed to
+survive a closed browser.
 
 When a problem is completed, the client stores a local `completed_on` date
-and an `updated_at` timestamp. The owner's heatmap and streaks use
-`activity_log`; public activity is derived from completed progress records
-through SQL functions. These separate sources can differ if counts have
-drifted.
+and an `updated_at` timestamp. The owner's heatmap and streaks derive activity
+from solved progress rows. A database trigger keeps `activity_log` synchronized
+within the progress transaction, and public activity is derived from progress
+through SQL functions. The migration also rebuilds existing aggregate counts.
 
 ### Daily Log
 
@@ -290,13 +302,15 @@ frontend only; use `npx vercel dev` when testing `/api/search` locally.
 
 ```bash
 npm test
+npm run lint
 npm run build
 npm run preview
 ```
 
 Vitest covers shared time logic, caching, Daily Log history, time input, and
-Full Log timeline behavior. No lint or end-to-end test command is currently
-configured in `package.json`.
+Full Log timeline behavior. ESLint checks JavaScript and JSX. GitHub Actions
+runs lint, tests, and the production build on pushes and pull requests; no
+end-to-end test command is currently configured.
 
 ### Configure Supabase
 
@@ -333,7 +347,7 @@ that has already been applied to a shared database. The timestamped files
 cover these areas:
 
 - **Accounts and progress:** profiles, signup behavior, completion dates,
-  activity counts, and owner policies.
+  transactional activity-count synchronization, and owner policies.
 - **Learning tracks:** private uploads, personal copies of built-in tracks,
   deletion tombstones, namespaced progress migration, and safe deletion.
 - **People and profiles:** authenticated username search, curated profile

@@ -3,6 +3,8 @@
 **A personal progress workspace for turning consistent effort into visible
 progress.**
 
+[![CI](https://github.com/rehnx95/Track-Sheet/actions/workflows/ci.yml/badge.svg)](https://github.com/rehnx95/Track-Sheet/actions/workflows/ci.yml)
+
 Momentum brings structured learning, daily routines, and personal analytics
 into one account-based workspace. People can build a learning track for any
 subject, record daily activity and sleep, and review how their habits develop
@@ -27,17 +29,18 @@ Backend tracks.
 
 ## Engineering highlights
 
-- Feature-oriented React modules separate authentication, learning tracks,
-  problem progress, Daily Log, profiles, and analytics.
-- Supabase Auth and PostgreSQL row-level security scope account data to the
-  signed-in user. Public profile reads use purpose-specific database
-  functions that return curated fields.
-- Optimistic progress updates and account-scoped browser caches keep the
-  interface responsive while server data remains authoritative.
-- Daily Log state, editing, persistence, history, and timer behavior are
-  separated into focused hooks.
-- Vite builds the SPA; Vercel hosts the application and authenticated
-  username-search endpoint.
+- **Account isolation:** Supabase Auth identifies users; PostgreSQL row-level
+  security enforces ownership. Public profile data is returned through
+  purpose-built functions rather than broad table access.
+- **Consistent analytics:** Solved progress is the source for active-day
+  metrics. A database trigger updates persisted activity counts in the same
+  transaction as progress changes.
+- **Reliable time tracking:** Daily Log validates intervals, serializes
+  autosaves, and splits running timers at local midnight.
+- **Extensible learning tracks:** Built-in text sources compile to JSON;
+  uploaded tracks are parsed, validated, and assigned namespaced problem IDs.
+- **Production checks:** GitHub Actions runs lint, tests, and a production
+  build on pushes and pull requests.
 
 ## Technology
 
@@ -47,7 +50,7 @@ Backend tracks.
 | Build and development   | Vite 5                                                   |
 | Authentication and data | Supabase Auth, PostgreSQL, PostgREST, RLS, SQL functions |
 | Hosting and API         | Vercel                                                   |
-| Tests                   | Vitest                                                   |
+| Tests and CI            | Vitest, Testing Library, GitHub Actions                  |
 | Icons                   | Lucide React                                             |
 
 ## Repository map
@@ -70,6 +73,10 @@ src/
     utils/            Shared date and time logic
   styles/             Global theme, layout, and responsive styles
 api/                  Vercel username-search endpoint
+docs/
+  architecture.md     System design, data flows, and deployment guide
+  screenshots/        Product previews
+  archive/            Supporting engineering history
 source/               Editable text sources for bundled tracks
 supabase/migrations/  Database schema, policies, and SQL functions
 ```
@@ -91,7 +98,7 @@ npm run dev
 Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env`, then
 open the local Vite URL (port `5173`). Configure Google sign-in and apply the
 Supabase migrations before testing authenticated workflows. For complete
-instructions, see [Local development and deployment](./architecture.md#local-development-and-deployment).
+instructions, see [Local development and deployment](./docs/architecture.md#local-development-and-deployment).
 
 Use `npx vercel dev` instead of `npm run dev` when you need to exercise
 `/api/search` locally.
@@ -124,6 +131,7 @@ signed-in session, not a service-role key.
 
 ```bash
 npm test                 # Run unit tests
+npm run lint             # Check JavaScript and JSX
 npm run build            # Create the production bundle
 npm run preview          # Preview the production bundle locally
 npm run convert-sheet    # Regenerate bundled JSON from source/ text files
@@ -131,7 +139,9 @@ npm run convert-sheet    # Regenerate bundled JSON from source/ text files
 
 ## Documentation
 
-- [Architecture and operations](./architecture.md) — system boundaries,
+- [Architecture and operations](./docs/architecture.md) — system boundaries,
   source ownership, data flows, security model, migrations, and deployment.
+- [Development history](./docs/archive/commit-history.md) — project evolution
+  and notable engineering changes.
 - [Learning-track sources](./source/) — editable text sources for bundled
   templates.
