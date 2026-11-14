@@ -17,10 +17,7 @@ export default function ProfileSheetProgress({
       aria-labelledby={headingId}
     >
       <header className="profile-progress-heading">
-        <h2
-          id={headingId}
-          className="text-lg font-semibold text-[#EDEDED]"
-        >
+        <h2 id={headingId} className="text-lg font-semibold text-[#EDEDED]">
           Sheet progress
         </h2>
         {showActions && (
@@ -36,11 +33,7 @@ export default function ProfileSheetProgress({
               </button>
             )}
             {onReset && (
-              <button
-                type="button"
-                className="btn-secondary btn-danger"
-                onClick={onReset}
-              >
+              <button type="button" className="btn-secondary btn-danger" onClick={onReset}>
                 <RefreshCcw size={14} /> Reset all
               </button>
             )}
@@ -49,17 +42,15 @@ export default function ProfileSheetProgress({
       </header>
       <div className="profile-sheet-grid">
         {sheets.map((sheet) => {
-          const percentage = sheet.total
-            ? Math.round((sheet.solved / sheet.total) * 100)
-            : 0;
+          const percentage = sheet.total ? Math.round((sheet.solved / sheet.total) * 100) : 0;
           return (
             <div className="profile-sheet-tile" key={sheet.id}>
               <div className="profile-sheet-tile-heading">
-                <span className="truncate font-medium text-[#EDEDED]">
-                  {sheet.title}
-                </span>
+                <span className="truncate font-medium text-[#EDEDED]">{sheet.title}</span>
                 <span className="profile-sheet-counts profile-sheet-count-breakdown">
-                  <span>{sheet.solved} / {sheet.total}</span>
+                  <span>
+                    {sheet.solved} / {sheet.total}
+                  </span>
                   <span>{sheet.skipped} skipped</span>
                   <span>{percentage}%</span>
                 </span>
@@ -72,10 +63,7 @@ export default function ProfileSheetProgress({
                 aria-valuemax={sheet.total}
                 aria-valuenow={sheet.solved}
               >
-                <div
-                  className="profile-sheet-progress-fill"
-                  style={{ width: `${percentage}%` }}
-                />
+                <div className="profile-sheet-progress-fill" style={{ width: `${percentage}%` }} />
               </div>
             </div>
           );

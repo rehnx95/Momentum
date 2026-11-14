@@ -1,14 +1,11 @@
 -- Keep public activity, streaks, and the client's local calendar aligned.
 -- Older solved rows may have no completed_on value, so fall back to their
 -- update date instead of silently omitting them from the public heatmap.
-DROP FUNCTION IF EXISTS public.get_public_profile(TEXT);
-DROP FUNCTION IF EXISTS public.get_public_profile(TEXT, DATE);
+DROP FUNCTION IF EXISTS public.get_public_profile (TEXT);
 
-CREATE FUNCTION public.get_public_profile(
-  requested_username TEXT,
-  requested_today DATE
-)
-RETURNS TABLE (
+DROP FUNCTION IF EXISTS public.get_public_profile (TEXT, DATE);
+
+CREATE FUNCTION public.get_public_profile (requested_username TEXT, requested_today DATE) RETURNS TABLE (
   name TEXT,
   username TEXT,
   location TEXT,
@@ -20,12 +17,9 @@ RETURNS TABLE (
   progress JSONB,
   custom_sheets JSONB,
   custom_recent_accepted JSONB
-)
-LANGUAGE SQL
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
+) LANGUAGE SQL STABLE SECURITY DEFINER
+SET
+  search_path = public AS $$
 WITH RECURSIVE target_profile AS (
   SELECT p.id, p.name, p.username, p.location, p.website
   FROM public.profiles AS p
@@ -228,5 +222,10 @@ SELECT
 FROM target_profile AS target;
 $$;
 
-REVOKE ALL ON FUNCTION public.get_public_profile(TEXT, DATE) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.get_public_profile(TEXT, DATE) TO authenticated;
+REVOKE ALL ON FUNCTION public.get_public_profile (TEXT, DATE)
+FROM
+  PUBLIC,
+  anon;
+
+GRANT
+EXECUTE ON FUNCTION public.get_public_profile (TEXT, DATE) TO authenticated;

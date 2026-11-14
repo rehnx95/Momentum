@@ -25,14 +25,14 @@ database operations. The Vercel search function validates the caller's
 bearer token and makes the same constrained profile-search call on that
 user's behalf.
 
-| Boundary | Responsibility |
-| --- | --- |
-| React application | Screens, interaction state, client-side validation, and feature-level data requests. |
-| Supabase Auth | Google OAuth, session restoration, and identity. |
-| PostgreSQL | Profiles, personal learning tracks, problem progress, activity counts, and daily logs. |
-| RLS and SQL functions | Enforce account ownership and provide narrowly scoped profile operations. |
-| Vercel | Serve the built SPA, rewrite app routes, and run `api/search.js`. |
-| Browser storage | Keep preferences and account-scoped caches for the current browser; it is not the cross-device source of truth. |
+| Boundary              | Responsibility                                                                                                  |
+| --------------------- | --------------------------------------------------------------------------------------------------------------- |
+| React application     | Screens, interaction state, client-side validation, and feature-level data requests.                            |
+| Supabase Auth         | Google OAuth, session restoration, and identity.                                                                |
+| PostgreSQL            | Profiles, personal learning tracks, problem progress, activity counts, and daily logs.                          |
+| RLS and SQL functions | Enforce account ownership and provide narrowly scoped profile operations.                                       |
+| Vercel                | Serve the built SPA, rewrite app routes, and run `api/search.js`.                                               |
+| Browser storage       | Keep preferences and account-scoped caches for the current browser; it is not the cross-device source of truth. |
 
 ## Repository map
 
@@ -69,17 +69,17 @@ supabase/migrations/      Database schema, policies, and SQL functions
 
 ### Ownership map
 
-| Area | Entry points | Owns |
-| --- | --- | --- |
-| Authentication | `src/App.jsx`, `src/features/auth/useAuthentication.js` | Session lifecycle, sign-in, onboarding, and auth-screen selection. |
-| Signed-in application | `src/features/dashboard/AuthenticatedApp.jsx`, `AuthenticatedScreens.jsx` | Compose feature hooks and select the active screen. |
-| Learning tracks | `src/features/sheets/hooks/useSheetLibrary.js`, `src/features/sheets/utils/parseSheet.js` | Load built-in templates, manage personal copies, and import text tracks. |
-| Problem progress | `src/features/problem-tracker/hooks/useProgress.js`, `useProblemTree.js` | Persist problem states and derive the searchable, filterable problem tree. |
-| Daily Log | `src/features/daily-log/hooks/useDailyLog.js` | Compose the daily editing, persistence, history, and timer hooks. |
-| Profiles and people | `src/features/profile/`, `src/features/people/`, `src/features/dashboard/usePeopleNavigation.js` | Owner profile metrics, public profile views, search, and profile navigation. |
-| Activity analytics | `src/features/activity/` | Activity heatmaps and sleep/study charts. |
-| Test data | `src/features/testing/` | Generate isolated sample history from the test-mode development server. |
-| Shared platform code | `src/shared/` | Supabase client, generic cache, common UI, and cross-feature date/time helpers. |
+| Area                  | Entry points                                                                                     | Owns                                                                            |
+| --------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| Authentication        | `src/App.jsx`, `src/features/auth/useAuthentication.js`                                          | Session lifecycle, sign-in, onboarding, and auth-screen selection.              |
+| Signed-in application | `src/features/dashboard/AuthenticatedApp.jsx`, `AuthenticatedScreens.jsx`                        | Compose feature hooks and select the active screen.                             |
+| Learning tracks       | `src/features/sheets/hooks/useSheetLibrary.js`, `src/features/sheets/utils/parseSheet.js`        | Load built-in templates, manage personal copies, and import text tracks.        |
+| Problem progress      | `src/features/problem-tracker/hooks/useProgress.js`, `useProblemTree.js`                         | Persist problem states and derive the searchable, filterable problem tree.      |
+| Daily Log             | `src/features/daily-log/hooks/useDailyLog.js`                                                    | Compose the daily editing, persistence, history, and timer hooks.               |
+| Profiles and people   | `src/features/profile/`, `src/features/people/`, `src/features/dashboard/usePeopleNavigation.js` | Owner profile metrics, public profile views, search, and profile navigation.    |
+| Activity analytics    | `src/features/activity/`                                                                         | Activity heatmaps and sleep/study charts.                                       |
+| Test data             | `src/features/testing/`                                                                          | Generate isolated sample history from the test-mode development server.         |
+| Shared platform code  | `src/shared/`                                                                                    | Supabase client, generic cache, common UI, and cross-feature date/time helpers. |
 
 The Daily Log keeps styles close to the components they describe:
 `CustomDatePicker.css` styles the date picker, `TimeInput.css` styles the
@@ -117,15 +117,15 @@ a routing package. `usePeopleNavigation` owns route state, history updates,
 people search, and public-profile loading; `AuthenticatedScreens` maps that
 state to screen components.
 
-| Path | Screen | Access |
-| --- | --- | --- |
-| `/` | Sign-in, onboarding, or tracker workspace based on account state | Workspace requires sign-in |
-| `/profile` | Owner profile and progress | Sign-in required |
-| `/profile/edit` | Profile settings | Sign-in required |
-| `/daily-log` | Day view and Full Log | Sign-in required |
-| `/people` | Username search | Sign-in required |
-| `/user/:username`, `/u/:username` | Curated profile view | Sign-in required |
-| `/api/search?q=<prefix>` | Vercel search function | Valid bearer token required |
+| Path                              | Screen                                                           | Access                      |
+| --------------------------------- | ---------------------------------------------------------------- | --------------------------- |
+| `/`                               | Sign-in, onboarding, or tracker workspace based on account state | Workspace requires sign-in  |
+| `/profile`                        | Owner profile and progress                                       | Sign-in required            |
+| `/profile/edit`                   | Profile settings                                                 | Sign-in required            |
+| `/daily-log`                      | Day view and Full Log                                            | Sign-in required            |
+| `/people`                         | Username search                                                  | Sign-in required            |
+| `/user/:username`, `/u/:username` | Curated profile view                                             | Sign-in required            |
+| `/api/search?q=<prefix>`          | Vercel search function                                           | Valid bearer token required |
 
 `vercel.json` sends app routes to `index.html`; `/api/search` is handled by
 the serverless function.
@@ -222,15 +222,15 @@ are not applied.
 Timestamped SQL files under `supabase/migrations/` define the schema, indexes,
 policies, and RPCs.
 
-| Table | Purpose |
-| --- | --- |
-| `profiles` | Account profile, unique username, onboarding status, and optional public profile fields. |
-| `user_sheets` | Per-user learning-track content and source metadata. |
-| `progress` | Explicit problem states and completion timestamps, keyed by user and namespaced problem ID. |
-| `activity_log` | Per-user completion counts by date. |
-| `daily_logs` | Per-user sleep/wake times and JSON activity slots, keyed by user and date. |
-| `user_deleted_builtin_sheets` | Per-user tombstones that prevent a deleted built-in copy from being recreated. |
-| `user_settings` | Legacy owner-scoped settings table; active tracker preferences are stored in browser storage. |
+| Table                         | Purpose                                                                                       |
+| ----------------------------- | --------------------------------------------------------------------------------------------- |
+| `profiles`                    | Account profile, unique username, onboarding status, and optional public profile fields.      |
+| `user_sheets`                 | Per-user learning-track content and source metadata.                                          |
+| `progress`                    | Explicit problem states and completion timestamps, keyed by user and namespaced problem ID.   |
+| `activity_log`                | Per-user completion counts by date.                                                           |
+| `daily_logs`                  | Per-user sleep/wake times and JSON activity slots, keyed by user and date.                    |
+| `user_deleted_builtin_sheets` | Per-user tombstones that prevent a deleted built-in copy from being recreated.                |
+| `user_settings`               | Legacy owner-scoped settings table; active tracker preferences are stored in browser storage. |
 
 Foreign keys cascade account-owned data when an account is removed. Indexes
 support user/date history, progress lookup, unique built-in copies, and
@@ -343,17 +343,17 @@ signatures.
 
 ## Troubleshooting
 
-| Symptom | First checks |
-| --- | --- |
-| Supabase is not configured | Set both Vite environment variables and restart the development server. |
-| Google sign-in fails | Check the Supabase provider, Google callback URL, Site URL, and allowed redirects. |
-| Built-in or uploaded tracks fail to load | Confirm the track migrations and owner policies are applied. |
-| Progress does not sync | Inspect the visible sync error, browser console, network request, and RLS policies. |
-| Daily Log cannot load or save | Check the daily-log migration, owner policy, requested date, and database error. |
-| People search fails | Check Vercel function environment, bearer token, prefix format, and search RPC grants. |
-| Deep link fails after refresh | Confirm Vercel's SPA rewrite and `/api/search` function are both deployed. |
-| Owner and public heatmaps differ | Compare `activity_log` counts with progress completion dates. |
-| A built-in track update is not visible to an existing user | Existing personal copies are intentionally not overwritten by template bootstrap. |
+| Symptom                                                    | First checks                                                                           |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Supabase is not configured                                 | Set both Vite environment variables and restart the development server.                |
+| Google sign-in fails                                       | Check the Supabase provider, Google callback URL, Site URL, and allowed redirects.     |
+| Built-in or uploaded tracks fail to load                   | Confirm the track migrations and owner policies are applied.                           |
+| Progress does not sync                                     | Inspect the visible sync error, browser console, network request, and RLS policies.    |
+| Daily Log cannot load or save                              | Check the daily-log migration, owner policy, requested date, and database error.       |
+| People search fails                                        | Check Vercel function environment, bearer token, prefix format, and search RPC grants. |
+| Deep link fails after refresh                              | Confirm Vercel's SPA rewrite and `/api/search` function are both deployed.             |
+| Owner and public heatmaps differ                           | Compare `activity_log` counts with progress completion dates.                          |
+| A built-in track update is not visible to an existing user | Existing personal copies are intentionally not overwritten by template bootstrap.      |
 
 ## Maintenance boundaries
 

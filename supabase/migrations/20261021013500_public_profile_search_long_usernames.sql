@@ -1,12 +1,8 @@
 -- Support legacy generated usernames with a unique suffix while retaining
 -- input validation and the bounded, prefix-only search result set.
-CREATE OR REPLACE FUNCTION public.search_public_profiles(search_term TEXT)
-RETURNS TABLE (name TEXT, username TEXT)
-LANGUAGE SQL
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
+CREATE OR REPLACE FUNCTION public.search_public_profiles (search_term TEXT) RETURNS TABLE (name TEXT, username TEXT) LANGUAGE SQL STABLE SECURITY DEFINER
+SET
+  search_path = public AS $$
   SELECT p.name, p.username
   FROM public.profiles AS p
   WHERE auth.uid() IS NOT NULL
@@ -17,5 +13,10 @@ AS $$
   LIMIT 10;
 $$;
 
-REVOKE ALL ON FUNCTION public.search_public_profiles(TEXT) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.search_public_profiles(TEXT) TO authenticated;
+REVOKE ALL ON FUNCTION public.search_public_profiles (TEXT)
+FROM
+  PUBLIC,
+  anon;
+
+GRANT
+EXECUTE ON FUNCTION public.search_public_profiles (TEXT) TO authenticated;

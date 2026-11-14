@@ -1401,9 +1401,15 @@
   line-height: 1.25;
 }
 
-.sleep-stat { border-top: 4px solid var(--daily-sleep-bar); }
-.active-stat { border-top: 4px solid var(--text); }
-.activities-stat { border-top: 4px solid var(--daily-task-1); }
+.sleep-stat {
+  border-top: 4px solid var(--daily-sleep-bar);
+}
+.active-stat {
+  border-top: 4px solid var(--text);
+}
+.activities-stat {
+  border-top: 4px solid var(--daily-task-1);
+}
 
 .trends-view {
   gap: 1.15rem;
@@ -1544,6 +1550,4 @@
     width: 100%;
     justify-content: flex-start;
   }
-
 }
-

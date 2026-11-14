@@ -40,7 +40,6 @@
   .log-summary-duration {
     font-size: 0.78rem;
   }
-
 }
 
 @container daily-tracker (max-width: 360px) {
@@ -97,7 +96,6 @@
   .log-summary-time-pair .time-input {
     width: 4.15rem;
   }
-
 }
 
 @container daily-tracker (max-width: 520px) {

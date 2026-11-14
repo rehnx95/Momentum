@@ -24,30 +24,30 @@
  * nothing if any anchor is missing. Commit or stash first so you can review
  * with git diff.
  */
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const root = path.join(__dirname, '..');
+const root = path.join(__dirname, "..");
 const args = new Set(process.argv.slice(2));
-const dryRun = args.has('--dry-run');
-const withSleepOverlap = args.has('--sleep-overlap');
+const dryRun = args.has("--dry-run");
+const withSleepOverlap = args.has("--sleep-overlap");
 
-const dailyDir = path.join(root, 'src', 'features', 'daily-log', 'components');
+const dailyDir = path.join(root, "src", "features", "daily-log", "components");
 const files = {
-  tracker: path.join(dailyDir, 'DailyTracker.jsx'),
-  card: path.join(dailyDir, 'ActivityCard.jsx'),
-  css: path.join(dailyDir, 'DailyLogRedesign.css'),
-  time: path.join(root, 'src', 'shared', 'utils', 'time.js'),
+  tracker: path.join(dailyDir, "DailyTracker.jsx"),
+  card: path.join(dailyDir, "ActivityCard.jsx"),
+  css: path.join(dailyDir, "DailyLogRedesign.css"),
+  time: path.join(root, "src", "shared", "utils", "time.js"),
 };
 
 function fail(msg) {
-  console.error('\nPatch aborted, nothing was written:\n  ' + msg);
+  console.error("\nPatch aborted, nothing was written:\n  " + msg);
   process.exit(1);
 }
 
 function read(file) {
-  if (!fs.existsSync(file)) fail('Missing file: ' + path.relative(root, file));
-  return fs.readFileSync(file, 'utf8');
+  if (!fs.existsSync(file)) fail("Missing file: " + path.relative(root, file));
+  return fs.readFileSync(file, "utf8");
 }
 
 const css = `/* Daily Log redesign. Added by scripts/patch-redesign.cjs.
@@ -123,25 +123,26 @@ const edits = [];
 
 // 1. CSS file + import
 const tracker = read(files.tracker);
-if (!tracker.includes('DailyLogRedesign.css')) {
+if (!tracker.includes("DailyLogRedesign.css")) {
   const importRe = /import\s+["']\.\/DailyTracker\.css["'];?/;
-  if (!importRe.test(tracker)) fail('Could not find the DailyTracker.css import in DailyTracker.jsx.');
+  if (!importRe.test(tracker))
+    fail("Could not find the DailyTracker.css import in DailyTracker.jsx.");
   edits.push({
     file: files.tracker,
     text: tracker.replace(importRe, (m) => m + '\nimport "./DailyLogRedesign.css";'),
-    note: 'DailyTracker.jsx: import DailyLogRedesign.css',
+    note: "DailyTracker.jsx: import DailyLogRedesign.css",
   });
 }
-if (!fs.existsSync(files.css) || fs.readFileSync(files.css, 'utf8') !== css) {
-  edits.push({ file: files.css, text: css, note: 'DailyLogRedesign.css: write styles' });
+if (!fs.existsSync(files.css) || fs.readFileSync(files.css, "utf8") !== css) {
+  edits.push({ file: files.css, text: css, note: "DailyLogRedesign.css: write styles" });
 }
 
 // 2. Slot count on every activity
 const card = read(files.card);
-if (!card.includes('slots.length === 1 ?')) {
+if (!card.includes("slots.length === 1 ?")) {
   const countRe =
     /\{slots\.length > 1 && \(\s*<span className="activity-slot-count">\{slots\.length\} slots<\/span>\s*\)\}/;
-  if (!countRe.test(card)) fail('Could not find the slot-count badge in ActivityCard.jsx.');
+  if (!countRe.test(card)) fail("Could not find the slot-count badge in ActivityCard.jsx.");
   edits.push({
     file: files.card,
     text: card.replace(
@@ -159,9 +160,9 @@ if (!card.includes('slots.length === 1 ?')) {
 // 3. Optional: sleep overlap check
 if (withSleepOverlap) {
   const time = read(files.time);
-  if (!time.includes('sleepStart < wakeEnd ?')) {
+  if (!time.includes("sleepStart < wakeEnd ?")) {
     const sleepRe = /sleepSlots\.push\(sleep\);/;
-    if (!sleepRe.test(time)) fail('Could not find sleepSlots.push(sleep) in time.js.');
+    if (!sleepRe.test(time)) fail("Could not find sleepSlots.push(sleep) in time.js.");
     edits.push({
       file: files.time,
       text: time.replace(
@@ -172,21 +173,25 @@ if (withSleepOverlap) {
         sleepStart < wakeEnd ? sleep : { start: "00:00", end: log.wake_time },
       );`,
       ),
-      note: 'time.js: check only the after-midnight part of a wrapping sleep',
+      note: "time.js: check only the after-midnight part of a wrapping sleep",
     });
   }
 }
 
 if (edits.length === 0) {
-  console.log('Already patched.');
+  console.log("Already patched.");
   process.exit(0);
 }
 
 for (const edit of edits) {
-  console.log((dryRun ? 'Would change: ' : 'Changed: ') + edit.note);
+  console.log((dryRun ? "Would change: " : "Changed: ") + edit.note);
   if (!dryRun) fs.writeFileSync(edit.file, edit.text);
 }
-console.log(dryRun ? '\nDry run only, nothing written.' : '\nDone. Review with git diff, then run npm test and npm run build.');
+console.log(
+  dryRun
+    ? "\nDry run only, nothing written."
+    : "\nDone. Review with git diff, then run npm test and npm run build.",
+);
 if (!withSleepOverlap) {
   console.log('Tip: add --sleep-overlap to also fix the false "overlaps Sleep" warnings.');
 }

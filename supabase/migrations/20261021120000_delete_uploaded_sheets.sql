@@ -1,9 +1,7 @@
-CREATE OR REPLACE FUNCTION public.delete_user_sheet(requested_sheet_id UUID)
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
+CREATE OR REPLACE FUNCTION public.delete_user_sheet (requested_sheet_id UUID) RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER
+SET
+  search_path = public,
+  pg_temp AS $$
 DECLARE
   removed_sheet_data JSONB;
 BEGIN
@@ -63,5 +61,9 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.delete_user_sheet(UUID) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.delete_user_sheet(UUID) TO authenticated;
+REVOKE ALL ON FUNCTION public.delete_user_sheet (UUID)
+FROM
+  PUBLIC;
+
+GRANT
+EXECUTE ON FUNCTION public.delete_user_sheet (UUID) TO authenticated;

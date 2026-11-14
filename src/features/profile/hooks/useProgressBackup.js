@@ -54,11 +54,7 @@ export default function useProgressBackup({
       try {
         const fileContent = loadEvent.target.result;
         const imported = JSON.parse(fileContent);
-        if (
-          !imported ||
-          typeof imported !== "object" ||
-          Array.isArray(imported)
-        ) {
+        if (!imported || typeof imported !== "object" || Array.isArray(imported)) {
           showNotice(
             "Invalid backup file format. Choose a progress backup JSON exported from your profile.",
             "Invalid backup",
@@ -66,9 +62,7 @@ export default function useProgressBackup({
           return;
         }
         const targetSheetId = importSheetId.current;
-        const targetSheet = availableSheets.find(
-          (sheet) => sheet.id === targetSheetId,
-        );
+        const targetSheet = availableSheets.find((sheet) => sheet.id === targetSheetId);
         if (!targetSheet) {
           showNotice("Select a valid sheet before importing progress.", "Choose a sheet");
           return;
@@ -83,9 +77,7 @@ export default function useProgressBackup({
             })),
           ),
         );
-        const targetById = new Map(
-          targetProblems.map((problem) => [problem.id, problem]),
-        );
+        const targetById = new Map(targetProblems.map((problem) => [problem.id, problem]));
         const targetByTitle = new Map();
         for (const problem of targetProblems) {
           const matches = targetByTitle.get(problem.normalizedTitle) || [];
@@ -100,16 +92,11 @@ export default function useProgressBackup({
 
           const sourceId = typeof value.id === "string" ? value.id : "";
           const directMatch = targetById.get(sourceId);
-          const titleMatches =
-            targetByTitle.get(normalizeProblemTitle(title)) || [];
+          const titleMatches = targetByTitle.get(normalizeProblemTitle(title)) || [];
           const sourceLocalId = sourceId.split("::").at(-1);
-          const localIdMatch = titleMatches.find(
-            (problem) => problem.localId === sourceLocalId,
-          );
+          const localIdMatch = titleMatches.find((problem) => problem.localId === sourceLocalId);
           const matchedProblem =
-            directMatch ||
-            localIdMatch ||
-            (titleMatches.length === 1 ? titleMatches[0] : null);
+            directMatch || localIdMatch || (titleMatches.length === 1 ? titleMatches[0] : null);
           if (matchedProblem) newProgress[matchedProblem.id] = state;
         }
         const importedCount = Object.keys(newProgress).length;
@@ -134,14 +121,10 @@ export default function useProgressBackup({
         );
       } catch (error) {
         console.error("Import error details:", error);
-        showNotice(
-          `Failed to import backup file: ${error.message}`,
-          "Import failed",
-        );
+        showNotice(`Failed to import backup file: ${error.message}`, "Import failed");
       }
     };
-    reader.onerror = () =>
-      showNotice("Failed to read backup file.", "Import failed");
+    reader.onerror = () => showNotice("Failed to read backup file.", "Import failed");
     reader.readAsText(file);
     event.target.value = "";
     setBackupAction("");

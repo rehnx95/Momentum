@@ -35,7 +35,8 @@
   background-color: #000000 !important;
 }
 
-.tracker-dashboard-shell:not([data-theme="light"]) .tracker-skip-toggle[aria-pressed="false"]:hover {
+.tracker-dashboard-shell:not([data-theme="light"])
+  .tracker-skip-toggle[aria-pressed="false"]:hover {
   background-color: #1f1f1f !important;
 }
 

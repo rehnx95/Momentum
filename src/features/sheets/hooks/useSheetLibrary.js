@@ -1,11 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { readUserDataCache, writeUserDataCache } from "../../../shared/lib/userDataCache";
 import { supabase } from "../../../shared/lib/supabase";
-import {
-  countSheetProblems,
-  parseSheet,
-  sampleSheetTemplate,
-} from "../utils/parseSheet";
+import { countSheetProblems, parseSheet, sampleSheetTemplate } from "../utils/parseSheet";
 import { bootstrapBuiltInSheets } from "../data/bootstrapBuiltInSheets";
 
 export default function useSheetLibrary(user, askConfirmation) {
@@ -14,8 +10,8 @@ export default function useSheetLibrary(user, askConfirmation) {
     () => !Array.isArray(cachedSheets),
   );
   const [sheetBootstrapComplete, setSheetBootstrapComplete] = useState(false);
-  const [customSheets, setCustomSheets] = useState(
-    () => (Array.isArray(cachedSheets) ? cachedSheets : []),
+  const [customSheets, setCustomSheets] = useState(() =>
+    Array.isArray(cachedSheets) ? cachedSheets : [],
   );
   const [uploadingSheet, setUploadingSheet] = useState(false);
   const [deletingSheetId, setDeletingSheetId] = useState(null);
@@ -27,17 +23,14 @@ export default function useSheetLibrary(user, askConfirmation) {
   } catch {
     savedSheetIdRef.current = null;
   }
-  const [selectedSheetId, setSelectedSheetId] = useState(
-    () => savedSheetIdRef.current || "",
-  );
+  const [selectedSheetId, setSelectedSheetId] = useState(() => savedSheetIdRef.current || "");
 
   const availableSheets = useMemo(
     () => [...customSheets].sort((a, b) => a.title.localeCompare(b.title)),
     [customSheets],
   );
   const selectedSheet =
-    availableSheets.find((sheet) => sheet.id === selectedSheetId) ||
-    availableSheets[0];
+    availableSheets.find((sheet) => sheet.id === selectedSheetId) || availableSheets[0];
   const data = useMemo(() => {
     if (!selectedSheet) return { steps: [] };
     const problemIdPrefix = `${selectedSheet.id}::`;
@@ -73,18 +66,13 @@ export default function useSheetLibrary(user, askConfirmation) {
     let active = true;
     const loadSheets = async () => {
       try {
-        const defaultSheetId = await bootstrapBuiltInSheets(
-          user.id,
-          () => active,
-        );
+        const defaultSheetId = await bootstrapBuiltInSheets(user.id, () => active);
         if (!active) return;
         setSheetBootstrapComplete(true);
 
         const { data: savedSheets, error } = await supabase
           .from("user_sheets")
-          .select(
-            "id, title, source_name, sheet_data, created_at, builtin_template_id",
-          )
+          .select("id, title, source_name, sheet_data, created_at, builtin_template_id")
           .eq("user_id", user.id)
           .order("created_at", { ascending: true });
         if (error) throw error;
@@ -101,14 +89,11 @@ export default function useSheetLibrary(user, askConfirmation) {
         setCustomSheets(loadedSheets);
         const savedSheetId = savedSheetIdRef.current;
         const savedSheet = loadedSheets.find(
-          (sheet) =>
-            sheet.id === savedSheetId ||
-            sheet.builtinTemplateId === savedSheetId,
+          (sheet) => sheet.id === savedSheetId || sheet.builtinTemplateId === savedSheetId,
         );
         const defaultSheet =
-          loadedSheets.find(
-            (sheet) => sheet.builtinTemplateId === defaultSheetId,
-          ) || loadedSheets[0];
+          loadedSheets.find((sheet) => sheet.builtinTemplateId === defaultSheetId) ||
+          loadedSheets[0];
         setSelectedSheetId((savedSheet || defaultSheet)?.id || "");
       } catch (error) {
         if (!active) return;
@@ -186,9 +171,7 @@ export default function useSheetLibrary(user, askConfirmation) {
       localStorage.setItem("momentum:learning-active-sheet", nextSheet.id);
     } catch (error) {
       console.error("Failed to upload sheet:", error);
-      setSheetError(
-        error.message || "Could not upload this sheet. Please try again.",
-      );
+      setSheetError(error.message || "Could not upload this sheet. Please try again.");
     } finally {
       setUploadingSheet(false);
     }
@@ -205,10 +188,9 @@ export default function useSheetLibrary(user, askConfirmation) {
     setSheetError("");
     setDeletingSheetId(sheet.id);
     try {
-      const { data: removed, error } = await supabase.rpc(
-        "delete_user_sheet",
-        { requested_sheet_id: sheet.customId },
-      );
+      const { data: removed, error } = await supabase.rpc("delete_user_sheet", {
+        requested_sheet_id: sheet.customId,
+      });
       if (error) throw error;
       if (!removed) throw new Error("This sheet could not be found.");
 
@@ -228,14 +210,10 @@ export default function useSheetLibrary(user, askConfirmation) {
         ),
       );
       await resetProgress(problemIds, { persist: false });
-      setCustomSheets((current) =>
-        current.filter((customSheet) => customSheet.id !== sheet.id),
-      );
+      setCustomSheets((current) => current.filter((customSheet) => customSheet.id !== sheet.id));
 
       if (selectedSheetId === sheet.id) {
-        const nextSheet = availableSheets.find(
-          (availableSheet) => availableSheet.id !== sheet.id,
-        );
+        const nextSheet = availableSheets.find((availableSheet) => availableSheet.id !== sheet.id);
         setSelectedSheetId(nextSheet?.id || "");
         if (nextSheet) {
           localStorage.setItem("momentum:learning-active-sheet", nextSheet.id);
@@ -245,9 +223,7 @@ export default function useSheetLibrary(user, askConfirmation) {
       }
     } catch (error) {
       console.error("Failed to permanently delete sheet:", error);
-      setSheetError(
-        error.message || "Could not remove this sheet. Please try again.",
-      );
+      setSheetError(error.message || "Could not remove this sheet. Please try again.");
     } finally {
       setDeletingSheetId(null);
     }

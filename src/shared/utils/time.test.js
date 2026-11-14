@@ -51,20 +51,26 @@ describe("time helpers", () => {
 
   it("calculates sleep and study minutes from daily log entries", () => {
     expect(getSleepMinutes({ sleep_time: "22:30", wake_time: "06:30" })).toBe(480);
-    expect(getSleepMinutes({
-      sleep_time: "22:30:00",
-      wake_time: "06:30:00",
-    })).toBe(480);
+    expect(
+      getSleepMinutes({
+        sleep_time: "22:30:00",
+        wake_time: "06:30:00",
+      }),
+    ).toBe(480);
     expect(getSleepMinutes({ sleep_time: "", wake_time: "" })).toBe(0);
-    expect(getStudyMinutes({
-      custom_tasks: [
-        { slots: [
-          { start: "09:00", end: "09:45" },
-          { start: "23:30", end: "00:00", endDayOffset: 1 },
-          { start: "invalid", end: "00:00", endDayOffset: 1 },
-        ] },
-      ],
-    })).toBe(75);
+    expect(
+      getStudyMinutes({
+        custom_tasks: [
+          {
+            slots: [
+              { start: "09:00", end: "09:45" },
+              { start: "23:30", end: "00:00", endDayOffset: 1 },
+              { start: "invalid", end: "00:00", endDayOffset: 1 },
+            ],
+          },
+        ],
+      }),
+    ).toBe(75);
   });
 
   it("splits timer intervals at midnight without losing minutes", () => {
@@ -96,7 +102,10 @@ describe("time helpers", () => {
 
   it("detects overlaps within and across activities", () => {
     const overlaps = findOverlaps({
-      DSA: [{ start: "10:00", end: "12:00" }, { start: "11:30", end: "13:00" }],
+      DSA: [
+        { start: "10:00", end: "12:00" },
+        { start: "11:30", end: "13:00" },
+      ],
       Backend: [{ start: "12:30", end: "14:00" }],
     });
     expect(overlaps).toHaveLength(2);

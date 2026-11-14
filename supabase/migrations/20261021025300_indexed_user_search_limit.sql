@@ -1,16 +1,12 @@
 -- Keep live username lookup fast and prefix-only; return no more than five
 -- public profile fields to authenticated callers.
-CREATE INDEX IF NOT EXISTS profiles_username_lower_pattern_idx
-  ON public.profiles (LOWER(username) text_pattern_ops)
-  WHERE username IS NOT NULL;
+CREATE INDEX IF NOT EXISTS profiles_username_lower_pattern_idx ON public.profiles (LOWER(username) text_pattern_ops)
+WHERE
+  username IS NOT NULL;
 
-CREATE OR REPLACE FUNCTION public.search_public_profiles(search_term TEXT)
-RETURNS TABLE (name TEXT, username TEXT)
-LANGUAGE SQL
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
+CREATE OR REPLACE FUNCTION public.search_public_profiles (search_term TEXT) RETURNS TABLE (name TEXT, username TEXT) LANGUAGE SQL STABLE SECURITY DEFINER
+SET
+  search_path = public AS $$
   SELECT p.name, p.username
   FROM public.profiles AS p
   WHERE auth.uid() IS NOT NULL
@@ -21,5 +17,10 @@ AS $$
   LIMIT 5;
 $$;
 
-REVOKE ALL ON FUNCTION public.search_public_profiles(TEXT) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.search_public_profiles(TEXT) TO authenticated;
+REVOKE ALL ON FUNCTION public.search_public_profiles (TEXT)
+FROM
+  PUBLIC,
+  anon;
+
+GRANT
+EXECUTE ON FUNCTION public.search_public_profiles (TEXT) TO authenticated;

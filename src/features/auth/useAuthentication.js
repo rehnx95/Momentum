@@ -13,11 +13,7 @@ const ACCOUNT_CACHE_KEY = "momentum:account-cache";
 function readCachedAccount() {
   try {
     const cached = JSON.parse(localStorage.getItem(ACCOUNT_CACHE_KEY) || "null");
-    if (
-      !cached?.user?.id ||
-      !cached.profile?.id ||
-      cached.profile.id !== cached.user.id
-    ) {
+    if (!cached?.user?.id || !cached.profile?.id || cached.profile.id !== cached.user.id) {
       return null;
     }
     return cached;
@@ -89,9 +85,7 @@ export default function useAuthentication() {
       .catch((error) => {
         if (!active || authEventOccurred.current) return;
         console.error("Failed to restore authentication session:", error);
-        setAuthError(
-          "Could not restore your session. Please refresh and try again.",
-        );
+        setAuthError("Could not restore your session. Please refresh and try again.");
         setAppState(AppState.UNAUTHENTICATED);
       });
 
@@ -118,9 +112,7 @@ export default function useAuthentication() {
         setProfile(profileData);
         if (!profileData) localStorage.removeItem(ACCOUNT_CACHE_KEY);
         setAppState(
-          profileData?.onboarding_completed
-            ? AppState.AUTHENTICATED
-            : AppState.ONBOARDING,
+          profileData?.onboarding_completed ? AppState.AUTHENTICATED : AppState.ONBOARDING,
         );
       })
       .catch((error) => {

@@ -1,11 +1,8 @@
 -- Auth user creation must not fail because of an optional user_settings row.
 -- The app currently keeps UI preferences in localStorage and does not read this table.
-CREATE OR REPLACE FUNCTION public.handle_new_user_signup()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
+CREATE OR REPLACE FUNCTION public.handle_new_user_signup () RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
+SET
+  search_path = public AS $$
 DECLARE
   base_username TEXT;
 BEGIN

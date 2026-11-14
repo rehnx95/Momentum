@@ -1,8 +1,5 @@
-
 .auth-shell {
-  background:
-    
-    var(--page) !important;
+  background: var(--page) !important;
 }
 
 .auth-layout {
@@ -126,10 +123,18 @@
   background: #262626;
 }
 
-.auth-preview-cell.level-1 { background: #262626; }
-.auth-preview-cell.level-2 { background: #404040; }
-.auth-preview-cell.level-3 { background: #737373; }
-.auth-preview-cell.level-4 { background: #ededed; }
+.auth-preview-cell.level-1 {
+  background: #262626;
+}
+.auth-preview-cell.level-2 {
+  background: #404040;
+}
+.auth-preview-cell.level-3 {
+  background: #737373;
+}
+.auth-preview-cell.level-4 {
+  background: #ededed;
+}
 
 .auth-preview-footer {
   justify-content: space-between;

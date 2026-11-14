@@ -96,9 +96,7 @@ export default function TrackerDashboard({ context }) {
                 onDelete={handleRemoveSheet}
                 deletingId={deletingSheetId}
               />
-              <span className="text-sm text-[#A1A1A1]">
-                {totalProblems} problems
-              </span>
+              <span className="text-sm text-[#A1A1A1]">{totalProblems} problems</span>
               <span className="page-head-spacer" />
               <div className="relative w-full sm:w-72">
                 <Search
@@ -163,10 +161,7 @@ export default function TrackerDashboard({ context }) {
                   </p>
                 </div>
                 <span className="text-2xl font-bold tabular-nums text-[#EDEDED]">
-                  {totalProblems > 0
-                    ? Math.round((doneCount / totalProblems) * 100)
-                    : 0}
-                  %
+                  {totalProblems > 0 ? Math.round((doneCount / totalProblems) * 100) : 0}%
                 </span>
               </div>
               <div
@@ -224,10 +219,7 @@ export default function TrackerDashboard({ context }) {
               <div className="mb-2">
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-bold text-white tabular-nums">
-                    {totalProblems > 0
-                      ? Math.round((doneCount / totalProblems) * 100)
-                      : 0}
-                    %
+                    {totalProblems > 0 ? Math.round((doneCount / totalProblems) * 100) : 0}%
                   </span>
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">
@@ -247,28 +239,16 @@ export default function TrackerDashboard({ context }) {
               <div className="mt-3 pt-3 border-t border-zinc-800/50">
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-white tabular-nums">
-                      {doneCount}
-                    </div>
-                    <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
-                      Done
-                    </div>
+                    <div className="text-lg font-bold text-white tabular-nums">{doneCount}</div>
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-wide">Done</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-muted tabular-nums">
-                      {skippedCount}
-                    </div>
-                    <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
-                      Skipped
-                    </div>
+                    <div className="text-lg font-bold text-muted tabular-nums">{skippedCount}</div>
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-wide">Skipped</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-white tabular-nums">
-                      {todoCount}
-                    </div>
-                    <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
-                      To Do
-                    </div>
+                    <div className="text-lg font-bold text-white tabular-nums">{todoCount}</div>
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-wide">To Do</div>
                   </div>
                 </div>
                 <button
@@ -277,8 +257,7 @@ export default function TrackerDashboard({ context }) {
                       `Reset progress for ${selectedSheet?.title || "this sheet"} only? Other sheets will not be affected.`,
                       "Reset this sheet?",
                     );
-                    if (confirmed)
-                      await reset(sheetProblems.map((problem) => problem.id));
+                    if (confirmed) await reset(sheetProblems.map((problem) => problem.id));
                   }}
                   className="w-full border border-[#262626] text-xs py-1.5 bg-[#1F1F1F] hover:bg-[#262626] text-[#A1A1A1] hover:text-[#EDEDED] rounded-md transition-colors flex items-center justify-center gap-1"
                 >

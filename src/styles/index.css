@@ -79,7 +79,9 @@ body {
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: color 150ms ease, background-color 150ms ease;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
 }
 
 .text-\[\#EDEDED\] {
@@ -124,4 +126,3 @@ textarea:focus-visible,
   background: var(--page) !important;
   color: var(--text);
 }
-

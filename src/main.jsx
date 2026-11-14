@@ -1,5 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import React from "react";
+import ReactDOM from "react-dom/client";
 import "./styles/index.css";
 import "./styles/shared-components.css";
 import "./styles/interaction-layout.css";
@@ -18,14 +18,13 @@ import "./styles/responsive/auth.css";
 import "./styles/responsive/dashboard.css";
 import "./styles/responsive/tracker.css";
 import "./styles/responsive/profile.css";
-import App from './App';
+import App from "./App";
 
 function RevealScrollbarsWhileScrolling() {
   React.useEffect(() => {
     const hideTimers = new Map();
     const showScrollbars = (event) => {
-      const element =
-        event.target === document ? document.scrollingElement : event.target;
+      const element = event.target === document ? document.scrollingElement : event.target;
       if (!(element instanceof HTMLElement)) return;
 
       element.classList.add("scrollbars-visible");
@@ -64,7 +63,7 @@ class AppErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('Application render failed:', error, errorInfo);
+    console.error("Application render failed:", error, errorInfo);
   }
 
   render() {
@@ -74,8 +73,8 @@ class AppErrorBoundary extends React.Component {
           <section className="max-w-md text-center">
             <h1 className="text-2xl font-bold">The app could not load</h1>
             <p className="mt-3 text-sm text-muted">
-              Reload the page to try again. If this keeps happening, contact
-              support and include the browser console error.
+              Reload the page to try again. If this keeps happening, contact support and include the
+              browser console error.
             </p>
             <button
               type="button"
@@ -92,7 +91,7 @@ class AppErrorBoundary extends React.Component {
   }
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <RevealScrollbarsWhileScrolling />
     <AppErrorBoundary>

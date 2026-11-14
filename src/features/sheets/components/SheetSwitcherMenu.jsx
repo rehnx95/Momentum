@@ -1,9 +1,4 @@
-import {
-  Check,
-  Download,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { Check, Download, Trash2, Upload } from "lucide-react";
 
 export default function SheetSwitcherMenu({
   sheets,
@@ -21,46 +16,47 @@ export default function SheetSwitcherMenu({
       {sheets.map((sheet) => {
         const title = sheet.title === "Dsa" ? "DSA" : sheet.title;
         return (
-        <div key={sheet.id} className="popover-row">
-          <button
-            type="button"
-            role="menuitem"
-            className="popover-item"
-            onClick={() => {
-              onSelect(sheet.id);
-              onClose();
-            }}
-          >
-            <span className="w-4 shrink-0">
-              {selected?.id === sheet.id && <Check size={14} />}
-            </span>
-            <span
-              className="min-w-0 flex-1 truncate"
-              style={{
-                color: selected?.id === sheet.id ? "var(--text)" : undefined,
-              }}
-            >
-              {title}
-            </span>
-            <span className="text-xs tabular-nums text-[#A1A1A1]">
-              {sheet.problemCount} <span className="text-[10px] uppercase tracking-wide">problems</span>
-            </span>
-          </button>
-          {sheet.customId && (
+          <div key={sheet.id} className="popover-row">
             <button
               type="button"
-              className="popover-trash"
-              aria-label={`Permanently remove ${title}`}
-              disabled={deletingId !== null}
+              role="menuitem"
+              className="popover-item"
               onClick={() => {
+                onSelect(sheet.id);
                 onClose();
-                onDelete(sheet);
               }}
             >
-              <Trash2 size={14} />
+              <span className="w-4 shrink-0">
+                {selected?.id === sheet.id && <Check size={14} />}
+              </span>
+              <span
+                className="min-w-0 flex-1 truncate"
+                style={{
+                  color: selected?.id === sheet.id ? "var(--text)" : undefined,
+                }}
+              >
+                {title}
+              </span>
+              <span className="text-xs tabular-nums text-[#A1A1A1]">
+                {sheet.problemCount}{" "}
+                <span className="text-[10px] uppercase tracking-wide">problems</span>
+              </span>
             </button>
-          )}
-        </div>
+            {sheet.customId && (
+              <button
+                type="button"
+                className="popover-trash"
+                aria-label={`Permanently remove ${title}`}
+                disabled={deletingId !== null}
+                onClick={() => {
+                  onClose();
+                  onDelete(sheet);
+                }}
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
+          </div>
         );
       })}
       {sheets.length === 0 && (
@@ -79,8 +75,7 @@ export default function SheetSwitcherMenu({
           onUpload();
         }}
       >
-        <Upload size={15} />{" "}
-        {uploading ? "Converting and saving…" : "Upload a TXT sheet"}
+        <Upload size={15} /> {uploading ? "Converting and saving…" : "Upload a TXT sheet"}
       </button>
       <button
         type="button"

@@ -18,11 +18,7 @@ function App() {
 
   if (appState === AppState.UNAUTHENTICATED) {
     return (
-      <UnauthenticatedView
-        onSignIn={handleSignIn}
-        isSigningIn={isSigningIn}
-        error={authError}
-      />
+      <UnauthenticatedView onSignIn={handleSignIn} isSigningIn={isSigningIn} error={authError} />
     );
   }
 

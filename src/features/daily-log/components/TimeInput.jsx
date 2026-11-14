@@ -22,9 +22,9 @@ function advanceTimeSegment(input) {
   const range = input.closest(".slot-time-range, .daily-sleep-time-range");
   if (!range) return;
 
-  const inputs = [...range.querySelectorAll(
-    'input[data-time-navigation][data-time-segment]:not(:disabled)',
-  )];
+  const inputs = [
+    ...range.querySelectorAll("input[data-time-navigation][data-time-segment]:not(:disabled)"),
+  ];
   const next = inputs[inputs.indexOf(input) + 1];
   if (!next) return;
 
@@ -37,9 +37,9 @@ export function navigateTimeSegments(event) {
   const view = event.currentTarget.closest(".daily-day-view");
   if (!view) return;
 
-  const inputs = [...view.querySelectorAll(
-    'input[data-time-navigation][data-time-segment]:not(:disabled)',
-  )];
+  const inputs = [
+    ...view.querySelectorAll("input[data-time-navigation][data-time-segment]:not(:disabled)"),
+  ];
   const index = inputs.indexOf(event.currentTarget);
   const next = inputs[index + (event.key === "ArrowRight" ? 1 : -1)];
   if (!next) return;
@@ -97,12 +97,7 @@ export default function TimeInput({
   const blurTime = () => {
     const hour = Number(segments.hour);
     const minute = Number(segments.minute);
-    if (
-      !segments.hour ||
-      !segments.minute ||
-      hour > 23 ||
-      minute > 59
-    ) {
+    if (!segments.hour || !segments.minute || hour > 23 || minute > 59) {
       setSegments(getSegments(value));
       return false;
     }

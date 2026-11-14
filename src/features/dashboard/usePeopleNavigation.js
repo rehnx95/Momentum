@@ -4,23 +4,16 @@ import { supabase } from "../../shared/lib/supabase";
 
 function getPeopleRoute(pathname = window.location.pathname) {
   if (pathname === "/people") return { page: "people", username: "" };
-  const profileMatch = pathname.match(
-    /^\/(?:user|u)\/([A-Za-z0-9-]{3,48})\/?$/,
-  );
-  if (profileMatch)
-    return { page: "profile", username: profileMatch[1].toLowerCase() };
+  const profileMatch = pathname.match(/^\/(?:user|u)\/([A-Za-z0-9-]{3,48})\/?$/);
+  if (profileMatch) return { page: "profile", username: profileMatch[1].toLowerCase() };
   return { page: "tracker", username: "" };
 }
 
 export default function usePeopleNavigation() {
   const [showProfile, setShowProfile] = useState(
-    () =>
-      window.location.pathname === "/profile" ||
-      window.location.pathname === "/profile/edit",
+    () => window.location.pathname === "/profile" || window.location.pathname === "/profile/edit",
   );
-  const [dailyLogPage, setDailyLogPage] = useState(
-    () => window.location.pathname === "/daily-log",
-  );
+  const [dailyLogPage, setDailyLogPage] = useState(() => window.location.pathname === "/daily-log");
   const [showSettings, setShowSettings] = useState(
     () => window.location.pathname === "/profile/edit",
   );
@@ -41,9 +34,7 @@ export default function usePeopleNavigation() {
   const [publicProfileLoading, setPublicProfileLoading] = useState(false);
   const [publicProfileError, setPublicProfileError] = useState("");
   const publicProfileCache = useRef(new Map());
-  const publicProfileReturnPath = useRef(
-    getPeopleRoute().page === "people" ? "/people" : "/",
-  );
+  const publicProfileReturnPath = useRef(getPeopleRoute().page === "people" ? "/people" : "/");
   const [copiedProfileLink, setCopiedProfileLink] = useState(false);
   const [publicHeatmapYear, setPublicHeatmapYear] = useState(null);
   const [publicHeatmap, setPublicHeatmap] = useState({
@@ -99,8 +90,7 @@ export default function usePeopleNavigation() {
       setProfileSearchOpen(route.page === "people");
       setSelectedPublicUsername(route.username);
       setShowProfile(
-        window.location.pathname === "/profile" ||
-          window.location.pathname === "/profile/edit",
+        window.location.pathname === "/profile" || window.location.pathname === "/profile/edit",
       );
       setShowSettings(window.location.pathname === "/profile/edit");
       setDailyLogPage(window.location.pathname === "/daily-log");
@@ -142,22 +132,17 @@ export default function usePeopleNavigation() {
         if (sessionError) throw sessionError;
         if (!session?.access_token) throw new Error("Sign in to search users.");
 
-        const response = await fetch(
-          `/api/search?q=${encodeURIComponent(query)}`,
-          {
-            headers: { Authorization: `Bearer ${session.access_token}` },
-            signal: controller.signal,
-          },
-        );
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          signal: controller.signal,
+        });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Could not search users.");
         if (active) setProfileSearchResults(result.results || []);
       } catch (error) {
         if (!active || error.name === "AbortError") return;
         console.error("Failed to search public profiles:", error);
-        setProfileSearchError(
-          error.message || "Could not search profiles. Please try again.",
-        );
+        setProfileSearchError(error.message || "Could not search profiles. Please try again.");
       } finally {
         if (active) setProfileSearchLoading(false);
       }
@@ -191,18 +176,16 @@ export default function usePeopleNavigation() {
 
     const loadPublicProfile = async () => {
       try {
-        const [
-          { data: profileRows, error: profileError },
-          { data: emailRows, error: emailError },
-        ] = await Promise.all([
-          supabase.rpc("get_public_profile", {
-            requested_username: selectedPublicUsername,
-            requested_today: getLocalDateKey(new Date()),
-          }),
-          supabase.rpc("get_public_profile_email", {
-            requested_username: selectedPublicUsername,
-          }),
-        ]);
+        const [{ data: profileRows, error: profileError }, { data: emailRows, error: emailError }] =
+          await Promise.all([
+            supabase.rpc("get_public_profile", {
+              requested_username: selectedPublicUsername,
+              requested_today: getLocalDateKey(new Date()),
+            }),
+            supabase.rpc("get_public_profile_email", {
+              requested_username: selectedPublicUsername,
+            }),
+          ]);
         if (profileError) throw profileError;
         if (emailError) throw emailError;
         if (!active) return;
@@ -243,12 +226,15 @@ export default function usePeopleNavigation() {
     };
   }, [selectedPublicUsername]);
 
-  const openPublicProfile = useCallback((username) => {
-    publicProfileReturnPath.current = "/people";
-    setProfileSearchQuery("");
-    setProfileSearchResults([]);
-    navigateTo(`/user/${encodeURIComponent(username)}`);
-  }, [navigateTo]);
+  const openPublicProfile = useCallback(
+    (username) => {
+      publicProfileReturnPath.current = "/people";
+      setProfileSearchQuery("");
+      setProfileSearchResults([]);
+      navigateTo(`/user/${encodeURIComponent(username)}`);
+    },
+    [navigateTo],
+  );
 
   const returnFromPublicProfile = useCallback(() => {
     navigateTo(publicProfileReturnPath.current || "/");

@@ -20,11 +20,7 @@ export default function TrackerControls({
   return (
     <div className="tracker-controls">
       <div className="tracker-filter-set">
-        <div
-          className="tracker-filter-group"
-          role="group"
-          aria-label="Filter problems"
-        >
+        <div className="tracker-filter-group" role="group" aria-label="Filter problems">
           {FILTER_OPTIONS.map(({ value, label }) => (
             <button
               key={value}
@@ -62,19 +58,11 @@ export default function TrackerControls({
         role="group"
         aria-label="Expand or collapse problem groups"
       >
-        <button
-          type="button"
-          onClick={expandAll}
-          className="transition-colors hover:text-white"
-        >
+        <button type="button" onClick={expandAll} className="transition-colors hover:text-white">
           Expand all
         </button>
         <span aria-hidden="true">·</span>
-        <button
-          type="button"
-          onClick={collapseAll}
-          className="transition-colors hover:text-white"
-        >
+        <button type="button" onClick={collapseAll} className="transition-colors hover:text-white">
           Collapse all
         </button>
       </div>

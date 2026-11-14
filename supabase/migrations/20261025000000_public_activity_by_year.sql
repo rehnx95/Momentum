@@ -1,14 +1,10 @@
-CREATE OR REPLACE FUNCTION public.get_public_activity(
+CREATE OR REPLACE FUNCTION public.get_public_activity (
   requested_username TEXT,
   requested_today DATE,
   requested_year INTEGER DEFAULT NULL
-)
-RETURNS TABLE (activity JSONB, active_years INTEGER[])
-LANGUAGE SQL
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
+) RETURNS TABLE (activity JSONB, active_years INTEGER[]) LANGUAGE SQL STABLE SECURITY DEFINER
+SET
+  search_path = public AS $$
 WITH target AS (
   SELECT p.id
   FROM public.profiles AS p
@@ -50,5 +46,10 @@ SELECT
   ), ARRAY[]::INTEGER[]) AS active_years;
 $$;
 
-REVOKE ALL ON FUNCTION public.get_public_activity(TEXT, DATE, INTEGER) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.get_public_activity(TEXT, DATE, INTEGER) TO authenticated;
+REVOKE ALL ON FUNCTION public.get_public_activity (TEXT, DATE, INTEGER)
+FROM
+  PUBLIC,
+  anon;
+
+GRANT
+EXECUTE ON FUNCTION public.get_public_activity (TEXT, DATE, INTEGER) TO authenticated;

@@ -32,81 +32,84 @@ export default function useDailyLogPersistence({
   const saveQueueRef = useRef(Promise.resolve(true));
   const autosaveTimer = useRef(null);
 
-  const saveLog = useCallback((draft, targetDate) => {
-    const nextDraft = draft || logRef.current;
-    const nextDate = targetDate || dateRef.current;
-    const result = validateDay(nextDraft);
-    if (result.errors.length) {
-      if (nextDate === dateRef.current) {
-        setStatus("Fix errors to save");
-        setMessage("");
-      }
-      return false;
-    }
-
-    const snapshot = JSON.stringify(nextDraft);
-    const save = async () => {
-      if (loadFailed) return false;
-      if (snapshot === savedSnapshotRef.current) return true;
-      setSaving(true);
-      if (nextDate === dateRef.current) {
-        setStatus("Saving…");
-        setMessage("");
-      }
-      const { error } = await supabase.from("daily_logs").upsert(
-        {
-          user_id: userId,
-          date: nextDate,
-          sleep_time: nextDraft.sleep_time || null,
-          wake_time: nextDraft.wake_time || null,
-          dsa_slots: [],
-          backend_slots: [],
-          custom_tasks: nextDraft.custom_tasks,
-          dsa_hours: null,
-          backend_hours: null,
-        },
-        { onConflict: "user_id,date" },
-      );
-      if (error) throw error;
-      invalidateDailyLogHistoryCache(userId);
-      invalidateFullLogCache(userId);
-      setDailyLogCache(userId, nextDate, normalizeLog(nextDraft, nextDate));
-      if (nextDate === dateRef.current) {
-        savedSnapshotRef.current = snapshot;
-        setSavedSnapshot(snapshot);
-        setStatus("Saved");
-        setMessage("");
-      }
-      return true;
-    };
-    const runSave = async () => {
-      try {
-        return await save();
-      } catch (error) {
-        console.error("Failed to save daily log:", error);
+  const saveLog = useCallback(
+    (draft, targetDate) => {
+      const nextDraft = draft || logRef.current;
+      const nextDate = targetDate || dateRef.current;
+      const result = validateDay(nextDraft);
+      if (result.errors.length) {
         if (nextDate === dateRef.current) {
-          setStatus("Could not save");
-          setMessage("Could not save this daily log. Your edits are still here.");
+          setStatus("Fix errors to save");
+          setMessage("");
         }
         return false;
-      } finally {
-        setSaving(false);
       }
-    };
 
-    const queuedPromise = saveQueueRef.current.then(runSave, runSave);
-    saveQueueRef.current = queuedPromise;
-    return queuedPromise;
-  }, [
-    dateRef,
-    loadFailed,
-    logRef,
-    savedSnapshotRef,
-    setMessage,
-    setSavedSnapshot,
-    setStatus,
-    userId,
-  ]);
+      const snapshot = JSON.stringify(nextDraft);
+      const save = async () => {
+        if (loadFailed) return false;
+        if (snapshot === savedSnapshotRef.current) return true;
+        setSaving(true);
+        if (nextDate === dateRef.current) {
+          setStatus("Saving…");
+          setMessage("");
+        }
+        const { error } = await supabase.from("daily_logs").upsert(
+          {
+            user_id: userId,
+            date: nextDate,
+            sleep_time: nextDraft.sleep_time || null,
+            wake_time: nextDraft.wake_time || null,
+            dsa_slots: [],
+            backend_slots: [],
+            custom_tasks: nextDraft.custom_tasks,
+            dsa_hours: null,
+            backend_hours: null,
+          },
+          { onConflict: "user_id,date" },
+        );
+        if (error) throw error;
+        invalidateDailyLogHistoryCache(userId);
+        invalidateFullLogCache(userId);
+        setDailyLogCache(userId, nextDate, normalizeLog(nextDraft, nextDate));
+        if (nextDate === dateRef.current) {
+          savedSnapshotRef.current = snapshot;
+          setSavedSnapshot(snapshot);
+          setStatus("Saved");
+          setMessage("");
+        }
+        return true;
+      };
+      const runSave = async () => {
+        try {
+          return await save();
+        } catch (error) {
+          console.error("Failed to save daily log:", error);
+          if (nextDate === dateRef.current) {
+            setStatus("Could not save");
+            setMessage("Could not save this daily log. Your edits are still here.");
+          }
+          return false;
+        } finally {
+          setSaving(false);
+        }
+      };
+
+      const queuedPromise = saveQueueRef.current.then(runSave, runSave);
+      saveQueueRef.current = queuedPromise;
+      return queuedPromise;
+    },
+    [
+      dateRef,
+      loadFailed,
+      logRef,
+      savedSnapshotRef,
+      setMessage,
+      setSavedSnapshot,
+      setStatus,
+      userId,
+    ],
+  );
 
   const saveLogRef = useRef(saveLog);
   saveLogRef.current = saveLog;
@@ -187,17 +190,7 @@ export default function useDailyLogPersistence({
       saveLogRef.current(logRef.current, dateRef.current);
     }, 800);
     return () => window.clearTimeout(autosaveTimer.current);
-  }, [
-    dateRef,
-    dirty,
-    loadFailed,
-    loading,
-    log,
-    logRef,
-    setMessage,
-    setStatus,
-    validationErrors,
-  ]);
+  }, [dateRef, dirty, loadFailed, loading, log, logRef, setMessage, setStatus, validationErrors]);
 
   const flushPendingSave = useCallback(async () => {
     window.clearTimeout(autosaveTimer.current);
@@ -217,8 +210,7 @@ export default function useDailyLogPersistence({
       }
     };
     document.addEventListener("visibilitychange", flushWhenHidden);
-    return () =>
-      document.removeEventListener("visibilitychange", flushWhenHidden);
+    return () => document.removeEventListener("visibilitychange", flushWhenHidden);
   }, [dateRef, logRef, savedSnapshotRef]);
 
   return {

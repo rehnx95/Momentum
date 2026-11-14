@@ -18,9 +18,9 @@ Step 2 — Dynamic Programming
 
 export function parseSheet(raw) {
   const content = raw
-    .replace(/\r\n/g, '\n')
-    .replace(/(\S)(Step\s+\d+\s+[—–-]\s+)/g, '$1\n$2')
-    .replace(/([^\s\d])(\d+\.\d+\s+[—–-]\s+)/g, '$1\n$2');
+    .replace(/\r\n/g, "\n")
+    .replace(/(\S)(Step\s+\d+\s+[—–-]\s+)/g, "$1\n$2")
+    .replace(/([^\s\d])(\d+\.\d+\s+[—–-]\s+)/g, "$1\n$2");
   const steps = [];
   let currentStep = null;
   let currentSubsection = null;
@@ -28,14 +28,15 @@ export function parseSheet(raw) {
   let currentSubId = null;
   let lastProblemNum = 0;
 
-  const extractLC = text => {
+  const extractLC = (text) => {
     const match = text.match(/\(LC\s+(\d+)\)/);
     return match ? Number.parseInt(match[1], 10) : null;
   };
-  const cleanTitle = text => text
-    .replace(/\s*\(LC\s+\d+\)\s*/g, '')
-    .replace(/\s*\(Skip\)\s*/gi, '')
-    .trim();
+  const cleanTitle = (text) =>
+    text
+      .replace(/\s*\(LC\s+\d+\)\s*/g, "")
+      .replace(/\s*\(Skip\)\s*/gi, "")
+      .trim();
 
   function splitProblems(text) {
     const first = text.match(/^(\d+)\.\s+/);
@@ -45,7 +46,7 @@ export function parseSheet(raw) {
     let start = 0;
     let searchFrom = first[0].length;
     for (;;) {
-      const nextProblem = new RegExp(`${number + 1}\\.\\s+`, 'g');
+      const nextProblem = new RegExp(`${number + 1}\\.\\s+`, "g");
       nextProblem.lastIndex = searchFrom;
       const match = nextProblem.exec(text);
       if (!match) break;
@@ -70,7 +71,7 @@ export function parseSheet(raw) {
   function ensureSubsection() {
     if (currentSubsection) return currentSubsection;
     if (!currentStep) return null;
-    currentSubId = '0';
+    currentSubId = "0";
     currentSubsection = {
       id: `s${currentStepNum}-${currentSubId}`,
       title: IMPLICIT_SUB_TITLE,
@@ -95,7 +96,7 @@ export function parseSheet(raw) {
     lastProblemNum = Number.parseInt(match[1], 10);
   }
 
-  for (const rawLine of content.split('\n')) {
+  for (const rawLine of content.split("\n")) {
     const line = rawLine.trim();
     if (!line) continue;
 
@@ -104,14 +105,14 @@ export function parseSheet(raw) {
       const peeled = peelMergedProblems(stepMatch[2]);
       currentStepNum = stepMatch[1];
       const id = `s${currentStepNum}`;
-      currentStep = steps.find(step => step.id === id);
+      currentStep = steps.find((step) => step.id === id);
       if (!currentStep) {
         currentStep = { id, title: peeled.title, subsections: [] };
         steps.push(currentStep);
       }
       const subsections = currentStep.subsections;
       currentSubsection = subsections.length ? subsections[subsections.length - 1] : null;
-      currentSubId = currentSubsection ? currentSubsection.id.split('-').slice(1).join('-') : null;
+      currentSubId = currentSubsection ? currentSubsection.id.split("-").slice(1).join("-") : null;
       peeled.problemParts.forEach(addProblem);
       continue;
     }
@@ -133,14 +134,18 @@ export function parseSheet(raw) {
     if (/^\d+\.\s+/.test(line)) splitProblems(line).forEach(addProblem);
   }
 
-  const problems = steps.flatMap(step => step.subsections.flatMap(subsection => subsection.problems));
+  const problems = steps.flatMap((step) =>
+    step.subsections.flatMap((subsection) => subsection.problems),
+  );
   if (!steps.length || !problems.length) {
-    throw new Error('No steps or problems found. Use “Step 1 — Title” headings and numbered problems.');
+    throw new Error(
+      "No steps or problems found. Use “Step 1 — Title” headings and numbered problems.",
+    );
   }
   const ids = new Set();
   for (const problem of problems) {
     if (!problem.title || ids.has(problem.id)) {
-      throw new Error('The sheet contains an empty problem title or duplicate problem number.');
+      throw new Error("The sheet contains an empty problem title or duplicate problem number.");
     }
     ids.add(problem.id);
   }
@@ -149,7 +154,9 @@ export function parseSheet(raw) {
 
 export function countSheetProblems(sheet) {
   return sheet.steps.reduce(
-    (total, step) => total + step.subsections.reduce((subTotal, subsection) => subTotal + subsection.problems.length, 0),
+    (total, step) =>
+      total +
+      step.subsections.reduce((subTotal, subsection) => subTotal + subsection.problems.length, 0),
     0,
   );
 }

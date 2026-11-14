@@ -50,7 +50,9 @@ describe("DayView activity entry", () => {
     const sleepPanel = screen.getByRole("region", { name: "Sleep time" });
     const quickLog = screen.getByRole("heading", { name: "Quick log" }).closest("form");
     expect(sleepPanel).toBeTruthy();
-    expect(quickLog.compareDocumentPosition(sleepPanel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      quickLog.compareDocumentPosition(sleepPanel) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Sleep" })).toBeNull();
     expect(screen.getByLabelText("Sleep start time hour")).toBeTruthy();
     expect(screen.getByLabelText("Wake time hour")).toBeTruthy();
@@ -64,21 +66,16 @@ describe("DayView activity entry", () => {
       name: "Reading",
       slots: [{ start: "", end: "" }],
     };
-    render(
-      <DayView
-        daily={createDaily([task])}
-        sheets={[]}
-        askConfirmation={vi.fn()}
-      />,
-    );
+    render(<DayView daily={createDaily([task])} sheets={[]} askConfirmation={vi.fn()} />);
 
     expect(screen.getByText("Reading", { selector: ".activity-card-name" })).toBeTruthy();
     expect(screen.queryByText("1 slot")).toBeNull();
     expect(screen.getByRole("button", { name: "Add slot to Reading" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Remove Reading activity" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Remove Reading slot 1" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Add slot to Reading" })
-      .closest(".activity-card-actions")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Add slot to Reading" }).closest(".activity-card-actions"),
+    ).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Options for Reading/ })).toBeNull();
   });
 
@@ -101,23 +98,24 @@ describe("DayView activity entry", () => {
   });
 
   it("places sleep overlap warnings on the relevant activity row", () => {
-    const daily = createDaily([{
-      id: "reading-1",
-      name: "Reading",
-      slots: [{ start: "23:00", end: "23:30" }],
-    }]);
-    daily.validation.warnings = [{
-      code: "overlap",
-      activityA: "Reading",
-      activityB: "Sleep",
-      message: "Reading overlaps Sleep.",
-    }];
-    const { container } = render(
-      <DayView daily={daily} sheets={[]} askConfirmation={vi.fn()} />,
-    );
+    const daily = createDaily([
+      {
+        id: "reading-1",
+        name: "Reading",
+        slots: [{ start: "23:00", end: "23:30" }],
+      },
+    ]);
+    daily.validation.warnings = [
+      {
+        code: "overlap",
+        activityA: "Reading",
+        activityB: "Sleep",
+        message: "Reading overlaps Sleep.",
+      },
+    ];
+    const { container } = render(<DayView daily={daily} sheets={[]} askConfirmation={vi.fn()} />);
 
-    expect(container.querySelector(".activity-sleep-overlap").textContent)
-      .toBe("Overlaps sleep");
+    expect(container.querySelector(".activity-sleep-overlap").textContent).toBe("Overlaps sleep");
     expect(screen.queryByRole("list", { name: "Daily log warnings" })).toBeNull();
   });
 
@@ -131,11 +129,7 @@ describe("DayView activity entry", () => {
       ],
     };
     const { container } = render(
-      <DayView
-        daily={createDaily([task])}
-        sheets={[]}
-        askConfirmation={vi.fn()}
-      />,
+      <DayView daily={createDaily([task])} sheets={[]} askConfirmation={vi.fn()} />,
     );
 
     const activityCard = container.querySelector(".activity-card");
@@ -145,37 +139,27 @@ describe("DayView activity entry", () => {
       "1h",
       "30m",
     ]);
-    expect(slotRows.every((row) =>
-      row.lastElementChild.classList.contains("slot-hours"),
-    )).toBe(true);
+    expect(slotRows.every((row) => row.lastElementChild.classList.contains("slot-hours"))).toBe(
+      true,
+    );
     expect(activityCard.querySelector(".activity-slot-totals")).toBeNull();
   });
 
   it("hides activities that no longer have any time slots", () => {
     const task = { id: "reading-1", name: "Reading", slots: [] };
-    render(
-      <DayView
-        daily={createDaily([task])}
-        sheets={[]}
-        askConfirmation={vi.fn()}
-      />,
-    );
+    render(<DayView daily={createDaily([task])} sheets={[]} askConfirmation={vi.fn()} />);
 
     expect(screen.queryByText("Reading", { selector: ".activity-card-name" })).toBeNull();
     expect(screen.getByText("Nothing logged yet. Add an activity to get started.")).toBeTruthy();
   });
 
   it("explains how the recorded sleep range is counted", () => {
-    render(
-      <DayView
-        daily={createDaily()}
-        sheets={[]}
-        askConfirmation={vi.fn()}
-      />,
-    );
+    render(<DayView daily={createDaily()} sheets={[]} askConfirmation={vi.fn()} />);
 
-    expect(screen.getByText(
-      "Counted toward the night you wake up, so late-evening slots no longer collide.",
-    )).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Counted toward the night you wake up, so late-evening slots no longer collide.",
+      ),
+    ).toBeTruthy();
   });
 });

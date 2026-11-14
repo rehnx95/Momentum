@@ -72,10 +72,7 @@ function shuffle(items, random) {
   const shuffled = [...items];
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [
-      shuffled[swapIndex],
-      shuffled[index],
-    ];
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
   }
   return shuffled;
 }
@@ -89,15 +86,9 @@ function buildDailyLogs(userId, today) {
     const dayChance = [0.56, 0.84, 0.82, 0.85, 0.8, 0.76, 0.62][weekday];
     if (random() >= dayChance) return [];
 
-    const activities = ACTIVITY_TEMPLATES.filter(
-      (activity) => random() < activity.chance,
-    );
+    const activities = ACTIVITY_TEMPLATES.filter((activity) => random() < activity.chance);
     while (activities.length < 2) {
-      const activity = ACTIVITY_TEMPLATES[randomInt(
-        random,
-        0,
-        ACTIVITY_TEMPLATES.length - 1,
-      )];
+      const activity = ACTIVITY_TEMPLATES[randomInt(random, 0, ACTIVITY_TEMPLATES.length - 1)];
       if (!activities.some((selected) => selected.id === activity.id)) {
         activities.push(activity);
       }
@@ -105,26 +96,30 @@ function buildDailyLogs(userId, today) {
 
     const sleepStart = randomInt(random, 21 * 60, 23 * 60 + 45);
     const wakeTime = randomInt(random, 6 * 60, 8 * 60 + 45);
-    return [{
-      user_id: userId,
-      date,
-      sleep_time: random() < 0.05 ? null : formatTime(sleepStart),
-      wake_time: random() < 0.05 ? null : formatTime(wakeTime),
-      dsa_slots: [],
-      backend_slots: [],
-      custom_tasks: activities.map((activity) => {
-        const startTime = activity.start + randomInt(random, -10, 10);
-        const duration = randomInt(random, 35, activity.maxDuration);
-        return {
-          id: activity.id,
-          name: activity.name,
-          slots: [{
-            start: formatTime(startTime),
-            end: formatTime(startTime + duration),
-          }],
-        };
-      }),
-    }];
+    return [
+      {
+        user_id: userId,
+        date,
+        sleep_time: random() < 0.05 ? null : formatTime(sleepStart),
+        wake_time: random() < 0.05 ? null : formatTime(wakeTime),
+        dsa_slots: [],
+        backend_slots: [],
+        custom_tasks: activities.map((activity) => {
+          const startTime = activity.start + randomInt(random, -10, 10);
+          const duration = randomInt(random, 35, activity.maxDuration);
+          return {
+            id: activity.id,
+            name: activity.name,
+            slots: [
+              {
+                start: formatTime(startTime),
+                end: formatTime(startTime + duration),
+              },
+            ],
+          };
+        }),
+      },
+    ];
   });
 }
 
@@ -158,23 +153,14 @@ function buildProgress(userId, problemIds, today) {
   const shuffled = shuffle(problemIds, random);
   const total = shuffled.length;
   const solvedCount = Math.min(total, Math.max(1, Math.round(total * 0.78)));
-  const skippedCount = Math.min(
-    total - solvedCount,
-    Math.round(total * 0.1),
-  );
+  const skippedCount = Math.min(total - solvedCount, Math.round(total * 0.1));
   const currentYear = Number(today.slice(0, 4));
   const solveDatesByYear = new Map();
 
   if (currentYear > 2025) {
-    solveDatesByYear.set(
-      2025,
-      activeDates("2025-01-01", "2025-12-31", random),
-    );
+    solveDatesByYear.set(2025, activeDates("2025-01-01", "2025-12-31", random));
   }
-  solveDatesByYear.set(
-    currentYear,
-    activeDates(`${currentYear}-01-01`, today, random),
-  );
+  solveDatesByYear.set(currentYear, activeDates(`${currentYear}-01-01`, today, random));
 
   const solvedIn2025 =
     currentYear > 2025 && solvedCount > 1
@@ -184,15 +170,10 @@ function buildProgress(userId, problemIds, today) {
   const progress = shuffled.slice(0, solvedCount).map((problemId, index) => {
     const year = index < solvedIn2025 ? 2025 : currentYear;
     const dates = solveDatesByYear.get(year);
-    const completedOn = dates?.length
-      ? dates[Math.floor(random() * dates.length)]
-      : today;
+    const completedOn = dates?.length ? dates[Math.floor(random() * dates.length)] : today;
     const hour = String(randomInt(random, 8, 22)).padStart(2, "0");
     const minute = String(randomInt(random, 0, 59)).padStart(2, "0");
-    activityCounts.set(
-      completedOn,
-      (activityCounts.get(completedOn) || 0) + 1,
-    );
+    activityCounts.set(completedOn, (activityCounts.get(completedOn) || 0) + 1);
 
     return {
       user_id: userId,

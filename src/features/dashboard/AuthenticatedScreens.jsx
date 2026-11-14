@@ -144,11 +144,7 @@ export default function AuthenticatedScreens({ context }) {
   if (showSettings) {
     return (
       <>
-        <Suspense
-          fallback={
-            <div className="app-page app-page-narrow" aria-hidden="true" />
-          }
-        >
+        <Suspense fallback={<div className="app-page app-page-narrow" aria-hidden="true" />}>
           <ProfileSettings
             userId={user.id}
             profile={profile}
@@ -171,11 +167,7 @@ export default function AuthenticatedScreens({ context }) {
         >
           <AppHeader active="daily-log" {...headerProps} />
           <main className="app-page">
-            <Suspense
-              fallback={
-                <div className="daily-tracker surface-card" aria-hidden="true" />
-              }
-            >
+            <Suspense fallback={<div className="daily-tracker surface-card" aria-hidden="true" />}>
               <DailyTracker
                 user={user}
                 sheets={availableSheets}

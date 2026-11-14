@@ -11,12 +11,12 @@ export default function PeopleSearchPage({
   context,
 }) {
   const { headerProps } = context;
-    return (
-      <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
-        <AppHeader active="people" {...headerProps} />
+  return (
+    <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
+      <AppHeader active="people" {...headerProps} />
 
-        <main className="app-page">
-          <div className="app-page-narrow">
+      <main className="app-page">
+        <div className="app-page-narrow">
           <h1 className="page-title mb-1">Find people</h1>
           <p className="mb-6 text-sm text-[#A1A1A1]">
             Search a username to see their streaks, sheet progress and activity.
@@ -35,8 +35,7 @@ export default function PeopleSearchPage({
               onChange={(event) => onQueryChange(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Escape") onQueryChange("");
-                if (event.key === "Enter" && results[0])
-                  onSelectProfile(results[0].username);
+                if (event.key === "Enter" && results[0]) onSelectProfile(results[0].username);
               }}
               placeholder="Search by username"
               aria-autocomplete="list"
@@ -50,9 +49,7 @@ export default function PeopleSearchPage({
                 className="absolute inset-x-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-[#383838] bg-[#0A0A0A] shadow-2xl"
               >
                 {loading ? (
-                  <p className="px-4 py-3 text-sm text-[#A1A1A1]">
-                    Searching people…
-                  </p>
+                  <p className="px-4 py-3 text-sm text-[#A1A1A1]">Searching people…</p>
                 ) : error ? (
                   <p role="alert" className="px-4 py-3 text-sm text-muted">
                     {error}
@@ -68,9 +65,7 @@ export default function PeopleSearchPage({
                       className="flex w-full items-center gap-3 border-b border-[#262626] px-4 py-3 text-left last:border-0 hover:bg-[#1F1F1F]"
                     >
                       <span className="people-result-avatar">
-                        {(result.name || result.username)
-                          .charAt(0)
-                          .toUpperCase()}
+                        {(result.name || result.username).charAt(0).toUpperCase()}
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-semibold text-[#EDEDED]">
@@ -80,11 +75,7 @@ export default function PeopleSearchPage({
                           @{result.username}
                         </span>
                       </span>
-                      <ChevronRight
-                        size={17}
-                        className="text-[#A1A1A1]"
-                        aria-hidden="true"
-                      />
+                      <ChevronRight size={17} className="text-[#A1A1A1]" aria-hidden="true" />
                     </button>
                   ))
                 ) : (
@@ -101,13 +92,12 @@ export default function PeopleSearchPage({
               <Users size={22} />
               <strong>Start typing a username</strong>
               <span>
-                Profiles show streaks, per-sheet progress, a yearly heatmap and
-                recent solves.
+                Profiles show streaks, per-sheet progress, a yearly heatmap and recent solves.
               </span>
             </div>
           )}
-          </div>
-        </main>
-      </div>
-    );
-  }
+        </div>
+      </main>
+    </div>
+  );
+}

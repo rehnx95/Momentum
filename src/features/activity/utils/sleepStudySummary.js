@@ -4,8 +4,7 @@ export function getSleepStudySummary(days) {
   const average = (key) =>
     recentLoggedDays.length
       ? Math.round(
-          recentLoggedDays.reduce((total, day) => total + day[key], 0) /
-            recentLoggedDays.length,
+          recentLoggedDays.reduce((total, day) => total + day[key], 0) / recentLoggedDays.length,
         )
       : null;
 

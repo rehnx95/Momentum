@@ -41,14 +41,14 @@ Backend tracks.
 
 ## Technology
 
-| Area | Stack |
-| --- | --- |
-| UI | React 18, JavaScript, Tailwind CSS, component-scoped CSS |
-| Build and development | Vite 5 |
+| Area                    | Stack                                                    |
+| ----------------------- | -------------------------------------------------------- |
+| UI                      | React 18, JavaScript, Tailwind CSS, component-scoped CSS |
+| Build and development   | Vite 5                                                   |
 | Authentication and data | Supabase Auth, PostgreSQL, PostgREST, RLS, SQL functions |
-| Hosting and API | Vercel |
-| Tests | Vitest |
-| Icons | Lucide React |
+| Hosting and API         | Vercel                                                   |
+| Tests                   | Vitest                                                   |
+| Icons                   | Lucide React                                             |
 
 ## Repository map
 

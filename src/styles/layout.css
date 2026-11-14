@@ -98,7 +98,9 @@ html {
   font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
-  transition: background-color 0.15s, color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
 
 .app-nav button:hover {

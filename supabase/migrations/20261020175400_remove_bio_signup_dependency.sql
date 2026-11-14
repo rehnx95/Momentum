@@ -1,11 +1,8 @@
 -- The application no longer collects or stores profile bios. Avoid requiring
 -- a legacy bio column when Supabase Auth creates a new profile.
-CREATE OR REPLACE FUNCTION public.handle_new_user_signup()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
+CREATE OR REPLACE FUNCTION public.handle_new_user_signup () RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
+SET
+  search_path = public AS $$
 DECLARE
   base_username TEXT;
 BEGIN

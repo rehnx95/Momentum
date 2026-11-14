@@ -1,12 +1,12 @@
 ALTER TABLE public.user_sheets
-  ADD COLUMN IF NOT EXISTS builtin_template_id TEXT;
+ADD COLUMN IF NOT EXISTS builtin_template_id TEXT;
 
-CREATE UNIQUE INDEX IF NOT EXISTS user_sheets_user_builtin_template_idx
-  ON public.user_sheets (user_id, builtin_template_id)
-  WHERE builtin_template_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS user_sheets_user_builtin_template_idx ON public.user_sheets (user_id, builtin_template_id)
+WHERE
+  builtin_template_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS public.user_deleted_builtin_sheets (
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
   sheet_id TEXT NOT NULL CHECK (sheet_id ~ '^[a-z0-9_-]{1,80}$'),
   deleted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (user_id, sheet_id)
@@ -28,17 +28,15 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.delete_sheet_progress_for_owner(
+CREATE OR REPLACE FUNCTION public.delete_sheet_progress_for_owner (
   target_user_id UUID,
   template_id TEXT,
   sheet_uuid UUID,
   sheet_json JSONB
-)
-RETURNS VOID
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
+) RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER
+SET
+  search_path = public,
+  pg_temp AS $$
 BEGIN
   WITH sheet_problem_ids AS (
     SELECT
@@ -104,14 +102,10 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.ensure_builtin_sheet_copies(
-  requested_sheets JSONB
-)
-RETURNS VOID
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
+CREATE OR REPLACE FUNCTION public.ensure_builtin_sheet_copies (requested_sheets JSONB) RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER
+SET
+  search_path = public,
+  pg_temp AS $$
 DECLARE
   requested_sheet JSONB;
   template_id TEXT;
@@ -260,12 +254,10 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.delete_user_sheet(requested_sheet_id UUID)
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
+CREATE OR REPLACE FUNCTION public.delete_user_sheet (requested_sheet_id UUID) RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER
+SET
+  search_path = public,
+  pg_temp AS $$
 DECLARE
   removed_sheet_data JSONB;
   removed_template_id TEXT;
@@ -299,11 +291,24 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.delete_sheet_progress_for_owner(UUID, TEXT, UUID, JSONB)
-  FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON FUNCTION public.ensure_builtin_sheet_copies(JSONB)
-  FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.ensure_builtin_sheet_copies(JSONB)
-  TO authenticated;
-REVOKE ALL ON FUNCTION public.delete_user_sheet(UUID) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.delete_user_sheet(UUID) TO authenticated;
+REVOKE ALL ON FUNCTION public.delete_sheet_progress_for_owner (UUID, TEXT, UUID, JSONB)
+FROM
+  PUBLIC,
+  anon,
+  authenticated;
+
+REVOKE ALL ON FUNCTION public.ensure_builtin_sheet_copies (JSONB)
+FROM
+  PUBLIC,
+  anon;
+
+GRANT
+EXECUTE ON FUNCTION public.ensure_builtin_sheet_copies (JSONB) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.delete_user_sheet (UUID)
+FROM
+  PUBLIC,
+  anon;
+
+GRANT
+EXECUTE ON FUNCTION public.delete_user_sheet (UUID) TO authenticated;

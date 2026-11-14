@@ -79,9 +79,7 @@ export default function PublicProfilePage({
     }
 
     const monthLabels = weeks.map((week) => {
-      const firstOfMonth = week.find(
-        (item) => !item.outOfRange && item.date.getDate() === 1,
-      );
+      const firstOfMonth = week.find((item) => !item.outOfRange && item.date.getDate() === 1);
       return firstOfMonth
         ? firstOfMonth.date.toLocaleDateString(undefined, { month: "short" })
         : "";
@@ -91,38 +89,32 @@ export default function PublicProfilePage({
 
   const customSheets = profile?.custom_sheets || EMPTY_SHEETS;
   const profileSheetStats = useMemo(
-    () => customSheets.map((sheet, index) => ({
-      id: `${sheet.title}-${index}`,
-      title: sheet.title,
-      solved: Number(sheet.solved || 0),
-      skipped: Number(sheet.skipped || 0),
-      total: Number(sheet.total || 0),
-    })),
+    () =>
+      customSheets.map((sheet, index) => ({
+        id: `${sheet.title}-${index}`,
+        title: sheet.title,
+        solved: Number(sheet.solved || 0),
+        skipped: Number(sheet.skipped || 0),
+        total: Number(sheet.total || 0),
+      })),
     [customSheets],
   );
   const recentAccepted = useMemo(
-    () => (profile?.custom_recent_accepted || EMPTY_RECENT_ACCEPTED).map(
-      (problem, index) => ({
+    () =>
+      (profile?.custom_recent_accepted || EMPTY_RECENT_ACCEPTED).map((problem, index) => ({
         id: `custom-${index}:${problem.sheet_title}:${problem.title}`,
         title: problem.title,
         sheetTitle: problem.sheet_title,
         acceptedOn: problem.accepted_on,
         completedAt: problem.completed_at,
-      }),
-    ),
+      })),
     [profile?.custom_recent_accepted],
   );
   const activeDays = heatmapData.weeks
     .flat()
     .filter((item) => !item.outOfRange && item.count > 0).length;
-  const profileProblemsSolved = profileSheetStats.reduce(
-    (total, sheet) => total + sheet.solved,
-    0,
-  );
-  const profileProblemsTotal = profileSheetStats.reduce(
-    (total, sheet) => total + sheet.total,
-    0,
-  );
+  const profileProblemsSolved = profileSheetStats.reduce((total, sheet) => total + sheet.solved, 0);
+  const profileProblemsTotal = profileSheetStats.reduce((total, sheet) => total + sheet.total, 0);
   return (
     <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
       <AppHeader
@@ -134,9 +126,7 @@ export default function PublicProfilePage({
         {error && !loading && !profile ? (
           <section className="surface-card rounded-2xl border p-8 text-center">
             <p className="text-sm font-semibold uppercase tracking-wider text-muted">
-              {error === "This profile could not be found."
-                ? "404"
-                : "Profile"}
+              {error === "This profile could not be found." ? "404" : "Profile"}
             </p>
             <h2 className="mt-2 text-2xl font-bold">
               {error === "This profile could not be found."
@@ -175,22 +165,16 @@ export default function PublicProfilePage({
                 <aside className="profile-sidebar">
                   <section className="profile-hero">
                     <div className="profile-avatar">
-                      {(profile.name || profile.username || "U")
-                        .charAt(0)
-                        .toUpperCase()}
+                      {(profile.name || profile.username || "U").charAt(0).toUpperCase()}
                     </div>
                     <div className="profile-user-details">
                       <div className="profile-identity">
                         <h1 className="text-2xl font-bold text-[#EDEDED]">
                           {profile.name || profile.username}
                         </h1>
-                        <p className="mt-1 text-sm text-[#A1A1A1]">
-                          @{profile.username}
-                        </p>
+                        <p className="mt-1 text-sm text-[#A1A1A1]">@{profile.username}</p>
                         {profile.email && (
-                          <p className="mt-1 break-all text-sm text-[#A1A1A1]">
-                            {profile.email}
-                          </p>
+                          <p className="mt-1 break-all text-sm text-[#A1A1A1]">{profile.email}</p>
                         )}
                       </div>
                     </div>
@@ -245,7 +229,9 @@ export default function PublicProfilePage({
 
               <div className="profile-main">
                 <ActivityHeatmap
-                  activity={publicHeatmap.username === selectedPublicUsername ? publicHeatmap.activity : {}}
+                  activity={
+                    publicHeatmap.username === selectedPublicUsername ? publicHeatmap.activity : {}
+                  }
                   years={publicHeatmap.years}
                   todayKey={todayDateKey}
                   selectedYear={publicHeatmapYear}
@@ -257,10 +243,10 @@ export default function PublicProfilePage({
                   }
                 />
 
-                  <section
-                    className="recent-ac-card surface-card"
-                    aria-labelledby="public-recent-ac-heading"
-                  >
+                <section
+                  className="recent-ac-card surface-card"
+                  aria-labelledby="public-recent-ac-heading"
+                >
                   <div className="recent-ac-heading">
                     <h2 id="public-recent-ac-heading">Recent AC</h2>
                     <span className="recent-ac-count">Latest {recentAccepted.length}</span>
@@ -290,21 +276,17 @@ export default function PublicProfilePage({
                               </span>
                             </Tooltip>
                             {problem.acceptedOn ? (
-                              <time
-                                className="recent-ac-date"
-                                dateTime={problem.acceptedOn}
-                              >
-                                {new Date(
-                                  `${problem.acceptedOn}T00:00:00`,
-                                ).toLocaleDateString(undefined, {
-                                  month: "short",
-                                  day: "numeric",
-                                })}
+                              <time className="recent-ac-date" dateTime={problem.acceptedOn}>
+                                {new Date(`${problem.acceptedOn}T00:00:00`).toLocaleDateString(
+                                  undefined,
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                  },
+                                )}
                               </time>
                             ) : (
-                              <span className="recent-ac-date">
-                                Date unavailable
-                              </span>
+                              <span className="recent-ac-date">Date unavailable</span>
                             )}
                           </li>
                         ))}

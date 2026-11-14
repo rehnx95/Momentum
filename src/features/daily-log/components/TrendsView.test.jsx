@@ -10,29 +10,31 @@ afterEach(cleanup);
 describe("TrendsView", () => {
   it("uses the original chart modes and only offers timed activities", () => {
     const daily = {
-      allLogs: [{
-        date: getLocalDateKey(),
-        sleep_time: "23:00",
-        wake_time: "06:00",
-        custom_tasks: [
-          {
-            id: "reading",
-            name: "Reading",
-            slots: [{ start: "09:00", end: "10:00" }],
-          },
-          {
-            id: "sheet:1",
-            sheetId: "1",
-            name: "DSA Sheet",
-            slots: [{ start: "10:00", end: "11:00" }],
-          },
-          {
-            id: "writing",
-            name: "Writing",
-            slots: [{ start: "", end: "" }],
-          },
-        ],
-      }],
+      allLogs: [
+        {
+          date: getLocalDateKey(),
+          sleep_time: "23:00",
+          wake_time: "06:00",
+          custom_tasks: [
+            {
+              id: "reading",
+              name: "Reading",
+              slots: [{ start: "09:00", end: "10:00" }],
+            },
+            {
+              id: "sheet:1",
+              sheetId: "1",
+              name: "DSA Sheet",
+              slots: [{ start: "10:00", end: "11:00" }],
+            },
+            {
+              id: "writing",
+              name: "Writing",
+              slots: [{ start: "", end: "" }],
+            },
+          ],
+        },
+      ],
       currentStreak: 1,
       allLogsLoading: false,
       olderLogsLoading: false,
@@ -51,8 +53,12 @@ describe("TrendsView", () => {
     expect(chartOptions.getByRole("option", { name: "DSA Sheet" })).toBeTruthy();
     expect(chartOptions.queryByRole("option", { name: "Writing" })).toBeNull();
     fireEvent.click(chartOptions.getByRole("option", { name: "Sleep" }));
-    expect(screen.getByText("Reading", { selector: ".trends-time-label span:last-child" })).toBeTruthy();
-    expect(screen.getByText("DSA Sheet", { selector: ".trends-time-label span:last-child" })).toBeTruthy();
+    expect(
+      screen.getByText("Reading", { selector: ".trends-time-label span:last-child" }),
+    ).toBeTruthy();
+    expect(
+      screen.getByText("DSA Sheet", { selector: ".trends-time-label span:last-child" }),
+    ).toBeTruthy();
 
     expect(screen.getByRole("img", { name: /Sleep hours over the last 30 days/ })).toBeTruthy();
     const chooseChart = (label) => {
@@ -62,14 +68,20 @@ describe("TrendsView", () => {
     chooseChart("Active");
     expect(screen.getByRole("img", { name: /Active hours over the last 30 days/ })).toBeTruthy();
     chooseChart("Sleep + Active");
-    expect(screen.getByRole("img", { name: /Sleep \+ active hours over the last 30 days/ })).toBeTruthy();
+    expect(
+      screen.getByRole("img", { name: /Sleep \+ active hours over the last 30 days/ }),
+    ).toBeTruthy();
     expect(screen.getByText("Active", { selector: ".sleep-study-legend span" })).toBeTruthy();
 
     chooseChart("Reading");
     expect(screen.getByRole("img", { name: /Reading hours over the last 30 days/ })).toBeTruthy();
 
-    const chartRange = container.querySelector(".trends-month-navigation .trends-range-label").textContent;
-    const weekRange = container.querySelector(".trends-week-navigation .trends-range-label").textContent;
+    const chartRange = container.querySelector(
+      ".trends-month-navigation .trends-range-label",
+    ).textContent;
+    const weekRange = container.querySelector(
+      ".trends-week-navigation .trends-range-label",
+    ).textContent;
     const weekNavigation = container.querySelector(".trends-week-navigation");
     expect(weekNavigation.parentElement.classList.contains("trends-time-header")).toBe(true);
     expect(container.querySelector(".trends-panel-grid")).toBeNull();
@@ -84,12 +96,18 @@ describe("TrendsView", () => {
     expect(container.textContent).not.toContain("Daily totals");
 
     fireEvent.click(screen.getByRole("button", { name: "Previous 30 days" }));
-    expect(container.querySelector(".trends-month-navigation .trends-range-label").textContent).not.toBe(chartRange);
-    expect(container.querySelector(".trends-week-navigation .trends-range-label").textContent).toBe(weekRange);
+    expect(
+      container.querySelector(".trends-month-navigation .trends-range-label").textContent,
+    ).not.toBe(chartRange);
+    expect(container.querySelector(".trends-week-navigation .trends-range-label").textContent).toBe(
+      weekRange,
+    );
     expect(screen.getByRole("img", { name: /Reading hours over the last 30 days/ })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Previous 7 days" }));
-    expect(container.querySelector(".trends-week-navigation .trends-range-label").textContent).not.toBe(weekRange);
+    expect(
+      container.querySelector(".trends-week-navigation .trends-range-label").textContent,
+    ).not.toBe(weekRange);
     expect(screen.getByRole("button", { name: "Next 7 days" }).disabled).toBe(false);
   });
 

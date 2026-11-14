@@ -25,9 +25,7 @@ async function assertCurrentUser(userId) {
 async function upsertRows(table, rows, conflictTarget) {
   for (let offset = 0; offset < rows.length; offset += BATCH_SIZE) {
     const batch = rows.slice(offset, offset + BATCH_SIZE);
-    const { error } = await supabase
-      .from(table)
-      .upsert(batch, { onConflict: conflictTarget });
+    const { error } = await supabase.from(table).upsert(batch, { onConflict: conflictTarget });
     if (error) {
       throw new Error(`Could not seed ${table}: ${error.message}`);
     }

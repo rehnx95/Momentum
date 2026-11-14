@@ -2,18 +2,24 @@ import { describe, expect, it } from "vitest";
 import { buildSampleData } from "./sampleData";
 
 function makeSheets(problemCount) {
-  return [{
-    id: "custom-test-sheet",
-    sheet: {
-      steps: [{
-        subsections: [{
-          problems: Array.from({ length: problemCount }, (_, index) => ({
-            id: `problem-${index + 1}`,
-          })),
-        }],
-      }],
+  return [
+    {
+      id: "custom-test-sheet",
+      sheet: {
+        steps: [
+          {
+            subsections: [
+              {
+                problems: Array.from({ length: problemCount }, (_, index) => ({
+                  id: `problem-${index + 1}`,
+                })),
+              },
+            ],
+          },
+        ],
+      },
     },
-  }];
+  ];
 }
 
 describe("test sample data", () => {
@@ -39,13 +45,8 @@ describe("test sample data", () => {
     });
 
     const solved = sample.progress.filter((item) => item.state === "done");
-    const solvedYears = new Set(
-      solved.map((item) => Number(item.completed_on.slice(0, 4))),
-    );
-    const countedSolves = sample.activityLog.reduce(
-      (total, entry) => total + entry.count,
-      0,
-    );
+    const solvedYears = new Set(solved.map((item) => Number(item.completed_on.slice(0, 4))));
+    const countedSolves = sample.activityLog.reduce((total, entry) => total + entry.count, 0);
 
     expect(solved.length).toBeGreaterThan(300);
     expect(solvedYears.has(2025)).toBe(true);

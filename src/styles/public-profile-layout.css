@@ -1,4 +1,3 @@
-
 .profile-layout.own-profile-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -18,9 +17,6 @@
 }
 
 .own-profile-layout .profile-hero-actions .app-tooltip-anchor:hover .app-tooltip,
-.own-profile-layout
-  .profile-hero-actions
-  .app-tooltip-anchor:has(:focus-visible)
-  .app-tooltip {
+.own-profile-layout .profile-hero-actions .app-tooltip-anchor:has(:focus-visible) .app-tooltip {
   transform: translateY(0);
 }

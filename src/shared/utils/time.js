@@ -30,10 +30,7 @@ export function getSleepMinutes(log) {
   if (!log?.sleep_time || !log?.wake_time) return 0;
   const sleepTime = String(log.sleep_time).slice(0, 5);
   const wakeTime = String(log.wake_time).slice(0, 5);
-  return slotMinutes(
-    { start: sleepTime, end: wakeTime },
-    { wrap: true },
-  ) || 0;
+  return slotMinutes({ start: sleepTime, end: wakeTime }, { wrap: true }) || 0;
 }
 
 export function getStudyMinutes(log) {
@@ -79,16 +76,10 @@ export function splitIntervalByDay(startedAt, endedAt) {
     return `${year}-${month}-${day}`;
   };
   const time = (date) =>
-    `${String(date.getHours()).padStart(2, "0")}:${String(
-      date.getMinutes(),
-    ).padStart(2, "0")}`;
+    `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 
   while (cursor < end) {
-    const midnight = new Date(
-      cursor.getFullYear(),
-      cursor.getMonth(),
-      cursor.getDate() + 1,
-    );
+    const midnight = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 1);
     const segmentEnd = end < midnight ? end : midnight;
     const endAtMidnight = segmentEnd.getTime() === midnight.getTime();
     segments.push({
@@ -112,7 +103,10 @@ function intervalsFor(slot, wraps) {
   if (start === end) return [];
   if (end > start) return [[start, end]];
   if (!wraps) return [];
-  return [[start, 1440], [0, end]];
+  return [
+    [start, 1440],
+    [0, end],
+  ];
 }
 
 export function findOverlaps(slotsByActivity) {
@@ -168,13 +162,11 @@ function collectStudyActivities(log) {
       label: "Backend",
       slots: Array.isArray(log?.backend_slots) ? log.backend_slots : [],
     },
-    ...(Array.isArray(log?.custom_tasks) ? log.custom_tasks : []).map(
-      (task, index) => ({
-        key: `custom:${task.id || index}`,
-        label: task.name || "Custom activity",
-        slots: Array.isArray(task.slots) ? task.slots : [],
-      }),
-    ),
+    ...(Array.isArray(log?.custom_tasks) ? log.custom_tasks : []).map((task, index) => ({
+      key: `custom:${task.id || index}`,
+      label: task.name || "Custom activity",
+      slots: Array.isArray(task.slots) ? task.slots : [],
+    })),
   ];
 }
 
@@ -249,9 +241,7 @@ export function validateDay(log) {
       const sleep = { start: log.sleep_time, end: log.wake_time, wrap: true };
       // A sleep that wraps past midnight belongs to the previous night; only the
       // part after midnight (00:00 to wake time) can clash with today's slots.
-      sleepSlots.push(
-        sleepStart < wakeEnd ? sleep : { start: "00:00", end: log.wake_time },
-      );
+      sleepSlots.push(sleepStart < wakeEnd ? sleep : { start: "00:00", end: log.wake_time });
       totalMinutes += slotMinutes(sleep, { wrap: true });
     }
   } else if (log?.sleep_time || log?.wake_time) {
@@ -268,12 +258,8 @@ export function validateDay(log) {
     });
   }
 
-  const overlapActivities = Object.fromEntries(
-    activities.map(({ key, slots }) => [key, slots]),
-  );
-  const overlapLabels = new Map(
-    activities.map(({ key, label }) => [key, label]),
-  );
+  const overlapActivities = Object.fromEntries(activities.map(({ key, slots }) => [key, slots]));
+  const overlapLabels = new Map(activities.map(({ key, label }) => [key, label]));
   if (sleepSlots.length) {
     overlapActivities.sleep = sleepSlots;
     overlapLabels.set("sleep", "Sleep");

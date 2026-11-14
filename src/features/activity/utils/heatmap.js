@@ -1,9 +1,9 @@
 const DAY = 86400000;
-const pad = (n) => String(n).padStart(2, '0');
+const pad = (n) => String(n).padStart(2, "0");
 
 export const toKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 export const fromKey = (key) => {
-  const [y, m, d] = key.split('-').map(Number);
+  const [y, m, d] = key.split("-").map(Number);
   return new Date(y, m - 1, d);
 };
 const addDays = (date, n) => new Date(date.getFullYear(), date.getMonth(), date.getDate() + n);
@@ -17,25 +17,20 @@ export function getLevel(count) {
 }
 
 function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd'];
+  const s = ["th", "st", "nd", "rd"];
   const v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
 export function formatTooltipDate(date, currentYear) {
-  const month = date.toLocaleDateString('en-US', { month: 'long' });
+  const month = date.toLocaleDateString("en-US", { month: "long" });
   const base = `${month} ${ordinal(date.getDate())}`;
   return date.getFullYear() === currentYear ? base : `${base}, ${date.getFullYear()}`;
 }
 
 // year = null -> rolling last year ending today. year = 2025 -> Jan 1 to Dec 31 of 2025.
 // The grid always starts on a Sunday, like GitHub.
-export function buildHeatmap({
-  activity = {},
-  todayKey,
-  year = null,
-  levelFn = getLevel,
-}) {
+export function buildHeatmap({ activity = {}, todayKey, year = null, levelFn = getLevel }) {
   const today = fromKey(todayKey);
   let start;
   let end;
@@ -70,8 +65,8 @@ export function buildHeatmap({
     weeks.push(week);
   }
 
-  const monthName = (d) => d.toLocaleDateString(undefined, { month: 'short' });
-  const labels = new Array(columns).fill('');
+  const monthName = (d) => d.toLocaleDateString(undefined, { month: "short" });
+  const labels = new Array(columns).fill("");
   weeks.forEach((week, c) => {
     const first = week.find((x) => x.inRange && x.date.getDate() === 1);
     if (first) labels[c] = monthName(first.date);

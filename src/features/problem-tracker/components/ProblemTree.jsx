@@ -3,7 +3,10 @@ import { ChevronDown, ChevronRight, SkipForward } from "lucide-react";
 export function ProgressBar({ done, total }) {
   const pct = total ? Math.round((done / total) * 100) : 0;
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#262626]" aria-label={`${pct}% complete`}>
+    <div
+      className="h-1.5 w-full overflow-hidden rounded-full bg-[#262626]"
+      aria-label={`${pct}% complete`}
+    >
       <div
         className="h-full rounded-full transition-all duration-300 ease-out"
         style={{
@@ -30,21 +33,11 @@ export function ProblemRow({ prob, state, onToggle, onSkip }) {
         onClick={() => onToggle(prob.id)}
         role="checkbox"
         aria-checked={isDone}
-        aria-label={
-          isDone
-            ? `Mark ${prob.title} as not done`
-            : `Mark ${prob.title} as done`
-        }
+        aria-label={isDone ? `Mark ${prob.title} as not done` : `Mark ${prob.title} as done`}
         className={`w-[22px] h-[22px] flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${isDone ? "bg-[#EDEDED] border-[#EDEDED]" : "border-[#EDEDED]/60 bg-transparent hover:border-[#EDEDED]"}`}
       >
         {isDone && (
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            className="text-black"
-          >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-black">
             <path
               d="M2 7l3.5 3.5L12 4.5"
               stroke="currentColor"
@@ -85,9 +78,7 @@ export function SubSectionRow({
   hideSkipped,
   filter,
 }) {
-  const done = sub.problems.filter(
-    (p) => progressState(p.id) === "done",
-  ).length;
+  const done = sub.problems.filter((p) => progressState(p.id) === "done").length;
   const total = sub.problems.length;
 
   let visible = sub.problems;
@@ -155,8 +146,7 @@ export function StepRow({
   filter,
 }) {
   const done = step.subsections.reduce(
-    (sum, s) =>
-      sum + s.problems.filter((p) => progressState(p.id) === "done").length,
+    (sum, s) => sum + s.problems.filter((p) => progressState(p.id) === "done").length,
     0,
   );
   const total = step.subsections.reduce((sum, s) => sum + s.problems.length, 0);

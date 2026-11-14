@@ -20,11 +20,7 @@ function activityName(name) {
 }
 
 function isSheetActivity(task) {
-  return Boolean(
-    task.sheetId ||
-    task.sheet_id ||
-    String(task.id || "").startsWith("sheet:"),
-  );
+  return Boolean(task.sheetId || task.sheet_id || String(task.id || "").startsWith("sheet:"));
 }
 
 function activityEntries(log) {
@@ -120,12 +116,7 @@ export default function TrendsView({ daily }) {
   const [weekOffset, setWeekOffset] = useState(0);
   const todayKey = getLocalDateKey();
   const allLogs = Array.isArray(daily.allLogs) ? daily.allLogs : EMPTY_LOGS;
-  const {
-    allLogsLoading,
-    hasOlderLogs,
-    loadOlderLogs,
-    olderLogsLoading,
-  } = daily;
+  const { allLogsLoading, hasOlderLogs, loadOlderLogs, olderLogsLoading } = daily;
 
   const activityOptions = useMemo(() => {
     const byKey = new Map();
@@ -138,32 +129,30 @@ export default function TrendsView({ daily }) {
       first.name.localeCompare(second.name, undefined, { sensitivity: "base" }),
     );
   }, [allLogs]);
-  const chartModes = useMemo(() => [
-    { id: "sleep", label: "Sleep", title: "Sleep hours", series: ["sleep"] },
-    { id: "active", label: "Active", title: "Active hours", series: ["study"] },
-    {
-      id: "combined",
-      label: "Sleep + Active",
-      title: "Sleep + active hours",
-      series: ["study", "sleep"],
-    },
-    ...activityOptions.map((activity) => ({
-      id: `activity:${activity.key}`,
-      label: activity.name,
-      title: `${activity.name} hours`,
-      series: ["study"],
-      activityKey: activity.key,
-      activityName: activity.name,
-    })),
-  ], [activityOptions]);
+  const chartModes = useMemo(
+    () => [
+      { id: "sleep", label: "Sleep", title: "Sleep hours", series: ["sleep"] },
+      { id: "active", label: "Active", title: "Active hours", series: ["study"] },
+      {
+        id: "combined",
+        label: "Sleep + Active",
+        title: "Sleep + active hours",
+        series: ["study", "sleep"],
+      },
+      ...activityOptions.map((activity) => ({
+        id: `activity:${activity.key}`,
+        label: activity.name,
+        title: `${activity.name} hours`,
+        series: ["study"],
+        activityKey: activity.key,
+        activityName: activity.name,
+      })),
+    ],
+    [activityOptions],
+  );
   const chartMode = chartModes.find(({ id }) => id === chartSelection) || chartModes[1];
 
-  const {
-    chartDays,
-    chartRangeLabel,
-    chartSummary,
-    chartStartKey,
-  } = useMemo(() => {
+  const { chartDays, chartRangeLabel, chartSummary, chartStartKey } = useMemo(() => {
     const logsByDate = new Map(allLogs.map((log) => [log.date, log]));
     const windowEnd = new Date(`${todayKey}T00:00:00`);
     windowEnd.setDate(windowEnd.getDate() + chartOffset * CHART_WINDOW_DAYS);
@@ -174,9 +163,7 @@ export default function TrendsView({ daily }) {
       date.setDate(windowStart.getDate() + index);
       return date;
     });
-    const logsInRange = dates
-      .map((date) => logsByDate.get(dateKey(date)))
-      .filter(Boolean);
+    const logsInRange = dates.map((date) => logsByDate.get(dateKey(date))).filter(Boolean);
     const chartDays = dates.map((date) => {
       const key = dateKey(date);
       const log = logsByDate.get(key);
@@ -194,21 +181,16 @@ export default function TrendsView({ daily }) {
     });
     const sleepLogs = logsInRange.filter((log) => log.sleep_time && log.wake_time);
     const averageSleep = sleepLogs.length
-      ? sleepLogs.reduce((total, log) => total + getSleepMinutes(log), 0) /
-        sleepLogs.length
+      ? sleepLogs.reduce((total, log) => total + getSleepMinutes(log), 0) / sleepLogs.length
       : null;
     const totalActive = logsInRange.reduce(
-      (total, log) => total + activityEntries(log).reduce(
-        (sum, activity) => sum + activity.minutes,
-        0,
-      ),
+      (total, log) =>
+        total + activityEntries(log).reduce((sum, activity) => sum + activity.minutes, 0),
       0,
     );
     const daysLogged = new Set(
       logsInRange
-        .filter((log) =>
-          activityEntries(log).length > 0 || log.sleep_time || log.wake_time,
-        )
+        .filter((log) => activityEntries(log).length > 0 || log.sleep_time || log.wake_time)
         .map((log) => log.date),
     ).size;
     const averageActive = logsInRange.length ? totalActive / logsInRange.length : null;
@@ -263,9 +245,7 @@ export default function TrendsView({ daily }) {
           label: name,
           value: formatDuration(minutes),
           minutes,
-          percentage: totalMinutes
-            ? Math.round((minutes / totalMinutes) * 100)
-            : 0,
+          percentage: totalMinutes ? Math.round((minutes / totalMinutes) * 100) : 0,
           color: getActivityColor(name),
         })),
     };
@@ -275,9 +255,7 @@ export default function TrendsView({ daily }) {
   const oldestLoadedDate = allLogs[allLogs.length - 1]?.date;
   const legendItems = chartMode.series.map((key) => ({
     key,
-    label: key === "sleep"
-      ? "Sleep"
-      : chartMode.activityName || "Active",
+    label: key === "sleep" ? "Sleep" : chartMode.activityName || "Active",
   }));
   const activityColor = chartMode.activityName
     ? getActivityColor(chartMode.activityName)
@@ -339,9 +317,18 @@ export default function TrendsView({ daily }) {
             loading={olderLogsLoading}
           />
           <div className="trends-chart-summary" aria-label="30-day summary">
-            <span><strong>{chartSummary.daysLogged}</strong><small>days logged</small></span>
-            <span><strong>{chartSummary.averageSleep}</strong><small>avg sleep</small></span>
-            <span><strong>{chartSummary.averageActive}</strong><small>avg active</small></span>
+            <span>
+              <strong>{chartSummary.daysLogged}</strong>
+              <small>days logged</small>
+            </span>
+            <span>
+              <strong>{chartSummary.averageSleep}</strong>
+              <small>avg sleep</small>
+            </span>
+            <span>
+              <strong>{chartSummary.averageActive}</strong>
+              <small>avg active</small>
+            </span>
           </div>
         </div>
         <div className="sleep-study-tabpanel trends-chart-panel">
@@ -352,9 +339,11 @@ export default function TrendsView({ daily }) {
                   <i
                     className={`sleep-study-legend-swatch ${key}`}
                     aria-hidden="true"
-                    style={key === "study" && activityColor
-                      ? { "--study-chart-color": activityColor }
-                      : undefined}
+                    style={
+                      key === "study" && activityColor
+                        ? { "--study-chart-color": activityColor }
+                        : undefined
+                    }
                   />
                   {label}
                 </span>
@@ -392,28 +381,32 @@ export default function TrendsView({ daily }) {
           />
         </header>
         <div className="trends-time-list">
-          {timeWent.length ? timeWent.map((item) => (
-            <div key={item.label} className="trends-time-row">
-              <div className="trends-time-label">
-                <span
-                  className="trends-time-dot"
-                  aria-hidden="true"
-                  style={{ "--activity-color": item.color }}
-                />
-                <span>{item.label}</span>
+          {timeWent.length ? (
+            timeWent.map((item) => (
+              <div key={item.label} className="trends-time-row">
+                <div className="trends-time-label">
+                  <span
+                    className="trends-time-dot"
+                    aria-hidden="true"
+                    style={{ "--activity-color": item.color }}
+                  />
+                  <span>{item.label}</span>
+                </div>
+                <span className="trends-time-percentage">{item.percentage}%</span>
+                <strong>{item.value}</strong>
+                <div className="trends-track" aria-hidden="true">
+                  <span
+                    style={{
+                      width: `${item.percentage}%`,
+                      "--activity-color": item.color,
+                    }}
+                  />
+                </div>
               </div>
-              <span className="trends-time-percentage">{item.percentage}%</span>
-              <strong>{item.value}</strong>
-              <div className="trends-track" aria-hidden="true">
-                <span
-                  style={{
-                    width: `${item.percentage}%`,
-                    "--activity-color": item.color,
-                  }}
-                />
-              </div>
-            </div>
-          )) : <p className="trends-no-data">No timed activities in this 7-day period.</p>}
+            ))
+          ) : (
+            <p className="trends-no-data">No timed activities in this 7-day period.</p>
+          )}
         </div>
       </article>
     </section>

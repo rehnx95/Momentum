@@ -1,9 +1,6 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import {
-  formatDuration,
-  getSlotDurationMinutes,
-} from "../../../shared/utils/time";
+import { formatDuration, getSlotDurationMinutes } from "../../../shared/utils/time";
 import { getLocalDateKey } from "../../../shared/utils/date";
 import { getActivityColor } from "../lib/activityColor";
 import ActivityCard from "./ActivityCard";
@@ -18,53 +15,58 @@ function activityTotal(slots) {
 
 function overlapsSleep(warnings, activityName) {
   const name = activityName.trim().toLocaleLowerCase();
-  return warnings.some((warning) =>
-    warning.code === "overlap" &&
-    [warning.activityA, warning.activityB].some(
-      (activity) => String(activity || "").trim().toLocaleLowerCase() === name,
-    ) &&
-    [warning.activityA, warning.activityB].some(
-      (activity) => String(activity || "").trim().toLocaleLowerCase() === "sleep",
-    ),
+  return warnings.some(
+    (warning) =>
+      warning.code === "overlap" &&
+      [warning.activityA, warning.activityB].some(
+        (activity) =>
+          String(activity || "")
+            .trim()
+            .toLocaleLowerCase() === name,
+      ) &&
+      [warning.activityA, warning.activityB].some(
+        (activity) =>
+          String(activity || "")
+            .trim()
+            .toLocaleLowerCase() === "sleep",
+      ),
   );
 }
 
 export default function DayView({ daily, sheets = [], askConfirmation }) {
   const [quickActivityName, setQuickActivityName] = useState("");
   const activities = useMemo(
-    () => daily.activeCustomTasks
-      .map((task) => ({
-        ...task,
-        slots:
-          daily.log.custom_tasks.find((item) => item.id === task.id)?.slots || [],
-      }))
-      .filter((task) => task.slots.length > 0),
+    () =>
+      daily.activeCustomTasks
+        .map((task) => ({
+          ...task,
+          slots: daily.log.custom_tasks.find((item) => item.id === task.id)?.slots || [],
+        }))
+        .filter((task) => task.slots.length > 0),
     [daily.activeCustomTasks, daily.log.custom_tasks],
   );
-  const entryDisabled =
-    daily.loading ||
-    daily.loadFailed;
+  const entryDisabled = daily.loading || daily.loadFailed;
   const totalLoggedMinutes = activities.reduce(
     (total, activity) => total + activityTotal(activity.slots),
     0,
   );
-  const runningTimerStart = daily.runningTimer
-    ? Date.parse(daily.runningTimer.startedAt)
-    : NaN;
+  const runningTimerStart = daily.runningTimer ? Date.parse(daily.runningTimer.startedAt) : NaN;
   const runningTimerMinutes =
     Number.isFinite(runningTimerStart) && Number.isFinite(daily.timerNow)
       ? Math.max(0, Math.floor((daily.timerNow - runningTimerStart) / 60_000))
       : 0;
-  const summaryWarnings = daily.validation.warnings.filter((warning) =>
-    !(
-      warning.code === "overlap" &&
-      [warning.activityA, warning.activityB].some(
-        (activity) => String(activity || "").trim().toLocaleLowerCase() === "sleep",
-      ) &&
-      activities.some((activity) =>
-        overlapsSleep([warning], activity.name),
-      )
-    ),
+  const summaryWarnings = daily.validation.warnings.filter(
+    (warning) =>
+      !(
+        warning.code === "overlap" &&
+        [warning.activityA, warning.activityB].some(
+          (activity) =>
+            String(activity || "")
+              .trim()
+              .toLocaleLowerCase() === "sleep",
+        ) &&
+        activities.some((activity) => overlapsSleep([warning], activity.name))
+      ),
   );
 
   const addQuickActivity = async (event) => {
@@ -100,7 +102,9 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
       {daily.loadFailed && (
         <div className="daily-load-error" role="alert">
           Could not load this day. Existing data is not being overwritten.
-          <button type="button" onClick={daily.retryLoad}>Try again</button>
+          <button type="button" onClick={daily.retryLoad}>
+            Try again
+          </button>
         </div>
       )}
       <div className="daily-day-header">
@@ -145,7 +149,9 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             </div>
 
             {activities.length === 0 && (
-              <p className="daily-empty-state">Nothing logged yet. Add an activity to get started.</p>
+              <p className="daily-empty-state">
+                Nothing logged yet. Add an activity to get started.
+              </p>
             )}
 
             <div className="daily-activity-list">
@@ -167,10 +173,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                     activity.sheet_id ||
                     String(activity.id || "").startsWith("sheet:"),
                   )}
-                  overlapsSleep={overlapsSleep(
-                    daily.validation.warnings,
-                    activity.name,
-                  )}
+                  overlapsSleep={overlapsSleep(daily.validation.warnings, activity.name)}
                   disabled={entryDisabled}
                   runningTimer={daily.runningTimer}
                   timerNow={daily.timerNow}
@@ -182,9 +185,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                   }
                   onRemoveSlot={(index) => daily.removeSlot(activity.id, index)}
                   onRemoveActivity={() => removeActivity(activity)}
-                  onDiscardEmptySlot={(index) =>
-                    daily.discardEmptySlot(activity.id, index)
-                  }
+                  onDiscardEmptySlot={(index) => daily.discardEmptySlot(activity.id, index)}
                 />
               ))}
             </div>
@@ -209,7 +210,9 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
         <aside className="daily-side-panel">
           <form className="quick-log-card" onSubmit={(event) => void addQuickActivity(event)}>
             <h3>Quick log</h3>
-            <label className="sr-only" htmlFor="quick-activity-name">New activity</label>
+            <label className="sr-only" htmlFor="quick-activity-name">
+              New activity
+            </label>
             <div className="quick-log-input-row">
               <input
                 id="quick-activity-name"

@@ -11,9 +11,10 @@ export default function SampleDataTools({ userId, userEmail, sheets }) {
 
   const runAction = async (action) => {
     const account = userEmail || "the current account";
-    const message = action === "generate"
-      ? `Generate sample data for ${account}? Matching Daily Log and problem records may be overwritten. Verify this is your second Google account before continuing.`
-      : `Remove ALL Daily Log entries, problem progress, and activity history for ${account}? This also clears manually entered tracking data. Profile details and learning sheets will remain. Continue only for your test account.`;
+    const message =
+      action === "generate"
+        ? `Generate sample data for ${account}? Matching Daily Log and problem records may be overwritten. Verify this is your second Google account before continuing.`
+        : `Remove ALL Daily Log entries, problem progress, and activity history for ${account}? This also clears manually entered tracking data. Profile details and learning sheets will remain. Continue only for your test account.`;
     const confirmed = window.confirm(message);
     if (!confirmed) return;
 
@@ -68,7 +69,11 @@ export default function SampleDataTools({ userId, userEmail, sheets }) {
           <Trash2 size={15} aria-hidden="true" />
         </button>
       </Tooltip>
-      {status && <span className="sample-data-status" role={hasError ? "alert" : "status"}>{status}</span>}
+      {status && (
+        <span className="sample-data-status" role={hasError ? "alert" : "status"}>
+          {status}
+        </span>
+      )}
     </div>
   );
 }

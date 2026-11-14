@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../../../shared/lib/supabase";
 import {
   getDailyLogHistoryCache,
@@ -60,7 +53,7 @@ export function SleepStudyGraph({
 
     const measure = () => {
       const width = Math.round(element.clientWidth);
-      if (width > 0) setChartWidth((current) => current === width ? current : width);
+      if (width > 0) setChartWidth((current) => (current === width ? current : width));
     };
 
     measure();
@@ -71,29 +64,20 @@ export function SleepStudyGraph({
   }, []);
 
   const isMobileChart = chartWidth <= 520;
-  const visibleDays = isMobileChart && !showAllDays
-    ? days.slice(-MOBILE_DAY_COUNT)
-    : days;
+  const visibleDays = isMobileChart && !showAllDays ? days.slice(-MOBILE_DAY_COUNT) : days;
   const plotWidth = chartWidth - PLOT.left - PLOT.right;
-  const chartHeight = isMobileChart
-    ? MOBILE_CHART_HEIGHT
-    : chartHeightOverride ?? CHART_HEIGHT;
+  const chartHeight = isMobileChart ? MOBILE_CHART_HEIGHT : (chartHeightOverride ?? CHART_HEIGHT);
   const plotHeight = chartHeight - PLOT.top - PLOT.bottom;
-  const maxMinutes = Math.max(
-    0,
-    ...visibleDays.flatMap((day) => series.map((key) => day[key])),
-  );
+  const maxMinutes = Math.max(0, ...visibleDays.flatMap((day) => series.map((key) => day[key])));
   const maxHours = maxMinutes > 12 * 60 ? 24 : 12;
   const currentYear = new Date().getFullYear();
-  const dateLabelIndexes = visibleDays.length <= MOBILE_DAY_COUNT
-    ? [...new Set([0, Math.floor((visibleDays.length - 1) / 2), visibleDays.length - 1])]
-    : DATE_LABEL_INDEXES;
+  const dateLabelIndexes =
+    visibleDays.length <= MOBILE_DAY_COUNT
+      ? [...new Set([0, Math.floor((visibleDays.length - 1) / 2), visibleDays.length - 1])]
+      : DATE_LABEL_INDEXES;
   const yFor = (minutes) =>
-    PLOT.top +
-    plotHeight -
-    (Math.min(minutes / 60, 24) / maxHours) * plotHeight;
-  const xFor = (index) =>
-    PLOT.left + (plotWidth * index) / Math.max(1, visibleDays.length - 1);
+    PLOT.top + plotHeight - (Math.min(minutes / 60, 24) / maxHours) * plotHeight;
+  const xFor = (index) => PLOT.left + (plotWidth * index) / Math.max(1, visibleDays.length - 1);
   const ticks = [0, 1, 2, 3, 4].map((step) => (maxHours * step) / 4);
   const showTooltip = (event) => {
     const target = event.target.closest?.("[data-tip]");
@@ -105,14 +89,16 @@ export function SleepStudyGraph({
     const rect = target.getBoundingClientRect();
     const point = target.dataset.point;
     setActivePoint(point);
-    setTooltip((current) => current?.point === point
-      ? current
-      : {
-          text: target.dataset.tip,
-          x: rect.left + rect.width / 2,
-          y: rect.top,
-          point,
-        });
+    setTooltip((current) =>
+      current?.point === point
+        ? current
+        : {
+            text: target.dataset.tip,
+            x: rect.left + rect.width / 2,
+            y: rect.top,
+            point,
+          },
+    );
   };
 
   return (
@@ -121,10 +107,7 @@ export function SleepStudyGraph({
       aria-label={title}
       style={activityColor ? { "--study-chart-color": activityColor } : undefined}
     >
-      <div
-        ref={chartWrapRef}
-        className="sleep-study-chart-wrap"
-      >
+      <div ref={chartWrapRef} className="sleep-study-chart-wrap">
         <svg
           className="sleep-study-chart"
           viewBox={`0 0 ${chartWidth} ${chartHeight}`}
@@ -219,11 +202,7 @@ export function SleepStudyGraph({
                 x={xFor(index)}
                 y={chartHeight - 8}
                 textAnchor={
-                  index === 0
-                    ? "start"
-                    : index === visibleDays.length - 1
-                      ? "end"
-                      : "middle"
+                  index === 0 ? "start" : index === visibleDays.length - 1 ? "end" : "middle"
                 }
               >
                 {day.label}
@@ -250,9 +229,7 @@ export function SleepStudyGraph({
 
 export default function SleepStudyChart({ userId, showSummary = false }) {
   const cachedHistory = getDailyLogHistoryCache(userId);
-  const [logs, setLogs] = useState(
-    () => cachedHistory?.logs || [],
-  );
+  const [logs, setLogs] = useState(() => cachedHistory?.logs || []);
   const [selectedChart, setSelectedChart] = useState("sleep");
   const tabRefs = useRef({});
   const [hasHistory, setHasHistory] = useState(Boolean(cachedHistory));
@@ -356,28 +333,17 @@ export default function SleepStudyChart({ userId, showSummary = false }) {
   };
 
   return (
-    <section
-      className="sleep-study-card surface-card"
-      aria-labelledby="sleep-study-heading"
-    >
+    <section className="sleep-study-card surface-card" aria-labelledby="sleep-study-heading">
       <header className="sleep-study-heading">
         <div className="sleep-study-heading-copy">
           <h2 id="sleep-study-heading">Sleep &amp; study trends</h2>
           <p>
-            <span className="sleep-study-range-desktop">
-              Daily hours over the last 30 days
-            </span>
-            <span className="sleep-study-range-mobile">
-              Daily hours over the last 7 days
-            </span>
+            <span className="sleep-study-range-desktop">Daily hours over the last 30 days</span>
+            <span className="sleep-study-range-mobile">Daily hours over the last 7 days</span>
           </p>
         </div>
         {!(error && !hasHistory) && (
-          <div
-            className="sleep-study-tabs"
-            role="tablist"
-            aria-label="Sleep and study graph"
-          >
+          <div className="sleep-study-tabs" role="tablist" aria-label="Sleep and study graph">
             {CHARTS.map((chart, index) => (
               <button
                 key={chart.id}
@@ -434,39 +400,27 @@ export default function SleepStudyChart({ userId, showSummary = false }) {
                 Study
               </span>
             </div>
-            <SleepStudyGraph
-              days={days}
-              title={activeChart.title}
-              series={activeChart.series}
-            />
+            <SleepStudyGraph days={days} title={activeChart.title} series={activeChart.series} />
           </div>
-          <p className="sleep-study-footnote">
-            Days without a saved log are shown as gaps.
-          </p>
+          <p className="sleep-study-footnote">Days without a saved log are shown as gaps.</p>
           {showSummary && (
             <div className="sleep-study-summary" aria-label="Sleep and study summaries">
               <article className="sleep-study-summary-card">
                 <span>Avg study, 7 days</span>
                 <strong>
-                  {summary.averageStudy === null
-                    ? "—"
-                    : formatDuration(summary.averageStudy)}
+                  {summary.averageStudy === null ? "—" : formatDuration(summary.averageStudy)}
                 </strong>
               </article>
               <article className="sleep-study-summary-card">
                 <span>Avg sleep, 7 days</span>
                 <strong>
-                  {summary.averageSleep === null
-                    ? "—"
-                    : formatDuration(summary.averageSleep)}
+                  {summary.averageSleep === null ? "—" : formatDuration(summary.averageSleep)}
                 </strong>
               </article>
               <article className="sleep-study-summary-card">
                 <span>Best study day</span>
                 <strong>
-                  {summary.bestStudyDay
-                    ? formatDuration(summary.bestStudyDay.study)
-                    : "—"}
+                  {summary.bestStudyDay ? formatDuration(summary.bestStudyDay.study) : "—"}
                 </strong>
                 <small>{summary.bestStudyDay?.label || "No saved days"}</small>
               </article>
@@ -481,8 +435,7 @@ export default function SleepStudyChart({ userId, showSummary = false }) {
           <ul className="sr-only">
             {days.map((day) => (
               <li key={day.dateKey}>
-                {day.dateKey}: {formatDuration(day.sleep)} sleep,{" "}
-                {formatDuration(day.study)} study
+                {day.dateKey}: {formatDuration(day.sleep)} sleep, {formatDuration(day.study)} study
               </li>
             ))}
           </ul>

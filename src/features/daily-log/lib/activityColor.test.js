@@ -11,8 +11,15 @@ describe("activity colors", () => {
   });
 
   it("assigns clear, different colors to common activities", () => {
-    const colors = ["DSA Sheet", "Reading", "Project", "System Design", "Exercise", "Writing", "Planning"]
-      .map((name) => getActivityColor(name));
+    const colors = [
+      "DSA Sheet",
+      "Reading",
+      "Project",
+      "System Design",
+      "Exercise",
+      "Writing",
+      "Planning",
+    ].map((name) => getActivityColor(name));
     expect(new Set(colors).size).toBe(colors.length);
   });
 

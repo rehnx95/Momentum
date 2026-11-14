@@ -4,10 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { createElement } from "react";
 import { afterEach } from "vitest";
 import { describe, expect, it, vi } from "vitest";
-import {
-  adjustTimeSegment,
-  navigateTimeSegments,
-} from "./TimeInput";
+import { adjustTimeSegment, navigateTimeSegments } from "./TimeInput";
 import TimeInput from "./TimeInput";
 
 afterEach(cleanup);
@@ -61,22 +58,24 @@ describe("segmented time input keyboard controls", () => {
   it("auto-advances across all four slot segments and leaves the end minute focused", () => {
     const onStartChange = vi.fn();
     const onEndChange = vi.fn();
-    render(createElement(
-      "div",
-      { className: "slot-time-range" },
-      createElement(TimeInput, {
-        label: "Start time",
-        value: "",
-        onChange: onStartChange,
-        showPlaceholder: true,
-      }),
-      createElement(TimeInput, {
-        label: "End time",
-        value: "",
-        onChange: onEndChange,
-        showPlaceholder: true,
-      }),
-    ));
+    render(
+      createElement(
+        "div",
+        { className: "slot-time-range" },
+        createElement(TimeInput, {
+          label: "Start time",
+          value: "",
+          onChange: onStartChange,
+          showPlaceholder: true,
+        }),
+        createElement(TimeInput, {
+          label: "End time",
+          value: "",
+          onChange: onEndChange,
+          showPlaceholder: true,
+        }),
+      ),
+    );
     const startHour = screen.getByRole("textbox", { name: "Start time hour" });
     const startMinute = screen.getByRole("textbox", { name: "Start time minute" });
     const endHour = screen.getByRole("textbox", { name: "End time hour" });
@@ -97,22 +96,24 @@ describe("segmented time input keyboard controls", () => {
   it("auto-advances across the sleep time segments", () => {
     const onSleepChange = vi.fn();
     const onWakeChange = vi.fn();
-    render(createElement(
-      "div",
-      { className: "daily-sleep-time-range" },
-      createElement(TimeInput, {
-        label: "Sleep time",
-        value: "",
-        onChange: onSleepChange,
-        showPlaceholder: true,
-      }),
-      createElement(TimeInput, {
-        label: "Wake time",
-        value: "",
-        onChange: onWakeChange,
-        showPlaceholder: true,
-      }),
-    ));
+    render(
+      createElement(
+        "div",
+        { className: "daily-sleep-time-range" },
+        createElement(TimeInput, {
+          label: "Sleep time",
+          value: "",
+          onChange: onSleepChange,
+          showPlaceholder: true,
+        }),
+        createElement(TimeInput, {
+          label: "Wake time",
+          value: "",
+          onChange: onWakeChange,
+          showPlaceholder: true,
+        }),
+      ),
+    );
     const sleepHour = screen.getByRole("textbox", { name: "Sleep time hour" });
     const sleepMinute = screen.getByRole("textbox", { name: "Sleep time minute" });
     const wakeHour = screen.getByRole("textbox", { name: "Wake time hour" });
@@ -127,12 +128,14 @@ describe("segmented time input keyboard controls", () => {
   it("commits the current time when Enter is pressed", () => {
     const onChange = vi.fn();
     const onSaveNow = vi.fn();
-    render(createElement(TimeInput, {
-      label: "Start time",
-      value: "09:30",
-      onChange,
-      onSaveNow,
-    }));
+    render(
+      createElement(TimeInput, {
+        label: "Start time",
+        value: "09:30",
+        onChange,
+        onSaveNow,
+      }),
+    );
 
     fireEvent.keyDown(screen.getByRole("textbox", { name: "Start time minute" }), {
       key: "Enter",

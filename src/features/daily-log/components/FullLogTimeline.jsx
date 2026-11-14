@@ -16,7 +16,12 @@ export function intervalsFor(slot, wrapMidnight = false) {
   if (slot?.endDayOffset === 1 && end === 0) return [[start, 1440]];
   if (start === end) return [];
   if (end > start) return [[start, end]];
-  return wrapMidnight ? [[start, 1440], [0, end]] : [];
+  return wrapMidnight
+    ? [
+        [start, 1440],
+        [0, end],
+      ]
+    : [];
 }
 
 function timeLabel(value) {
@@ -105,11 +110,7 @@ export default function FullLogTimeline({
           <span style={{ left: "100%" }}>12am</span>
         </div>
       )}
-      <div
-        className="full-log-timeline-track"
-        role="group"
-        aria-label={description}
-      >
+      <div className="full-log-timeline-track" role="group" aria-label={description}>
         {segments.map((segment) => (
           <span
             key={segment.key}

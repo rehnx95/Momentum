@@ -1,23 +1,23 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const SOURCE_DIR = path.join(__dirname, '../source');
-const OUTPUT_DIR = path.join(__dirname, '../src/features/sheets/data');
+const SOURCE_DIR = path.join(__dirname, "../source");
+const OUTPUT_DIR = path.join(__dirname, "../src/features/sheets/data");
 
 // Title used for problems that sit directly under a Step (no "N.M — Title" header).
 // Set to null so the UI can simply skip rendering a subsection heading.
 const IMPLICIT_SUB_TITLE = null;
 
 function parseSheet(sourceFile) {
-  const raw = fs.readFileSync(sourceFile, 'utf8').replace(/\r\n/g, '\n');
+  const raw = fs.readFileSync(sourceFile, "utf8").replace(/\r\n/g, "\n");
 
   // Pre-process: if a Step header or "N.M — Title" header got glued onto the end
   // of the previous line (e.g. "...(LC 127)Step 15 — Graphs"), break it onto its own line.
   const content = raw
-    .replace(/(\S)(Step\s+\d+\s+[—–-]\s+)/g, '$1\n$2')
-    .replace(/([^\s\d])(\d+\.\d+\s+[—–-]\s+)/g, '$1\n$2');
+    .replace(/(\S)(Step\s+\d+\s+[—–-]\s+)/g, "$1\n$2")
+    .replace(/([^\s\d])(\d+\.\d+\s+[—–-]\s+)/g, "$1\n$2");
 
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   const steps = [];
   let currentStep = null;
@@ -37,8 +37,8 @@ function parseSheet(sourceFile) {
 
   function cleanTitle(text) {
     return text
-      .replace(/\s*\(LC\s+\d+\)\s*/g, '')
-      .replace(/\s*\(Skip\)\s*/g, '')
+      .replace(/\s*\(LC\s+\d+\)\s*/g, "")
+      .replace(/\s*\(Skip\)\s*/g, "")
       .trim();
   }
 
@@ -57,7 +57,7 @@ function parseSheet(sourceFile) {
     let searchFrom = first[0].length;
 
     for (;;) {
-      const re = new RegExp(`${num + 1}\\.\\s+`, 'g');
+      const re = new RegExp(`${num + 1}\\.\\s+`, "g");
       re.lastIndex = searchFrom;
       const m = re.exec(text);
       if (!m) break;
@@ -79,7 +79,7 @@ function parseSheet(sourceFile) {
     if (m && m.index > 0) {
       return {
         title: title.slice(0, m.index).trim(),
-        problemParts: splitProblems(title.slice(m.index))
+        problemParts: splitProblems(title.slice(m.index)),
       };
     }
     return { title: title.trim(), problemParts: [] };
@@ -90,12 +90,12 @@ function parseSheet(sourceFile) {
   function ensureSubsection() {
     if (currentSubsection) return currentSubsection;
     if (!currentStep) return null;
-    currentSubId = '0';
+    currentSubId = "0";
     currentSubsection = {
       id: `s${currentStepNum}-${currentSubId}`,
       title: IMPLICIT_SUB_TITLE,
       implicit: true,
-      problems: []
+      problems: [],
     };
     currentStep.subsections.push(currentSubsection);
     return currentSubsection;
@@ -110,7 +110,7 @@ function parseSheet(sourceFile) {
       id: `s${currentStepNum}-${currentSubId}-p${pm[1]}`,
       title: cleanTitle(pm[2]),
       lc: extractLC(pm[2]),
-      defaultSkip: isSkip(pm[2])
+      defaultSkip: isSkip(pm[2]),
     });
     lastProblemNum = parseInt(pm[1], 10);
   }
@@ -126,7 +126,7 @@ function parseSheet(sourceFile) {
       currentStepNum = stepMatch[1];
 
       const id = `s${currentStepNum}`;
-      let step = steps.find(s => s.id === id);
+      let step = steps.find((s) => s.id === id);
       if (!step) {
         step = { id, title: peeled.title, subsections: [] };
         steps.push(step);
@@ -137,7 +137,7 @@ function parseSheet(sourceFile) {
       // If we are re-entering an existing step, resume its last subsection.
       const subs = currentStep.subsections;
       currentSubsection = subs.length ? subs[subs.length - 1] : null;
-      currentSubId = currentSubsection ? currentSubsection.id.split('-').slice(1).join('-') : null;
+      currentSubId = currentSubsection ? currentSubsection.id.split("-").slice(1).join("-") : null;
 
       peeled.problemParts.forEach(addProblem);
       continue;
@@ -152,7 +152,7 @@ function parseSheet(sourceFile) {
       currentSubsection = {
         id: `s${currentStepNum}-${currentSubId}`,
         title: peeled.title,
-        problems: []
+        problems: [],
       };
       currentStep.subsections.push(currentSubsection);
 
@@ -171,8 +171,9 @@ function parseSheet(sourceFile) {
 }
 
 function listSourceFiles() {
-  return fs.readdirSync(SOURCE_DIR)
-    .filter(file => file.toLowerCase().endsWith('.txt'))
+  return fs
+    .readdirSync(SOURCE_DIR)
+    .filter((file) => file.toLowerCase().endsWith(".txt"))
     .sort((a, b) => a.localeCompare(b));
 }
 
@@ -180,17 +181,21 @@ async function chooseSourceFile() {
   const files = listSourceFiles();
   if (files.length === 0) throw new Error(`No .txt source files found in ${SOURCE_DIR}`);
 
-  console.log('Available source sheets:');
+  console.log("Available source sheets:");
   files.forEach((file, index) => console.log(`  ${index + 1}. ${file}`));
 
-  const readline = require('readline/promises');
-  const { stdin, stdout } = require('process');
+  const readline = require("readline/promises");
+  const { stdin, stdout } = require("process");
   const prompt = readline.createInterface({ input: stdin, output: stdout });
   try {
-    const answer = (await prompt.question('Enter a source filename or number: ')).trim();
+    const answer = (await prompt.question("Enter a source filename or number: ")).trim();
     const selected = /^\d+$/.test(answer)
       ? files[Number(answer) - 1]
-      : files.find(file => file.toLowerCase() === answer.toLowerCase() || file.toLowerCase() === `${answer}.txt`.toLowerCase());
+      : files.find(
+          (file) =>
+            file.toLowerCase() === answer.toLowerCase() ||
+            file.toLowerCase() === `${answer}.txt`.toLowerCase(),
+        );
     if (!selected) throw new Error(`Source file "${answer}" was not found in ${SOURCE_DIR}`);
     return selected;
   } finally {
@@ -199,18 +204,25 @@ async function chooseSourceFile() {
 }
 
 async function main(sourceName = process.argv[2]) {
-  const selectedName = sourceName || await chooseSourceFile();
-  const filename = selectedName.toLowerCase().endsWith('.txt') ? selectedName : `${selectedName}.txt`;
+  const selectedName = sourceName || (await chooseSourceFile());
+  const filename = selectedName.toLowerCase().endsWith(".txt")
+    ? selectedName
+    : `${selectedName}.txt`;
   if (path.basename(filename) !== filename || !listSourceFiles().includes(filename)) {
     throw new Error(`Choose a .txt file from ${SOURCE_DIR}`);
   }
 
   const sourceFile = path.join(SOURCE_DIR, filename);
-  const outputName = filename.replace(/\.txt$/i, '');
+  const outputName = filename.replace(/\.txt$/i, "");
   const outputFile = path.join(OUTPUT_DIR, `${outputName}.json`);
   console.log(`Parsing ${filename}...`);
   const data = parseSheet(sourceFile);
-  if (data.steps.length === 0 || data.steps.every(step => step.subsections.every(subsection => subsection.problems.length === 0))) {
+  if (
+    data.steps.length === 0 ||
+    data.steps.every((step) =>
+      step.subsections.every((subsection) => subsection.problems.length === 0),
+    )
+  ) {
     throw new Error(`No steps or problems were found in ${filename}; check the source format.`);
   }
   let problemsCount = 0;
@@ -220,7 +232,7 @@ async function main(sourceName = process.argv[2]) {
   for (const step of data.steps) {
     for (const sub of step.subsections) {
       problemsCount += sub.problems.length;
-      skipCount += sub.problems.filter(p => p.defaultSkip).length;
+      skipCount += sub.problems.filter((p) => p.defaultSkip).length;
       if (sub.implicit) implicitCount++;
     }
   }
@@ -231,14 +243,14 @@ async function main(sourceName = process.argv[2]) {
   console.log(`Implicit subsections (steps with no N.M header): ${implicitCount}`);
 
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-  fs.writeFileSync(outputFile, JSON.stringify(data, null, 2), 'utf8');
+  fs.writeFileSync(outputFile, JSON.stringify(data, null, 2), "utf8");
   console.log(`\nWritten to ${outputFile}`);
 
   return { stepsCount: data.steps.length, problemsCount, skipCount, outputFile };
 }
 
 if (require.main === module) {
-  main().catch(error => {
+  main().catch((error) => {
     console.error(`\nConversion failed: ${error.message}`);
     process.exitCode = 1;
   });

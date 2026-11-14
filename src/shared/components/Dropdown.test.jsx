@@ -15,12 +15,7 @@ describe("Dropdown", () => {
   it("opens its custom list and reports a selected option", () => {
     const onChange = vi.fn();
     render(
-      <Dropdown
-        ariaLabel="Test options"
-        value="first"
-        options={options}
-        onChange={onChange}
-      />,
+      <Dropdown ariaLabel="Test options" value="first" options={options} onChange={onChange} />,
     );
 
     fireEvent.click(screen.getByRole("combobox", { name: "Test options" }));
@@ -33,12 +28,7 @@ describe("Dropdown", () => {
   it("supports arrow-key selection and Escape", () => {
     const onChange = vi.fn();
     render(
-      <Dropdown
-        ariaLabel="Test options"
-        value="first"
-        options={options}
-        onChange={onChange}
-      />,
+      <Dropdown ariaLabel="Test options" value="first" options={options} onChange={onChange} />,
     );
     const trigger = screen.getByRole("combobox", { name: "Test options" });
 

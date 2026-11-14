@@ -55,17 +55,11 @@ export default function CustomDatePicker({ value, max, disabled, onChange }) {
 
   useEffect(() => {
     if (!open) return;
-    gridRef.current
-      ?.querySelector(`[data-date="${focusDate}"]`)
-      ?.focus({ preventScroll: true });
+    gridRef.current?.querySelector(`[data-date="${focusDate}"]`)?.focus({ preventScroll: true });
   }, [focusDate, open, visibleMonth]);
 
   const calendarDays = useMemo(() => {
-    const first = new Date(
-      visibleMonth.getFullYear(),
-      visibleMonth.getMonth(),
-      1,
-    );
+    const first = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1);
     const start = new Date(first);
     start.setDate(first.getDate() - first.getDay());
     return Array.from({ length: 42 }, (_, index) => {
@@ -98,11 +92,10 @@ export default function CustomDatePicker({ value, max, disabled, onChange }) {
     const targetDate = new Date(
       targetMonth.getFullYear(),
       targetMonth.getMonth(),
-      Math.min(nextFocus.getDate(), new Date(
-        targetMonth.getFullYear(),
-        targetMonth.getMonth() + 1,
-        0,
-      ).getDate()),
+      Math.min(
+        nextFocus.getDate(),
+        new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0).getDate(),
+      ),
     );
     if (formatDateKey(targetMonth) > max) return;
     setVisibleMonth(targetMonth);
@@ -140,17 +133,9 @@ export default function CustomDatePicker({ value, max, disabled, onChange }) {
         </button>
       </Tooltip>
       {open && (
-        <section
-          className="custom-calendar"
-          role="dialog"
-          aria-label="Choose log date"
-        >
+        <section className="custom-calendar" role="dialog" aria-label="Choose log date">
           <header className="custom-calendar-header">
-            <button
-              type="button"
-              aria-label="Previous month"
-              onClick={() => moveMonth(-1)}
-            >
+            <button type="button" aria-label="Previous month" onClick={() => moveMonth(-1)}>
               <ChevronLeft size={16} aria-hidden="true" />
             </button>
             <strong aria-live="polite">{monthLabel}</strong>
@@ -176,60 +161,60 @@ export default function CustomDatePicker({ value, max, disabled, onChange }) {
             </div>
             {Array.from({ length: 6 }, (_, weekIndex) => (
               <div className="custom-calendar-row" key={weekIndex}>
-                {calendarDays
-                  .slice(weekIndex * 7, weekIndex * 7 + 7)
-                  .map((date) => {
-                    const dateKey = formatDateKey(date);
-                    const outOfMonth = date.getMonth() !== visibleMonth.getMonth();
-                    const isSelected = dateKey === value;
-                    const isToday = dateKey === todayKey;
-                    const isFuture = dateKey > max;
-                    return (
-                      <button
-                        type="button"
-                        key={dateKey}
-                        data-date={dateKey}
-                        tabIndex={dateKey === focusDate ? 0 : -1}
-                        disabled={isFuture}
-                        aria-label={date.toLocaleDateString(undefined, {
-                          weekday: "long",
-                          month: "long",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                        aria-current={isToday ? "date" : undefined}
-                        aria-pressed={isSelected}
-                        className={[
-                          "custom-calendar-day",
-                          outOfMonth && "outside-month",
-                          isSelected && "selected",
-                          isToday && "today",
-                        ].filter(Boolean).join(" ")}
-                        onFocus={() => setFocusDate(dateKey)}
-                        onClick={() => {
+                {calendarDays.slice(weekIndex * 7, weekIndex * 7 + 7).map((date) => {
+                  const dateKey = formatDateKey(date);
+                  const outOfMonth = date.getMonth() !== visibleMonth.getMonth();
+                  const isSelected = dateKey === value;
+                  const isToday = dateKey === todayKey;
+                  const isFuture = dateKey > max;
+                  return (
+                    <button
+                      type="button"
+                      key={dateKey}
+                      data-date={dateKey}
+                      tabIndex={dateKey === focusDate ? 0 : -1}
+                      disabled={isFuture}
+                      aria-label={date.toLocaleDateString(undefined, {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                      aria-current={isToday ? "date" : undefined}
+                      aria-pressed={isSelected}
+                      className={[
+                        "custom-calendar-day",
+                        outOfMonth && "outside-month",
+                        isSelected && "selected",
+                        isToday && "today",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      onFocus={() => setFocusDate(dateKey)}
+                      onClick={() => {
+                        void chooseDate(dateKey);
+                      }}
+                      onKeyDown={(event) => {
+                        const offsets = {
+                          ArrowLeft: -1,
+                          ArrowRight: 1,
+                          ArrowUp: -7,
+                          ArrowDown: 7,
+                        };
+                        const offset = offsets[event.key];
+                        if (offset) {
+                          event.preventDefault();
+                          moveFocus(date, offset);
+                        } else if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
                           void chooseDate(dateKey);
-                        }}
-                        onKeyDown={(event) => {
-                          const offsets = {
-                            ArrowLeft: -1,
-                            ArrowRight: 1,
-                            ArrowUp: -7,
-                            ArrowDown: 7,
-                          };
-                          const offset = offsets[event.key];
-                          if (offset) {
-                            event.preventDefault();
-                            moveFocus(date, offset);
-                          } else if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            void chooseDate(dateKey);
-                          }
-                        }}
-                      >
-                        {date.getDate()}
-                      </button>
-                    );
-                  })}
+                        }
+                      }}
+                    >
+                      {date.getDate()}
+                    </button>
+                  );
+                })}
               </div>
             ))}
           </div>

@@ -22,11 +22,7 @@ describe("sleep and study summary", () => {
   });
 
   it("returns empty averages and best day when no entries are saved", () => {
-    expect(
-      getSleepStudySummary([
-        { logged: false, study: 0, sleep: 0 },
-      ]),
-    ).toEqual({
+    expect(getSleepStudySummary([{ logged: false, study: 0, sleep: 0 }])).toEqual({
       averageStudy: null,
       averageSleep: null,
       bestStudyDay: null,

@@ -1,14 +1,14 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const root = path.join(__dirname, '..');
-const cssPath = path.join(root, 'src', 'index.css');
-const appPath = path.join(root, 'src', 'App.jsx');
-let css = fs.readFileSync(cssPath, 'utf8').replace(/\r\n/g, '\n');
-let app = fs.readFileSync(appPath, 'utf8');
+const root = path.join(__dirname, "..");
+const cssPath = path.join(root, "src", "index.css");
+const appPath = path.join(root, "src", "App.jsx");
+let css = fs.readFileSync(cssPath, "utf8").replace(/\r\n/g, "\n");
+let app = fs.readFileSync(appPath, "utf8");
 
-if (css.includes('/* ===== Light theme ===== */')) {
-  console.log('Already patched.');
+if (css.includes("/* ===== Light theme ===== */")) {
+  console.log("Already patched.");
   process.exit(0);
 }
 
@@ -21,7 +21,7 @@ css = css.replace(
   --heat-2: #006d32;
   --heat-3: #26a641;
   --heat-4: #39d353;
-}`
+}`,
 );
 
 // 2. New light variable block (first light block in file)
@@ -51,9 +51,9 @@ css = css.replace(/:root\[data-theme="light"\] \{[\s\S]*?\n\}/, lightVars);
 
 // 3. Replace legacy light overrides
 const legacyStart = css.indexOf(':root[data-theme="light"] [class*="bg-[#0B0B0F]"]');
-const legacyEnd = css.indexOf('\n.auth-shell {', legacyStart);
+const legacyEnd = css.indexOf("\n.auth-shell {", legacyStart);
 if (legacyStart === -1 || legacyEnd === -1) {
-  console.error('Could not find the legacy light block. Nothing written.');
+  console.error("Could not find the legacy light block. Nothing written.");
   process.exit(1);
 }
 
@@ -136,7 +136,7 @@ const heat = /"#171717",\s*"#0e4429",\s*"#006d32",\s*"#26a641",\s*"#39d353"/g;
 const count = (app.match(heat) || []).length;
 app = app.replace(
   heat,
-  '"var(--heat-0)", "var(--heat-1)", "var(--heat-2)", "var(--heat-3)", "var(--heat-4)"'
+  '"var(--heat-0)", "var(--heat-1)", "var(--heat-2)", "var(--heat-3)", "var(--heat-4)"',
 );
 
 fs.writeFileSync(cssPath, css);

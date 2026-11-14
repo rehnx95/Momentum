@@ -1,11 +1,11 @@
-import { memo, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { memo, useEffect, useId, useMemo, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { buildHeatmap, formatTooltipDate } from "../utils/heatmap";
 import { formatDuration } from "../../../shared/utils/time";
 import "./ActivityHeatmap.css";
 import "./ActivityHeatmap.responsive.css";
 
-const WEEKDAYS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+const WEEKDAYS = ["", "Mon", "", "Wed", "", "Fri", ""];
 const CELL = 10;
 const getHourLevel = (hours) => {
   if (hours <= 0) return 0;
@@ -22,7 +22,7 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
   selectedYear = null,
   onSelectYear,
   loading = false,
-  mode = 'problems',
+  mode = "problems",
   fillWidth = false,
 }) {
   const scrollRef = useRef(null);
@@ -33,7 +33,7 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
   const yearMenuId = useId();
   const currentYear = Number(todayKey.slice(0, 4));
 
-  const levelFn = mode === 'hours' ? getHourLevel : undefined;
+  const levelFn = mode === "hours" ? getHourLevel : undefined;
   const heat = useMemo(
     () => buildHeatmap({ activity, todayKey, year: selectedYear, levelFn }),
     [activity, todayKey, selectedYear, levelFn],
@@ -54,16 +54,16 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
       if (!yearMenuRef.current?.contains(event.target)) setYearMenuOpen(false);
     };
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setYearMenuOpen(false);
         yearTriggerRef.current?.focus();
       }
     };
-    document.addEventListener('pointerdown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [yearMenuOpen]);
 
@@ -84,18 +84,16 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
   };
 
   const title =
-    mode === 'hours'
+    mode === "hours"
       ? `${formatDuration(heat.total * 60)} studied ${
-          selectedYear == null ? 'in the last year' : `in ${selectedYear}`
+          selectedYear == null ? "in the last year" : `in ${selectedYear}`
         }`
-      : `${heat.total.toLocaleString()} ${
-          heat.total === 1 ? 'problem' : 'problems'
-        } solved ${
-          selectedYear == null ? 'in the last year' : `in ${selectedYear}`
+      : `${heat.total.toLocaleString()} ${heat.total === 1 ? "problem" : "problems"} solved ${
+          selectedYear == null ? "in the last year" : `in ${selectedYear}`
         }`;
 
   return (
-    <section className={`hm-card${loading ? ' hm-loading' : ''}`} aria-label="Activity heatmap">
+    <section className={`hm-card${loading ? " hm-loading" : ""}`} aria-label="Activity heatmap">
       <header className="hm-header">
         <h3 className="hm-title">{title}</h3>
         <div className="hm-year-picker" ref={yearMenuRef}>
@@ -108,16 +106,11 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
             aria-controls={yearMenuId}
             onClick={() => setYearMenuOpen((open) => !open)}
           >
-            <span>{selectedYear == null ? 'Last 12 months' : selectedYear}</span>
+            <span>{selectedYear == null ? "Last 12 months" : selectedYear}</span>
             <ChevronDown size={14} aria-hidden="true" />
           </button>
           {yearMenuOpen && (
-            <div
-              id={yearMenuId}
-              className="hm-year-menu"
-              role="group"
-              aria-label="Activity year"
-            >
+            <div id={yearMenuId} className="hm-year-menu" role="group" aria-label="Activity year">
               <button
                 type="button"
                 aria-pressed={selectedYear == null}
@@ -151,8 +144,8 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
             <div
               className="hm-inner"
               style={{
-                '--hm-weeks': heat.columns,
-                ...(!fillWidth && { '--hm-cell': `${CELL}px` }),
+                "--hm-weeks": heat.columns,
+                ...(!fillWidth && { "--hm-cell": `${CELL}px` }),
               }}
             >
               <div className="hm-months">
@@ -171,11 +164,12 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
                     <div className="hm-week" key={w}>
                       {week.map((day) => {
                         const tipText =
-                          mode === 'hours'
+                          mode === "hours"
                             ? `${formatDuration(day.count * 60)} on ${formatTooltipDate(day.date, currentYear)}`
-                            : `${day.count === 0
-                                ? 'No problems'
-                                : `${day.count} ${day.count === 1 ? 'problem' : 'problems'}`
+                            : `${
+                                day.count === 0
+                                  ? "No problems"
+                                  : `${day.count} ${day.count === 1 ? "problem" : "problems"}`
                               } on ${formatTooltipDate(day.date, currentYear)}`;
                         return (
                           <span
@@ -183,7 +177,7 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
                             data-tip={day.inRange ? tipText : undefined}
                             aria-label={day.inRange ? tipText : undefined}
                             aria-hidden={day.inRange ? undefined : true}
-                            className={`hm-day hm-l${day.level}${day.inRange ? '' : ' hm-off'}`}
+                            className={`hm-day hm-l${day.level}${day.inRange ? "" : " hm-off"}`}
                           />
                         );
                       })}
@@ -196,7 +190,7 @@ const ActivityHeatmap = memo(function ActivityHeatmap({
           <div className="hm-foot">
             <div className="hm-summary">
               <span>
-                {mode === 'hours'
+                {mode === "hours"
                   ? `Days with study: ${heat.activeDays}`
                   : `Total active days: ${heat.activeDays}`}
               </span>

@@ -55,9 +55,10 @@ export default function ActivityCard({
       if (clickedAction && cardRef.current?.contains(clickedAction)) return;
 
       const clickedRow = event.target?.closest?.(".daily-slot-row");
-      const clickedIndex = clickedRow && cardRef.current?.contains(clickedRow)
-        ? Number(clickedRow.dataset.slotIndex)
-        : -1;
+      const clickedIndex =
+        clickedRow && cardRef.current?.contains(clickedRow)
+          ? Number(clickedRow.dataset.slotIndex)
+          : -1;
       const emptyIndexes = slots.reduce((indexes, slot, index) => {
         if (!String(slot.start || "").trim() && !String(slot.end || "").trim()) {
           indexes.push(index);
@@ -91,15 +92,11 @@ export default function ActivityCard({
           <strong className="activity-card-name">{activityName}</strong>
         </div>
         <div className="activity-card-meta">
-          {fromSheet && (
-            <span className="activity-from-sheet">From sheet</span>
-          )}
+          {fromSheet && <span className="activity-from-sheet">From sheet</span>}
           {activityDescription && (
             <span className="activity-card-description">{activityDescription}</span>
           )}
-          {overlapsSleep && (
-            <span className="activity-sleep-overlap">Overlaps sleep</span>
-          )}
+          {overlapsSleep && <span className="activity-sleep-overlap">Overlaps sleep</span>}
         </div>
       </div>
       {visibleSlots.length > 0 && (
@@ -117,9 +114,7 @@ export default function ActivityCard({
                   (value) => typeof value === "string" && value.trim(),
                 ) || ""
               }
-              onChange={(slotIndex, field, value) =>
-                onChangeSlot(slotIndex, field, value)
-              }
+              onChange={(slotIndex, field, value) => onChangeSlot(slotIndex, field, value)}
               onRemove={(slotIndex) => onRemoveSlot(slotIndex)}
               allowRemove={allowRemoveSlot}
               disabled={disabled || timerRunningHere}
@@ -159,14 +154,14 @@ export default function ActivityCard({
             </Tooltip>
           )}
           {timerRunningHere && (
-          <button
-            type="button"
-            className="slot-start is-running"
-            onClick={() => void onStopTimer()}
-            disabled={disabled}
-          >
-            <Square size={13} aria-hidden="true" /> Stop
-          </button>
+            <button
+              type="button"
+              className="slot-start is-running"
+              onClick={() => void onStopTimer()}
+              disabled={disabled}
+            >
+              <Square size={13} aria-hidden="true" /> Stop
+            </button>
           )}
         </div>
       )}

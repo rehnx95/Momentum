@@ -1,25 +1,27 @@
-import React from 'react';
-import TestRenderer, { act } from 'react-test-renderer';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import useDailyLogPersistence from './useDailyLogPersistence';
+import React from "react";
+import TestRenderer, { act } from "react-test-renderer";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import useDailyLogPersistence from "./useDailyLogPersistence";
 
 const fromMock = vi.hoisted(() => vi.fn());
 
 function installBrowserStubs() {
   const store = new Map();
-  Object.defineProperty(globalThis, 'localStorage', {
+  Object.defineProperty(globalThis, "localStorage", {
     value: {
       getItem: (key) => (store.has(key) ? store.get(key) : null),
       setItem: (key, value) => store.set(key, String(value)),
       removeItem: (key) => store.delete(key),
       clear: () => store.clear(),
       key: (index) => Array.from(store.keys())[index] ?? null,
-      get length() { return store.size; },
+      get length() {
+        return store.size;
+      },
     },
     configurable: true,
   });
 
-  Object.defineProperty(globalThis, 'window', {
+  Object.defineProperty(globalThis, "window", {
     value: {
       setInterval: vi.fn(() => 1),
       clearInterval: vi.fn(),
@@ -29,11 +31,11 @@ function installBrowserStubs() {
     configurable: true,
   });
 
-  Object.defineProperty(globalThis, 'document', {
+  Object.defineProperty(globalThis, "document", {
     value: {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
-      visibilityState: 'visible',
+      visibilityState: "visible",
       documentElement: {
         setAttribute: vi.fn(),
         removeAttribute: vi.fn(),
@@ -43,11 +45,11 @@ function installBrowserStubs() {
   });
 }
 
-vi.mock('../../../shared/lib/supabase', () => ({
+vi.mock("../../../shared/lib/supabase", () => ({
   supabase: { from: fromMock },
 }));
 
-describe('useDailyLogPersistence', () => {
+describe("useDailyLogPersistence", () => {
   beforeEach(() => {
     installBrowserStubs();
     fromMock.mockReset();
@@ -56,10 +58,12 @@ describe('useDailyLogPersistence', () => {
       eq: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockResolvedValue({
         data: {
-          date: '2025-03-14',
-          sleep_time: '22:30',
-          wake_time: '06:15',
-          custom_tasks: [{ id: 'task-1', name: 'Reading', slots: [{ start: '21:00', end: '22:00' }] }],
+          date: "2025-03-14",
+          sleep_time: "22:30",
+          wake_time: "06:15",
+          custom_tasks: [
+            { id: "task-1", name: "Reading", slots: [{ start: "21:00", end: "22:00" }] },
+          ],
         },
         error: null,
       }),
@@ -73,7 +77,7 @@ describe('useDailyLogPersistence', () => {
     delete globalThis.document;
   });
 
-  it('loads the saved daily log and restores the latest snapshot', async () => {
+  it("loads the saved daily log and restores the latest snapshot", async () => {
     const setLog = vi.fn();
     const setSavedSnapshot = vi.fn();
     const setStatus = vi.fn();
@@ -81,14 +85,16 @@ describe('useDailyLogPersistence', () => {
     const setLoading = vi.fn();
     const setMessage = vi.fn();
 
-    const logRef = { current: { date: '2025-03-14', sleep_time: '', wake_time: '', custom_tasks: [] } };
+    const logRef = {
+      current: { date: "2025-03-14", sleep_time: "", wake_time: "", custom_tasks: [] },
+    };
     const savedSnapshotRef = { current: JSON.stringify(logRef.current) };
     let hookResult;
 
     function HookHarness() {
       hookResult = useDailyLogPersistence({
-        date: '2025-03-14',
-        dateRef: { current: '2025-03-14' },
+        date: "2025-03-14",
+        dateRef: { current: "2025-03-14" },
         dirty: false,
         loadFailed: false,
         loadRequest: 0,
@@ -102,7 +108,7 @@ describe('useDailyLogPersistence', () => {
         setMessage,
         setSavedSnapshot,
         setStatus,
-        userId: 'user-1',
+        userId: "user-1",
         validationErrors: [],
       });
       return null;
@@ -115,8 +121,8 @@ describe('useDailyLogPersistence', () => {
     });
 
     expect(hookResult).toBeTruthy();
-    expect(setLog).toHaveBeenCalledWith(expect.objectContaining({ date: '2025-03-14' }));
-    expect(setStatus).toHaveBeenCalledWith('Saved');
+    expect(setLog).toHaveBeenCalledWith(expect.objectContaining({ date: "2025-03-14" }));
+    expect(setStatus).toHaveBeenCalledWith("Saved");
     expect(setLoading).toHaveBeenCalled();
   });
 });

@@ -1,8 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  getDailyLogViewMode,
-  setDailyLogViewMode,
-} from "./dailyLogModel";
+import { getDailyLogViewMode, setDailyLogViewMode } from "./dailyLogModel";
 
 describe("Daily Log view preference", () => {
   afterEach(() => {

@@ -33,26 +33,20 @@ export default function useProblemTree({ data, progress, getState, update }) {
       return false;
     }
   });
-  const [activeFilter, setActiveFilter] = useState(
-    () => safeLocalStorageGet("momentum:learning-filter", "all"),
+  const [activeFilter, setActiveFilter] = useState(() =>
+    safeLocalStorageGet("momentum:learning-filter", "all"),
   );
 
   useEffect(() => {
     try {
-      localStorage.setItem(
-        "momentum:learning-expanded-steps",
-        JSON.stringify([...expandedSteps]),
-      );
+      localStorage.setItem("momentum:learning-expanded-steps", JSON.stringify([...expandedSteps]));
     } catch {
       // ignore quota errors
     }
   }, [expandedSteps]);
   useEffect(() => {
     try {
-      localStorage.setItem(
-        "momentum:learning-expanded-subs",
-        JSON.stringify([...expandedSubs]),
-      );
+      localStorage.setItem("momentum:learning-expanded-subs", JSON.stringify([...expandedSubs]));
     } catch {
       // ignore quota errors
     }
@@ -81,9 +75,7 @@ export default function useProblemTree({ data, progress, getState, update }) {
 
   const sheetProblems = useMemo(
     () =>
-      data.steps.flatMap((step) =>
-        step.subsections.flatMap((subsection) => subsection.problems),
-      ),
+      data.steps.flatMap((step) => step.subsections.flatMap((subsection) => subsection.problems)),
     [data.steps],
   );
   const totalProblems = useMemo(
@@ -92,26 +84,18 @@ export default function useProblemTree({ data, progress, getState, update }) {
         (sum, step) =>
           sum +
           step.subsections.reduce(
-            (subsectionTotal, subsection) =>
-              subsectionTotal + subsection.problems.length,
+            (subsectionTotal, subsection) => subsectionTotal + subsection.problems.length,
             0,
           ),
         0,
       ),
     [data.steps],
   );
-  const doneCount = sheetProblems.filter(
-    (problem) => progress[problem.id] === "done",
-  ).length;
-  const skippedCount = sheetProblems.filter(
-    (problem) => progress[problem.id] === "skipped",
-  ).length;
+  const doneCount = sheetProblems.filter((problem) => progress[problem.id] === "done").length;
+  const skippedCount = sheetProblems.filter((problem) => progress[problem.id] === "skipped").length;
   const todoCount = totalProblems - doneCount - skippedCount;
   const problemMap = useMemo(
-    () =>
-      new Map(
-        sheetProblems.map((problem) => [problem.id, problem]),
-      ),
+    () => new Map(sheetProblems.map((problem) => [problem.id, problem])),
     [sheetProblems],
   );
 
@@ -157,9 +141,7 @@ export default function useProblemTree({ data, progress, getState, update }) {
   const expandAll = useCallback(() => {
     const allSteps = new Set(data.steps.map((step) => step.id));
     const allSubsections = new Set(
-      data.steps.flatMap((step) =>
-        step.subsections.map((subsection) => subsection.id),
-      ),
+      data.steps.flatMap((step) => step.subsections.map((subsection) => subsection.id)),
     );
     setExpandedSteps(allSteps);
     setExpandedSubs(allSubsections);

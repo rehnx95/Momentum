@@ -15,9 +15,7 @@ export default function useDailyLogHistory(userId, viewMode, setMessage) {
   const [cachedFullLog] = useState(() => getFullLogCache(userId));
   const [allLogs, setAllLogs] = useState(() => cachedFullLog?.logs || []);
   const [allLogsLoading, setAllLogsLoading] = useState(false);
-  const [hasOlderLogs, setHasOlderLogs] = useState(
-    () => cachedFullLog?.hasOlderLogs || false,
-  );
+  const [hasOlderLogs, setHasOlderLogs] = useState(() => cachedFullLog?.hasOlderLogs || false);
   const [olderLogsLoading, setOlderLogsLoading] = useState(false);
   const [clearingHistory, setClearingHistory] = useState(false);
   const logsRequestRef = useRef(0);
@@ -30,8 +28,7 @@ export default function useDailyLogHistory(userId, viewMode, setMessage) {
     const trendsStartKey = getLocalDateKey(trendsStart);
     const isTrendsView = viewMode === "trends";
     const cachedHasOlderLogs = Boolean(
-      cached?.hasOlderLogs ||
-      (cached?.logs || []).some((row) => row.date < trendsStartKey),
+      cached?.hasOlderLogs || (cached?.logs || []).some((row) => row.date < trendsStartKey),
     );
     let hasOlderTrendLogs = cachedHasOlderLogs;
     const findOlderTrendLogs = async () => {
@@ -48,10 +45,7 @@ export default function useDailyLogHistory(userId, viewMode, setMessage) {
     if (cached) {
       setAllLogs(cached.logs);
       setHasOlderLogs(cachedHasOlderLogs);
-      if (
-        Date.now() - cached.loadedAt < FULL_LOG_CACHE_DURATION &&
-        viewMode !== "trends"
-      ) {
+      if (Date.now() - cached.loadedAt < FULL_LOG_CACHE_DURATION && viewMode !== "trends") {
         return;
       }
     } else {
@@ -82,17 +76,13 @@ export default function useDailyLogHistory(userId, viewMode, setMessage) {
       const rows = fetched.slice(0, PAGE_SIZE);
       const currentDates = new Set(rows.map((row) => row.date));
       const retainedRows = (cached?.logs || []).filter(
-        (row) =>
-          !currentDates.has(row.date) &&
-          (!isTrendsView || row.date >= trendsStartKey),
+        (row) => !currentDates.has(row.date) && (!isTrendsView || row.date >= trendsStartKey),
       );
       const refreshedRows = [...(isTrendsView ? fetched : rows), ...retainedRows]
-        .filter((row, index, entries) =>
-          entries.findIndex((entry) => entry.date === row.date) === index,
+        .filter(
+          (row, index, entries) => entries.findIndex((entry) => entry.date === row.date) === index,
         )
-        .sort((a, b) =>
-        b.date.localeCompare(a.date),
-      );
+        .sort((a, b) => b.date.localeCompare(a.date));
       setAllLogs(refreshedRows);
       let nextHasOlderLogs = isTrendsView ? hasOlderTrendLogs : false;
       if (!isTrendsView) {
@@ -117,71 +107,74 @@ export default function useDailyLogHistory(userId, viewMode, setMessage) {
     if (viewMode === "full" || viewMode === "trends") void loadLogs();
   }, [viewMode, loadLogs]);
 
-  const loadOlderLogs = useCallback(async (loadAll = false) => {
-    const oldest = allLogs[allLogs.length - 1]?.date;
-    if (!oldest) return false;
-    setOlderLogsLoading(true);
-    let cursor = oldest;
-    let more = true;
-    let accumulatedLogs = allLogs;
-    try {
-      while (more) {
-        const logsResult = await supabase
-          .from("daily_logs")
-          .select("date, sleep_time, wake_time, custom_tasks")
-          .eq("user_id", userId)
-          .lt("date", cursor)
-          .order("date", { ascending: false })
-          .limit(PAGE_SIZE + 1);
-        if (logsResult.error) throw logsResult.error;
-        const fetched = logsResult.data || [];
-        const rows = fetched.slice(0, PAGE_SIZE);
-        const oldestFetched = rows[rows.length - 1]?.date;
-        if (rows.length) {
-          accumulatedLogs = [...accumulatedLogs, ...rows];
-          setAllLogs(accumulatedLogs);
+  const loadOlderLogs = useCallback(
+    async (loadAll = false) => {
+      const oldest = allLogs[allLogs.length - 1]?.date;
+      if (!oldest) return false;
+      setOlderLogsLoading(true);
+      let cursor = oldest;
+      let more = true;
+      let accumulatedLogs = allLogs;
+      try {
+        while (more) {
+          const logsResult = await supabase
+            .from("daily_logs")
+            .select("date, sleep_time, wake_time, custom_tasks")
+            .eq("user_id", userId)
+            .lt("date", cursor)
+            .order("date", { ascending: false })
+            .limit(PAGE_SIZE + 1);
+          if (logsResult.error) throw logsResult.error;
+          const fetched = logsResult.data || [];
+          const rows = fetched.slice(0, PAGE_SIZE);
+          const oldestFetched = rows[rows.length - 1]?.date;
+          if (rows.length) {
+            accumulatedLogs = [...accumulatedLogs, ...rows];
+            setAllLogs(accumulatedLogs);
+          }
+          more = fetched.length > PAGE_SIZE;
+          setHasOlderLogs(more);
+          setFullLogCache(userId, accumulatedLogs, more);
+          if (!loadAll || !oldestFetched) break;
+          cursor = oldestFetched;
         }
-        more = fetched.length > PAGE_SIZE;
-        setHasOlderLogs(more);
-        setFullLogCache(userId, accumulatedLogs, more);
-        if (!loadAll || !oldestFetched) break;
-        cursor = oldestFetched;
+        return true;
+      } catch (error) {
+        console.error("Failed to load older daily logs:", error);
+        setMessage("Could not load older log entries.");
+        return false;
+      } finally {
+        setOlderLogsLoading(false);
       }
-      return true;
-    } catch (error) {
-      console.error("Failed to load older daily logs:", error);
-      setMessage("Could not load older log entries.");
-      return false;
-    } finally {
-      setOlderLogsLoading(false);
-    }
-  }, [allLogs, setMessage, userId]);
+    },
+    [allLogs, setMessage, userId],
+  );
 
-  const clearHistory = useCallback(async (waitForPendingSave) => {
-    setClearingHistory(true);
-    try {
-      await waitForPendingSave();
-      logsRequestRef.current += 1;
-      const { error } = await supabase
-        .from("daily_logs")
-        .delete()
-        .eq("user_id", userId);
-      if (error) throw error;
-      clearDailyLogCaches(userId);
-      setAllLogs([]);
-      setHasOlderLogs(false);
-      invalidateFullLogCache(userId);
-      return true;
-    } catch (error) {
-      console.error("Failed to clear this user's daily logs:", error);
-      setMessage(
-        "Could not clear all Daily Log data. Refresh and check your history before retrying.",
-      );
-      return false;
-    } finally {
-      setClearingHistory(false);
-    }
-  }, [setMessage, userId]);
+  const clearHistory = useCallback(
+    async (waitForPendingSave) => {
+      setClearingHistory(true);
+      try {
+        await waitForPendingSave();
+        logsRequestRef.current += 1;
+        const { error } = await supabase.from("daily_logs").delete().eq("user_id", userId);
+        if (error) throw error;
+        clearDailyLogCaches(userId);
+        setAllLogs([]);
+        setHasOlderLogs(false);
+        invalidateFullLogCache(userId);
+        return true;
+      } catch (error) {
+        console.error("Failed to clear this user's daily logs:", error);
+        setMessage(
+          "Could not clear all Daily Log data. Refresh and check your history before retrying.",
+        );
+        return false;
+      } finally {
+        setClearingHistory(false);
+      }
+    },
+    [setMessage, userId],
+  );
 
   return {
     allLogs,

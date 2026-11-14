@@ -4,19 +4,9 @@ import MomentumBrand from "../../shared/components/MomentumBrand";
 import Tooltip from "../../shared/components/Tooltip";
 import { User, LogOut } from "lucide-react";
 
-export default function OnboardingPage({
-  user,
-  profile,
-  onGoToDashboard,
-  onComplete,
-  onSignOut,
-}) {
+export default function OnboardingPage({ user, profile, onGoToDashboard, onComplete, onSignOut }) {
   const [formData, setFormData] = useState({
-    name:
-      profile?.name ||
-      user.user_metadata?.full_name ||
-      user.user_metadata?.name ||
-      "",
+    name: profile?.name || user.user_metadata?.full_name || user.user_metadata?.name || "",
     username: profile?.username || "",
     location: profile?.location || "",
     website: profile?.website || "",
@@ -51,9 +41,7 @@ export default function OnboardingPage({
         console.error("Username availability check failed:", error);
         if (!active) return;
         setUsernameAvailable(null);
-        setValidationMessage(
-          "Could not check username availability. You can still try saving it.",
-        );
+        setValidationMessage("Could not check username availability. You can still try saving it.");
       }
     }, 500);
 
@@ -102,8 +90,7 @@ export default function OnboardingPage({
     if (!formData.name.trim()) newErrors.name = "Name is required";
     const usernameError = validateUsername(formData.username);
     if (usernameError) newErrors.username = usernameError;
-    else if (usernameAvailable === false)
-      newErrors.username = "Username is already taken";
+    else if (usernameAvailable === false) newErrors.username = "Username is already taken";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -153,10 +140,7 @@ export default function OnboardingPage({
       <header className="dashboard-header bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
         <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <MomentumBrand
-              onNavigate={onGoToDashboard}
-              subtitle="Complete your profile"
-            />
+            <MomentumBrand onNavigate={onGoToDashboard} subtitle="Complete your profile" />
           </div>
           <Tooltip label="Sign out of your account">
             <button
@@ -174,12 +158,10 @@ export default function OnboardingPage({
       <main className="flex-1 max-w-2xl mx-auto px-4 md:px-6 py-8">
         <div className="onboarding-panel bg-[#0A0A0A] rounded-2xl border border-[#262626] p-6 md:p-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-2">
-              Welcome to Momentum
-            </h2>
+            <h2 className="text-2xl font-bold mb-2">Welcome to Momentum</h2>
             <p className="text-[#A1A1A1]">
-              Set up your profile to make Momentum yours. Keep your learning,
-              routines, and daily progress moving forward.
+              Set up your profile to make Momentum yours. Keep your learning, routines, and daily
+              progress moving forward.
             </p>
           </div>
 
@@ -209,9 +191,7 @@ export default function OnboardingPage({
                   className="w-full pl-10 pr-4 py-3 bg-[#000000] border border-[#262626] rounded-lg text-[#EDEDED] placeholder-[#A1A1A1] focus:outline-none focus:ring-2 focus:ring-[#EDEDED] focus:border-transparent transition-all"
                 />
               </div>
-              {errors.name && (
-                <p className="text-muted text-sm mt-1">{errors.name}</p>
-              )}
+              {errors.name && <p className="text-muted text-sm mt-1">{errors.name}</p>}
             </div>
 
             {/* Username Field */}
@@ -257,18 +237,14 @@ export default function OnboardingPage({
               <p className="text-xs text-[#A1A1A1] mt-1">
                 3–45 characters, lowercase letters, numbers, and hyphens only
               </p>
-              <p
-                className={`text-sm mt-1 ${validationMessage ? "text-muted" : "text-[#A1A1A1]"}`}
-              >
+              <p className={`text-sm mt-1 ${validationMessage ? "text-muted" : "text-[#A1A1A1]"}`}>
                 {validationMessage}
               </p>
             </div>
 
             {/* Location Field */}
             <div>
-              <label className="block text-sm font-medium text-[#EDEDED] mb-2">
-                Location
-              </label>
+              <label className="block text-sm font-medium text-[#EDEDED] mb-2">Location</label>
               <div className="relative">
                 <svg
                   width="20"

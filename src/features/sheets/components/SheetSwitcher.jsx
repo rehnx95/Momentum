@@ -41,9 +41,7 @@ export default function SheetSwitcher({
         onClick={() => setOpen((current) => !current)}
       >
         <BookOpen size={20} className="shrink-0" />
-        <span className="page-title truncate">
-          {selected?.title || "Select sheet"}
-        </span>
+        <span className="page-title truncate">{selected?.title || "Select sheet"}</span>
         <ChevronDown
           size={18}
           className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}

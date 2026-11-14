@@ -2,10 +2,9 @@
 -- on an account's own profile. Individual todo rows and uploaded sheet content 
 -- remain private; only solved/skipped states, sheet summaries and activity are 
 -- returned to authenticated callers.
-DROP FUNCTION IF EXISTS public.get_public_profile(TEXT);
+DROP FUNCTION IF EXISTS public.get_public_profile (TEXT);
 
-CREATE FUNCTION public.get_public_profile(requested_username TEXT)
-RETURNS TABLE (
+CREATE FUNCTION public.get_public_profile (requested_username TEXT) RETURNS TABLE (
   name TEXT,
   username TEXT,
   location TEXT,
@@ -17,12 +16,9 @@ RETURNS TABLE (
   progress JSONB,
   custom_sheets JSONB,
   custom_recent_accepted JSONB
-)
-LANGUAGE SQL
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
+) LANGUAGE SQL STABLE SECURITY DEFINER
+SET
+  search_path = public AS $$
 WITH RECURSIVE target_profile AS (
   SELECT p.id, p.name, p.username, p.location, p.website
   FROM public.profiles AS p
@@ -199,5 +195,10 @@ SELECT
 FROM target_profile AS target;
 $$;
 
-REVOKE ALL ON FUNCTION public.get_public_profile(TEXT) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.get_public_profile(TEXT) TO authenticated;
+REVOKE ALL ON FUNCTION public.get_public_profile (TEXT)
+FROM
+  PUBLIC,
+  anon;
+
+GRANT
+EXECUTE ON FUNCTION public.get_public_profile (TEXT) TO authenticated;

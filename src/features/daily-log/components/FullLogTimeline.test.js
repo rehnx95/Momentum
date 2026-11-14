@@ -7,9 +7,10 @@ describe("Full Log timeline intervals", () => {
   });
 
   it("splits overnight sleep at midnight", () => {
-    expect(
-      intervalsFor({ start: "22:00", end: "06:00" }, true),
-    ).toEqual([[1320, 1440], [0, 360]]);
+    expect(intervalsFor({ start: "22:00", end: "06:00" }, true)).toEqual([
+      [1320, 1440],
+      [0, 360],
+    ]);
   });
 
   it("keeps a slot ending at midnight through the end of the day", () => {

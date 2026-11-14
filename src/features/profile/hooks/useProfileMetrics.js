@@ -33,14 +33,8 @@ export default function useProfileMetrics({
       }),
     [availableSheets, progress],
   );
-  const profileProblemsTotal = profileSheetStats.reduce(
-    (total, sheet) => total + sheet.total,
-    0,
-  );
-  const profileProblemsSolved = profileSheetStats.reduce(
-    (total, sheet) => total + sheet.solved,
-    0,
-  );
+  const profileProblemsTotal = profileSheetStats.reduce((total, sheet) => total + sheet.total, 0);
+  const profileProblemsSolved = profileSheetStats.reduce((total, sheet) => total + sheet.solved, 0);
   const recentAccepted = useMemo(
     () =>
       availableSheets

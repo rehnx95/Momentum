@@ -13,11 +13,7 @@ function MomentumBrand({ onNavigate, subtitle }) {
       </span>
       <span className="momentum-brand-copy min-w-0">
         <span className="momentum-brand-name block font-bold tracking-tight">Momentum</span>
-        {subtitle && (
-          <span className="momentum-brand-context block truncate">
-            {subtitle}
-          </span>
-        )}
+        {subtitle && <span className="momentum-brand-context block truncate">{subtitle}</span>}
       </span>
     </button>
   );

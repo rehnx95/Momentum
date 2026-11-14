@@ -1,5 +1,7 @@
 function normalizeActivityName(name) {
-  const normalized = String(name || "Activity").trim().toLowerCase();
+  const normalized = String(name || "Activity")
+    .trim()
+    .toLowerCase();
   return normalized === "dsa" ? "dsa sheet" : normalized;
 }
 
@@ -35,7 +37,6 @@ const KNOWN_ACTIVITY_COLORS = {
 
 export function getActivityColor(name) {
   const normalized = normalizeActivityName(name);
-  const index = KNOWN_ACTIVITY_COLORS[normalized] ??
-    hashName(normalized) % COLOR_VARIABLES.length;
+  const index = KNOWN_ACTIVITY_COLORS[normalized] ?? hashName(normalized) % COLOR_VARIABLES.length;
   return `var(${COLOR_VARIABLES[index]})`;
 }

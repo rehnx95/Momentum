@@ -51,15 +51,19 @@ export default function LogSummary({
   const sleepEnd = toMinutes(String(wakeTime || "").slice(0, 5));
   if (sleepStart !== null && sleepEnd !== null) {
     const end = sleepEnd <= sleepStart ? sleepEnd + 1440 : sleepEnd;
-    const segments = end > 1440
-      ? [[sleepStart, 1440], [0, end - 1440]]
-      : [[sleepStart, end]];
+    const segments =
+      end > 1440
+        ? [
+            [sleepStart, 1440],
+            [0, end - 1440],
+          ]
+        : [[sleepStart, end]];
     segments.forEach(([start, finish], index) => {
       blocks.push({
         key: `sleep-${index}`,
         label: "Sleep",
-        left: start / 1440 * 100,
-        width: (finish - start) / 1440 * 100,
+        left: (start / 1440) * 100,
+        width: ((finish - start) / 1440) * 100,
         color: "var(--daily-sleep-bar)",
       });
     });
@@ -79,8 +83,8 @@ export default function LogSummary({
         blocks.push({
           key: `${activity.id}-${slotIndex}`,
           label: activity.name,
-          left: start / 1440 * 100,
-          width: (finish - start) / 1440 * 100,
+          left: (start / 1440) * 100,
+          width: ((finish - start) / 1440) * 100,
           color: getActivityColor(activity.name),
         });
       });
@@ -98,12 +102,18 @@ export default function LogSummary({
         <div className="log-summary-saved" role="status" aria-live="polite">
           <span>{savedStatus}</span>
           {dirty && onSaveNow && (
-            <button type="button" onClick={onSaveNow}>Save now</button>
+            <button type="button" onClick={onSaveNow}>
+              Save now
+            </button>
           )}
         </div>
       </div>
       <div className="log-summary-axis" aria-hidden="true">
-        <span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>12am</span>
+        <span>12am</span>
+        <span>6am</span>
+        <span>12pm</span>
+        <span>6pm</span>
+        <span>12am</span>
       </div>
       <div className="log-summary-rail" aria-label="Your day timeline">
         {blocks.map((block) => (
@@ -123,7 +133,8 @@ export default function LogSummary({
       <div className="log-summary-labels">
         {legend.map((item) => (
           <span key={item.label}>
-            <i style={{ background: item.color }} />{item.label}
+            <i style={{ background: item.color }} />
+            {item.label}
           </span>
         ))}
       </div>
@@ -136,8 +147,15 @@ export default function LogSummary({
             onChange={onSleepTimeChange}
             disabled={disabled}
           />
-          <span className="slot-arrow" aria-hidden="true">→</span>
-          <SummaryTime value={wakeTime} label="Wake time" onChange={onWakeTimeChange} disabled={disabled} />
+          <span className="slot-arrow" aria-hidden="true">
+            →
+          </span>
+          <SummaryTime
+            value={wakeTime}
+            label="Wake time"
+            onChange={onWakeTimeChange}
+            disabled={disabled}
+          />
         </div>
         {sleepTime && wakeTime && (
           <strong className="log-summary-duration" aria-label={`Sleep duration: ${sleepDuration}`}>

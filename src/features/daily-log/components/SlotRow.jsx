@@ -30,7 +30,9 @@ export default function SlotRow({
             inputRef={startInputRef}
             onSaveNow={onSaveNow}
           />
-          <span className="slot-time-separator" aria-hidden="true">–</span>
+          <span className="slot-time-separator" aria-hidden="true">
+            –
+          </span>
           <TimeInput
             value={slot.end}
             disabled={disabled}
@@ -57,10 +59,7 @@ export default function SlotRow({
       <span className="slot-activity-description" aria-hidden={!slotDescription}>
         {slotDescription}
       </span>
-      <span
-        className="slot-hours"
-        aria-label={`${activityName} slot ${index + 1} duration`}
-      >
+      <span className="slot-hours" aria-label={`${activityName} slot ${index + 1} duration`}>
         {durationMinutes === null ? "—" : formatDuration(durationMinutes)}
       </span>
       {slot.endDayOffset === 1 && <span className="slot-next-day">+1 day</span>}

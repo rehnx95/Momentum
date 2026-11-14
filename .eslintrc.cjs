@@ -6,19 +6,19 @@ module.exports = {
     node: true,
   },
   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
+    ecmaVersion: "latest",
+    sourceType: "module",
     ecmaFeatures: {
       jsx: true,
     },
   },
-  extends: ['eslint:recommended'],
-  plugins: ['react-hooks'],
+  extends: ["eslint:recommended"],
+  plugins: ["react-hooks"],
   rules: {
-    'no-control-regex': 'off',
-    'no-unused-vars': 'off',
-    'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
+    "no-control-regex": "off",
+    "no-unused-vars": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
   },
-  ignorePatterns: ['dist/', 'node_modules/'],
+  ignorePatterns: ["dist/", "node_modules/"],
 };

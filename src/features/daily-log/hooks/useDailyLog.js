@@ -1,13 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  getDailyLogCache,
-  setDailyLogCache,
-} from "../lib/dailyLogHistoryCache";
-import {
-  getSleepMinutes,
-  getStudyMinutes,
-  validateDay,
-} from "../../../shared/utils/time";
+import { getDailyLogCache, setDailyLogCache } from "../lib/dailyLogHistoryCache";
+import { getSleepMinutes, getStudyMinutes, validateDay } from "../../../shared/utils/time";
 import { getLocalDateKey } from "../../../shared/utils/date";
 import {
   emptyLog,
@@ -34,9 +27,7 @@ export default function useDailyLog(user, activityLog = {}) {
     return cached ? JSON.stringify(normalizeLog(cached, dateKey)) : null;
   });
   const savedSnapshotRef = useRef(savedSnapshot);
-  const [loading, setLoading] = useState(
-    () => !getDailyLogCache(user.id, getLocalDateKey()),
-  );
+  const [loading, setLoading] = useState(() => !getDailyLogCache(user.id, getLocalDateKey()));
   const [loadFailed, setLoadFailed] = useState(false);
   const [loadRequest, setLoadRequest] = useState(0);
   const [status, setStatus] = useState("");
@@ -82,10 +73,13 @@ export default function useDailyLog(user, activityLog = {}) {
   const studiedMinutes = useMemo(() => getStudyMinutes(log), [log]);
   const sleptMinutes = useMemo(() => getSleepMinutes(log), [log]);
   const problemCounts = useMemo(
-    () => Object.fromEntries(
-      [...new Set([date, ...allLogs.map((entry) => entry.date)])]
-        .map((entryDate) => [entryDate, Number(activityLog[entryDate] || 0)]),
-    ),
+    () =>
+      Object.fromEntries(
+        [...new Set([date, ...allLogs.map((entry) => entry.date)])].map((entryDate) => [
+          entryDate,
+          Number(activityLog[entryDate] || 0),
+        ]),
+      ),
     [activityLog, allLogs, date],
   );
   const dirty = savedSnapshot !== null && JSON.stringify(log) !== savedSnapshot;
@@ -102,87 +96,87 @@ export default function useDailyLog(user, activityLog = {}) {
     updateSlot,
   } = useDailyLogActivities(logRef, setLog);
 
-  const {
-    autosaveTimer,
-    flushPendingSave,
-    saveLog,
-    saveLogRef,
-    saveQueueRef,
-    saving,
-  } = useDailyLogPersistence({
-    date,
-    dateRef,
-    dirty,
-    loadFailed,
-    loadRequest,
-    loading,
-    log,
-    logRef,
-    savedSnapshotRef,
-    setLoadFailed,
-    setLoading,
-    setLog,
-    setMessage,
-    setSavedSnapshot,
-    setStatus,
-    userId: user.id,
-    validationErrors: validation.errors,
-  });
-
-  const { quickAdd, runningTimer, startTimer, stopTimer, timerNow } =
-    useDailyLogTimer({
-      userId: user.id,
+  const { autosaveTimer, flushPendingSave, saveLog, saveLogRef, saveQueueRef, saving } =
+    useDailyLogPersistence({
+      date,
       dateRef,
+      dirty,
+      loadFailed,
+      loadRequest,
+      loading,
+      log,
       logRef,
+      savedSnapshotRef,
+      setLoadFailed,
+      setLoading,
       setLog,
-      saveLogRef,
-      flushPendingSave,
       setMessage,
+      setSavedSnapshot,
+      setStatus,
+      userId: user.id,
+      validationErrors: validation.errors,
     });
 
-  const changeViewMode = useCallback(async (nextMode) => {
-    if (!["daily", "full", "trends"].includes(nextMode)) return false;
-    if (nextMode === viewMode) return true;
-    if (viewMode === "daily" && !(await flushPendingSave())) return false;
-    setViewMode(nextMode);
-    if (!setDailyLogViewMode(user.id, nextMode)) {
-      setMessage("Could not save the Daily Log view preference.");
-    }
-    return true;
-  }, [flushPendingSave, setMessage, user.id, viewMode]);
+  const { quickAdd, runningTimer, startTimer, stopTimer, timerNow } = useDailyLogTimer({
+    userId: user.id,
+    dateRef,
+    logRef,
+    setLog,
+    saveLogRef,
+    flushPendingSave,
+    setMessage,
+  });
 
-  const changeDate = useCallback(async (selectedDate) => {
-    if (
-      loading ||
-      !selectedDate ||
-      selectedDate === dateRef.current ||
-      selectedDate > getLocalDateKey()
-    ) {
-      return false;
-    }
-    const saved = await flushPendingSave();
-    if (!saved) return false;
-    savedSnapshotRef.current = null;
-    setSavedSnapshot(null);
-    const cachedLog = getDailyLogCache(user.id, selectedDate);
-    const nextLog = cachedLog
-      ? normalizeLog(cachedLog, selectedDate)
-      : emptyLog(selectedDate);
-    const snapshot = cachedLog ? JSON.stringify(nextLog) : null;
-    savedSnapshotRef.current = snapshot;
-    setSavedSnapshot(snapshot);
-    setLog(nextLog);
-    setLoading(!cachedLog);
-    setDate(selectedDate);
-    return true;
-  }, [flushPendingSave, loading, setDate, setLog, user.id]);
+  const changeViewMode = useCallback(
+    async (nextMode) => {
+      if (!["daily", "full", "trends"].includes(nextMode)) return false;
+      if (nextMode === viewMode) return true;
+      if (viewMode === "daily" && !(await flushPendingSave())) return false;
+      setViewMode(nextMode);
+      if (!setDailyLogViewMode(user.id, nextMode)) {
+        setMessage("Could not save the Daily Log view preference.");
+      }
+      return true;
+    },
+    [flushPendingSave, setMessage, user.id, viewMode],
+  );
 
-  const shiftDate = useCallback((days) => {
-    const [year, month, day] = dateRef.current.split("-").map(Number);
-    const target = new Date(year, month - 1, day + days);
-    const key = getLocalDateKey(target);
-    if (key <= getLocalDateKey()) void changeDate(key);
-  }, [changeDate]);
+  const changeDate = useCallback(
+    async (selectedDate) => {
+      if (
+        loading ||
+        !selectedDate ||
+        selectedDate === dateRef.current ||
+        selectedDate > getLocalDateKey()
+      ) {
+        return false;
+      }
+      const saved = await flushPendingSave();
+      if (!saved) return false;
+      savedSnapshotRef.current = null;
+      setSavedSnapshot(null);
+      const cachedLog = getDailyLogCache(user.id, selectedDate);
+      const nextLog = cachedLog ? normalizeLog(cachedLog, selectedDate) : emptyLog(selectedDate);
+      const snapshot = cachedLog ? JSON.stringify(nextLog) : null;
+      savedSnapshotRef.current = snapshot;
+      setSavedSnapshot(snapshot);
+      setLog(nextLog);
+      setLoading(!cachedLog);
+      setDate(selectedDate);
+      return true;
+    },
+    [flushPendingSave, loading, setDate, setLog, user.id],
+  );
+
+  const shiftDate = useCallback(
+    (days) => {
+      const [year, month, day] = dateRef.current.split("-").map(Number);
+      const target = new Date(year, month - 1, day + days);
+      const key = getLocalDateKey(target);
+      if (key <= getLocalDateKey()) void changeDate(key);
+    },
+    [changeDate],
+  );
 
   const clearAllLogs = useCallback(async () => {
     window.clearTimeout(autosaveTimer.current);
@@ -202,15 +196,48 @@ export default function useDailyLog(user, activityLog = {}) {
   }, [autosaveTimer, clearHistory, saveQueueRef, setLog, user.id]);
 
   return {
-    date, log, setLog, loading, loadFailed,
-    saving, clearingHistory, status, message, setMessage,
-    viewMode, changeViewMode,
-    activeCustomTasks, currentStreak, problemCounts, allLogs, allLogsLoading,
-    hasOlderLogs, olderLogsLoading, runningTimer, timerNow, validation, dirty,
-    studiedMinutes, sleptMinutes, changeDate, shiftDate, updateField, updateSlot,
-    addSlot, removeSlot, discardEmptySlot, addCustomTask, addSheetActivity, removeCustomTask,
-    renameCustomTask, saveLog, loadOlderLogs, clearAllLogs, startTimer,
-    stopTimer, quickAdd,
+    date,
+    log,
+    setLog,
+    loading,
+    loadFailed,
+    saving,
+    clearingHistory,
+    status,
+    message,
+    setMessage,
+    viewMode,
+    changeViewMode,
+    activeCustomTasks,
+    currentStreak,
+    problemCounts,
+    allLogs,
+    allLogsLoading,
+    hasOlderLogs,
+    olderLogsLoading,
+    runningTimer,
+    timerNow,
+    validation,
+    dirty,
+    studiedMinutes,
+    sleptMinutes,
+    changeDate,
+    shiftDate,
+    updateField,
+    updateSlot,
+    addSlot,
+    removeSlot,
+    discardEmptySlot,
+    addCustomTask,
+    addSheetActivity,
+    removeCustomTask,
+    renameCustomTask,
+    saveLog,
+    loadOlderLogs,
+    clearAllLogs,
+    startTimer,
+    stopTimer,
+    quickAdd,
     saveNow: flushPendingSave,
     retryLoad: () => setLoadRequest((current) => current + 1),
   };

@@ -1,11 +1,7 @@
 import { createPortal } from "react-dom";
 import { useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, List, Trash2 } from "lucide-react";
-import {
-  formatDuration,
-  getSlotDurationMinutes,
-  slotMinutes,
-} from "../../../shared/utils/time";
+import { formatDuration, getSlotDurationMinutes, slotMinutes } from "../../../shared/utils/time";
 import Tooltip from "../../../shared/components/Tooltip";
 import Dropdown from "../../../shared/components/Dropdown";
 import FullLogTimeline from "./FullLogTimeline";
@@ -14,10 +10,7 @@ import { getActivityColor } from "../lib/activityColor";
 const PAGE_SIZE = 10;
 
 function slotTotal(slots = []) {
-  return slots.reduce(
-    (total, slot) => total + (getSlotDurationMinutes(slot) || 0),
-    0,
-  );
+  return slots.reduce((total, slot) => total + (getSlotDurationMinutes(slot) || 0), 0);
 }
 
 function sleepTotal(row) {
@@ -38,7 +31,9 @@ function activityBreakdown(row) {
     .map((task) => ({
       id: task.id,
       name:
-        String(task.name || "Activity").trim().toLowerCase() === "dsa"
+        String(task.name || "Activity")
+          .trim()
+          .toLowerCase() === "dsa"
           ? "DSA"
           : task.name || "Activity",
       slots: Array.isArray(task.slots) ? task.slots : [],
@@ -58,10 +53,7 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
           row,
           activities,
           sleep: sleepTotal(row),
-          studied: activities.reduce(
-            (total, activity) => total + activity.minutes,
-            0,
-          ),
+          studied: activities.reduce((total, activity) => total + activity.minutes, 0),
           problems: daily.problemCounts[row.date] || 0,
         };
       }),
@@ -218,53 +210,54 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
               <div className="full-log-table-header" aria-hidden="true">
                 <span>Date</span>
                 <div className="full-log-table-axis">
-                  <span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>12am</span>
+                  <span>12am</span>
+                  <span>6am</span>
+                  <span>12pm</span>
+                  <span>6pm</span>
+                  <span>12am</span>
                 </div>
                 <span>Sleep</span>
                 <span>Active</span>
               </div>
               <ul className="full-log-day-list">
-              {visibleEntries.map(({ row, activities, sleep, studied }) => (
-                <li className="full-log-day" key={row.date}>
-                  <span className="full-log-day-date">
-                    <span className="full-log-day-weekday">
-                      {new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
-                        weekday: "short",
-                      })}
+                {visibleEntries.map(({ row, activities, sleep, studied }) => (
+                  <li className="full-log-day" key={row.date}>
+                    <span className="full-log-day-date">
+                      <span className="full-log-day-weekday">
+                        {new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
+                          weekday: "short",
+                        })}
+                      </span>
+                      <button
+                        type="button"
+                        className="full-log-date-button"
+                        aria-label={`Open daily log for ${new Date(`${row.date}T00:00:00`).toLocaleDateString()}`}
+                        onClick={async () => {
+                          if (row.date === daily.date || (await daily.changeDate(row.date))) {
+                            await daily.changeViewMode("daily");
+                          }
+                        }}
+                      >
+                        {new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
+                          day: "numeric",
+                          month: "short",
+                        })}
+                      </button>
                     </span>
-                    <button
-                      type="button"
-                      className="full-log-date-button"
-                      aria-label={`Open daily log for ${new Date(`${row.date}T00:00:00`).toLocaleDateString()}`}
-                      onClick={async () => {
-                        if (
-                          row.date === daily.date ||
-                          await daily.changeDate(row.date)
-                        ) {
-                          await daily.changeViewMode("daily");
-                        }
-                      }}
-                    >
-                      {new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
-                        day: "numeric",
-                        month: "short",
-                      })}
-                    </button>
-                  </span>
-                  <FullLogTimeline
-                    row={row}
-                    activities={activities}
-                    showAxis={false}
-                    activityFilter={activityFilter}
-                  />
-                  <span className="full-log-sleep-total">
-                    {row.sleep_time || row.wake_time ? formatDuration(sleep) : "—"}
-                  </span>
-                  <span className="full-log-active-total">
-                    {activityFilter === "Sleep" ? "—" : formatDuration(studied)}
-                  </span>
-                </li>
-              ))}
+                    <FullLogTimeline
+                      row={row}
+                      activities={activities}
+                      showAxis={false}
+                      activityFilter={activityFilter}
+                    />
+                    <span className="full-log-sleep-total">
+                      {row.sleep_time || row.wake_time ? formatDuration(sleep) : "—"}
+                    </span>
+                    <span className="full-log-active-total">
+                      {activityFilter === "Sleep" ? "—" : formatDuration(studied)}
+                    </span>
+                  </li>
+                ))}
               </ul>
             </div>
           ) : daily.allLogsLoading ? (

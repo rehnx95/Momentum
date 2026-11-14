@@ -14,8 +14,7 @@ export default function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
             </div>
             <h1 className="auth-simple-title">Make progress every day.</h1>
             <p className="auth-panel-description">
-              Bring your learning, routines, and daily progress together in one
-              place.
+              Bring your learning, routines, and daily progress together in one place.
             </p>
             {error && (
               <p
@@ -25,11 +24,7 @@ export default function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
                 {error}
               </p>
             )}
-            <button
-              onClick={onSignIn}
-              disabled={isSigningIn}
-              className="google-signin-button"
-            >
+            <button onClick={onSignIn} disabled={isSigningIn} className="google-signin-button">
               <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
                 <path
                   fill="#4285F4"
@@ -54,9 +49,7 @@ export default function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
             <div className="auth-divider">
               <span>SECURE SIGN IN</span>
             </div>
-            <p className="auth-legal">
-              Your sheets and progress sync to your account.
-            </p>
+            <p className="auth-legal">Your sheets and progress sync to your account.</p>
           </div>
         </section>
       </div>

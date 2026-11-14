@@ -1,13 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-export default function Dropdown({
-  ariaLabel,
-  className = "",
-  onChange,
-  options,
-  value,
-}) {
+export default function Dropdown({ ariaLabel, className = "", onChange, options, value }) {
   const dropdownId = useId();
   const dropdownRef = useRef(null);
   const triggerRef = useRef(null);
@@ -54,9 +48,7 @@ export default function Dropdown({
         return;
       }
       const direction = event.key === "ArrowDown" ? 1 : -1;
-      setActiveIndex((index) =>
-        (index + direction + options.length) % options.length,
-      );
+      setActiveIndex((index) => (index + direction + options.length) % options.length);
       return;
     }
 
@@ -82,10 +74,7 @@ export default function Dropdown({
   const activeOptionId = `${dropdownId}-option-${activeIndex}`;
 
   return (
-    <div
-      className={`custom-dropdown ${className}`.trim()}
-      ref={dropdownRef}
-    >
+    <div className={`custom-dropdown ${className}`.trim()} ref={dropdownRef}>
       <button
         ref={triggerRef}
         type="button"
@@ -102,9 +91,7 @@ export default function Dropdown({
         }}
         onKeyDown={handleKeyDown}
       >
-        <span className="custom-dropdown-value">
-          {selectedOption?.label || ""}
-        </span>
+        <span className="custom-dropdown-value">{selectedOption?.label || ""}</span>
         <ChevronDown size={15} aria-hidden="true" />
       </button>
       {open && (

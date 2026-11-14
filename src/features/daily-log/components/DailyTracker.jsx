@@ -14,22 +14,22 @@ import "./DailyLogRedesign.css";
 export default function DailyTracker({ user, sheets, activityLog, askConfirmation }) {
   const [fullLogToolbarTarget, setFullLogToolbarTarget] = useState(null);
   const daily = useDailyLog(user, activityLog);
-  const title = daily.viewMode === "daily"
-    ? "Daily log"
-    : daily.viewMode === "full"
-      ? "Full log"
-      : "Trends";
-  const subtitle = daily.viewMode === "daily"
-    ? `Where your hours went on ${new Date(`${daily.date}T00:00:00`).toLocaleDateString(undefined, { weekday: "long" })}.`
-    : daily.viewMode === "full"
-      ? "Every day at a glance."
-      : "How your days add up over time.";
+  const title =
+    daily.viewMode === "daily" ? "Daily log" : daily.viewMode === "full" ? "Full log" : "Trends";
+  const subtitle =
+    daily.viewMode === "daily"
+      ? `Where your hours went on ${new Date(`${daily.date}T00:00:00`).toLocaleDateString(undefined, { weekday: "long" })}.`
+      : daily.viewMode === "full"
+        ? "Every day at a glance."
+        : "How your days add up over time.";
 
   return (
     <section className="daily-tracker surface-card" aria-labelledby="daily-log-title">
       <header className="daily-toolbar">
         <div className="daily-toolbar-copy">
-          <h2 id="daily-log-title" className="page-title">{title}</h2>
+          <h2 id="daily-log-title" className="page-title">
+            {title}
+          </h2>
           <p className="daily-toolbar-subtitle">{subtitle}</p>
         </div>
         <div className="daily-toolbar-controls">
@@ -82,7 +82,9 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
         <TrendsView daily={daily} />
       )}
       {daily.message && (
-        <p className="daily-error-message" role="alert">{daily.message}</p>
+        <p className="daily-error-message" role="alert">
+          {daily.message}
+        </p>
       )}
     </section>
   );

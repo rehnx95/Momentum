@@ -1,12 +1,8 @@
 -- Public profile discovery is limited to authenticated users and exposes only
 -- profile fields and aggregate activity, never email addresses or raw progress.
-CREATE OR REPLACE FUNCTION public.search_public_profiles(search_term TEXT)
-RETURNS TABLE (name TEXT, username TEXT)
-LANGUAGE SQL
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
+CREATE OR REPLACE FUNCTION public.search_public_profiles (search_term TEXT) RETURNS TABLE (name TEXT, username TEXT) LANGUAGE SQL STABLE SECURITY DEFINER
+SET
+  search_path = public AS $$
   SELECT p.name, p.username
   FROM public.profiles AS p
   WHERE auth.uid() IS NOT NULL
@@ -17,20 +13,16 @@ AS $$
   LIMIT 10;
 $$;
 
-CREATE OR REPLACE FUNCTION public.get_public_profile(requested_username TEXT)
-RETURNS TABLE (
+CREATE OR REPLACE FUNCTION public.get_public_profile (requested_username TEXT) RETURNS TABLE (
   name TEXT,
   username TEXT,
   location TEXT,
   website TEXT,
   total_solved BIGINT,
   activity JSONB
-)
-LANGUAGE SQL
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
+) LANGUAGE SQL STABLE SECURITY DEFINER
+SET
+  search_path = public AS $$
   SELECT
     p.name,
     p.username,
@@ -59,7 +51,18 @@ AS $$
   LIMIT 1;
 $$;
 
-REVOKE ALL ON FUNCTION public.search_public_profiles(TEXT) FROM PUBLIC, anon;
-REVOKE ALL ON FUNCTION public.get_public_profile(TEXT) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.search_public_profiles(TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.get_public_profile(TEXT) TO authenticated;
+REVOKE ALL ON FUNCTION public.search_public_profiles (TEXT)
+FROM
+  PUBLIC,
+  anon;
+
+REVOKE ALL ON FUNCTION public.get_public_profile (TEXT)
+FROM
+  PUBLIC,
+  anon;
+
+GRANT
+EXECUTE ON FUNCTION public.search_public_profiles (TEXT) TO authenticated;
+
+GRANT
+EXECUTE ON FUNCTION public.get_public_profile (TEXT) TO authenticated;

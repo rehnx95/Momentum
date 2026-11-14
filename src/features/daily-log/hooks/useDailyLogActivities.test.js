@@ -74,9 +74,7 @@ describe("useDailyLogActivities", () => {
     });
     act(() => activities.discardEmptySlot(task.id, 0));
 
-    expect(logRef.current.custom_tasks).toEqual([
-      { ...task, slots: [] },
-    ]);
+    expect(logRef.current.custom_tasks).toEqual([{ ...task, slots: [] }]);
     act(() => renderer.unmount());
   });
 });

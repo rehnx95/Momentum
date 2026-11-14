@@ -1,11 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import AppDialog from "../../shared/components/AppDialog";
 import { getLocalDateKey } from "../../shared/utils/date";
 import { useProgress } from "../problem-tracker/hooks/useProgress";
@@ -31,12 +24,14 @@ export default function AuthenticatedApp({
   const showNotice = useCallback((message, title = "Momentum") => {
     setDialog({ type: "notice", title, message });
   }, []);
-  const askConfirmation = useCallback((message, title = "Are you sure?") => (
-    new Promise((resolve) => {
-      dialogResolver.current = resolve;
-      setDialog({ type: "confirm", title, message });
-    })
-  ), []);
+  const askConfirmation = useCallback(
+    (message, title = "Are you sure?") =>
+      new Promise((resolve) => {
+        dialogResolver.current = resolve;
+        setDialog({ type: "confirm", title, message });
+      }),
+    [],
+  );
   const closeDialog = useCallback((confirmed = false) => {
     const resolve = dialogResolver.current;
     dialogResolver.current = null;
@@ -101,9 +96,7 @@ export default function AuthenticatedApp({
     update,
   });
   const handleRemoveSheet = (sheet) => removeSheet(sheet, reset);
-  const [todayDateKey, setTodayDateKey] = useState(() =>
-    getLocalDateKey(new Date()),
-  );
+  const [todayDateKey, setTodayDateKey] = useState(() => getLocalDateKey(new Date()));
   const {
     copiedProfileLink,
     copyPublicProfileLink,
@@ -137,12 +130,7 @@ export default function AuthenticatedApp({
   }, []);
 
   const [backupAction, setBackupAction] = useState("");
-  const {
-    exportProgress,
-    importFileInput,
-    importProgress,
-    importSheetId,
-  } = useProgressBackup({
+  const { exportProgress, importFileInput, importProgress, importSheetId } = useProgressBackup({
     availableSheets,
     progress,
     bulkUpdate,
@@ -150,17 +138,18 @@ export default function AuthenticatedApp({
     setBackupAction,
   });
 
-  const renderDialog = () => dialog && (
-    <AppDialog
-      dialog={dialog}
-      onClose={() => closeDialog(false)}
-      onConfirm={() => closeDialog(true)}
-    />
-  );
+  const renderDialog = () =>
+    dialog && (
+      <AppDialog
+        dialog={dialog}
+        onClose={() => closeDialog(false)}
+        onConfirm={() => closeDialog(true)}
+      />
+    );
 
   useEffect(() => {
     const refreshToday = () => {
-      setTodayDateKey(current => {
+      setTodayDateKey((current) => {
         const today = getLocalDateKey(new Date());
         return current === today ? current : today;
       });
@@ -176,18 +165,11 @@ export default function AuthenticatedApp({
   }, []);
 
   const userName =
-    profile?.name ||
-    user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
-    "User";
+    profile?.name || user.user_metadata?.full_name || user.user_metadata?.name || "User";
   const userUsername = profile?.username || "";
   const testDataTools = isTestDataToolsEnabled ? (
     <Suspense fallback={null}>
-      <SampleDataTools
-        userId={user.id}
-        userEmail={user.email}
-        sheets={availableSheets}
-      />
+      <SampleDataTools userId={user.id} userEmail={user.email} sheets={availableSheets} />
     </Suspense>
   ) : null;
   const headerProps = {
