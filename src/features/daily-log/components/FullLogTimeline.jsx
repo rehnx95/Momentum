@@ -1,150 +1,52 @@
-import { useState } from "react";
-import { toMinutes } from "../../../shared/utils/time";
+import { formatDuration } from "../../../shared/utils/time";
 import { getActivityColor } from "../lib/activityColor";
 
-const TICKS = [
-  { minute: 0, label: "12am" },
-  { minute: 360, label: "6am" },
-  { minute: 720, label: "12pm" },
-  { minute: 1080, label: "6pm" },
-];
-
-export function intervalsFor(slot, wrapMidnight = false) {
-  const start = toMinutes(String(slot?.start || "").slice(0, 5));
-  const end = toMinutes(String(slot?.end || "").slice(0, 5));
-  if (start === null || end === null) return [];
-  if (slot?.endDayOffset === 1 && end === 0) return [[start, 1440]];
-  if (start === end) return [];
-  if (end > start) return [[start, end]];
-  return wrapMidnight
-    ? [
-        [start, 1440],
-        [0, end],
-      ]
-    : [];
-}
-
-export function sleepIntervalsFor(sleepTime, wakeTime) {
-  const start = toMinutes(String(sleepTime || "").slice(0, 5));
-  const end = toMinutes(String(wakeTime || "").slice(0, 5));
-  if (start === null || end === null || start === end) return [];
-  if (start > end) return end > 0 ? [[0, end]] : [];
-  return [[start, end]];
-}
-
-function timeLabel(value) {
-  if (!value) return "--:--";
-  return String(value).slice(0, 5);
-}
-
 export default function FullLogTimeline({
-  row,
   activities,
   activityColors,
-  showAxis = true,
+  totalMinutes,
   activityFilter = "All",
 }) {
-  const [tooltip, setTooltip] = useState(null);
-  const segments = [];
-  const sleepSlot = { start: row.sleep_time, end: row.wake_time };
-
-  if (activityFilter === "All" || activityFilter === "Sleep") {
-    sleepIntervalsFor(sleepSlot.start, sleepSlot.end).forEach(([start, end], index) => {
-      segments.push({
-        key: `sleep-${index}`,
-        kind: "sleep",
-        start,
-        end,
-        label: `Sleep ${timeLabel(row.sleep_time)} to ${timeLabel(row.wake_time)}`,
-      });
-    });
-  }
-
-  activities.forEach((activity) => {
-    if (activityFilter !== "All" && activity.name !== activityFilter) return;
-    activity.slots.forEach((slot, slotIndex) => {
-      intervalsFor(slot).forEach(([start, end], intervalIndex) => {
-        segments.push({
-          key: `${activity.id || activity.name}-${slotIndex}-${intervalIndex}`,
-          kind: "study",
-          color: getActivityColor(activity.name, activityColors),
-          start,
-          end,
-          label: `${activity.name} ${timeLabel(slot.start)} to ${timeLabel(slot.end)}`,
-        });
-      });
-    });
-  });
-
-  const description = segments.length
-    ? segments.map((segment) => segment.label).join("; ")
-    : "No sleep or study periods recorded";
-  const showTooltip = (event) => {
-    const target = event.target.closest?.("[data-tip]");
-    if (!target) {
-      setTooltip(null);
-      return;
-    }
-    const rect = target.getBoundingClientRect();
-    const below = rect.top < 48;
-    setTooltip({
-      text: target.dataset.tip,
-      x: Math.max(12, Math.min(rect.left + rect.width / 2, window.innerWidth - 12)),
-      y: below ? rect.bottom + 8 : rect.top - 8,
-      below,
-    });
-  };
+  const visibleActivities = activities
+    .filter((activity) => activityFilter === "All" || activity.name === activityFilter)
+    .sort(
+      (first, second) =>
+        second.minutes - first.minutes || String(first.name).localeCompare(String(second.name)),
+    );
 
   return (
-    <div
-      className="full-log-timeline"
-      onMouseOver={showTooltip}
-      onMouseLeave={() => setTooltip(null)}
-      onFocusCapture={showTooltip}
-      onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setTooltip(null);
-      }}
-    >
-      {showAxis && (
-        <div className="full-log-timeline-axis" aria-hidden="true">
-          {TICKS.map(({ minute, label }) => (
+    <div className="full-log-timeline" role="group" aria-label="Share of active time">
+      <div className="full-log-timeline-track">
+        {visibleActivities.map((activity) => {
+          const share = totalMinutes > 0 ? (activity.minutes / totalMinutes) * 100 : 0;
+          const color = getActivityColor(activity.name, activityColors);
+          const label = `${activity.name} ${formatDuration(activity.minutes)} · ${Math.round(share)}%`;
+
+          return (
             <span
-              key={label}
-              className={minute === 0 ? "first" : ""}
-              style={{ left: `${(minute / 1440) * 100}%` }}
-            >
-              {label}
-            </span>
-          ))}
-          <span style={{ left: "100%" }}>12am</span>
-        </div>
-      )}
-      <div className="full-log-timeline-track" role="group" aria-label={description}>
-        {segments.map((segment) => (
-          <span
-            key={segment.key}
-            className={`full-log-timeline-segment ${segment.kind}`}
-            role="img"
-            data-tip={segment.label}
-            aria-label={segment.label}
-            tabIndex={0}
-            style={{
-              left: `${(segment.start / 1440) * 100}%`,
-              width: `${((segment.end - segment.start) / 1440) * 100}%`,
-              ...(segment.color ? { "--activity-color": segment.color } : {}),
-            }}
-          />
-        ))}
+              key={activity.id || activity.name}
+              className="full-log-timeline-segment"
+              role="img"
+              aria-label={label}
+              title={label}
+              style={{ width: `${share}%`, "--activity-color": color }}
+            />
+          );
+        })}
       </div>
-      {tooltip && (
-        <div
-          className={`full-log-timeline-tooltip${tooltip.below ? " below" : ""}`}
-          role="tooltip"
-          style={{ left: tooltip.x, top: tooltip.y }}
-        >
-          {tooltip.text}
-        </div>
-      )}
+      <div className="full-log-activity-breakdown">
+        {visibleActivities.map((activity) => {
+          const share = totalMinutes > 0 ? (activity.minutes / totalMinutes) * 100 : 0;
+          const color = getActivityColor(activity.name, activityColors);
+
+          return (
+            <span key={activity.id || activity.name}>
+              <i aria-hidden="true" style={{ "--activity-color": color }} />
+              {activity.name} {formatDuration(activity.minutes)} · {Math.round(share)}%
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }

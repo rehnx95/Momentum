@@ -1,19 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { Palette, Plus, Square, Trash2 } from "lucide-react";
-import { formatDuration } from "../../../shared/utils/time";
 import Tooltip from "../../../shared/components/Tooltip";
 import SlotRow from "./SlotRow";
 import { ACTIVITY_COLOR_PALETTE, isActivityColorValue } from "../lib/activityColor";
+
+function getPickerColor(activityColor) {
+  if (/^#[0-9a-f]{6}$/i.test(activityColor || "")) return activityColor;
+  return (
+    ACTIVITY_COLOR_PALETTE.find(
+      ({ id }) => activityColor === `var(--activity-color-${id.replace(/_/g, "-")})`,
+    )?.hex || ACTIVITY_COLOR_PALETTE[0].hex
+  );
+}
 
 export default function ActivityCard({
   activityId,
   activityName,
   activityDescription = "",
   slots,
-  totalMinutes = 0,
   disabled,
   runningTimer,
-  timerNow,
   onSaveNow,
   onStopTimer,
   onAddSlot,
@@ -37,10 +43,6 @@ export default function ActivityCard({
   const [customColor, setCustomColor] = useState("");
   const visibleSlots = slots.map((slot, index) => ({ slot, index }));
   const timerRunningHere = runningTimer?.activityId === activityId;
-  const elapsedMinutes = timerRunningHere
-    ? Math.max(0, Math.floor((timerNow - Date.parse(runningTimer.startedAt)) / 60_000))
-    : 0;
-  const activityDurationMinutes = totalMinutes + elapsedMinutes;
 
   useEffect(() => {
     if (slots.length > previousSlotCount.current && pendingSlotFocus.current) {
@@ -55,7 +57,9 @@ export default function ActivityCard({
 
   useEffect(() => {
     const discardUnfilledSlots = (event) => {
-      const clickedAction = event.target?.closest?.(".activity-add-slot, .activity-delete");
+      const clickedAction = event.target?.closest?.(
+        ".activity-add-slot, .activity-delete, .activity-color-toggle, .activity-color-picker",
+      );
       if (clickedAction && cardRef.current?.contains(clickedAction)) return;
 
       const clickedRow = event.target?.closest?.(".daily-slot-row");
@@ -85,8 +89,8 @@ export default function ActivityCard({
   };
 
   const chooseColor = async (color) => {
-    const saved = await onSetActivityColor?.(color);
-    if (saved !== false) setColorPickerOpen(false);
+    await onSetActivityColor?.(color);
+    setColorPickerOpen(false);
   };
 
   const applyCustomColor = (event) => {
@@ -137,9 +141,6 @@ export default function ActivityCard({
           ))}
         </div>
       )}
-      <span className="activity-total">
-        {activityDurationMinutes > 0 ? formatDuration(activityDurationMinutes) : "—"}
-      </span>
       {(allowAddSlot || allowRemoveActivity || timerRunningHere) && (
         <div className="activity-card-actions">
           {onSetActivityColor && (
@@ -150,7 +151,7 @@ export default function ActivityCard({
                 aria-label={`Choose color for ${activityName}`}
                 aria-expanded={colorPickerOpen}
                 onClick={() => {
-                  setCustomColor(/^#[0-9a-f]{6}$/i.test(activityColor) ? activityColor : "");
+                  setCustomColor(getPickerColor(activityColor));
                   setColorPickerOpen((open) => !open);
                 }}
                 disabled={disabled}
@@ -215,6 +216,18 @@ export default function ActivityCard({
               </button>
             ))}
           </div>
+          <label className="activity-native-color-picker">
+            Pick a custom color
+            <input
+              type="color"
+              aria-label={`Pick custom color for ${activityName}`}
+              value={
+                /^#[0-9a-f]{6}$/i.test(customColor) ? customColor : getPickerColor(activityColor)
+              }
+              onChange={(event) => setCustomColor(event.target.value)}
+              disabled={disabled}
+            />
+          </label>
           <form className="activity-custom-color" onSubmit={applyCustomColor}>
             <label htmlFor={`activity-color-hex-${activityId}`}>Custom hex</label>
             <input

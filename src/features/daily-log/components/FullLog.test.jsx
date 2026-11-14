@@ -80,7 +80,7 @@ describe("FullLog", () => {
     expect(
       within(screen.getByRole("group", { name: "Activity colors" })).getByText("Reading"),
     ).toBeTruthy();
-    expect(container.querySelector(".full-log-day-weekday")).toBeTruthy();
+    expect(container.querySelector(".full-log-date-button")).toBeTruthy();
   });
 
   it("shows the saved number of problems solved for each day", () => {
@@ -102,8 +102,32 @@ describe("FullLog", () => {
     };
     render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
 
-    expect(screen.getByText("Solved")).toBeTruthy();
-    expect(screen.getByLabelText("3 problems solved").textContent).toBe("3");
+    expect(screen.getByLabelText("3 problems solved")).toBeTruthy();
+  });
+
+  it("labels the date, activity share, active time, sleep, and solved columns", () => {
+    const daily = {
+      allLogs: [
+        {
+          date: getLocalDateKey(),
+          sleep_time: "",
+          wake_time: "",
+          custom_tasks: [],
+        },
+      ],
+      problemCounts: {},
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+    };
+    const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
+
+    expect(
+      [...container.querySelectorAll(".full-log-table-header > span")].map((item) =>
+        item.textContent.trim(),
+      ),
+    ).toEqual(["Date", "Share of active time", "Active", "Sleep", "Solved"]);
   });
 
   it("includes a solved date even when no daily log was saved", () => {
@@ -118,8 +142,138 @@ describe("FullLog", () => {
     };
     render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
 
-    expect(screen.getByLabelText("2 problems solved").textContent).toBe("2");
+    expect(screen.getByLabelText("2 problems solved")).toBeTruthy();
     expect(screen.queryByText("No saved daily logs yet.")).toBeNull();
+  });
+
+  it("shows activity and overnight sleep ranges with durations in expanded day details", () => {
+    const date = getLocalDateKey();
+    const daily = {
+      allLogs: [
+        {
+          date,
+          sleep_time: "23:00",
+          wake_time: "06:00",
+          custom_tasks: [
+            {
+              id: "reading",
+              name: "Reading",
+              slots: [{ start: "09:00", end: "10:30" }],
+            },
+          ],
+        },
+      ],
+      problemCounts: { [date]: 2 },
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+    };
+    const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
+
+    const rows = [...container.querySelectorAll(".full-log-entry")];
+    expect(rows).toHaveLength(2);
+    expect(rows[0].textContent).toContain("Reading");
+    expect(rows[0].textContent).toContain("09:00");
+    expect(rows[0].textContent).toContain("1h 30m");
+    expect(rows[1].textContent).toContain("Sleep");
+    expect(rows[1].textContent).toContain("23:00");
+    expect(rows[1].textContent).toContain("06:00");
+    expect(rows[1].textContent).toContain("7h");
+    expect(screen.getByLabelText("2 problems solved")).toBeTruthy();
+  });
+
+  it("sorts expanded activity times from midnight through the end of day", () => {
+    const date = getLocalDateKey();
+    const daily = {
+      allLogs: [
+        {
+          date,
+          sleep_time: "",
+          wake_time: "",
+          custom_tasks: [
+            {
+              id: "reading",
+              name: "Reading",
+              slots: [
+                { start: "23:00", end: "23:59" },
+                { start: "12:00", end: "12:30" },
+                { start: "00:00", end: "00:30" },
+              ],
+            },
+          ],
+        },
+      ],
+      problemCounts: {},
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+    };
+    const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
+
+    expect(
+      [...container.querySelectorAll(".full-log-entry-time")].map((item) =>
+        item.textContent.trim().slice(0, 5),
+      ),
+    ).toEqual(["00:00", "12:00", "23:00"]);
+  });
+
+  it("shows active-time shares as a stacked bar in descending activity duration order", () => {
+    const date = getLocalDateKey();
+    const daily = {
+      allLogs: [
+        {
+          date,
+          sleep_time: "",
+          wake_time: "",
+          custom_tasks: [
+            { id: "reading", name: "Reading", slots: [{ start: "09:00", end: "10:00" }] },
+            { id: "project", name: "Project", slots: [{ start: "10:00", end: "12:00" }] },
+          ],
+        },
+      ],
+      problemCounts: {},
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+    };
+    const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
+    const segments = [...container.querySelectorAll(".full-log-timeline-segment")];
+
+    expect(segments).toHaveLength(2);
+    expect(segments[0].getAttribute("aria-label")).toContain("Project 2h · 67%");
+    expect(Number.parseFloat(segments[0].style.width)).toBeCloseTo(66.67, 1);
+    expect(segments[1].getAttribute("aria-label")).toContain("Reading 1h · 33%");
+  });
+
+  it("reveals more than ten activity entries for an expanded day", () => {
+    const date = getLocalDateKey();
+    const slots = Array.from({ length: 11 }, (_, index) => ({
+      start: `${String(index + 1).padStart(2, "0")}:00`,
+      end: `${String(index + 1).padStart(2, "0")}:30`,
+    }));
+    const daily = {
+      allLogs: [
+        {
+          date,
+          sleep_time: "",
+          wake_time: "",
+          custom_tasks: [{ id: "reading", name: "Reading", slots }],
+        },
+      ],
+      problemCounts: {},
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+    };
+    const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
+
+    expect(container.querySelectorAll(".full-log-entry")).toHaveLength(10);
+    fireEvent.click(screen.getByRole("button", { name: "Show 10 more entries" }));
+    expect(container.querySelectorAll(".full-log-entry")).toHaveLength(11);
   });
 
   it("opens the selected date in the daily log", async () => {

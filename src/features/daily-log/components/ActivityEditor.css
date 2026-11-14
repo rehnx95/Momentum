@@ -228,6 +228,32 @@
   box-shadow: 0 0 0 1px var(--surface-raised);
 }
 
+.activity-native-color-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.65rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.activity-native-color-picker input {
+  width: 2rem;
+  height: 1.8rem;
+  padding: 0.1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.35rem;
+  background: var(--page);
+  cursor: pointer;
+}
+
+.activity-native-color-picker input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .activity-custom-color {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;

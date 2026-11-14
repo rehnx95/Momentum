@@ -103,6 +103,48 @@ describe("DayView activity entry", () => {
     await waitFor(() => {
       expect(daily.setActivityColor).toHaveBeenLastCalledWith("Reading", "#12ab34");
     });
+
+    fireEvent.click(screen.getByRole("button", { name: "Choose color for Reading" }));
+    fireEvent.change(screen.getByLabelText("Pick custom color for Reading"), {
+      target: { value: "#345678" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
+    await waitFor(() => {
+      expect(daily.setActivityColor).toHaveBeenLastCalledWith("Reading", "#345678");
+    });
+  });
+
+  it("closes the color picker after a failed save attempt", async () => {
+    const daily = createDaily([
+      {
+        id: "reading-1",
+        name: "Reading",
+        slots: [{ start: "09:00", end: "10:00" }],
+      },
+    ]);
+    daily.setActivityColor.mockResolvedValue(false);
+    render(<DayView daily={daily} sheets={[]} askConfirmation={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Choose color for Reading" }));
+    fireEvent.click(screen.getByRole("button", { name: "Use Teal color" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("group", { name: "Reading color" })).toBeNull();
+    });
+  });
+
+  it("keeps an empty slot when opening the activity color picker", () => {
+    const task = { id: "reading-1", name: "Reading", slots: [{ start: "", end: "" }] };
+    const { container } = render(
+      <DayView daily={createDaily([task])} sheets={[]} askConfirmation={vi.fn()} />,
+    );
+    const colorButton = screen.getByRole("button", { name: "Choose color for Reading" });
+
+    fireEvent.pointerDown(colorButton);
+    fireEvent.click(colorButton);
+
+    expect(container.querySelector(".daily-slot-row")).toBeTruthy();
+    expect(screen.getByRole("group", { name: "Reading color" })).toBeTruthy();
   });
 
   it("shows a category count and total alongside the activities heading", () => {
@@ -155,7 +197,7 @@ describe("DayView activity entry", () => {
     expect(screen.queryByRole("list", { name: "Daily log warnings" })).toBeNull();
   });
 
-  it("shows each slot duration on the right of its corresponding time row", () => {
+  it("shows each slot duration and avoids repeating the activity total", () => {
     const task = {
       id: "reading-1",
       name: "Reading",
@@ -170,7 +212,7 @@ describe("DayView activity entry", () => {
 
     const activityCard = container.querySelector(".activity-card");
     const slotRows = [...activityCard.querySelectorAll(".daily-slot-row")];
-    expect(activityCard.querySelector(".activity-total").textContent).toBe("1h 30m");
+    expect(activityCard.querySelector(".activity-total")).toBeNull();
     expect(slotRows.map((row) => row.querySelector(".slot-hours").textContent)).toEqual([
       "1h",
       "30m",

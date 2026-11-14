@@ -1,7 +1,12 @@
 import { createPortal } from "react-dom";
 import { useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, List, Trash2 } from "lucide-react";
-import { formatDuration, getSlotDurationMinutes, slotMinutes } from "../../../shared/utils/time";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, List, Trash2 } from "lucide-react";
+import {
+  formatDuration,
+  getSlotDurationMinutes,
+  slotMinutes,
+  toMinutes,
+} from "../../../shared/utils/time";
 import Tooltip from "../../../shared/components/Tooltip";
 import Dropdown from "../../../shared/components/Dropdown";
 import FullLogTimeline from "./FullLogTimeline";
@@ -42,9 +47,47 @@ function activityBreakdown(row) {
     .filter((activity) => activity.minutes > 0);
 }
 
+function detailEntries(row, activities, filter, activityColors) {
+  const details = [];
+  const sleep = sleepTotal(row);
+
+  if ((filter === "All" || filter === "Sleep") && sleep > 0) {
+    details.push({
+      key: "sleep",
+      name: "Sleep",
+      start: row.sleep_time,
+      end: row.wake_time,
+      minutes: sleep,
+      color: "var(--activity-color-sleep)",
+      isSleep: true,
+    });
+  }
+
+  activities.forEach((activity) => {
+    if (filter !== "All" && activity.name !== filter) return;
+    activity.slots.forEach((slot, index) => {
+      const minutes = getSlotDurationMinutes(slot) || 0;
+      if (!minutes) return;
+      details.push({
+        key: `${activity.id || activity.name}-${index}`,
+        name: activity.name,
+        start: slot.start,
+        end: slot.end,
+        minutes,
+        color: getActivityColor(activity.name, activityColors),
+        isSleep: false,
+      });
+    });
+  });
+
+  return details.sort((first, second) => toMinutes(first.start) - toMinutes(second.start));
+}
+
 export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activityFilter, setActivityFilter] = useState("All");
+  const [expandedDates, setExpandedDates] = useState(null);
+  const [visibleEntryCounts, setVisibleEntryCounts] = useState({});
   const entries = useMemo(() => {
     const logsByDate = new Map(daily.allLogs.map((row) => [row.date, row]));
     const solvedDates = Object.entries(daily.problemCounts)
@@ -110,6 +153,17 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
   const showAllDays = async () => {
     if (daily.hasOlderLogs && !(await daily.loadOlderLogs(true))) return;
     setVisibleCount(Infinity);
+  };
+
+  const toggleDate = (date) => {
+    setExpandedDates((current) => {
+      const next = current
+        ? new Set(current)
+        : new Set(visibleEntries.length ? [visibleEntries[0].row.date] : []);
+      if (next.has(date)) next.delete(date);
+      else next.add(date);
+      return next;
+    });
   };
 
   const clearHistory = async () => {
@@ -221,63 +275,149 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
             <div className="full-log-table">
               <div className="full-log-table-header" aria-hidden="true">
                 <span>Date</span>
-                <div className="full-log-table-axis">
-                  <span>12am</span>
-                  <span>6am</span>
-                  <span>12pm</span>
-                  <span>6pm</span>
-                  <span>12am</span>
-                </div>
-                <span>Sleep</span>
+                <span>Share of active time</span>
                 <span>Active</span>
+                <span>Sleep</span>
                 <span>Solved</span>
               </div>
               <ul className="full-log-day-list">
-                {visibleEntries.map(({ row, activities, sleep, studied, problems }) => (
-                  <li className="full-log-day" key={row.date}>
-                    <span className="full-log-day-date">
-                      <span className="full-log-day-weekday">
-                        {new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
-                          weekday: "short",
-                        })}
-                      </span>
-                      <button
-                        type="button"
-                        className="full-log-date-button"
-                        aria-label={`Open daily log for ${new Date(`${row.date}T00:00:00`).toLocaleDateString()}`}
-                        onClick={async () => {
-                          if (row.date === daily.date || (await daily.changeDate(row.date))) {
-                            await daily.changeViewMode("daily");
-                          }
-                        }}
-                      >
-                        {new Date(`${row.date}T00:00:00`).toLocaleDateString(undefined, {
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </button>
-                    </span>
-                    <FullLogTimeline
-                      row={row}
-                      activities={activities}
-                      activityColors={daily.activityColors}
-                      showAxis={false}
-                      activityFilter={activityFilter}
-                    />
-                    <span className="full-log-sleep-total">
-                      {row.sleep_time || row.wake_time ? formatDuration(sleep) : "—"}
-                    </span>
-                    <span className="full-log-active-total">
-                      {activityFilter === "Sleep" ? "—" : formatDuration(studied)}
-                    </span>
-                    <span
-                      className="full-log-solved-total"
-                      aria-label={`${problems} ${problems === 1 ? "problem" : "problems"} solved`}
-                    >
-                      {problems > 0 ? problems : "—"}
-                    </span>
-                  </li>
-                ))}
+                {visibleEntries.map(({ row, activities, sleep, studied, problems }, index) => {
+                  const date = new Date(`${row.date}T00:00:00`);
+                  const dayLabel = date.toLocaleDateString(undefined, {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  });
+                  const weekday = date.toLocaleDateString(undefined, { weekday: "short" });
+                  const monthDay = date.toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  });
+                  const details = detailEntries(
+                    row,
+                    activities,
+                    activityFilter,
+                    daily.activityColors,
+                  );
+                  const isExpanded = expandedDates ? expandedDates.has(row.date) : index === 0;
+                  const visibleEntriesForDate = details.slice(
+                    0,
+                    visibleEntryCounts[row.date] || PAGE_SIZE,
+                  );
+                  const detailsId = `full-log-details-${row.date}`;
+
+                  return (
+                    <li className="full-log-day" key={row.date}>
+                      <div className="full-log-day-header">
+                        <div className="full-log-day-date">
+                          <button
+                            type="button"
+                            className="full-log-expand-button"
+                            aria-label={`${isExpanded ? "Collapse" : "Expand"} entries for ${dayLabel}`}
+                            aria-expanded={isExpanded}
+                            aria-controls={detailsId}
+                            onClick={() => toggleDate(row.date)}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown size={16} aria-hidden="true" />
+                            ) : (
+                              <ChevronRight size={16} aria-hidden="true" />
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            className="full-log-date-button"
+                            aria-label={`Open daily log for ${new Date(`${row.date}T00:00:00`).toLocaleDateString()}`}
+                            onClick={async () => {
+                              if (row.date === daily.date || (await daily.changeDate(row.date))) {
+                                await daily.changeViewMode("daily");
+                              }
+                            }}
+                          >
+                            <span>{weekday}</span>
+                            <strong>{monthDay}</strong>
+                          </button>
+                        </div>
+                        <FullLogTimeline
+                          activities={activities}
+                          activityColors={daily.activityColors}
+                          totalMinutes={studied}
+                          activityFilter={activityFilter}
+                        />
+                        <span
+                          className="full-log-active-total"
+                          aria-label={`Active ${activityFilter === "Sleep" ? "time not shown" : formatDuration(studied)}`}
+                        >
+                          <small>Active</small>
+                          {activityFilter === "Sleep" ? "—" : formatDuration(studied)}
+                        </span>
+                        <span
+                          className="full-log-sleep-total"
+                          aria-label={`Sleep ${row.sleep_time || row.wake_time ? formatDuration(sleep) : "not recorded"}`}
+                        >
+                          <small>Sleep</small>
+                          {row.sleep_time || row.wake_time ? formatDuration(sleep) : "—"}
+                        </span>
+                        <span
+                          className="full-log-solved-total"
+                          aria-label={`${problems} ${problems === 1 ? "problem" : "problems"} solved`}
+                        >
+                          <small>Solved</small>
+                          {problems}
+                        </span>
+                      </div>
+                      {isExpanded && (
+                        <div className="full-log-day-details" id={detailsId}>
+                          {visibleEntriesForDate.length > 0 ? (
+                            <ul className="full-log-entry-list">
+                              {visibleEntriesForDate.map((entry) => (
+                                <li className="full-log-entry" key={entry.key}>
+                                  <span className="full-log-entry-activity">
+                                    <span className="full-log-entry-time">
+                                      {String(entry.start || "").slice(0, 5)} –{" "}
+                                      {String(entry.end || "").slice(0, 5)}
+                                    </span>
+                                    <span className="full-log-entry-name">
+                                      <i
+                                        className={entry.isSleep ? "sleep" : ""}
+                                        aria-hidden="true"
+                                        style={{ "--activity-color": entry.color }}
+                                      />
+                                      {entry.name}
+                                    </span>
+                                  </span>
+                                  <span
+                                    className={`full-log-entry-duration${entry.isSleep ? " is-sleep" : ""}`}
+                                  >
+                                    {formatDuration(entry.minutes)}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="full-log-no-entries">
+                              No activity or sleep entries for this day.
+                            </p>
+                          )}
+                          {details.length > visibleEntriesForDate.length && (
+                            <button
+                              type="button"
+                              className="full-log-show-more"
+                              onClick={() =>
+                                setVisibleEntryCounts((current) => ({
+                                  ...current,
+                                  [row.date]: (current[row.date] || PAGE_SIZE) + PAGE_SIZE,
+                                }))
+                              }
+                            >
+                              Show 10 more entries
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ) : daily.allLogsLoading ? (

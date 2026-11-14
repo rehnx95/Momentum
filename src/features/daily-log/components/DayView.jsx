@@ -161,7 +161,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                     ) || ""
                   }
                   slots={activity.slots}
-                  totalMinutes={activityTotal(activity.slots)}
                   activityColor={getActivityColor(activity.name, daily.activityColors)}
                   onSetActivityColor={
                     getActivityKey(activity.name) === "sleep"
@@ -176,7 +175,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                   overlapsSleep={overlapsSleep(daily.validation.warnings, activity.name)}
                   disabled={entryDisabled}
                   runningTimer={daily.runningTimer}
-                  timerNow={daily.timerNow}
                   onSaveNow={daily.saveNow}
                   onAddSlot={() => daily.addSlot(activity.id)}
                   onStopTimer={daily.stopTimer}
