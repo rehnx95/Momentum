@@ -7,7 +7,7 @@ steps for developing and deploying the application.
 
 ## System overview
 
-```mermaid  
+```mermaid
 flowchart LR
   person[Signed-in user] --> browser
   browser["React 18 SPA<br/>Vite build"]
@@ -211,6 +211,12 @@ at midnight so that each segment is assigned to the correct date. Daily-log
 preferences and caches are browser-specific; they do not automatically sync
 between devices.
 
+Activity colors are stored per account and normalized activity name in
+`activity_color_assignments`. SQL functions allocate palette colors safely,
+while a trigger releases an assignment only after no saved daily log contains
+that activity. The same mapping drives Daily Log, Full Log, and Trends; color
+changes can use a palette swatch or a custom hex value.
+
 The owner-only sleep/study chart reads the latest 30 days of `daily_logs`,
 calculates durations, and renders SVG charts sized with `ResizeObserver`.
 Detailed daily-log records are not included in public profile responses.
@@ -244,6 +250,7 @@ policies, and RPCs.
 | `progress`                    | Explicit problem states and completion timestamps, keyed by user and namespaced problem ID.   |
 | `activity_log`                | Per-user completion counts by date.                                                           |
 | `daily_logs`                  | Per-user sleep/wake times and JSON activity slots, keyed by user and date.                    |
+| `activity_color_assignments`  | Per-user activity color assignments shared across saved daily-log history.                    |
 | `user_deleted_builtin_sheets` | Per-user tombstones that prevent a deleted built-in copy from being recreated.                |
 | `user_settings`               | Legacy owner-scoped settings table; active tracker preferences are stored in browser storage. |
 
@@ -265,7 +272,8 @@ username prefix search.
 
 Important RPCs include `is_username_available`,
 `search_public_profiles`, `get_public_profile`, `get_public_activity`,
-`ensure_builtin_sheet_copies`, and `delete_user_sheet`. Their exact
+`ensure_builtin_sheet_copies`, `delete_user_sheet`,
+`get_or_assign_activity_color`, and `set_activity_color`. Their exact
 signatures and grants are defined by the migrations.
 
 ## Username-search API

@@ -39,6 +39,7 @@ export default function LogSummary({
   wakeTime,
   sleepDuration,
   activities = [],
+  activityColors = {},
   savedStatus,
   dirty = false,
   onSaveNow,
@@ -64,7 +65,7 @@ export default function LogSummary({
         label: "Sleep",
         left: (start / 1440) * 100,
         width: ((finish - start) / 1440) * 100,
-        color: "var(--daily-sleep-bar)",
+        color: "var(--activity-color-sleep)",
       });
     });
   }
@@ -73,7 +74,7 @@ export default function LogSummary({
     if (activity.slots.some((slot) => getSlotDurationMinutes(slot) > 0)) {
       taskNames.set(activity.id, {
         label: activity.name,
-        color: getActivityColor(activity.name),
+        color: getActivityColor(activity.name, activityColors),
       });
       activity.slots.forEach((slot, slotIndex) => {
         const start = toMinutes(String(slot.start || "").slice(0, 5));
@@ -85,13 +86,13 @@ export default function LogSummary({
           label: activity.name,
           left: (start / 1440) * 100,
           width: ((finish - start) / 1440) * 100,
-          color: getActivityColor(activity.name),
+          color: getActivityColor(activity.name, activityColors),
         });
       });
     }
   });
   const legend = [
-    { label: "Sleep", color: "var(--daily-sleep-bar)" },
+    { label: "Sleep", color: "var(--activity-color-sleep)" },
     ...[...taskNames.values()].map(({ label, color }) => ({ label, color })),
   ];
 

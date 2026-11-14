@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDuration, getSlotDurationMinutes } from "../../../shared/utils/time";
 import { getLocalDateKey } from "../../../shared/utils/date";
-import { getActivityColor } from "../lib/activityColor";
+import { getActivityColor, getActivityKey } from "../lib/activityColor";
 import ActivityCard from "./ActivityCard";
 import CustomDatePicker from "./CustomDatePicker";
 import SleepCard from "./SleepCard";
@@ -162,7 +162,12 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                   }
                   slots={activity.slots}
                   totalMinutes={activityTotal(activity.slots)}
-                  activityColor={getActivityColor(activity.name)}
+                  activityColor={getActivityColor(activity.name, daily.activityColors)}
+                  onSetActivityColor={
+                    getActivityKey(activity.name) === "sleep"
+                      ? undefined
+                      : (color) => daily.setActivityColor?.(activity.name, color)
+                  }
                   fromSheet={Boolean(
                     activity.sheetId ||
                     activity.sheet_id ||

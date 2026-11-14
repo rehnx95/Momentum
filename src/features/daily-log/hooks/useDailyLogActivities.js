@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-export default function useDailyLogActivities(logRef, setLog) {
+export default function useDailyLogActivities(logRef, setLog, assignActivityColor) {
   const updateField = useCallback(
     (field, value) => {
       setLog((current) => ({ ...current, [field]: value }));
@@ -85,6 +85,7 @@ export default function useDailyLogActivities(logRef, setLog) {
     async (name) => {
       const trimmed = name.trim();
       if (!trimmed) return null;
+      if (assignActivityColor && !(await assignActivityColor(trimmed))) return null;
       const task = {
         id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`,
         name: trimmed,
@@ -96,7 +97,7 @@ export default function useDailyLogActivities(logRef, setLog) {
       }));
       return task;
     },
-    [setLog],
+    [assignActivityColor, setLog],
   );
 
   const addSheetActivity = useCallback(
@@ -106,6 +107,7 @@ export default function useDailyLogActivities(logRef, setLog) {
         addSlot(id);
         return true;
       }
+      if (assignActivityColor && !(await assignActivityColor(sheet.title))) return false;
       const task = {
         id,
         sheetId: sheet.id,
@@ -118,7 +120,7 @@ export default function useDailyLogActivities(logRef, setLog) {
       }));
       return true;
     },
-    [addSlot, logRef, setLog],
+    [addSlot, assignActivityColor, logRef, setLog],
   );
 
   const removeCustomTask = useCallback(
@@ -132,17 +134,19 @@ export default function useDailyLogActivities(logRef, setLog) {
   );
 
   const renameCustomTask = useCallback(
-    (taskId, name) => {
+    async (taskId, name) => {
       const trimmed = name.trim();
-      if (!trimmed) return;
+      if (!trimmed) return false;
+      if (assignActivityColor && !(await assignActivityColor(trimmed))) return false;
       setLog((current) => ({
         ...current,
         custom_tasks: current.custom_tasks.map((task) =>
           task.id === taskId ? { ...task, name: trimmed } : task,
         ),
       }));
+      return true;
     },
-    [setLog],
+    [assignActivityColor, setLog],
   );
 
   return {

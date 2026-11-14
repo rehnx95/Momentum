@@ -15,7 +15,7 @@
   --border-strong: #3a3a3a;
   --text: #f4f4f5;
   --muted: #a3a3a3;
-  --daily-sleep-bar: #353535;
+  --daily-sleep-bar: #5a5a5a;
   --popup-background: #000000;
   --popup-hover-background: #1b1b1b;
   --popup-border: #2b2b2b;
@@ -628,7 +628,7 @@
 }
 
 .daily-log-page-shell .full-log-day:nth-child(odd) {
-  background: #000000;
+  background: var(--surface);
 }
 
 .daily-log-page-shell .full-log-day-date {

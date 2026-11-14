@@ -9,6 +9,7 @@ export default function useDailyLogTimer({
   dateRef,
   logRef,
   setLog,
+  assignActivityColor,
   saveLogRef,
   flushPendingSave,
   setMessage,
@@ -42,6 +43,12 @@ export default function useDailyLogTimer({
   const stopTimer = useCallback(async () => {
     if (!runningTimer) return false;
     if (!(await flushPendingSave())) return false;
+    if (
+      assignActivityColor &&
+      !(await assignActivityColor(runningTimer.activityName || "Activity"))
+    ) {
+      return false;
+    }
     try {
       const segments = splitIntervalByDay(new Date(runningTimer.startedAt), new Date()).map(
         (segment) => ({
@@ -146,7 +153,17 @@ export default function useDailyLogTimer({
       setMessage("Could not save the timer. It is still running; please retry.");
       return false;
     }
-  }, [dateRef, flushPendingSave, logRef, runningTimer, saveLogRef, setLog, setMessage, userId]);
+  }, [
+    assignActivityColor,
+    dateRef,
+    flushPendingSave,
+    logRef,
+    runningTimer,
+    saveLogRef,
+    setLog,
+    setMessage,
+    userId,
+  ]);
 
   useEffect(() => {
     if (!runningTimer) return undefined;
@@ -165,6 +182,7 @@ export default function useDailyLogTimer({
       }));
       const currentDate = dateRef.current;
       if (!(await flushPendingSave())) return false;
+      if (assignActivityColor && !(await assignActivityColor(activityName))) return false;
       try {
         for (const segment of segments) {
           if (segment.date === currentDate) {
@@ -233,7 +251,7 @@ export default function useDailyLogTimer({
         return false;
       }
     },
-    [dateRef, flushPendingSave, setLog, setMessage, userId],
+    [assignActivityColor, dateRef, flushPendingSave, setLog, setMessage, userId],
   );
 
   return { quickAdd, runningTimer, startTimer, stopTimer, timerNow };

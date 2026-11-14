@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import DayView from "./DayView";
 
@@ -31,6 +31,7 @@ function createDaily(tasks = []) {
     updateField: vi.fn(),
     addCustomTask: vi.fn(),
     addSheetActivity: vi.fn(),
+    setActivityColor: vi.fn().mockResolvedValue(true),
     addSlot: vi.fn(),
     discardEmptySlot: vi.fn(),
     removeSlot: vi.fn(),
@@ -77,6 +78,31 @@ describe("DayView activity entry", () => {
       screen.getByRole("button", { name: "Add slot to Reading" }).closest(".activity-card-actions"),
     ).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Options for Reading/ })).toBeNull();
+  });
+
+  it("saves palette and custom hex colors for an activity", async () => {
+    const daily = createDaily([
+      {
+        id: "reading-1",
+        name: "Reading",
+        slots: [{ start: "09:00", end: "10:00" }],
+      },
+    ]);
+    render(<DayView daily={daily} sheets={[]} askConfirmation={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Choose color for Reading" }));
+    fireEvent.click(screen.getByRole("button", { name: "Use Teal color" }));
+    expect(daily.setActivityColor).toHaveBeenLastCalledWith("Reading", "teal");
+    await waitFor(() => {
+      expect(screen.queryByRole("group", { name: "Reading color" })).toBeNull();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Choose color for Reading" }));
+    fireEvent.change(screen.getByLabelText("Custom hex"), { target: { value: "#12ab34" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
+    await waitFor(() => {
+      expect(daily.setActivityColor).toHaveBeenLastCalledWith("Reading", "#12ab34");
+    });
   });
 
   it("shows a category count and total alongside the activities heading", () => {

@@ -23,7 +23,7 @@
   --danger: #ef4444;
   --success: #22c55e;
   --study-accent: #a1a1a1;
-  --sleep-chart-color: #ffffff;
+  --sleep-chart-color: #5a5a5a;
   --study-chart-color: #22c55e;
   --progress-fill: #ffffff;
   --font-sans: Geist, Inter, "Segoe UI", system-ui, sans-serif;
@@ -50,7 +50,7 @@
   --danger: #dc2626;
   --success: #16a34a;
   --study-accent: #737373;
-  --sleep-chart-color: #000000;
+  --sleep-chart-color: #5a5a5a;
   --study-chart-color: #22c55e;
   --progress-fill: #000000;
 }

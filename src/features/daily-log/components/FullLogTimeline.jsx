@@ -40,6 +40,7 @@ function timeLabel(value) {
 export default function FullLogTimeline({
   row,
   activities,
+  activityColors,
   showAxis = true,
   activityFilter = "All",
 }) {
@@ -66,7 +67,7 @@ export default function FullLogTimeline({
         segments.push({
           key: `${activity.id || activity.name}-${slotIndex}-${intervalIndex}`,
           kind: "study",
-          color: getActivityColor(activity.name),
+          color: getActivityColor(activity.name, activityColors),
           start,
           end,
           label: `${activity.name} ${timeLabel(slot.start)} to ${timeLabel(slot.end)}`,

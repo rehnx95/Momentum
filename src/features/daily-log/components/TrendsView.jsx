@@ -259,10 +259,10 @@ export default function TrendsView({ daily }) {
           value: formatDuration(minutes),
           minutes,
           percentage: totalMinutes ? Math.round((minutes / totalMinutes) * 100) : 0,
-          color: getActivityColor(name),
+          color: getActivityColor(name, daily.activityColors),
         })),
     };
-  }, [allLogs, todayKey, weekOffset]);
+  }, [allLogs, daily.activityColors, todayKey, weekOffset]);
 
   const requiredStartKey = [chartStartKey, weekStartKey].sort()[0];
   const oldestLoadedDate = allLogs[allLogs.length - 1]?.date;
@@ -271,7 +271,7 @@ export default function TrendsView({ daily }) {
     label: key === "sleep" ? "Sleep" : chartMode.activityName || "Active",
   }));
   const activityColor = chartMode.activityName
-    ? getActivityColor(chartMode.activityName)
+    ? getActivityColor(chartMode.activityName, daily.activityColors)
     : undefined;
   const seriesLabels = Object.fromEntries(
     legendItems.map(({ key, label }) => [key, label.toLowerCase()]),

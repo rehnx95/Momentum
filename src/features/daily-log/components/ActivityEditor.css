@@ -179,6 +179,96 @@
   margin-top: 0.55rem;
 }
 
+.activity-color-toggle {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.45rem;
+  color: var(--muted);
+}
+
+.activity-color-toggle:hover,
+.activity-color-toggle[aria-expanded="true"] {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.activity-color-picker {
+  position: absolute;
+  z-index: 20;
+  right: 0.75rem;
+  bottom: 3.25rem;
+  width: min(17rem, calc(100% - 1.5rem));
+  padding: 0.65rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.65rem;
+  background: var(--surface-raised);
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.22);
+}
+
+.activity-color-swatches {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+}
+
+.activity-color-swatches button {
+  width: 1.8rem;
+  height: 1.8rem;
+  min-width: 0;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+}
+
+.activity-color-swatches button[aria-pressed="true"] {
+  border-color: var(--text);
+  box-shadow: 0 0 0 1px var(--surface-raised);
+}
+
+.activity-custom-color {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+
+.activity-custom-color label {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.activity-custom-color input {
+  min-width: 0;
+  height: 1.9rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.4rem;
+  background: var(--page);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.activity-custom-color button {
+  min-height: 1.9rem;
+  padding: 0 0.5rem;
+  border-radius: 0.4rem;
+  background: var(--text);
+  color: var(--page);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.activity-custom-color button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .slot-start,
 .slot-add {
   display: inline-flex;

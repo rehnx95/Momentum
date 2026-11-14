@@ -480,7 +480,7 @@
 
 :root[data-theme="light"] .daily-tracker,
 [data-theme="light"] .daily-tracker {
-  --daily-sleep-bar: #9a9a9a;
+  --daily-sleep-bar: #5a5a5a;
   --daily-dsa-bar: #1f150c;
   --daily-reading-bar: #8a6d40;
   --daily-project-bar: #5e4524;
@@ -491,6 +491,22 @@
   --daily-task-5: #6b6b6b;
   --daily-activity-black: #000000;
   --daily-activity-white: #ffffff;
+  --activity-color-sleep: #5a5a5a;
+  --activity-color-sand: #8a6532;
+  --activity-color-slate-blue: #405a91;
+  --activity-color-sky: #277ba2;
+  --activity-color-olive: #4f6635;
+  --activity-color-rose: #9a526e;
+  --activity-color-dusty-red: #94464b;
+  --activity-color-teal: #287e77;
+  --activity-color-lavender: #71578e;
+  --activity-color-mint: #497747;
+  --activity-color-deep-teal: #176769;
+  --activity-color-peach: #a6602e;
+  --activity-color-salmon: #a74c50;
+  --activity-color-steel-blue: #3d6e9a;
+  --activity-color-bronze: #78591f;
+  --activity-color-sage: #536e38;
   background: #f3f1ef;
 }
 
@@ -736,7 +752,7 @@
 
 /* Reference layout for the three Daily Log views. */
 .daily-tracker {
-  --daily-sleep-bar: #6b6b6b;
+  --daily-sleep-bar: #5a5a5a;
   --daily-task-1: #e1dcc9;
   --daily-task-2: #7d6238;
   --daily-task-3: #b39a6b;
@@ -744,6 +760,22 @@
   --daily-task-5: #9a9a9a;
   --daily-activity-black: #ffffff;
   --daily-activity-white: #000000;
+  --activity-color-sleep: #5a5a5a;
+  --activity-color-sand: #c9a96e;
+  --activity-color-slate-blue: #657fb6;
+  --activity-color-sky: #90d4fe;
+  --activity-color-olive: #718b4f;
+  --activity-color-rose: #f9b3d1;
+  --activity-color-dusty-red: #b97276;
+  --activity-color-teal: #59b7af;
+  --activity-color-lavender: #b496d0;
+  --activity-color-mint: #a7daa6;
+  --activity-color-deep-teal: #2b9192;
+  --activity-color-peach: #f7bd8f;
+  --activity-color-salmon: #e1979b;
+  --activity-color-steel-blue: #6da0d1;
+  --activity-color-bronze: #b28b50;
+  --activity-color-sage: #87a76c;
   margin: 0;
   padding: 0;
   border: 0;

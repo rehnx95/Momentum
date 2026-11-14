@@ -83,7 +83,7 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
     .filter((filter) => filter !== "All")
     .map((label) => ({
       label,
-      color: label === "Sleep" ? null : getActivityColor(label),
+      color: getActivityColor(label, daily.activityColors),
     }));
   const filteredEntries = entries.filter(({ row, activities }) => {
     if (activityFilter === "All") return true;
@@ -260,6 +260,7 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                     <FullLogTimeline
                       row={row}
                       activities={activities}
+                      activityColors={daily.activityColors}
                       showAxis={false}
                       activityFilter={activityFilter}
                     />

@@ -12,6 +12,7 @@ import useDailyLogHistory from "./useDailyLogHistory";
 import useDailyLogTimer from "./useDailyLogTimer";
 import useDailyLogActivities from "./useDailyLogActivities";
 import useDailyLogPersistence from "./useDailyLogPersistence";
+import useActivityColors from "./useActivityColors";
 
 export default function useDailyLog(user, activityLog = {}) {
   const [date, setDateState] = useState(() => getLocalDateKey());
@@ -68,6 +69,18 @@ export default function useDailyLog(user, activityLog = {}) {
     logRef.current = next;
     setLogState(next);
   }, []);
+  const reportActivityColorError = useCallback(
+    (message) => {
+      setMessage(message);
+      setStatus(message.startsWith("Could not load") ? "Could not load" : "Could not save");
+    },
+    [setMessage, setStatus],
+  );
+  const {
+    activityColors,
+    assignColor: assignActivityColor,
+    setColor: setActivityColor,
+  } = useActivityColors(user.id, reportActivityColorError);
 
   const validation = useMemo(() => validateDay(log), [log]);
   const studiedMinutes = useMemo(() => getStudyMinutes(log), [log]);
@@ -91,7 +104,7 @@ export default function useDailyLog(user, activityLog = {}) {
     renameCustomTask,
     updateField,
     updateSlot,
-  } = useDailyLogActivities(logRef, setLog);
+  } = useDailyLogActivities(logRef, setLog, assignActivityColor);
 
   const { autosaveTimer, flushPendingSave, saveLog, saveLogRef, saveQueueRef, saving } =
     useDailyLogPersistence({
@@ -119,6 +132,7 @@ export default function useDailyLog(user, activityLog = {}) {
     dateRef,
     logRef,
     setLog,
+    assignActivityColor,
     saveLogRef,
     flushPendingSave,
     setMessage,
@@ -206,6 +220,7 @@ export default function useDailyLog(user, activityLog = {}) {
     viewMode,
     changeViewMode,
     activeCustomTasks,
+    activityColors,
     currentStreak,
     problemCounts,
     allLogs,
@@ -229,6 +244,7 @@ export default function useDailyLog(user, activityLog = {}) {
     addSheetActivity,
     removeCustomTask,
     renameCustomTask,
+    setActivityColor,
     saveLog,
     loadOlderLogs,
     clearAllLogs,
