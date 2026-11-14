@@ -130,6 +130,41 @@ describe("FullLog", () => {
     ).toEqual(["Date", "Share of active time", "Active", "Sleep", "Solved"]);
   });
 
+  it("keeps dates collapsed until they are explicitly expanded", () => {
+    const date = getLocalDateKey();
+    const daily = {
+      allLogs: [
+        {
+          date,
+          sleep_time: "",
+          wake_time: "",
+          custom_tasks: [
+            {
+              id: "reading",
+              name: "Reading",
+              slots: [{ start: "09:00", end: "10:00" }],
+            },
+          ],
+        },
+      ],
+      problemCounts: {},
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+    };
+    const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
+    const toggle = container.querySelector(".full-log-expand-button");
+
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    expect(container.querySelector(".full-log-day-details")).toBeNull();
+
+    fireEvent.click(toggle);
+
+    expect(toggle.getAttribute("aria-expanded")).toBe("true");
+    expect(container.querySelector(".full-log-day-details")).toBeTruthy();
+  });
+
   it("includes a solved date even when no daily log was saved", () => {
     const date = getLocalDateKey();
     const daily = {
@@ -171,6 +206,7 @@ describe("FullLog", () => {
     };
     const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
 
+    fireEvent.click(container.querySelector(".full-log-expand-button"));
     const rows = [...container.querySelectorAll(".full-log-entry")];
     expect(rows).toHaveLength(2);
     expect(rows[0].textContent).toContain("Reading");
@@ -212,6 +248,7 @@ describe("FullLog", () => {
     };
     const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
 
+    fireEvent.click(container.querySelector(".full-log-expand-button"));
     expect(
       [...container.querySelectorAll(".full-log-entry-time")].map((item) =>
         item.textContent.trim().slice(0, 5),
@@ -244,8 +281,14 @@ describe("FullLog", () => {
 
     expect(segments).toHaveLength(2);
     expect(segments[0].getAttribute("aria-label")).toContain("Project 2h · 67%");
+    expect(segments[0].hasAttribute("title")).toBe(false);
     expect(Number.parseFloat(segments[0].style.width)).toBeCloseTo(66.67, 1);
     expect(segments[1].getAttribute("aria-label")).toContain("Reading 1h · 33%");
+
+    fireEvent.mouseEnter(segments[0]);
+    expect(screen.getByRole("tooltip").textContent).toContain("Project 2h · 67%");
+    fireEvent.mouseLeave(container.querySelector(".full-log-timeline"));
+    expect(screen.queryByRole("tooltip")).toBeNull();
   });
 
   it("reveals more than ten activity entries for an expanded day", () => {
@@ -271,6 +314,7 @@ describe("FullLog", () => {
     };
     const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
 
+    fireEvent.click(container.querySelector(".full-log-expand-button"));
     expect(container.querySelectorAll(".full-log-entry")).toHaveLength(10);
     fireEvent.click(screen.getByRole("button", { name: "Show 10 more entries" }));
     expect(container.querySelectorAll(".full-log-entry")).toHaveLength(11);

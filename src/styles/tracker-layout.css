@@ -116,8 +116,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: 1.5rem;
-  padding-top: 1.5rem !important;
+  gap: 1.25rem;
+  padding-top: 1rem !important;
 }
 
 .tracker-dashboard-shell .dashboard-content {
@@ -131,4 +131,8 @@
 .profile-settings-shell > main.app-page,
 .dashboard-shell > main.app-page {
   padding-top: 1.5rem !important;
+}
+
+.tracker-dashboard-shell > main.app-page {
+  padding-top: 1rem !important;
 }

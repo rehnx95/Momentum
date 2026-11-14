@@ -23,6 +23,10 @@
   --tracker-page-gutter: 1rem;
 }
 
+.tracker-dashboard-shell .page-head {
+  margin-bottom: 0.5rem;
+}
+
 .tracker-dashboard-shell:not([data-theme="light"]) .dashboard-content .surface-card.rounded-xl,
 .tracker-dashboard-shell:not([data-theme="light"]) .tracker-side .surface-card,
 .tracker-dashboard-shell:not([data-theme="light"]) .mobile-progress-summary,
@@ -51,7 +55,7 @@
 }
 
 .tracker-dashboard-shell > .dashboard-main {
-  padding-top: 1.5rem !important;
+  padding-top: 1rem !important;
 }
 
 .tracker-dashboard-shell .sheet-sidebar {

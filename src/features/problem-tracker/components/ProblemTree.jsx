@@ -26,7 +26,7 @@ export function ProblemRow({ prob, state, onToggle, onSkip }) {
 
   return (
     <div
-      className={`problem-row group flex items-center gap-3 py-2 px-3 rounded-lg transition-colors duration-200 ${isSkip ? "opacity-50 bg-[#0A0A0A]/40" : "hover:bg-[#1F1F1F]"}`}
+      className={`problem-row group flex items-center gap-3 py-1.5 px-3 rounded-lg transition-colors duration-200 ${isSkip ? "opacity-50 bg-[#0A0A0A]/40" : "hover:bg-[#1F1F1F]"}`}
     >
       <button
         type="button"
@@ -98,7 +98,7 @@ export function SubSectionRow({
     <div className="ml-4 pl-3 border-l border-[#262626]">
       <button
         onClick={() => onToggle(sub.id)}
-        className="w-full flex items-center gap-2 py-2 text-sm group text-left hover:text-[#EDEDED] transition-colors"
+        className="w-full flex items-center gap-2 py-1.5 text-sm group text-left hover:text-[#EDEDED] transition-colors"
       >
         {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         <span className="font-medium text-[#EDEDED]">{sub.title}</span>
@@ -111,7 +111,7 @@ export function SubSectionRow({
       </button>
 
       {expanded && (
-        <div className="surface-card mt-2 mb-3 bg-[#0A0A0A] rounded-xl border border-[#262626] p-2">
+        <div className="surface-card mt-1.5 mb-2 bg-[#0A0A0A] rounded-xl border border-[#262626] p-1.5">
           {visible.length > 0 ? (
             visible.map((p) => (
               <ProblemRow
@@ -153,11 +153,11 @@ export function StepRow({
   const expanded = expandedSteps.has(step.id);
 
   return (
-    <div className="surface-card mb-2 overflow-hidden rounded-xl border border-[#262626] bg-[#0A0A0A]">
+    <div className="surface-card mb-1.5 overflow-hidden rounded-xl border border-[#262626] bg-[#0A0A0A]">
       <button
         onClick={() => onToggleStep(step.id)}
         aria-expanded={expanded}
-        className="grid w-full grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[#1F1F1F] md:grid-cols-[1.5rem_minmax(0,1fr)_14rem_3.5rem]"
+        className="grid w-full grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-[#1F1F1F] md:grid-cols-[1.5rem_minmax(0,1fr)_14rem_3.5rem]"
       >
         <span className="flex h-6 w-6 items-center justify-center">
           {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
@@ -174,7 +174,7 @@ export function StepRow({
       </button>
 
       {expanded && (
-        <div className="px-4 pb-3">
+        <div className="px-4 pb-2">
           {step.subsections.map((sub) => (
             <SubSectionRow
               key={sub.id}

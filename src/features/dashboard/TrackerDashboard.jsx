@@ -148,7 +148,7 @@ export default function TrackerDashboard({ context }) {
               setHideSkipped={setHideSkipped}
             />
             <section
-              className="mobile-progress-summary surface-card mb-4 rounded-xl border border-[#262626] bg-[#0A0A0A] p-4 lg:hidden"
+              className="mobile-progress-summary surface-card mb-3 rounded-xl border border-[#262626] bg-[#0A0A0A] p-3 lg:hidden"
               aria-label="Overall progress"
             >
               <div className="flex items-center justify-between gap-3">
@@ -165,7 +165,7 @@ export default function TrackerDashboard({ context }) {
                 </span>
               </div>
               <div
-                className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#262626]"
+                className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#262626]"
                 role="progressbar"
                 aria-label="Overall problem completion"
                 aria-valuemin={0}
@@ -179,7 +179,7 @@ export default function TrackerDashboard({ context }) {
                   }}
                 />
               </div>
-              <div className="mt-3 flex justify-between gap-2 text-xs text-[#A1A1A1]">
+              <div className="mt-2 flex justify-between gap-2 text-xs text-[#A1A1A1]">
                 <span>{doneCount} done</span>
                 <span>{skippedCount} skipped</span>
                 <span>{todoCount} to do</span>
@@ -210,8 +210,8 @@ export default function TrackerDashboard({ context }) {
             </div>
           </section>
           <aside className="tracker-side hidden lg:block space-y-3">
-            <div className="tracker-sheet-progress surface-card bg-[#0A0A0A] rounded-2xl border border-[#262626] p-4 relative">
-              <div className="mb-3">
+            <div className="tracker-sheet-progress surface-card bg-[#0A0A0A] rounded-2xl border border-[#262626] p-3 relative">
+              <div className="mb-2">
                 <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
                   {selectedSheet?.title || "Sheet"} progress
                 </h3>
@@ -226,7 +226,7 @@ export default function TrackerDashboard({ context }) {
                   {doneCount} / {totalProblems} problems solved
                 </p>
               </div>
-              <div className="relative mt-4">
+              <div className="relative mt-3">
                 <div className="h-2 bg-zinc-800 rounded-full overflow-visible relative">
                   <div
                     className="h-full bg-[#EDEDED] rounded-full transition-all duration-500 ease-out relative"
@@ -236,8 +236,8 @@ export default function TrackerDashboard({ context }) {
                   />
                 </div>
               </div>
-              <div className="mt-3 pt-3 border-t border-zinc-800/50">
-                <div className="grid grid-cols-3 gap-2 mb-3">
+              <div className="mt-2 pt-2 border-t border-zinc-800/50">
+                <div className="grid grid-cols-3 gap-2 mb-2">
                   <div className="text-center">
                     <div className="text-lg font-bold text-white tabular-nums">{doneCount}</div>
                     <div className="text-[10px] text-zinc-500 uppercase tracking-wide">Done</div>

@@ -157,9 +157,7 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
 
   const toggleDate = (date) => {
     setExpandedDates((current) => {
-      const next = current
-        ? new Set(current)
-        : new Set(visibleEntries.length ? [visibleEntries[0].row.date] : []);
+      const next = new Set(current || []);
       if (next.has(date)) next.delete(date);
       else next.add(date);
       return next;
@@ -281,7 +279,7 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                 <span>Solved</span>
               </div>
               <ul className="full-log-day-list">
-                {visibleEntries.map(({ row, activities, sleep, studied, problems }, index) => {
+                {visibleEntries.map(({ row, activities, sleep, studied, problems }) => {
                   const date = new Date(`${row.date}T00:00:00`);
                   const dayLabel = date.toLocaleDateString(undefined, {
                     weekday: "short",
@@ -299,7 +297,7 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                     activityFilter,
                     daily.activityColors,
                   );
-                  const isExpanded = expandedDates ? expandedDates.has(row.date) : index === 0;
+                  const isExpanded = expandedDates?.has(row.date) || false;
                   const visibleEntriesForDate = details.slice(
                     0,
                     visibleEntryCounts[row.date] || PAGE_SIZE,
