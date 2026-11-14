@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import DayView from "./DayView";
 
@@ -95,6 +95,16 @@ describe("DayView activity entry", () => {
 
     expect(screen.getByRole("heading", { name: "Activities" })).toBeTruthy();
     expect(screen.getByText("1 category · 1h")).toBeTruthy();
+  });
+
+  it("adds a built-in activity when its previous empty slot was discarded", () => {
+    const daily = createDaily();
+    const sheet = { id: "dsa", title: "DSA" };
+    render(<DayView daily={daily} sheets={[sheet]} askConfirmation={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "DSA" }));
+
+    expect(daily.addSheetActivity).toHaveBeenCalledWith(sheet);
   });
 
   it("places sleep overlap warnings on the relevant activity row", () => {

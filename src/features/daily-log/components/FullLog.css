@@ -55,7 +55,7 @@
 .full-log-table-header,
 .full-log-day {
   display: grid;
-  grid-template-columns: minmax(6rem, 0.14fr) minmax(14rem, 1fr) 4rem 4rem;
+  grid-template-columns: minmax(6rem, 0.14fr) minmax(14rem, 1fr) 4rem 4rem 4rem;
   align-items: center;
   gap: 0.8rem;
 }
@@ -75,9 +75,10 @@
   text-transform: none;
 }
 
-.full-log-table-header > span:nth-last-child(-n + 2),
+.full-log-table-header > span:nth-last-child(-n + 3),
 .full-log-sleep-total,
-.full-log-active-total {
+.full-log-active-total,
+.full-log-solved-total {
   text-align: right;
 }
 
@@ -99,7 +100,8 @@
 }
 
 .full-log-day-date,
-.full-log-active-total {
+.full-log-active-total,
+.full-log-solved-total {
   color: var(--text);
   font-weight: 700;
 }
@@ -125,7 +127,8 @@
 }
 
 .full-log-sleep-total,
-.full-log-active-total {
+.full-log-active-total,
+.full-log-solved-total {
   font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
 }
@@ -194,7 +197,7 @@
 
   .full-log-table-header,
   .full-log-day {
-    grid-template-columns: 5.5rem minmax(13rem, 1fr) 3.25rem 3.5rem;
+    grid-template-columns: 5.5rem minmax(13rem, 1fr) 3.25rem 3.5rem 3.5rem;
     gap: 0.5rem;
   }
 }

@@ -83,6 +83,45 @@ describe("FullLog", () => {
     expect(container.querySelector(".full-log-day-weekday")).toBeTruthy();
   });
 
+  it("shows the saved number of problems solved for each day", () => {
+    const date = getLocalDateKey();
+    const daily = {
+      allLogs: [
+        {
+          date,
+          sleep_time: "",
+          wake_time: "",
+          custom_tasks: [],
+        },
+      ],
+      problemCounts: { [date]: 3 },
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+    };
+    render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
+
+    expect(screen.getByText("Solved")).toBeTruthy();
+    expect(screen.getByLabelText("3 problems solved").textContent).toBe("3");
+  });
+
+  it("includes a solved date even when no daily log was saved", () => {
+    const date = getLocalDateKey();
+    const daily = {
+      allLogs: [],
+      problemCounts: { [date]: 2 },
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+    };
+    render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
+
+    expect(screen.getByLabelText("2 problems solved").textContent).toBe("2");
+    expect(screen.queryByText("No saved daily logs yet.")).toBeNull();
+  });
+
   it("opens the selected date in the daily log", async () => {
     const date = getLocalDateKey();
     const daily = {

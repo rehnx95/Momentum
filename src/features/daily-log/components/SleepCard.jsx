@@ -27,7 +27,7 @@ export default function SleepCard({
           onSaveNow={onSaveNow}
         />
         <span className="daily-sleep-time-separator" aria-hidden="true">
-          to
+          –
         </span>
         <TimeInput
           value={wakeTime}

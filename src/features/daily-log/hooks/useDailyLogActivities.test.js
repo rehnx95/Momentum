@@ -44,28 +44,44 @@ describe("useDailyLogActivities", () => {
     act(() => renderer.unmount());
   });
 
-  it("creates sheet activities with blank slots and can fill a legacy missing slot", async () => {
+  it("restores empty built-in activities and adds slots when selected again", async () => {
     const { activities, logRef, renderer } = renderActivities({
-      custom_tasks: [{ id: "legacy", name: "Project", slots: [] }],
+      custom_tasks: [
+        {
+          id: "sheet:sheet-1",
+          sheetId: "sheet-1",
+          name: "DSA",
+          slots: [],
+        },
+      ],
     });
+    const sheet = { id: "sheet-1", title: "DSA" };
 
     await act(async () => {
-      await activities.addSheetActivity({ id: "sheet-1", title: "DSA" });
+      await activities.addSheetActivity(sheet);
     });
-    act(() => activities.updateSlot("legacy", 0, "start", "09:00"));
 
     expect(logRef.current.custom_tasks).toEqual([
       {
-        id: "legacy",
-        name: "Project",
-        slots: [{ start: "09:00", end: "", endDayOffset: 0 }],
+        id: "sheet:sheet-1",
+        sheetId: "sheet-1",
+        name: "DSA",
+        slots: [{ start: "", end: "" }],
       },
-      { id: "sheet:sheet-1", sheetId: "sheet-1", name: "DSA", slots: [{ start: "", end: "" }] },
     ]);
+
+    await act(async () => {
+      await activities.addSheetActivity(sheet);
+    });
+    expect(logRef.current.custom_tasks[0].slots).toEqual([
+      { start: "", end: "" },
+      { start: "", end: "" },
+    ]);
+
     act(() => renderer.unmount());
   });
 
-  it("discards an untouched slot without deleting its activity", async () => {
+  it("removes an activity when its last untouched slot is discarded", async () => {
     const { activities, logRef, renderer } = renderActivities();
     let task;
 
@@ -74,7 +90,7 @@ describe("useDailyLogActivities", () => {
     });
     act(() => activities.discardEmptySlot(task.id, 0));
 
-    expect(logRef.current.custom_tasks).toEqual([{ ...task, slots: [] }]);
+    expect(logRef.current.custom_tasks).toEqual([]);
     act(() => renderer.unmount());
   });
 });

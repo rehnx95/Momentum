@@ -75,12 +75,9 @@ export default function useDailyLog(user, activityLog = {}) {
   const problemCounts = useMemo(
     () =>
       Object.fromEntries(
-        [...new Set([date, ...allLogs.map((entry) => entry.date)])].map((entryDate) => [
-          entryDate,
-          Number(activityLog[entryDate] || 0),
-        ]),
+        Object.entries(activityLog).map(([entryDate, count]) => [entryDate, Number(count) || 0]),
       ),
-    [activityLog, allLogs, date],
+    [activityLog],
   );
   const dirty = savedSnapshot !== null && JSON.stringify(log) !== savedSnapshot;
   const activeCustomTasks = log.custom_tasks;

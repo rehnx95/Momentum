@@ -1268,19 +1268,10 @@
 }
 
 .daily-sleep-time-range .time-input {
-  box-sizing: border-box;
-  width: 5rem;
-  min-height: 2.15rem;
-  height: 2.15rem;
-  flex: none;
-  padding: 0.3rem;
-  border-radius: 0.55rem;
-  font-size: 0.78rem;
-}
-
-.daily-sleep-time-range .time-input input {
-  width: 0.95rem;
-  font-size: 0.78rem;
+  width: 4.7rem;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  font-size: 0.9rem;
 }
 
 .quick-log-card h3 {

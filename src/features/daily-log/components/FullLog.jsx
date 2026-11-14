@@ -45,9 +45,22 @@ function activityBreakdown(row) {
 export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activityFilter, setActivityFilter] = useState("All");
-  const entries = useMemo(
-    () =>
-      daily.allLogs.map((row) => {
+  const entries = useMemo(() => {
+    const logsByDate = new Map(daily.allLogs.map((row) => [row.date, row]));
+    const solvedDates = Object.entries(daily.problemCounts)
+      .filter(([, count]) => Number(count) > 0)
+      .map(([date]) => date);
+    const dates = new Set([...logsByDate.keys(), ...solvedDates]);
+
+    return [...dates]
+      .sort((first, second) => second.localeCompare(first))
+      .map((date) => {
+        const row = logsByDate.get(date) || {
+          date,
+          sleep_time: "",
+          wake_time: "",
+          custom_tasks: [],
+        };
         const activities = activityBreakdown(row);
         return {
           row,
@@ -56,9 +69,8 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
           studied: activities.reduce((total, activity) => total + activity.minutes, 0),
           problems: daily.problemCounts[row.date] || 0,
         };
-      }),
-    [daily.allLogs, daily.problemCounts],
-  );
+      });
+  }, [daily.allLogs, daily.problemCounts]);
   const activityFilters = useMemo(() => {
     const names = new Set(
       entries.flatMap(({ activities }) => activities.map((activity) => activity.name)),
@@ -218,9 +230,10 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                 </div>
                 <span>Sleep</span>
                 <span>Active</span>
+                <span>Solved</span>
               </div>
               <ul className="full-log-day-list">
-                {visibleEntries.map(({ row, activities, sleep, studied }) => (
+                {visibleEntries.map(({ row, activities, sleep, studied, problems }) => (
                   <li className="full-log-day" key={row.date}>
                     <span className="full-log-day-date">
                       <span className="full-log-day-weekday">
@@ -255,6 +268,12 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                     </span>
                     <span className="full-log-active-total">
                       {activityFilter === "Sleep" ? "—" : formatDuration(studied)}
+                    </span>
+                    <span
+                      className="full-log-solved-total"
+                      aria-label={`${problems} ${problems === 1 ? "problem" : "problems"} solved`}
+                    >
+                      {problems > 0 ? problems : "—"}
                     </span>
                   </li>
                 ))}

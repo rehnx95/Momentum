@@ -81,12 +81,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
     setQuickActivityName("");
   };
 
-  const addQuickSheet = async (sheet) => {
-    const activityId = `sheet:${sheet.id}`;
-    const existing = activities.find((activity) => activity.id === activityId);
-    if (existing) daily.addSlot(existing.id);
-    else await daily.addSheetActivity(sheet);
-  };
+  const addQuickSheet = (sheet) => daily.addSheetActivity(sheet);
 
   const removeActivity = async (activity) => {
     const message = `Remove "${activity.name}" and its slots from this day?`;

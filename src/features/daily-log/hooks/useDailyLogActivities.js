@@ -70,14 +70,11 @@ export default function useDailyLogActivities(logRef, setLog) {
 
         return {
           ...current,
-          custom_tasks: current.custom_tasks.map((item) =>
-            item.id === activity
-              ? {
-                  ...item,
-                  slots: item.slots.filter((_, slotIndex) => slotIndex !== index),
-                }
-              : item,
-          ),
+          custom_tasks: current.custom_tasks.flatMap((item) => {
+            if (item.id !== activity) return [item];
+            const slots = item.slots.filter((_, slotIndex) => slotIndex !== index);
+            return slots.length ? [{ ...item, slots }] : [];
+          }),
         };
       });
     },
@@ -105,7 +102,10 @@ export default function useDailyLogActivities(logRef, setLog) {
   const addSheetActivity = useCallback(
     async (sheet) => {
       const id = `sheet:${sheet.id}`;
-      if (logRef.current.custom_tasks.some((task) => task.id === id)) return true;
+      if (logRef.current.custom_tasks.some((task) => task.id === id)) {
+        addSlot(id);
+        return true;
+      }
       const task = {
         id,
         sheetId: sheet.id,
@@ -118,7 +118,7 @@ export default function useDailyLogActivities(logRef, setLog) {
       }));
       return true;
     },
-    [logRef, setLog],
+    [addSlot, logRef, setLog],
   );
 
   const removeCustomTask = useCallback(
