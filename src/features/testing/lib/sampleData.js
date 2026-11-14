@@ -1,11 +1,11 @@
-const DAILY_LOG_DAYS = 365;
+const DAILY_LOG_START = "2025-01-01";
 
 const ACTIVITY_TEMPLATES = [
-  { id: "sample-dsa", name: "DSA", chance: 0.78, start: 465, maxDuration: 125 },
-  { id: "sample-backend", name: "Backend", chance: 0.72, start: 650, maxDuration: 125 },
-  { id: "sample-design", name: "System Design", chance: 0.54, start: 850, maxDuration: 110 },
-  { id: "sample-project", name: "Project", chance: 0.5, start: 1050, maxDuration: 145 },
-  { id: "sample-reading", name: "Reading", chance: 0.38, start: 1230, maxDuration: 100 },
+  { id: "sample-dsa", name: "DSA", start: 480 },
+  { id: "sample-backend", name: "Backend", start: 630 },
+  { id: "sample-design", name: "System Design", start: 780 },
+  { id: "sample-project", name: "Project", start: 930 },
+  { id: "sample-reading", name: "Reading", start: 1080 },
 ];
 
 function hashString(value) {
@@ -79,47 +79,33 @@ function shuffle(items, random) {
 
 function buildDailyLogs(userId, today) {
   const random = createRandom(`${userId}:daily-log`);
-  const start = addDays(today, -(DAILY_LOG_DAYS - 1));
 
-  return dateKeysBetween(start, today).flatMap((date) => {
-    const weekday = dateFromKey(date).getUTCDay();
-    const dayChance = [0.56, 0.84, 0.82, 0.85, 0.8, 0.76, 0.62][weekday];
-    if (random() >= dayChance) return [];
-
-    const activities = ACTIVITY_TEMPLATES.filter((activity) => random() < activity.chance);
-    while (activities.length < 2) {
-      const activity = ACTIVITY_TEMPLATES[randomInt(random, 0, ACTIVITY_TEMPLATES.length - 1)];
-      if (!activities.some((selected) => selected.id === activity.id)) {
-        activities.push(activity);
-      }
-    }
-
-    const sleepStart = randomInt(random, 21 * 60, 23 * 60 + 45);
+  return dateKeysBetween(DAILY_LOG_START, today).map((date) => {
+    const sleepStart = randomInt(random, 22 * 60 + 30, 23 * 60 + 45);
     const wakeTime = randomInt(random, 6 * 60, 8 * 60 + 45);
-    return [
-      {
-        user_id: userId,
-        date,
-        sleep_time: random() < 0.05 ? null : formatTime(sleepStart),
-        wake_time: random() < 0.05 ? null : formatTime(wakeTime),
-        dsa_slots: [],
-        backend_slots: [],
-        custom_tasks: activities.map((activity) => {
-          const startTime = activity.start + randomInt(random, -10, 10);
-          const duration = randomInt(random, 35, activity.maxDuration);
-          return {
-            id: activity.id,
-            name: activity.name,
-            slots: [
-              {
-                start: formatTime(startTime),
-                end: formatTime(startTime + duration),
-              },
-            ],
-          };
-        }),
-      },
-    ];
+    return {
+      user_id: userId,
+      date,
+      sleep_time: formatTime(sleepStart),
+      wake_time: formatTime(wakeTime),
+      dsa_slots: [],
+      backend_slots: [],
+      custom_tasks: ACTIVITY_TEMPLATES.map((activity) => {
+        const slotCount = randomInt(random, 4, 5);
+        return {
+          id: activity.id,
+          name: activity.name,
+          slots: Array.from({ length: slotCount }, (_, index) => {
+            const startTime = activity.start + index * 45 + randomInt(random, 0, 5);
+            const duration = randomInt(random, 25, 38);
+            return {
+              start: formatTime(startTime),
+              end: formatTime(startTime + duration),
+            };
+          }),
+        };
+      }),
+    };
   });
 }
 

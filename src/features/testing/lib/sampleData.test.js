@@ -23,7 +23,7 @@ function makeSheets(problemCount) {
 }
 
 describe("test sample data", () => {
-  it("creates irregular Daily Log history spanning 365 days", () => {
+  it("creates a complete, dense Daily Log for every day since January 2025", () => {
     const sample = buildSampleData({
       userId: "test-user",
       sheets: makeSheets(500),
@@ -31,10 +31,29 @@ describe("test sample data", () => {
     });
 
     const dates = sample.dailyLogs.map((entry) => entry.date);
-    expect(dates[0]).toBe("2025-11-13");
+    const expectedDays =
+      (Date.UTC(2026, 10, 12) - Date.UTC(2025, 0, 1)) / (24 * 60 * 60 * 1000) + 1;
+    expect(dates[0]).toBe("2025-01-01");
     expect(dates[dates.length - 1]).toBe("2026-11-12");
-    expect(dates.length).toBeGreaterThan(250);
-    expect(dates.length).toBeLessThan(365);
+    expect(dates).toHaveLength(expectedDays);
+    expect(sample.summary.dailyLogDays).toBe(expectedDays);
+
+    sample.dailyLogs.forEach((entry, index) => {
+      expect(entry.date).toBe(
+        new Date(Date.UTC(2025, 0, 1 + index)).toISOString().slice(0, 10),
+      );
+      expect(entry.sleep_time).toBeTruthy();
+      expect(entry.wake_time).toBeTruthy();
+      expect(entry.custom_tasks).toHaveLength(5);
+      entry.custom_tasks.forEach((activity) => {
+        expect(activity.slots.length).toBeGreaterThanOrEqual(4);
+        expect(activity.slots.length).toBeLessThanOrEqual(5);
+        activity.slots.forEach((slot) => {
+          expect(slot.start).toMatch(/^\d{2}:\d{2}$/);
+          expect(slot.end).toMatch(/^\d{2}:\d{2}$/);
+        });
+      });
+    });
   });
 
   it("creates dense solved history in 2025 and the current year", () => {
