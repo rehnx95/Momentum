@@ -28,15 +28,15 @@ export function formatTooltipDate(date, currentYear) {
   return date.getFullYear() === currentYear ? base : `${base}, ${date.getFullYear()}`;
 }
 
-// year = null -> previous 365 complete days. year = 2025 -> Jan 1 to Dec 31 of 2025.
+// year = null -> trailing 365 days through today. year = 2025 -> Jan 1 to Dec 31 of 2025.
 // The grid always starts on a Sunday, like GitHub.
 export function buildHeatmap({ activity = {}, todayKey, year = null, levelFn = getLevel }) {
   const today = fromKey(todayKey);
   let start;
   let end;
   if (year == null) {
-    end = addDays(today, -1);
-    start = addDays(end, -364);
+    end = today;
+    start = addDays(today, -364);
   } else {
     start = new Date(year, 0, 1);
     end = new Date(year, 11, 31);
