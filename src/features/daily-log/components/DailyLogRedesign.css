@@ -209,8 +209,17 @@
 
 .daily-log-page-shell .daily-entry-heading {
   align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
   margin: 0;
   padding: 0.2rem 0 0.65rem;
+}
+
+.daily-log-page-shell .daily-entry-heading-copy {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.45rem;
 }
 
 .daily-log-page-shell .daily-entry-heading h3 {
@@ -218,6 +227,22 @@
   color: var(--text);
   font-size: 1.3rem;
   font-weight: 700;
+}
+
+.daily-log-page-shell .daily-add-activity-button {
+  min-height: 2.25rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: var(--text);
+  color: var(--page);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.daily-log-page-shell .daily-add-activity-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .daily-log-page-shell .quick-log-card h3,
