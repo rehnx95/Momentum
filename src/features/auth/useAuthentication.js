@@ -9,6 +9,26 @@ export const AppState = {
 };
 
 const ACCOUNT_CACHE_KEY = "momentum:account-cache";
+const profileRequests = new Map();
+
+function fetchProfile(userId) {
+  const existingRequest = profileRequests.get(userId);
+  if (existingRequest) return existingRequest;
+
+  const request = Promise.resolve(
+    supabase
+      .from("profiles")
+      .select("id, name, username, onboarding_completed")
+      .eq("id", userId)
+      .maybeSingle(),
+  );
+  profileRequests.set(userId, request);
+  const clearRequest = () => {
+    if (profileRequests.get(userId) === request) profileRequests.delete(userId);
+  };
+  request.then(clearRequest, clearRequest);
+  return request;
+}
 
 function readCachedAccount() {
   try {
@@ -38,6 +58,9 @@ export default function useAuthentication() {
   const [authError, setAuthError] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
   const authEventOccurred = useRef(false);
+  const loadedProfileUserId = useRef(null);
+  const userId = user?.id;
+  const hasCachedProfile = profile?.id === userId;
 
   useEffect(() => {
     const oauthError = new URLSearchParams(window.location.search).get("error");
@@ -99,19 +122,15 @@ export default function useAuthentication() {
   }, []);
 
   useEffect(() => {
-    if (!user || !supabase) return undefined;
+    if (!userId || !supabase || loadedProfileUserId.current === userId) return undefined;
 
     let active = true;
-    const hasCachedProfile = profile?.id === user.id;
     if (!hasCachedProfile) setAppState(AppState.LOADING);
-    supabase
-      .from("profiles")
-      .select("id, name, username, onboarding_completed")
-      .eq("id", user.id)
-      .maybeSingle()
+    fetchProfile(userId)
       .then(({ data: profileData, error }) => {
         if (!active) return;
         if (error) throw error;
+        loadedProfileUserId.current = userId;
         setProfile(profileData);
         if (!profileData) localStorage.removeItem(ACCOUNT_CACHE_KEY);
         setAppState(
@@ -130,9 +149,7 @@ export default function useAuthentication() {
     return () => {
       active = false;
     };
-    // Avoid refetching when the profile fetched below updates the cached profile ID.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [userId, hasCachedProfile]);
 
   useEffect(() => {
     if (!user || profile?.id !== user.id) return;

@@ -1,33 +1,243 @@
+import { Activity } from "lucide-react";
+
+const navigation = [
+  { id: "tracker", label: "Tracker" },
+  { id: "daily-log", label: "Daily Log" },
+  { id: "people", label: "People" },
+  { id: "profile", label: "Profile" },
+];
+
+function getLoadingVariant(pathname) {
+  if (pathname === "/daily-log") return "daily-log";
+  if (pathname === "/people") return "people";
+  if (/^\/(?:profile|u\/|user\/)/.test(pathname)) return "profile";
+  return "tracker";
+}
+
+function LoadingBar({ className = "" }) {
+  return <span className={`app-loading-bar ${className}`} />;
+}
+
+function TrackerLoadingContent() {
+  return (
+    <>
+      <div className="app-loading-tracker-heading">
+        <LoadingBar className="app-loading-tracker-title" />
+        <LoadingBar className="app-loading-tracker-count" />
+      </div>
+      <LoadingBar className="app-loading-search" />
+      <div className="app-loading-filters">
+        {Array.from({ length: 5 }, (_, index) => (
+          <LoadingBar key={index} className={index === 0 ? "is-active" : ""} />
+        ))}
+      </div>
+      <section className="app-loading-progress-card">
+        <div className="app-loading-progress-heading">
+          <div>
+            <LoadingBar className="app-loading-label" />
+            <LoadingBar className="app-loading-copy" />
+          </div>
+          <LoadingBar className="app-loading-progress-number" />
+        </div>
+        <LoadingBar className="app-loading-progress-track" />
+        <div className="app-loading-progress-stats">
+          <LoadingBar />
+          <LoadingBar />
+          <LoadingBar />
+        </div>
+      </section>
+      <div className="app-loading-row-list">
+        {Array.from({ length: 5 }, (_, index) => (
+          <div className="app-loading-list-row" key={index}>
+            <LoadingBar className="app-loading-row-icon" />
+            <LoadingBar className="app-loading-row-title" />
+            <LoadingBar className="app-loading-row-count" />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function ProfileLoadingContent() {
+  return (
+    <div className="app-loading-profile-layout">
+      <div className="app-loading-profile-column">
+        <section className="app-loading-profile-card">
+          <div className="app-loading-profile-identity">
+            <LoadingBar className="app-loading-avatar" />
+            <div className="app-loading-profile-copy">
+              <LoadingBar className="app-loading-profile-name" />
+              <LoadingBar className="app-loading-copy" />
+              <LoadingBar className="app-loading-copy app-loading-email" />
+            </div>
+          </div>
+          <div className="app-loading-profile-stats">
+            {Array.from({ length: 4 }, (_, index) => (
+              <div key={index}>
+                <LoadingBar className="app-loading-copy" />
+                <LoadingBar className="app-loading-stat-value" />
+              </div>
+            ))}
+          </div>
+        </section>
+        <section className="app-loading-profile-card app-loading-sheet-progress">
+          <div className="app-loading-card-heading">
+            <LoadingBar className="app-loading-section-title" />
+            <LoadingBar className="app-loading-button" />
+          </div>
+          {Array.from({ length: 3 }, (_, index) => (
+            <div className="app-loading-sheet-row" key={index}>
+              <div className="app-loading-sheet-meta">
+                <LoadingBar className="app-loading-sheet-name" />
+                <LoadingBar className="app-loading-copy" />
+              </div>
+              <LoadingBar className="app-loading-sheet-track" />
+            </div>
+          ))}
+        </section>
+      </div>
+      <div className="app-loading-profile-column">
+        <section className="app-loading-profile-card">
+          <div className="app-loading-card-heading">
+            <LoadingBar className="app-loading-section-title" />
+            <LoadingBar className="app-loading-button" />
+          </div>
+          <div className="app-loading-heatmap">
+            {Array.from({ length: 105 }, (_, index) => (
+              <LoadingBar className={`app-loading-heat-cell tone-${index % 4}`} key={index} />
+            ))}
+          </div>
+        </section>
+        <section className="app-loading-profile-card">
+          <div className="app-loading-card-heading">
+            <LoadingBar className="app-loading-section-title" />
+            <LoadingBar className="app-loading-button" />
+          </div>
+          {Array.from({ length: 4 }, (_, index) => (
+            <div className="app-loading-activity-row" key={index}>
+              <LoadingBar className="app-loading-row-icon" />
+              <LoadingBar className="app-loading-row-title" />
+              <LoadingBar className="app-loading-row-count" />
+            </div>
+          ))}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function DailyLogLoadingContent() {
+  return (
+    <>
+      <div className="app-loading-daily-heading">
+        <LoadingBar className="app-loading-section-title" />
+        <LoadingBar className="app-loading-button app-loading-date" />
+      </div>
+      <div className="app-loading-daily-panels">
+        <section className="app-loading-profile-card">
+          <LoadingBar className="app-loading-section-title" />
+          <LoadingBar className="app-loading-search" />
+        </section>
+        <section className="app-loading-profile-card">
+          <LoadingBar className="app-loading-section-title" />
+          <LoadingBar className="app-loading-search" />
+        </section>
+      </div>
+      <section className="app-loading-profile-card app-loading-daily-activities">
+        <LoadingBar className="app-loading-section-title" />
+        {Array.from({ length: 4 }, (_, index) => (
+          <div className="app-loading-activity-row" key={index}>
+            <LoadingBar className="app-loading-row-title" />
+            <LoadingBar className="app-loading-button" />
+          </div>
+        ))}
+      </section>
+    </>
+  );
+}
+
+function PeopleLoadingContent() {
+  return (
+    <>
+      <LoadingBar className="app-loading-section-title" />
+      <LoadingBar className="app-loading-search" />
+      <section className="app-loading-profile-card app-loading-people-list">
+        {Array.from({ length: 5 }, (_, index) => (
+          <div className="app-loading-activity-row" key={index}>
+            <LoadingBar className="app-loading-avatar app-loading-person-avatar" />
+            <div className="app-loading-person-copy">
+              <LoadingBar className="app-loading-row-title" />
+              <LoadingBar className="app-loading-copy" />
+            </div>
+            <LoadingBar className="app-loading-button" />
+          </div>
+        ))}
+      </section>
+    </>
+  );
+}
+
 export default function AppLoadingFallback({ fullScreen = true }) {
+  const pathname = typeof window === "undefined" ? "/" : window.location.pathname;
+  const variant = getLoadingVariant(pathname);
   const Content = fullScreen ? "main" : "div";
+  const activeNavigation = variant === "profile" ? "profile" : variant;
 
   return (
     <div
-      className={`app-loading-fallback${fullScreen ? " app-loading-fallback-fullscreen" : ""}`}
+      className={`app-loading-fallback app-loading-fallback-${variant}${fullScreen ? " app-loading-fallback-fullscreen" : ""}`}
       role="status"
       aria-label="Loading app"
     >
       {fullScreen && (
         <header className="app-loading-fallback-header" aria-hidden="true">
-          <span className="app-loading-fallback-brand">Momentum</span>
-          <nav className="app-loading-fallback-nav">
-            <span />
-            <span />
-            <span />
-            <span />
-          </nav>
-          <span className="app-loading-fallback-action" />
+          <div className="app-loading-header-inner">
+            <span className="app-loading-brand">
+              <span className="app-loading-brand-icon">
+                <Activity size={20} aria-hidden="true" />
+              </span>
+              <span className="app-loading-brand-name">Momentum</span>
+            </span>
+            <nav className="app-loading-desktop-nav">
+              {navigation.map(({ id }) => (
+                <LoadingBar
+                  className={id === activeNavigation ? "is-active" : ""}
+                  key={id}
+                />
+              ))}
+            </nav>
+            <div className="app-loading-header-actions">
+              <LoadingBar />
+              <LoadingBar />
+            </div>
+          </div>
         </header>
       )}
       <Content className="app-loading-fallback-content" aria-hidden="true">
-        <span className="app-loading-fallback-title" />
-        <span className="app-loading-fallback-subtitle" />
-        <div className="app-loading-fallback-cards">
-          <span />
-          <span />
-          <span />
-        </div>
+        {variant === "profile" ? (
+          <ProfileLoadingContent />
+        ) : variant === "daily-log" ? (
+          <DailyLogLoadingContent />
+        ) : variant === "people" ? (
+          <PeopleLoadingContent />
+        ) : (
+          <TrackerLoadingContent />
+        )}
       </Content>
+      {fullScreen && (
+        <nav className="app-loading-mobile-nav" aria-hidden="true">
+          {navigation.map(({ id }) => (
+            <span
+              className={`app-loading-mobile-item${id === activeNavigation ? " is-active" : ""}`}
+              key={id}
+            >
+              <LoadingBar />
+              <LoadingBar />
+            </span>
+          ))}
+        </nav>
+      )}
     </div>
   );
 }

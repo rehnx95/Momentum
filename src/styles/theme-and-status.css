@@ -131,58 +131,90 @@
 
 .app-loading-fallback-fullscreen {
   min-height: 100vh;
+  min-height: 100svh;
   background: var(--page);
 }
 
 .app-loading-fallback-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 1px solid var(--border);
+  background: var(--page-overlay);
+}
+
+.app-loading-header-inner {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 1rem;
+  width: min(1200px, 100%);
   height: var(--header-h, 60px);
-  padding-inline: max(1rem, calc((100vw - 1200px) / 2 + 1rem));
-  border-bottom: 1px solid var(--border);
+  margin-inline: auto;
+  padding-inline: 1rem;
 }
 
-.app-loading-fallback-brand {
+.app-loading-brand {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 0.65rem;
   color: var(--text);
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 750;
   letter-spacing: -0.035em;
 }
 
-.app-loading-fallback-nav {
+.app-loading-brand-icon {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: var(--text);
+}
+
+.app-loading-brand-icon svg {
+  color: var(--page);
+}
+
+.app-loading-desktop-nav,
+.app-loading-header-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
-.app-loading-fallback-nav span,
-.app-loading-fallback-action {
-  display: block;
-  width: 4.25rem;
-  height: 1.9rem;
+.app-loading-desktop-nav .app-loading-bar {
+  width: 6rem;
+  height: 2.25rem;
   border-radius: 0.6rem;
-  background: var(--surface-hover);
 }
 
-.app-loading-fallback-action {
-  width: 5rem;
+.app-loading-header-actions {
   justify-self: end;
+}
+
+.app-loading-header-actions .app-loading-bar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.6rem;
 }
 
 .app-loading-fallback-content {
   display: grid;
+  align-content: start;
+  gap: 1rem;
   width: min(1200px, 100%);
-  gap: 0.8rem;
   margin-inline: auto;
-  padding: 1.5rem 2rem;
+  padding: 1.5rem 1rem 3rem;
 }
 
-.app-loading-fallback-title,
-.app-loading-fallback-subtitle,
-.app-loading-fallback-cards > span {
+.app-loading-bar {
   display: block;
+  min-width: 0;
   border-radius: 0.65rem;
   background: linear-gradient(
     100deg,
@@ -194,70 +226,456 @@
   animation: app-shimmer 1.4s ease-in-out infinite;
 }
 
-.app-loading-fallback-title {
-  width: min(14rem, 55%);
-  height: 1.75rem;
+.app-loading-tracker-heading,
+.app-loading-daily-heading,
+.app-loading-progress-heading,
+.app-loading-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.app-loading-fallback-subtitle {
-  width: min(22rem, 80%);
+.app-loading-tracker-title,
+.app-loading-section-title {
+  width: min(15rem, 65%);
+  height: 2rem;
+}
+
+.app-loading-tracker-count {
+  width: 5rem;
+  height: 1rem;
+}
+
+.app-loading-search {
+  width: 100%;
+  height: 2.75rem;
+  border: 1px solid var(--border);
+}
+
+.app-loading-filters {
+  display: flex;
+  min-height: 3.25rem;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+}
+
+.app-loading-filters .app-loading-bar {
+  height: 2.4rem;
+  flex: 1 1 0;
+}
+
+.app-loading-filters .app-loading-bar.is-active,
+.app-loading-mobile-item.is-active .app-loading-bar:first-child {
+  background: var(--text);
+  animation: none;
+}
+
+.app-loading-progress-card,
+.app-loading-profile-card {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface-raised);
+}
+
+.app-loading-progress-heading {
+  margin-bottom: 0.8rem;
+}
+
+.app-loading-label {
+  width: 8.5rem;
+  height: 0.8rem;
+  margin-bottom: 0.45rem;
+}
+
+.app-loading-copy {
+  width: 7rem;
+  height: 0.75rem;
+}
+
+.app-loading-progress-number {
+  width: 3.5rem;
+  height: 2rem;
+}
+
+.app-loading-progress-track,
+.app-loading-sheet-track {
+  height: 0.5rem;
+  border-radius: 999px;
+}
+
+.app-loading-progress-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.app-loading-progress-stats .app-loading-bar {
+  width: 4.5rem;
+  height: 0.75rem;
+}
+
+.app-loading-row-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.app-loading-list-row,
+.app-loading-activity-row {
+  display: flex;
+  min-width: 0;
+  min-height: 4rem;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface-raised);
+}
+
+.app-loading-row-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 1.1rem;
+  border-radius: 50%;
+}
+
+.app-loading-row-title {
+  width: min(60%, 20rem);
+  height: 1rem;
+}
+
+.app-loading-row-count {
+  width: 2.75rem;
+  height: 0.8rem;
+  margin-left: auto;
+}
+
+.app-loading-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(15rem, 0.8fr) minmax(0, 1.5fr);
+  align-items: start;
+  gap: 1rem;
+}
+
+.app-loading-profile-column {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
+}
+
+.app-loading-profile-card {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.1rem;
+}
+
+.app-loading-profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.app-loading-avatar {
+  width: 4rem;
+  height: 4rem;
+  flex: 0 0 4rem;
+  border-radius: 50%;
+}
+
+.app-loading-profile-copy,
+.app-loading-person-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.45rem;
+}
+
+.app-loading-profile-name {
+  width: 9rem;
+  height: 1.5rem;
+}
+
+.app-loading-email {
+  width: min(13rem, 70%);
+}
+
+.app-loading-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1rem;
+  padding-top: 0.25rem;
+}
+
+.app-loading-stat-value {
+  width: 3.5rem;
+  height: 1.15rem;
+  margin-top: 0.4rem;
+}
+
+.app-loading-section-title {
+  width: min(12rem, 55%);
+  height: 1.35rem;
+}
+
+.app-loading-button {
+  width: 3rem;
+  height: 2rem;
+  border: 1px solid var(--border);
+}
+
+.app-loading-sheet-row {
+  display: grid;
+  gap: 0.55rem;
+  padding-top: 0.7rem;
+}
+
+.app-loading-sheet-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.app-loading-sheet-name {
+  width: 7rem;
   height: 0.9rem;
-  margin-bottom: 0.5rem;
 }
 
-.app-loading-fallback-cards {
+.app-loading-sheet-meta .app-loading-copy {
+  width: 5rem;
+}
+
+.app-loading-heatmap {
+  display: grid;
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  gap: 0.3rem;
+  padding-top: 0.2rem;
+}
+
+.app-loading-heat-cell {
+  aspect-ratio: 1;
+  border-radius: 0.2rem;
+  animation: none;
+}
+
+.app-loading-heat-cell.tone-0 {
+  background: var(--surface-hover);
+}
+
+.app-loading-heat-cell.tone-1 {
+  background: color-mix(in srgb, var(--text) 20%, var(--page));
+}
+
+.app-loading-heat-cell.tone-2 {
+  background: color-mix(in srgb, var(--text) 38%, var(--page));
+}
+
+.app-loading-heat-cell.tone-3 {
+  background: color-mix(in srgb, var(--text) 58%, var(--page));
+}
+
+.app-loading-activity-row {
+  min-height: 3.25rem;
+  padding: 0.5rem 0;
+  border-width: 0 0 1px;
+  border-radius: 0;
+  background: transparent;
+}
+
+.app-loading-daily-heading {
+  margin-bottom: 0.2rem;
+}
+
+.app-loading-date {
+  width: 8rem;
+}
+
+.app-loading-daily-panels {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.app-loading-fallback-cards > span {
+.app-loading-daily-panels .app-loading-profile-card {
   min-height: 8rem;
-  border: 1px solid var(--border);
-  border-radius: 1rem;
 }
 
-.app-loading-fallback-cards > span:first-child {
-  grid-column: 1 / -1;
-  min-height: 12rem;
+.app-loading-daily-activities {
+  margin-top: 0.25rem;
+}
+
+.app-loading-people-list {
+  margin-top: 0.5rem;
+}
+
+.app-loading-person-avatar {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-basis: 2.75rem;
+}
+
+.app-loading-mobile-nav {
+  display: none;
 }
 
 .app-loading-fallback:not(.app-loading-fallback-fullscreen) .app-loading-fallback-content {
+  width: 100%;
   padding: 1rem 0;
 }
 
 @media (max-width: 767px) {
-  .app-loading-fallback-header {
+  .app-loading-header-inner {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 0.5rem;
     padding-inline: 0.75rem;
   }
 
-  .app-loading-fallback-nav {
+  .app-loading-brand {
+    gap: 0.45rem;
+    font-size: 1.05rem;
+  }
+
+  .app-loading-brand-icon {
+    width: 2.15rem;
+    height: 2.15rem;
+    flex-basis: 2.15rem;
+    border-radius: 0.65rem;
+  }
+
+  .app-loading-desktop-nav {
     display: none;
   }
 
+  .app-loading-header-actions .app-loading-bar {
+    width: 2rem;
+    height: 2rem;
+  }
+
   .app-loading-fallback-content {
-    gap: 0.65rem;
-    padding: 1rem 0.75rem;
+    gap: 0.7rem;
+    padding: 0.9rem 0.75rem 5.5rem;
   }
 
-  .app-loading-fallback-cards {
+  .app-loading-tracker-heading {
+    justify-content: flex-start;
+  }
+
+  .app-loading-tracker-title {
+    width: min(12rem, 55%);
+    height: 1.7rem;
+  }
+
+  .app-loading-tracker-count {
+    margin-left: 0.25rem;
+  }
+
+  .app-loading-search {
+    height: 3.25rem;
+  }
+
+  .app-loading-filters {
+    gap: 0.15rem;
+  }
+
+  .app-loading-filters .app-loading-bar {
+    height: 2.55rem;
+  }
+
+  .app-loading-profile-layout,
+  .app-loading-daily-panels {
     grid-template-columns: minmax(0, 1fr);
-    gap: 0.65rem;
+    gap: 0.7rem;
   }
 
-  .app-loading-fallback-cards > span,
-  .app-loading-fallback-cards > span:first-child {
-    grid-column: 1;
-    min-height: 7rem;
+  .app-loading-profile-column {
+    gap: 0.7rem;
+  }
+
+  .app-loading-profile-card,
+  .app-loading-progress-card {
+    padding: 0.85rem;
+    border-radius: 0.85rem;
+  }
+
+  .app-loading-profile-identity {
+    gap: 0.7rem;
+  }
+
+  .app-loading-avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    flex-basis: 3.5rem;
+  }
+
+  .app-loading-profile-stats {
+    gap: 0.7rem;
+  }
+
+  .app-loading-sheet-row {
+    padding-top: 0.4rem;
+  }
+
+  .app-loading-heatmap {
+    gap: 0.2rem;
+  }
+
+  .app-loading-activity-row {
+    min-height: 3rem;
+  }
+
+  .app-loading-mobile-nav {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 3;
+    display: flex;
+    justify-content: space-around;
+    gap: 0.1rem;
+    padding: 0.35rem 0.4rem calc(0.35rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--page-overlay);
+  }
+
+  .app-loading-mobile-item {
+    display: flex;
+    min-width: 0;
+    min-height: 3.3rem;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.15rem;
+    border-radius: 0.7rem;
+  }
+
+  .app-loading-mobile-item .app-loading-bar:first-child {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.25rem;
+  }
+
+  .app-loading-mobile-item .app-loading-bar:last-child {
+    width: 2.5rem;
+    height: 0.45rem;
+  }
+
+  .app-loading-mobile-item.is-active {
+    background: var(--text);
+  }
+
+  .app-loading-mobile-item.is-active .app-loading-bar:last-child {
+    background: color-mix(in srgb, var(--page) 28%, var(--text));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app-loading-fallback-title,
-  .app-loading-fallback-subtitle,
-  .app-loading-fallback-cards > span {
+  .app-loading-bar {
     animation: none;
   }
 }
