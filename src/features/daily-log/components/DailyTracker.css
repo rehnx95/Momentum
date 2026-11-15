@@ -34,9 +34,16 @@
 
 .daily-toolbar-copy {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.daily-toolbar-title-row {
+  display: flex;
+  align-items: baseline;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.75rem;
+  gap: 0.55rem;
 }
 
 .daily-toolbar-copy .daily-save-status {
@@ -44,6 +51,7 @@
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .daily-toolbar-controls {

@@ -33,14 +33,16 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
     <section className="daily-tracker surface-card" aria-labelledby="daily-log-title">
       <header className="daily-toolbar">
         <div className="daily-toolbar-copy">
-          <h2 id="daily-log-title" className="page-title">
-            {title}
-          </h2>
-          {savedStatusText && (
-            <span className="daily-save-status" role="status" aria-live="polite">
-              {savedStatusText}
-            </span>
-          )}
+          <div className="daily-toolbar-title-row">
+            <h2 id="daily-log-title" className="page-title">
+              {title}
+            </h2>
+            {savedStatusText && (
+              <span className="daily-save-status" role="status" aria-live="polite">
+                {savedStatusText}
+              </span>
+            )}
+          </div>
           <p className="daily-toolbar-subtitle">{subtitle}</p>
         </div>
         <div className="daily-toolbar-controls" data-view-mode={daily.viewMode}>
