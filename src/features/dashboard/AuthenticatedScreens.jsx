@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import AppHeader from "../../shared/components/AppHeader";
 import AppLoadingFallback from "../../shared/components/AppLoadingFallback";
+import LegalPage from "./LegalPage";
 import TrackerDashboard from "./TrackerDashboard";
 
 const PeopleSearchPage = lazy(() => import("../people/PeopleSearchPage"));
@@ -40,9 +41,11 @@ export default function AuthenticatedScreens({ context }) {
     importFileInput,
     importProgress,
     importSheetId,
+    legalPage,
     longestStreak,
     navigateTo,
     notFoundPage,
+    privacyPage,
     onProfileUpdated,
     openProfileSettings,
     openPublicProfile,
@@ -100,6 +103,20 @@ export default function AuthenticatedScreens({ context }) {
     userUsername,
     yearlyActiveDays,
   } = context;
+
+  if (legalPage) {
+    return (
+      <>
+        <div className="dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
+          <AppHeader active="tracker" {...headerProps} />
+          <main className="app-page">
+            <LegalPage mode={privacyPage ? "privacy" : "terms"} onBack={() => navigateTo("/")} />
+          </main>
+        </div>
+        {renderDialog()}
+      </>
+    );
+  }
 
   if (notFoundPage) {
     return (

@@ -36,6 +36,23 @@ export default function AppHeader({
           ))}
         </nav>
         <div className="app-header-actions">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.72rem", color: "#A1A1A1" }}>
+            <button
+              type="button"
+              onClick={() => onNavigate("/privacy")}
+              style={{ background: "transparent", border: "none", color: "inherit", cursor: "pointer", padding: 0 }}
+            >
+              Privacy
+            </button>
+            <span>•</span>
+            <button
+              type="button"
+              onClick={() => onNavigate("/terms")}
+              style={{ background: "transparent", border: "none", color: "inherit", cursor: "pointer", padding: 0 }}
+            >
+              Terms
+            </button>
+          </div>
           {testDataTools}
           <button
             type="button"

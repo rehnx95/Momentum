@@ -65,6 +65,11 @@ describe("useAuthenticatedNavigation", () => {
     expect(navigation.peopleSearchPage).toBe(true);
     expect(window.location.pathname).toBe("/people");
 
+    act(() => navigation.navigateTo("/privacy"));
+    expect(navigation.legalPage).toBe(true);
+    expect(navigation.privacyPage).toBe(true);
+    expect(document.title).toBe("Privacy Policy • Momentum");
+
     act(() => navigation.navigateTo("/missing-page"));
     expect(navigation.notFoundPage).toBe(true);
     expect(document.title).toBe("Momentum");

@@ -101,15 +101,18 @@ export default function AuthenticatedApp({
   const [todayDateKey, setTodayDateKey] = useState(() => getLocalDateKey(new Date()));
   const {
     dailyLogPage,
+    legalPage,
     navigateTo,
     notFoundPage,
     peopleSearchPage,
     openPublicProfile: navigateToPublicProfile,
+    privacyPage,
     publicProfileReturnPath,
     returnFromPublicProfile,
     selectedPublicUsername,
     showProfile,
     showSettings,
+    termsPage,
   } = useAuthenticatedNavigation();
   const {
     clearSearch,
@@ -241,6 +244,7 @@ export default function AuthenticatedApp({
     importFileInput,
     importProgress,
     importSheetId,
+    legalPage,
     longestStreak,
     navigateTo,
     notFoundPage,
@@ -248,6 +252,7 @@ export default function AuthenticatedApp({
     openProfileSettings,
     openPublicProfile,
     ownHeatmapYear,
+    privacyPage,
     peopleSearchError,
     peopleSearchLoading,
     peopleSearchPage,
@@ -288,6 +293,7 @@ export default function AuthenticatedApp({
     showProfile,
     showSettings,
     skippedCount,
+    termsPage,
     theme,
     todayDateKey,
     todoCount,

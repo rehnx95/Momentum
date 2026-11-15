@@ -11,6 +11,9 @@ function preloadCurrentPage(pathname) {
   if (pathname === "/profile") return import("./features/profile/pages/ProfilePage");
   if (pathname === "/people") return import("./features/people/PeopleSearchPage");
   if (pathname === "/daily-log") return import("./features/daily-log/components/DailyTracker");
+  if (pathname === "/privacy" || pathname === "/terms") {
+    return import("./features/dashboard/LegalPage");
+  }
   if (/^\/(?:user|u)\/[A-Za-z0-9-]{3,48}\/?$/.test(pathname)) {
     return import("./features/people/PublicProfilePage");
   }

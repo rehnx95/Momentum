@@ -6,6 +6,8 @@ function getPageTitle(pathname = window.location.pathname) {
   if (pathname === "/people") return "People • Momentum";
   if (pathname === "/profile") return "Profile • Momentum";
   if (pathname === "/profile/edit") return "Edit Profile • Momentum";
+  if (pathname === "/privacy") return "Privacy Policy • Momentum";
+  if (pathname === "/terms") return "Terms of Service • Momentum";
   const profileMatch = pathname.match(/^\/(?:user|u)\/([A-Za-z0-9-]{3,48})\/?$/);
   if (profileMatch) return `${profileMatch[1]} • Momentum`;
   return "Momentum";
@@ -27,17 +29,29 @@ function applyRouteMetadata(pathname = window.location.pathname) {
 
 function getAuthenticatedRoute(pathname = window.location.pathname) {
   const profileMatch = pathname.match(/^\/(?:user|u)\/([A-Za-z0-9-]{3,48})\/?$/);
-  const knownPaths = new Set(["/", "/daily-log", "/people", "/profile", "/profile/edit"]);
+  const knownPaths = new Set([
+    "/",
+    "/daily-log",
+    "/people",
+    "/privacy",
+    "/profile",
+    "/profile/edit",
+    "/terms",
+  ]);
   const showProfile = pathname === "/profile" || pathname === "/profile/edit";
+  const isLegalPage = pathname === "/privacy" || pathname === "/terms";
   const isKnownPath = knownPaths.has(pathname) || Boolean(profileMatch);
 
   return {
     dailyLogPage: pathname === "/daily-log",
+    legalPage: isLegalPage,
     notFoundPage: !isKnownPath,
     peopleSearchPage: pathname === "/people",
+    privacyPage: pathname === "/privacy",
     selectedPublicUsername: profileMatch ? profileMatch[1].toLowerCase() : "",
     showProfile,
     showSettings: pathname === "/profile/edit",
+    termsPage: pathname === "/terms",
   };
 }
 
