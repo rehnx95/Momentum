@@ -5,6 +5,16 @@ import useAuthenticatedNavigation from "./useAuthenticatedNavigation";
 
 function installBrowserStub() {
   const location = { pathname: "/" };
+  const documentMeta = {
+    title: "Momentum",
+    head: {
+      appendChild: () => {},
+    },
+    querySelector: () => null,
+    createElement: () => ({
+      setAttribute: () => {},
+    }),
+  };
   Object.defineProperty(globalThis, "window", {
     configurable: true,
     value: {
@@ -17,6 +27,10 @@ function installBrowserStub() {
       addEventListener() {},
       removeEventListener() {},
     },
+  });
+  Object.defineProperty(globalThis, "document", {
+    configurable: true,
+    value: documentMeta,
   });
 }
 
@@ -41,9 +55,11 @@ describe("useAuthenticatedNavigation", () => {
 
     act(() => navigation.navigateTo("/daily-log"));
     expect(navigation.dailyLogPage).toBe(true);
+    expect(document.title).toBe("Daily Log • Momentum");
 
     act(() => navigation.openPublicProfile("Rehan"));
     expect(navigation.selectedPublicUsername).toBe("rehan");
+    expect(document.title).toBe("Rehan • Momentum");
 
     act(() => navigation.returnFromPublicProfile());
     expect(navigation.peopleSearchPage).toBe(true);
