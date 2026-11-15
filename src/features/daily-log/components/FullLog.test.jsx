@@ -47,8 +47,9 @@ describe("FullLog", () => {
       Number.parseFloat(container.querySelector(".full-log-timeline-gap").style.width),
     ).toBeCloseTo(100, 1);
     const unloggedTotal = container.querySelector(".full-log-unlogged-total");
-    expect(unloggedTotal.getAttribute("aria-label")).toBe("Unlogged 24h · 100%");
-    expect(unloggedTotal.textContent).toContain("100%");
+    expect(unloggedTotal.getAttribute("aria-label")).toBe("Unlogged 24h");
+    expect(unloggedTotal.textContent).toContain("24h");
+    expect(unloggedTotal.textContent).not.toContain("%");
   });
 
   it("filters by activities and includes sleep and unlogged options", () => {
@@ -105,7 +106,7 @@ describe("FullLog", () => {
     expect(shareSegments[0].getAttribute("aria-label")).toMatch(/^Reading /);
     expect(Number.parseFloat(shareSegments[0].style.left)).toBe(0);
     expect(Number.parseFloat(shareSegments[0].style.width)).toBeCloseTo((60 / 1440) * 100, 1);
-    expect(screen.getByLabelText("Unlogged 15h · 63%")).toBeTruthy();
+    expect(screen.getByLabelText("Unlogged 15h")).toBeTruthy();
     expect(container.querySelector(".full-log-date-button")).toBeTruthy();
   });
 
@@ -287,7 +288,6 @@ describe("FullLog", () => {
       loading: false,
     };
     const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
-
     fireEvent.click(container.querySelector(".full-log-expand-button"));
     const rows = [...container.querySelectorAll(".full-log-entry")];
     expect(rows).toHaveLength(1);
@@ -357,7 +357,10 @@ describe("FullLog", () => {
     };
     const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
     const segments = [...container.querySelectorAll(".full-log-timeline-segment")];
+    const breakdown = container.querySelector(".full-log-activity-breakdown");
 
+    expect(breakdown.textContent).toContain("Reading 1h · 4%");
+    expect(breakdown.textContent).toContain("Project 2h · 8%");
     expect(segments).toHaveLength(2);
     expect(segments[0].getAttribute("aria-label")).toBe("Project 2h · 8%");
     expect(segments[0].hasAttribute("title")).toBe(false);

@@ -176,6 +176,7 @@ export default function useDailyLog(user, activityLog = {}) {
       const cachedLog = getDailyLogCache(user.id, selectedDate);
       const nextLog = cachedLog ? normalizeLog(cachedLog, selectedDate) : emptyLog(selectedDate);
       const snapshot = cachedLog ? JSON.stringify(nextLog) : null;
+      savedUpdatedAtRef.current = cachedLog?.updated_at ?? null;
       savedSnapshotRef.current = snapshot;
       setSavedSnapshot(snapshot);
       setLog(nextLog);
@@ -204,6 +205,7 @@ export default function useDailyLog(user, activityLog = {}) {
     const clearedLog = emptyLog(dateRef.current);
     const snapshot = JSON.stringify(clearedLog);
     setLog(clearedLog);
+    savedUpdatedAtRef.current = null;
     savedSnapshotRef.current = snapshot;
     setSavedSnapshot(snapshot);
     setDailyLogCache(user.id, dateRef.current, clearedLog);

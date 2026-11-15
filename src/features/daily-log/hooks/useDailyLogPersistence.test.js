@@ -126,6 +126,101 @@ describe("useDailyLogPersistence", () => {
     expect(setLoading).toHaveBeenCalled();
   });
 
+  it("does not report a conflict for equivalent timestamp formats", async () => {
+    const date = "2025-03-14";
+    const databaseTimestamp = "2025-03-14T12:00:00+00:00";
+    const loadedLog = {
+      date,
+      sleep_time: "",
+      wake_time: "",
+      dsa_slots: [],
+      backend_slots: [],
+      dsa_hours: null,
+      backend_hours: null,
+      custom_tasks: [],
+      updated_at: databaseTimestamp,
+    };
+    const logRef = { current: loadedLog };
+    const savedSnapshotRef = { current: JSON.stringify(loadedLog) };
+    const savedUpdatedAtRef = { current: "2025-03-14T12:00:00.000Z" };
+    const upsert = vi.fn().mockResolvedValue({ error: null });
+    const setMessage = vi.fn();
+    const setStatus = vi.fn();
+    fromMock.mockImplementation(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: loadedLog, error: null }),
+      upsert,
+    }));
+    let hookResult;
+
+    function HookHarness() {
+      hookResult = useDailyLogPersistence({
+        date,
+        dateRef: { current: date },
+        dirty: false,
+        loadFailed: false,
+        loadRequest: 0,
+        loading: false,
+        log: logRef.current,
+        logRef,
+        savedSnapshotRef,
+        savedUpdatedAtRef,
+        setLoadFailed: vi.fn(),
+        setLoading: vi.fn(),
+        setLog: vi.fn(),
+        setMessage,
+        setSavedSnapshot: vi.fn(),
+        setStatus,
+        userId: "user-1",
+        validationErrors: [],
+      });
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    savedUpdatedAtRef.current = "2025-03-14T12:00:00.000Z";
+
+    let result;
+    await act(async () => {
+      result = await hookResult.saveLog(
+        {
+          ...loadedLog,
+          custom_tasks: [
+            { id: "task-1", name: "Reading", slots: [{ start: "09:00", end: "10:00" }] },
+          ],
+        },
+        date,
+      );
+    });
+
+    expect(result).toBe(true);
+    expect(upsert).toHaveBeenCalledOnce();
+    expect(setMessage).not.toHaveBeenCalledWith(expect.stringContaining("changed elsewhere"));
+
+    savedUpdatedAtRef.current = "2025-03-14T11:00:00.000Z";
+    let conflictResult;
+    await act(async () => {
+      conflictResult = await hookResult.saveLog(
+        {
+          ...loadedLog,
+          custom_tasks: [
+            { id: "task-1", name: "Reading", slots: [{ start: "10:00", end: "11:00" }] },
+          ],
+        },
+        date,
+      );
+    });
+
+    expect(conflictResult).toBe(false);
+    expect(upsert).toHaveBeenCalledOnce();
+    expect(setStatus).toHaveBeenCalledWith("This day changed elsewhere");
+  });
+
   it("includes the Supabase error code when a daily log save fails", async () => {
     const setStatus = vi.fn();
     const setMessage = vi.fn();

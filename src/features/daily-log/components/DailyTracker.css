@@ -286,6 +286,11 @@
   margin-bottom: 0.9rem;
 }
 
+.quick-log-card input:focus {
+  border-color: var(--text);
+  outline: none;
+}
+
 .quick-log-tags {
   display: flex;
   flex-wrap: wrap;

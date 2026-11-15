@@ -9,6 +9,15 @@ import {
 import { normalizeLog } from "../lib/dailyLogModel";
 import { validateDay } from "../../../shared/utils/time";
 
+function sameTimestamp(first, second) {
+  const firstTime = Date.parse(first);
+  const secondTime = Date.parse(second);
+  if (Number.isFinite(firstTime) && Number.isFinite(secondTime)) {
+    return firstTime === secondTime;
+  }
+  return first === second;
+}
+
 export default function useDailyLogPersistence({
   date,
   dateRef,
@@ -63,7 +72,7 @@ export default function useDailyLogPersistence({
           .maybeSingle();
         if (existing?.data && savedUpdatedAtRef.current && existing.data.updated_at) {
           const savedAt = savedUpdatedAtRef.current;
-          if (savedAt !== existing.data.updated_at) {
+          if (!sameTimestamp(savedAt, existing.data.updated_at)) {
             if (nextDate === dateRef.current) {
               setStatus("This day changed elsewhere");
               setMessage("This day changed elsewhere. Reload the date to keep the latest version.");

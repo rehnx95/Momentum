@@ -235,7 +235,7 @@ export default function FullLogTimeline({
         )}
       <div className="full-log-activity-breakdown">
         {visibleActivities.map((activity) => {
-          const share = totalMinutes > 0 ? (activity.minutes / totalMinutes) * 100 : 0;
+          const share = shareTotal > 0 ? (activity.minutes / shareTotal) * 100 : 0;
           const color = getActivityColor(activity.name, activityColors);
 
           return (

@@ -469,6 +469,11 @@
   font-size: 0.82rem;
 }
 
+.daily-log-page-shell .quick-log-input-row input:focus {
+  border-color: var(--text);
+  outline: none;
+}
+
 .daily-log-page-shell .quick-add-primary {
   min-height: 2.65rem;
   padding-inline: 1rem;

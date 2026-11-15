@@ -282,9 +282,6 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
               <ul className="full-log-day-list">
                 {visibleEntries.map(({ row, activities, sleep, studied, problems }) => {
                   const unlogged = unloggedMinutesFor(studied, sleep);
-                  const dayMinutes = studied + sleep + unlogged;
-                  const unloggedPercentage =
-                    dayMinutes > 0 ? Math.round((unlogged / dayMinutes) * 100) : 0;
                   const date = new Date(`${row.date}T00:00:00`);
                   const dayLabel = date.toLocaleDateString(undefined, {
                     weekday: "short",
@@ -361,10 +358,10 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                         </span>
                         <span
                           className="full-log-unlogged-total"
-                          aria-label={`Unlogged ${formatDuration(unlogged)} · ${unloggedPercentage}%`}
+                          aria-label={`Unlogged ${formatDuration(unlogged)}`}
                         >
                           <small>Unlogged</small>
-                          {formatDuration(unlogged)} · {unloggedPercentage}%
+                          {formatDuration(unlogged)}
                         </span>
                         <span
                           className="full-log-solved-total"
