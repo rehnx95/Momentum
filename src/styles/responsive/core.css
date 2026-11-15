@@ -123,6 +123,11 @@ textarea {
     gap: 0.1rem;
   }
 
+  .app-header-meta-links {
+    gap: 0.3rem;
+    font-size: 0.64rem;
+  }
+
   .app-nav {
     position: fixed;
     inset: auto 0 0;

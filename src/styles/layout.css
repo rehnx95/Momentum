@@ -81,6 +81,28 @@ html {
   gap: 0.25rem;
 }
 
+.app-header-meta-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.app-header-meta-links button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.app-header-meta-links button:hover {
+  color: var(--text);
+}
+
 .app-nav {
   display: flex;
   gap: 0.25rem;
