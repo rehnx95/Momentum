@@ -19,8 +19,8 @@ export default {
         danger: "#ef4444",
       },
       fontFamily: {
-        sans: ["Geist", "Inter", "Segoe UI Variable", "Segoe UI", "system-ui", "sans-serif"],
-        mono: ["Geist Mono", "ui-monospace", "monospace"],
+        sans: ["Segoe UI Variable", "Segoe UI", "system-ui", "sans-serif"],
+        mono: ["ui-monospace", "monospace"],
       },
     },
   },

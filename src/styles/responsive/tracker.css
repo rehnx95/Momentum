@@ -37,6 +37,20 @@
   }
 }
 
+@media (min-width: 1024px) and (max-width: 1099px) {
+  .tracker-dashboard-shell .dashboard-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tracker-dashboard-shell .tracker-side {
+    display: none;
+  }
+
+  .tracker-dashboard-shell .mobile-progress-summary {
+    display: block;
+  }
+}
+
 @media (hover: none) {
   .popover-trash {
     opacity: 1;

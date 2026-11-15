@@ -1,10 +1,11 @@
 import { lazy, Suspense } from "react";
 import AppHeader from "../../shared/components/AppHeader";
-import PeopleSearchPage from "../people/PeopleSearchPage";
-import PublicProfilePage from "../people/PublicProfilePage";
-import ProfilePage from "../profile/pages/ProfilePage";
+import AppLoadingFallback from "../../shared/components/AppLoadingFallback";
 import TrackerDashboard from "./TrackerDashboard";
 
+const PeopleSearchPage = lazy(() => import("../people/PeopleSearchPage"));
+const PublicProfilePage = lazy(() => import("../people/PublicProfilePage"));
+const ProfilePage = lazy(() => import("../profile/pages/ProfilePage"));
 const ProfileSettings = lazy(() => import("../profile/pages/ProfileSettings"));
 const DailyTracker = lazy(() => import("../daily-log/components/DailyTracker"));
 
@@ -102,15 +103,17 @@ export default function AuthenticatedScreens({ context }) {
   if (peopleSearchPage) {
     return (
       <>
-        <PeopleSearchPage
-          context={{ headerProps }}
-          query={peopleSearchQuery}
-          onQueryChange={setPeopleSearchQuery}
-          results={peopleSearchResults}
-          loading={peopleSearchLoading}
-          error={peopleSearchError}
-          onSelectProfile={openPublicProfile}
-        />
+        <Suspense fallback={<AppLoadingFallback />}>
+          <PeopleSearchPage
+            context={{ headerProps }}
+            query={peopleSearchQuery}
+            onQueryChange={setPeopleSearchQuery}
+            results={peopleSearchResults}
+            loading={peopleSearchLoading}
+            error={peopleSearchError}
+            onSelectProfile={openPublicProfile}
+          />
+        </Suspense>
         {renderDialog()}
       </>
     );
@@ -119,23 +122,25 @@ export default function AuthenticatedScreens({ context }) {
   if (selectedPublicUsername) {
     return (
       <>
-        <PublicProfilePage
-          context={{
-            headerProps,
-            publicHeatmap,
-            publicHeatmapYear,
-            publicProfileReturnPath,
-            selectedPublicUsername,
-            setPublicHeatmapYear,
-            todayDateKey,
-          }}
-          profile={publicProfile}
-          loading={publicProfileLoading}
-          error={publicProfileError}
-          copied={copiedProfileLink}
-          onCopyLink={copyPublicProfileLink}
-          onBack={returnFromPublicProfile}
-        />
+        <Suspense fallback={<AppLoadingFallback />}>
+          <PublicProfilePage
+            context={{
+              headerProps,
+              publicHeatmap,
+              publicHeatmapYear,
+              publicProfileReturnPath,
+              selectedPublicUsername,
+              setPublicHeatmapYear,
+              todayDateKey,
+            }}
+            profile={publicProfile}
+            loading={publicProfileLoading}
+            error={publicProfileError}
+            copied={copiedProfileLink}
+            onCopyLink={copyPublicProfileLink}
+            onBack={returnFromPublicProfile}
+          />
+        </Suspense>
         {renderDialog()}
       </>
     );
@@ -144,7 +149,7 @@ export default function AuthenticatedScreens({ context }) {
   if (showSettings) {
     return (
       <>
-        <Suspense fallback={<div className="app-page app-page-narrow" aria-hidden="true" />}>
+        <Suspense fallback={<AppLoadingFallback />}>
           <ProfileSettings
             userId={user.id}
             profile={profile}
@@ -167,7 +172,7 @@ export default function AuthenticatedScreens({ context }) {
         >
           <AppHeader active="daily-log" {...headerProps} />
           <main className="app-page">
-            <Suspense fallback={<div className="daily-tracker surface-card" aria-hidden="true" />}>
+            <Suspense fallback={<AppLoadingFallback fullScreen={false} />}>
               <DailyTracker
                 user={user}
                 sheets={availableSheets}
@@ -185,40 +190,42 @@ export default function AuthenticatedScreens({ context }) {
   if (showProfile) {
     return (
       <>
-        <ProfilePage
-          context={{
-            activityLog,
-            askConfirmation,
-            authError,
-            availableSheets,
-            backupAction,
-            dailyStreak,
-            exportProgress,
-            headerProps,
-            importFileInput,
-            importProgress,
-            importSheetId,
-            longestStreak,
-            navigateTo,
-            openProfileSettings,
-            ownHeatmapYear,
-            profileProblemsSolved,
-            profileProblemsTotal,
-            profileSheetStats,
-            progressError,
-            publicProfileReturnPath,
-            recentAccepted,
-            reset,
-            setBackupAction,
-            setOwnHeatmapYear,
-            showNotice,
-            todayDateKey,
-            user,
-            userName,
-            userUsername,
-            yearlyActiveDays,
-          }}
-        />
+        <Suspense fallback={<AppLoadingFallback />}>
+          <ProfilePage
+            context={{
+              activityLog,
+              askConfirmation,
+              authError,
+              availableSheets,
+              backupAction,
+              dailyStreak,
+              exportProgress,
+              headerProps,
+              importFileInput,
+              importProgress,
+              importSheetId,
+              longestStreak,
+              navigateTo,
+              openProfileSettings,
+              ownHeatmapYear,
+              profileProblemsSolved,
+              profileProblemsTotal,
+              profileSheetStats,
+              progressError,
+              publicProfileReturnPath,
+              recentAccepted,
+              reset,
+              setBackupAction,
+              setOwnHeatmapYear,
+              showNotice,
+              todayDateKey,
+              user,
+              userName,
+              userUsername,
+              yearlyActiveDays,
+            }}
+          />
+        </Suspense>
         {renderDialog()}
       </>
     );

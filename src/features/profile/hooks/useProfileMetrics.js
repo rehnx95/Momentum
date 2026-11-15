@@ -9,10 +9,12 @@ export default function useProfileMetrics({
   completedOn,
   completedAt,
   todayDateKey,
+  enabled = true,
 }) {
   const profileSheetStats = useMemo(
-    () =>
-      availableSheets.map((sheet) => {
+    () => {
+      if (!enabled) return [];
+      return availableSheets.map((sheet) => {
         const idPrefix = `${sheet.id}::`;
         const problems = sheet.sheet.steps.flatMap((step) =>
           step.subsections.flatMap((subsection) => subsection.problems),
@@ -32,14 +34,16 @@ export default function useProfileMetrics({
           skipped,
           total: problems.length,
         };
-      }),
-    [availableSheets, progress],
+      });
+    },
+    [availableSheets, progress, enabled],
   );
   const profileProblemsTotal = profileSheetStats.reduce((total, sheet) => total + sheet.total, 0);
   const profileProblemsSolved = profileSheetStats.reduce((total, sheet) => total + sheet.solved, 0);
   const recentAccepted = useMemo(
-    () =>
-      availableSheets
+    () => {
+      if (!enabled) return [];
+      return availableSheets
         .flatMap((sheet) => {
           const idPrefix = `${sheet.id}::`;
           return sheet.sheet.steps.flatMap((step) =>
@@ -72,18 +76,20 @@ export default function useProfileMetrics({
           if (!second.acceptedOn) return -1;
           return second.acceptedOn.localeCompare(first.acceptedOn);
         })
-        .slice(0, 8),
-    [availableSheets, completedAt, completedOn, progress],
+        .slice(0, 8);
+    },
+    [availableSheets, completedAt, completedOn, progress, enabled],
   );
 
   const activeDates = useMemo(() => {
+    if (!enabled) return [];
     const uniqueDates = new Set();
     for (const [problemId, day] of Object.entries(completedOn || {})) {
       if (!day || progress[problemId] !== "done") continue;
       uniqueDates.add(String(day).slice(0, 10));
     }
     return [...uniqueDates].sort();
-  }, [completedOn, progress]);
+  }, [completedOn, progress, enabled]);
 
   const dailyStreak = useMemo(() => {
     let streak = 0;
@@ -124,8 +130,9 @@ export default function useProfileMetrics({
   }, [activeDates]);
 
   const yearlyActiveDays = useMemo(() => {
+    if (!enabled) return 0;
     return buildHeatmap({ activity: activityLog, todayKey: todayDateKey }).activeDays;
-  }, [activityLog, todayDateKey]);
+  }, [activityLog, todayDateKey, enabled]);
 
   return {
     profileSheetStats,

@@ -138,9 +138,26 @@ export default function AuthenticatedApp({
   const [ownHeatmapYear, setOwnHeatmapYear] = useState(null);
 
   useEffect(() => {
-    void import("../daily-log/components/DailyTracker").catch((error) => {
-      console.warn("Could not preload the Daily Log page:", error);
-    });
+    let idleCallbackId = null;
+    let timeoutId = null;
+    const preload = () => {
+      void import("../daily-log/components/DailyTracker").catch((error) => {
+        console.warn("Could not preload the Daily Log page:", error);
+      });
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      idleCallbackId = window.requestIdleCallback(preload, { timeout: 5000 });
+    } else {
+      timeoutId = window.setTimeout(preload, 2000);
+    }
+
+    return () => {
+      if (idleCallbackId !== null && typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleCallbackId);
+      }
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+    };
   }, []);
 
   const [backupAction, setBackupAction] = useState("");
@@ -213,6 +230,7 @@ export default function AuthenticatedApp({
     completedOn,
     completedAt,
     todayDateKey,
+    enabled: showProfile,
   });
 
   const screenContext = {

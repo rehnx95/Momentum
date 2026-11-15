@@ -26,7 +26,7 @@
   --sleep-chart-color: #5a5a5a;
   --study-chart-color: #22c55e;
   --progress-fill: #ffffff;
-  --font-sans: Geist, Inter, "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
 }
 
 :root[data-theme="light"] {

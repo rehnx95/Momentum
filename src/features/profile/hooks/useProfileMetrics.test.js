@@ -4,6 +4,41 @@ import { describe, expect, it } from "vitest";
 import useProfileMetrics from "./useProfileMetrics";
 
 describe("useProfileMetrics", () => {
+  it("defers profile calculations while the profile screen is inactive", () => {
+    let metrics;
+
+    function HookHarness() {
+      metrics = useProfileMetrics({
+        availableSheets: [
+          {
+            id: "sheet",
+            title: "Algorithms",
+            sheet: {
+              steps: [{ subsections: [{ problems: [{ id: "problem", title: "Problem" }] }] }],
+            },
+          },
+        ],
+        activityLog: { "2026-11-14": 1 },
+        progress: { "sheet::problem": "done" },
+        completedOn: { "sheet::problem": "2026-11-14" },
+        completedAt: {},
+        todayDateKey: "2026-11-14",
+        enabled: false,
+      });
+      return null;
+    }
+
+    let renderer;
+    act(() => {
+      renderer = TestRenderer.create(React.createElement(HookHarness));
+    });
+
+    expect(metrics.profileSheetStats).toEqual([]);
+    expect(metrics.recentAccepted).toEqual([]);
+    expect(metrics.yearlyActiveDays).toBe(0);
+    act(() => renderer.unmount());
+  });
+
   it("counts active days from the same saved activity data as the heatmap", () => {
     const activityLog = {
       "2025-11-13": 1,

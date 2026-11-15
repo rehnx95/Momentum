@@ -124,6 +124,144 @@
   font-family: var(--font-sans);
 }
 
+.app-loading-fallback {
+  min-width: 0;
+  color: var(--text);
+}
+
+.app-loading-fallback-fullscreen {
+  min-height: 100vh;
+  background: var(--page);
+}
+
+.app-loading-fallback-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  height: var(--header-h, 60px);
+  padding-inline: max(1rem, calc((100vw - 1200px) / 2 + 1rem));
+  border-bottom: 1px solid var(--border);
+}
+
+.app-loading-fallback-brand {
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.app-loading-fallback-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-loading-fallback-nav span,
+.app-loading-fallback-action {
+  display: block;
+  width: 4.25rem;
+  height: 1.9rem;
+  border-radius: 0.6rem;
+  background: var(--surface-hover);
+}
+
+.app-loading-fallback-action {
+  width: 5rem;
+  justify-self: end;
+}
+
+.app-loading-fallback-content {
+  display: grid;
+  width: min(1200px, 100%);
+  gap: 0.8rem;
+  margin-inline: auto;
+  padding: 1.5rem 2rem;
+}
+
+.app-loading-fallback-title,
+.app-loading-fallback-subtitle,
+.app-loading-fallback-cards > span {
+  display: block;
+  border-radius: 0.65rem;
+  background: linear-gradient(
+    100deg,
+    var(--surface-hover) 20%,
+    var(--border) 45%,
+    var(--surface-hover) 70%
+  );
+  background-size: 220% 100%;
+  animation: app-shimmer 1.4s ease-in-out infinite;
+}
+
+.app-loading-fallback-title {
+  width: min(14rem, 55%);
+  height: 1.75rem;
+}
+
+.app-loading-fallback-subtitle {
+  width: min(22rem, 80%);
+  height: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.app-loading-fallback-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.app-loading-fallback-cards > span {
+  min-height: 8rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+
+.app-loading-fallback-cards > span:first-child {
+  grid-column: 1 / -1;
+  min-height: 12rem;
+}
+
+.app-loading-fallback:not(.app-loading-fallback-fullscreen) .app-loading-fallback-content {
+  padding: 1rem 0;
+}
+
+@media (max-width: 767px) {
+  .app-loading-fallback-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  .app-loading-fallback-nav {
+    display: none;
+  }
+
+  .app-loading-fallback-content {
+    gap: 0.65rem;
+    padding: 1rem 0.75rem;
+  }
+
+  .app-loading-fallback-cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.65rem;
+  }
+
+  .app-loading-fallback-cards > span,
+  .app-loading-fallback-cards > span:first-child {
+    grid-column: 1;
+    min-height: 7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-loading-fallback-title,
+  .app-loading-fallback-subtitle,
+  .app-loading-fallback-cards > span {
+    animation: none;
+  }
+}
+
 .app-loading-label {
   margin: 0;
   font-size: 0.875rem;
