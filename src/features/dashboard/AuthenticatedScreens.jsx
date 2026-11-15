@@ -42,6 +42,7 @@ export default function AuthenticatedScreens({ context }) {
     importSheetId,
     longestStreak,
     navigateTo,
+    notFoundPage,
     onProfileUpdated,
     openProfileSettings,
     openPublicProfile,
@@ -99,6 +100,33 @@ export default function AuthenticatedScreens({ context }) {
     userUsername,
     yearlyActiveDays,
   } = context;
+
+  if (notFoundPage) {
+    return (
+      <>
+        <div className="dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
+          <AppHeader active="tracker" {...headerProps} />
+          <main className="app-page">
+            <section className="surface-card rounded-2xl border p-8 text-center">
+              <p className="text-sm font-semibold uppercase tracking-wider text-muted">404</p>
+              <h1 className="mt-2 text-3xl font-bold text-[#EDEDED]">Page not found</h1>
+              <p className="mx-auto mt-3 max-w-md text-sm text-[#A1A1A1]">
+                The page you’re looking for doesn’t exist or may have moved.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigateTo("/")}
+                className="mt-6 rounded-lg bg-[#EDEDED] px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-white"
+              >
+                Return to dashboard
+              </button>
+            </section>
+          </main>
+        </div>
+        {renderDialog()}
+      </>
+    );
+  }
 
   if (peopleSearchPage) {
     return (

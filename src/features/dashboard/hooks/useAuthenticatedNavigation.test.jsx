@@ -65,6 +65,10 @@ describe("useAuthenticatedNavigation", () => {
     expect(navigation.peopleSearchPage).toBe(true);
     expect(window.location.pathname).toBe("/people");
 
+    act(() => navigation.navigateTo("/missing-page"));
+    expect(navigation.notFoundPage).toBe(true);
+    expect(document.title).toBe("Momentum");
+
     act(() => renderer.unmount());
   });
 });

@@ -27,10 +27,13 @@ function applyRouteMetadata(pathname = window.location.pathname) {
 
 function getAuthenticatedRoute(pathname = window.location.pathname) {
   const profileMatch = pathname.match(/^\/(?:user|u)\/([A-Za-z0-9-]{3,48})\/?$/);
+  const knownPaths = new Set(["/", "/daily-log", "/people", "/profile", "/profile/edit"]);
   const showProfile = pathname === "/profile" || pathname === "/profile/edit";
+  const isKnownPath = knownPaths.has(pathname) || Boolean(profileMatch);
 
   return {
     dailyLogPage: pathname === "/daily-log",
+    notFoundPage: !isKnownPath,
     peopleSearchPage: pathname === "/people",
     selectedPublicUsername: profileMatch ? profileMatch[1].toLowerCase() : "",
     showProfile,

@@ -102,6 +102,7 @@ export default function AuthenticatedApp({
   const {
     dailyLogPage,
     navigateTo,
+    notFoundPage,
     peopleSearchPage,
     openPublicProfile: navigateToPublicProfile,
     publicProfileReturnPath,
@@ -242,6 +243,7 @@ export default function AuthenticatedApp({
     importSheetId,
     longestStreak,
     navigateTo,
+    notFoundPage,
     onProfileUpdated,
     openProfileSettings,
     openPublicProfile,
