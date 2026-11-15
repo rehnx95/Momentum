@@ -154,7 +154,7 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
       </header>
 
       {/* Main Content */}
-      <main className="onboarding-main mx-auto flex w-full max-w-3xl flex-1 items-center px-4 md:px-6">
+      <main id="main-content" className="onboarding-main mx-auto flex w-full max-w-3xl flex-1 items-center px-4 md:px-6">
         <div
           className="onboarding-panel w-full rounded-2xl border p-6 md:p-8"
           aria-labelledby="onboarding-title"

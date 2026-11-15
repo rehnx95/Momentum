@@ -109,7 +109,7 @@ export default function AuthenticatedScreens({ context }) {
       <>
         <div className="dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
           <AppHeader active="tracker" {...headerProps} />
-          <main className="app-page">
+          <main id="main-content" className="app-page">
             <LegalPage mode={privacyPage ? "privacy" : "terms"} onBack={() => navigateTo("/")} />
           </main>
         </div>
@@ -123,7 +123,7 @@ export default function AuthenticatedScreens({ context }) {
       <>
         <div className="dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
           <AppHeader active="tracker" {...headerProps} />
-          <main className="app-page">
+          <main id="main-content" className="app-page">
             <section className="surface-card rounded-2xl border p-8 text-center">
               <p className="text-sm font-semibold uppercase tracking-wider text-muted">404</p>
               <h1 className="mt-2 text-3xl font-bold text-[#EDEDED]">Page not found</h1>

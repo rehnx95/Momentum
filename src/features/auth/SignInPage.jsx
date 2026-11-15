@@ -4,8 +4,11 @@ export default function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
   return (
     <div className="auth-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
       <div className="auth-layout auth-layout-simple">
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
         <section className="auth-panel-wrap">
-          <div className="auth-panel">
+          <div id="main-content" className="auth-panel">
             <div className="auth-simple-brand">
               <div className="brand-mark">
                 <Activity size={21} strokeWidth={2.25} className="text-black" />
