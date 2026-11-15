@@ -18,7 +18,8 @@ Backend tracks.
 - **Organize learning.** Work through a built-in track or create a private
   track from a text file. Search, filter, expand, and update problem states.
 - **Record daily activity.** Log sleep and activity intervals, then revisit
-  previous entries in the paginated Full Log.
+  previous entries in the paginated Full Log, with expandable day details and
+  filters for recorded activities, sleep, and unlogged time.
 - **Understand progress.** Review completion totals, streaks, activity
   history, and sleep/study visualizations.
 - **Share selectively.** Find profiles by username and share a curated
@@ -36,7 +37,14 @@ Backend tracks.
   metrics. A database trigger updates persisted activity counts in the same
   transaction as progress changes.
 - **Reliable time tracking:** Daily Log validates intervals, serializes
-  autosaves, and splits running timers at local midnight.
+  autosaves, detects changes made elsewhere before overwriting a saved day,
+  and splits running timers at local midnight. Full Log derives unlogged time
+  from the parts of each day not covered by recorded activity or sleep.
+- **Account-safe browser state:** Momentum-scoped local caches are cleared on
+  sign-out and when switching accounts, while caches remain a performance
+  layer rather than a cross-device source of truth.
+- **Responsive workspace:** Tracker controls, Daily Log, Full Log, and the
+  application header adapt to smaller screens.
 - **Extensible learning tracks:** Built-in text sources compile to JSON;
   uploaded tracks are parsed, validated, and assigned namespaced problem IDs.
 - **Production checks:** GitHub Actions runs lint, tests, and a production
@@ -145,3 +153,27 @@ npm run convert-sheet    # Regenerate bundled JSON from source/ text files
   and notable engineering changes.
 - [Learning-track sources](./source/) — editable text sources for bundled
   templates.
+
+### Product screenshots
+
+#### Dark theme
+
+- [Tracker dashboard](./docs/screenshots/tracker-dashboard.png)
+- [Expanded tracker category](./docs/screenshots/tracker-expanded-category.png)
+- [Daily Log](./docs/screenshots/daily-log.png)
+- [Full Log](./docs/screenshots/full-log.png)
+- [Expanded Full Log day](./docs/screenshots/full-log-expanded-day.png)
+- [Trends](./docs/screenshots/trends.png)
+- [People search](./docs/screenshots/people-search.png)
+- [Profile](./docs/screenshots/profile.png)
+
+#### Light theme
+
+- [Tracker dashboard](./docs/screenshots/tracker-dashboard-light.png)
+- [Expanded tracker category](./docs/screenshots/tracker-expanded-category-light.png)
+- [Daily Log](./docs/screenshots/daily-log-light.png)
+- [Full Log](./docs/screenshots/full-log-light.png)
+- [Expanded Full Log day](./docs/screenshots/full-log-expanded-day-light.png)
+- [Trends](./docs/screenshots/trends-light.png)
+- [People search](./docs/screenshots/people-search-light.png)
+- [Profile](./docs/screenshots/profile-light.png)

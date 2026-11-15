@@ -43,6 +43,8 @@ user's behalf.
 | Keep progress as the analytics source      | The client derives active-day counts from solved progress rows. A database trigger maintains `activity_log` in the same transaction for database consumers. | Prevents a solved-state write and its aggregate count from being saved independently. |
 | Treat cached data as a performance layer   | Browser caches are account-scoped and can initialize the UI, while Supabase remains the durable source of truth.                                            | Improves responsiveness without claiming offline synchronization.                     |
 | Model time explicitly                      | Local date keys, interval validation, serialized saves, and timer splitting at midnight keep daily records attached to their intended day.                  | Avoids UTC date shifts and ambiguous cross-day entries.                               |
+| Prevent stale daily-log overwrites         | Daily-log rows carry `updated_at`; before an upsert, persistence compares the saved version with the current database version and reports a conflict.       | Prevents a stale browser session from silently replacing a more recent edit.          |
+| Scope browser state to the active account  | Momentum-prefixed local storage is cleared on sign-out and account switches; other caches are keyed by user.                                               | Avoids exposing one account's cached state to another account using the same browser. |
 | Namespace track problems                   | Problem identifiers include their track identity, including for user-uploaded sheets.                                                                       | Allows different tracks to reuse local IDs without colliding.                         |
 
 ## Repository map
@@ -75,7 +77,7 @@ src/
     components/           Reusable interface components
     lib/                  Supabase client and generic browser cache
     utils/                Date and time calculations
-  styles/                 Global tokens, layout, and responsive styles
+  styles/                 Global theme, layout, and responsive styles
 api/search.js             Authenticated username-search endpoint
 docs/                     Architecture, screenshots, and supporting project notes
 source/                   Editable source text for bundled tracks
@@ -96,11 +98,12 @@ supabase/migrations/      Database schema, policies, and SQL functions
 | Test data             | `src/features/testing/`                                                                                       | Generate isolated sample history from the test-mode development server.             |
 | Shared platform code  | `src/shared/`                                                                                                 | Supabase client, generic cache, common UI, and cross-feature date/time helpers.     |
 
-The Daily Log keeps styles close to the components they describe:
-`CustomDatePicker.css` styles the date picker, `TimeInput.css` styles the
-segmented time field, `ActivityEditor.css` styles activity cards and slots,
-and `FullLog.css` styles history and log summaries. Responsive styles remain
-separate when a component needs viewport or container-specific rules.
+The Daily Log keeps styles close to the components they describe.
+`DailyTracker.css` and `DailyLogPage.css` style the page, while
+`CustomDatePicker.css`, `TimeInput.css`, and `ActivityEditor.css` style their
+respective components. `FullLog.css` styles the history view. Responsive
+styles remain separate when a component needs viewport or container-specific
+rules.
 
 Global styles are imported from `src/main.jsx`. Preserve import order when
 moving CSS: theme overrides and component selectors can depend on the
@@ -199,12 +202,19 @@ activity slots.
    activity, or slot.
 4. Validate sleep and activity intervals with
    `src/shared/utils/time.js`.
-5. Debounce valid changes, serialize writes, and upsert the day record.
+5. Debounce valid changes and serialize writes. Before an upsert, compare the
+   row's saved `updated_at` with the current database value; if another
+   session has changed the row, surface a conflict instead of overwriting it.
 6. Flush pending edits before date changes or history-clearing operations.
 
 Full Log data loads on demand. The history hook caches results for one minute,
 loads ten rows per page plus one extra to detect older records, and
-coordinates history clearing with pending day saves.
+coordinates history clearing with pending day saves. The view supports
+activity, sleep, and unlogged-time filters, expandable day details, and
+navigation back to a selected date's editor. Each day shows active time, sleep,
+unlogged time, and solved totals alongside a timeline. Unlogged time is
+derived from the 24-hour day after subtracting recorded activity and sleep; it
+is a visualization, not a separately persisted field.
 
 The timer hook persists active timer details per account and splits intervals
 at midnight so that each segment is assigned to the correct date. Daily-log

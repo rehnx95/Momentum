@@ -9,7 +9,7 @@ import "./DailyTrackerStatus.responsive.css";
 import "./FullLog.css";
 import "./FullLog.responsive.css";
 import "./DailyTracker.css";
-import "./DailyLogRedesign.css";
+import "./DailyLogPage.css";
 
 export default function DailyTracker({ user, sheets, activityLog, askConfirmation }) {
   const [fullLogToolbarTarget, setFullLogToolbarTarget] = useState(null);
