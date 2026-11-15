@@ -1,4 +1,4 @@
-import { Activity } from "lucide-react";
+import { Activity, Users } from "lucide-react";
 
 const navigation = [
   { id: "tracker", label: "Tracker" },
@@ -47,7 +47,7 @@ function TrackerLoadingContent() {
         </div>
       </section>
       <div className="app-loading-row-list">
-        {Array.from({ length: 5 }, (_, index) => (
+        {Array.from({ length: 4 }, (_, index) => (
           <div className="app-loading-list-row" key={index}>
             <LoadingBar className="app-loading-row-icon" />
             <LoadingBar className="app-loading-row-title" />
@@ -103,10 +103,24 @@ function ProfileLoadingContent() {
             <LoadingBar className="app-loading-section-title" />
             <LoadingBar className="app-loading-button" />
           </div>
-          <div className="app-loading-heatmap">
-            {Array.from({ length: 105 }, (_, index) => (
-              <LoadingBar className={`app-loading-heat-cell tone-${index % 4}`} key={index} />
-            ))}
+          <div className="app-loading-heatmap-clip">
+            <div className="app-loading-heatmap-months">
+              {Array.from({ length: 12 }, (_, index) => (
+                <LoadingBar key={index} />
+              ))}
+            </div>
+            <div className="app-loading-heatmap">
+              {Array.from({ length: 53 }, (_, week) => (
+                <div className="app-loading-heat-week" key={week}>
+                  {Array.from({ length: 7 }, (_, day) => (
+                    <LoadingBar
+                      className={`app-loading-heat-cell tone-${(week + day) % 4}`}
+                      key={day}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </section>
         <section className="app-loading-profile-card">
@@ -130,51 +144,77 @@ function ProfileLoadingContent() {
 function DailyLogLoadingContent() {
   return (
     <>
-      <div className="app-loading-daily-heading">
-        <LoadingBar className="app-loading-section-title" />
+      <header className="app-loading-daily-toolbar">
+        <div className="app-loading-daily-title-group">
+          <LoadingBar className="app-loading-section-title" />
+          <LoadingBar className="app-loading-daily-subtitle" />
+        </div>
+        <LoadingBar className="app-loading-daily-switcher" />
+      </header>
+      <div className="app-loading-daily-date">
+        <LoadingBar className="app-loading-date-arrow" />
         <LoadingBar className="app-loading-button app-loading-date" />
+        <LoadingBar className="app-loading-date-arrow" />
       </div>
-      <div className="app-loading-daily-panels">
-        <section className="app-loading-profile-card">
-          <LoadingBar className="app-loading-section-title" />
-          <LoadingBar className="app-loading-search" />
-        </section>
-        <section className="app-loading-profile-card">
-          <LoadingBar className="app-loading-section-title" />
-          <LoadingBar className="app-loading-search" />
-        </section>
-      </div>
-      <section className="app-loading-profile-card app-loading-daily-activities">
-        <LoadingBar className="app-loading-section-title" />
-        {Array.from({ length: 4 }, (_, index) => (
-          <div className="app-loading-activity-row" key={index}>
-            <LoadingBar className="app-loading-row-title" />
-            <LoadingBar className="app-loading-button" />
+      <div className="app-loading-daily-layout">
+        <section className="app-loading-profile-card app-loading-daily-activities">
+          <div className="app-loading-card-heading">
+            <LoadingBar className="app-loading-section-title" />
+            <LoadingBar className="app-loading-copy" />
           </div>
-        ))}
-      </section>
+          {Array.from({ length: 2 }, (_, index) => (
+            <div className="app-loading-activity-row" key={index}>
+              <LoadingBar className="app-loading-row-icon" />
+              <LoadingBar className="app-loading-row-title" />
+              <LoadingBar className="app-loading-row-count" />
+            </div>
+          ))}
+        </section>
+        <div className="app-loading-daily-panels">
+          <section className="app-loading-profile-card app-loading-quick-log">
+            <LoadingBar className="app-loading-section-title" />
+            <LoadingBar className="app-loading-search" />
+            <div className="app-loading-quick-tags">
+              <LoadingBar />
+              <LoadingBar />
+            </div>
+          </section>
+          <section className="app-loading-profile-card app-loading-sleep">
+            <div className="app-loading-card-heading">
+              <LoadingBar className="app-loading-section-title" />
+              <LoadingBar className="app-loading-copy" />
+            </div>
+            <div className="app-loading-sleep-times">
+              <LoadingBar />
+              <LoadingBar />
+            </div>
+            <LoadingBar className="app-loading-sleep-note" />
+          </section>
+        </div>
+      </div>
     </>
   );
 }
 
 function PeopleLoadingContent() {
   return (
-    <>
-      <LoadingBar className="app-loading-section-title" />
-      <LoadingBar className="app-loading-search" />
-      <section className="app-loading-profile-card app-loading-people-list">
-        {Array.from({ length: 5 }, (_, index) => (
-          <div className="app-loading-activity-row" key={index}>
-            <LoadingBar className="app-loading-avatar app-loading-person-avatar" />
-            <div className="app-loading-person-copy">
-              <LoadingBar className="app-loading-row-title" />
-              <LoadingBar className="app-loading-copy" />
-            </div>
-            <LoadingBar className="app-loading-button" />
-          </div>
-        ))}
+    <div className="app-loading-people-layout">
+      <LoadingBar className="app-loading-section-title app-loading-people-title" />
+      <div className="app-loading-people-description">
+        <LoadingBar />
+        <LoadingBar />
+      </div>
+      <LoadingBar className="app-loading-search app-loading-people-search" />
+      <LoadingBar className="app-loading-people-hint" />
+      <section className="app-loading-people-empty">
+        <Users size={22} aria-hidden="true" />
+        <LoadingBar className="app-loading-people-empty-title" />
+        <div className="app-loading-people-description">
+          <LoadingBar />
+          <LoadingBar />
+        </div>
       </section>
-    </>
+    </div>
   );
 }
 
