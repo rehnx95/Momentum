@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { formatDuration } from "../../../shared/utils/time";
+import { formatDuration, intervalsFor, sleepIntervalsFor } from "../../../shared/utils/time";
 import { getActivityColor } from "../lib/activityColor";
+
+export { intervalsFor, sleepIntervalsFor };
 
 export default function FullLogTimeline({
   activities,

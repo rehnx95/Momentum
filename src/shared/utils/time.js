@@ -95,7 +95,7 @@ export function splitIntervalByDay(startedAt, endedAt) {
   return segments;
 }
 
-function intervalsFor(slot, wraps) {
+export function intervalsFor(slot, wraps) {
   const start = toMinutes(slot?.start);
   const end = toMinutes(slot?.end);
   if (start === null || end === null) return [];
@@ -107,6 +107,15 @@ function intervalsFor(slot, wraps) {
     [start, 1440],
     [0, end],
   ];
+}
+
+export function sleepIntervalsFor(sleepTime, wakeTime) {
+  const sleep = toMinutes(sleepTime);
+  const wake = toMinutes(wakeTime);
+  if (sleep === null || wake === null) return [];
+  if (sleep < wake) return [[sleep, wake]];
+  if (wake === 0) return [];
+  return [[0, wake]];
 }
 
 export function findOverlaps(slotsByActivity) {
