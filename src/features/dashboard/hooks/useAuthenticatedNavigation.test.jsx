@@ -72,7 +72,7 @@ describe("useAuthenticatedNavigation", () => {
 
     act(() => navigation.navigateTo("/missing-page"));
     expect(navigation.notFoundPage).toBe(true);
-    expect(document.title).toBe("Momentum");
+    expect(document.title).toBe("Page not found • Momentum");
 
     act(() => renderer.unmount());
   });

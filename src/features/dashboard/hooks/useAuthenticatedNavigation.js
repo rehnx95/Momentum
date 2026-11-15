@@ -10,7 +10,7 @@ function getPageTitle(pathname = window.location.pathname) {
   if (pathname === "/terms") return "Terms of Service • Momentum";
   const profileMatch = pathname.match(/^\/(?:user|u)\/([A-Za-z0-9-]{3,48})\/?$/);
   if (profileMatch) return `${profileMatch[1]} • Momentum`;
-  return "Momentum";
+  return "Page not found • Momentum";
 }
 
 function applyRouteMetadata(pathname = window.location.pathname) {
