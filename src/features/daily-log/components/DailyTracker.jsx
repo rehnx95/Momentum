@@ -15,7 +15,7 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
   const [fullLogToolbarTarget, setFullLogToolbarTarget] = useState(null);
   const daily = useDailyLog(user, activityLog);
   const title =
-    daily.viewMode === "daily" ? "Daily log" : daily.viewMode === "full" ? "Full log" : "Trends";
+    daily.viewMode === "daily" ? "Daily Log" : daily.viewMode === "full" ? "Full Log" : "Trends";
   const subtitle =
     daily.viewMode === "daily"
       ? `Where your hours went on ${new Date(`${daily.date}T00:00:00`).toLocaleDateString(undefined, { weekday: "long" })}.`
@@ -43,7 +43,7 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
           )}
           <div
             className={`daily-view-switch ${daily.viewMode === "full" ? "" : "daily-view-switch-content-sized"}`}
-            aria-label="Daily log view"
+            aria-label="Daily Log view"
           >
             <button
               type="button"
@@ -51,7 +51,7 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
               aria-pressed={daily.viewMode === "daily"}
               onClick={() => void daily.changeViewMode("daily")}
             >
-              Day
+              Daily Log
             </button>
             <button
               type="button"
@@ -59,7 +59,7 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
               aria-pressed={daily.viewMode === "full"}
               onClick={() => void daily.changeViewMode("full")}
             >
-              Full log
+              Full Log
             </button>
             <button
               type="button"

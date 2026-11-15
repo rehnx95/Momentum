@@ -588,6 +588,15 @@
   background: var(--daily-sleep-bar);
 }
 
+.daily-log-page-shell .full-log-legend i.unlogged {
+  border: 1px solid var(--border-strong);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--border-strong) 0 1px,
+    var(--surface-hover) 1px 2px
+  );
+}
+
 .daily-log-page-shell .full-log-table {
   min-width: 0;
   padding: 0;
@@ -611,7 +620,8 @@
 .daily-log-page-shell .full-log-table-header,
 .daily-log-page-shell .full-log-day-header,
 .daily-log-page-shell .full-log-day-details {
-  grid-template-columns: minmax(7.5rem, max-content) minmax(10rem, 1fr) 5.2rem 4.5rem 3.5rem;
+  grid-template-columns:
+    8rem minmax(10rem, 1fr) 5.2rem 4.5rem 5rem 3.5rem;
   column-gap: 0.8rem;
 }
 
@@ -968,7 +978,7 @@
     display: grid;
     grid-template-columns:
       minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(1.7rem, 0.5fr);
+      minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
     column-gap: 0.4rem;
     min-height: 2.5rem;
     padding: 0.45rem 0.65rem;
@@ -978,7 +988,7 @@
   .daily-log-page-shell .full-log-day-header {
     grid-template-columns:
       minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(1.7rem, 0.5fr);
+      minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
     column-gap: 0.4rem;
     min-height: 0;
     padding: 0.6rem 0.65rem 0.4rem;
@@ -1004,19 +1014,26 @@
     grid-row: 1;
   }
 
-  .daily-log-page-shell .full-log-day-header > .full-log-solved-total {
+  .daily-log-page-shell .full-log-day-header > .full-log-unlogged-total {
     grid-column: 5;
+    grid-row: 1;
+  }
+
+  .daily-log-page-shell .full-log-day-header > .full-log-solved-total {
+    grid-column: 6;
     grid-row: 1;
   }
 
   .daily-log-page-shell .full-log-active-total,
   .daily-log-page-shell .full-log-sleep-total,
+  .daily-log-page-shell .full-log-unlogged-total,
   .daily-log-page-shell .full-log-solved-total {
     font-size: 0.75rem;
   }
 
   .daily-log-page-shell .full-log-active-total small,
   .daily-log-page-shell .full-log-sleep-total small,
+  .daily-log-page-shell .full-log-unlogged-total small,
   .daily-log-page-shell .full-log-solved-total small {
     display: none;
   }
@@ -1025,7 +1042,7 @@
     display: grid;
     grid-template-columns:
       minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(1.7rem, 0.5fr);
+      minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
     column-gap: 0.4rem;
     padding: 0 0.65rem 0.45rem;
   }
@@ -1046,7 +1063,7 @@
   .daily-log-page-shell .full-log-entry {
     grid-template-columns:
       minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(1.7rem, 0.5fr);
+      minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
     column-gap: 0.4rem;
     align-items: center;
   }
@@ -1057,10 +1074,6 @@
 
   .daily-log-page-shell .full-log-entry-duration {
     grid-column: 3;
-  }
-
-  .daily-log-page-shell .full-log-entry-duration.is-sleep {
-    grid-column: 4;
   }
 
   .daily-log-page-shell .full-log-table {
@@ -1106,7 +1119,7 @@
   .daily-log-page-shell .full-log-table-header {
     grid-template-columns:
       minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(1.7rem, 0.5fr);
+      minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
     column-gap: 0.25rem;
     padding-inline: 0.45rem;
   }
@@ -1114,7 +1127,7 @@
   .daily-log-page-shell .full-log-day-header {
     grid-template-columns:
       minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(1.7rem, 0.5fr);
+      minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
     column-gap: 0.25rem;
     padding-inline: 0.45rem;
   }
@@ -1126,7 +1139,7 @@
   .daily-log-page-shell .full-log-day-details {
     grid-template-columns:
       minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(1.7rem, 0.5fr);
+      minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
     column-gap: 0.25rem;
     padding-inline: 0.45rem;
   }
@@ -1159,6 +1172,6 @@
   .daily-log-page-shell .full-log-entry {
     grid-template-columns:
       minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(3rem, 0.7fr)
-      minmax(3rem, 0.5fr);
+      minmax(3rem, 0.7fr) minmax(2.5rem, 0.5fr);
   }
 }

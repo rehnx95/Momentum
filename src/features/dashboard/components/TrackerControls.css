@@ -72,6 +72,7 @@
 }
 
 .tracker-skip-toggle {
+  gap: 0.35rem;
   min-height: 2rem;
   white-space: nowrap;
 }

@@ -1,3 +1,4 @@
+import { Eye, EyeOff } from "lucide-react";
 import "./TrackerControls.css";
 
 const FILTER_OPTIONS = [
@@ -38,6 +39,11 @@ export default function TrackerControls({
             aria-label={hideSkipped ? "Show skipped problems" : "Hide skipped problems"}
             className={`tracker-filter-chip tracker-skip-toggle px-3 py-1 rounded-md text-xs font-medium transition-colors ${chipActive("skip-visibility")}`}
           >
+            {hideSkipped ? (
+              <Eye size={14} aria-hidden="true" />
+            ) : (
+              <EyeOff size={14} aria-hidden="true" />
+            )}
             <span>{hideSkipped ? "Show skip" : "Hide skip"}</span>
           </button>
         </div>

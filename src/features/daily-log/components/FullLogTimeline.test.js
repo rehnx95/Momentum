@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { intervalsFor, sleepIntervalsFor } from "./FullLogTimeline";
+import {
+  intervalsFor,
+  sleepIntervalsFor,
+  unloggedIntervalsFor,
+  unloggedMinutesFor,
+} from "./FullLogTimeline";
 
 describe("Full Log timeline intervals", () => {
   it("maps a daytime slot to its position in the day", () => {
@@ -37,5 +42,40 @@ describe("Full Log timeline intervals", () => {
 
   it("does not render a zero-length interval", () => {
     expect(intervalsFor({ start: "08:00", end: "08:00" }, true)).toEqual([]);
+  });
+
+  it("finds gaps after merging overlapping activity and sleep intervals", () => {
+    expect(
+      unloggedIntervalsFor(
+        [
+          {
+            slots: [
+              { start: "09:00", end: "11:00" },
+              { start: "10:00", end: "12:00" },
+            ],
+          },
+        ],
+        "22:00",
+        "06:00",
+      ),
+    ).toEqual([
+      [360, 540],
+      [720, 1320],
+    ]);
+  });
+
+  it("returns no unlogged intervals when recorded time covers the whole day", () => {
+    expect(
+      unloggedIntervalsFor([
+        {
+          slots: [{ start: "00:00", end: "00:00", endDayOffset: 1 }],
+        },
+      ]),
+    ).toEqual([]);
+  });
+
+  it("calculates unlogged time after subtracting activity and sleep from a day", () => {
+    expect(unloggedMinutesFor(180, 420)).toBe(840);
+    expect(unloggedMinutesFor(1440, 60)).toBe(0);
   });
 });

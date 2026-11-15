@@ -2,7 +2,7 @@ import { Activity, Users } from "lucide-react";
 
 const navigation = [
   { id: "tracker", label: "Tracker" },
-  { id: "daily-log", label: "Daily Log" },
+  { id: "daily-log", label: "Activity Log" },
   { id: "people", label: "People" },
   { id: "profile", label: "Profile" },
 ];

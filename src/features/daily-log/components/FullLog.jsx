@@ -9,7 +9,7 @@ import {
 } from "../../../shared/utils/time";
 import Tooltip from "../../../shared/components/Tooltip";
 import Dropdown from "../../../shared/components/Dropdown";
-import FullLogTimeline from "./FullLogTimeline";
+import FullLogTimeline, { unloggedMinutesFor } from "./FullLogTimeline";
 import { getActivityColor } from "../lib/activityColor";
 
 const PAGE_SIZE = 10;
@@ -47,21 +47,8 @@ function activityBreakdown(row) {
     .filter((activity) => activity.minutes > 0);
 }
 
-function detailEntries(row, activities, filter, activityColors) {
+function detailEntries(activities, filter, activityColors) {
   const details = [];
-  const sleep = sleepTotal(row);
-
-  if ((filter === "All" || filter === "Sleep") && sleep > 0) {
-    details.push({
-      key: "sleep",
-      name: "Sleep",
-      start: row.sleep_time,
-      end: row.wake_time,
-      minutes: sleep,
-      color: "var(--activity-color-sleep)",
-      isSleep: true,
-    });
-  }
 
   activities.forEach((activity) => {
     if (filter !== "All" && activity.name !== filter) return;
@@ -75,7 +62,6 @@ function detailEntries(row, activities, filter, activityColors) {
         end: slot.end,
         minutes,
         color: getActivityColor(activity.name, activityColors),
-        isSleep: false,
       });
     });
   });
@@ -114,23 +100,31 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
         };
       });
   }, [daily.allLogs, daily.problemCounts]);
+  const activityNames = useMemo(
+    () => [
+      ...new Set(
+        entries.flatMap(({ activities }) =>
+          activities
+            .map((activity) => activity.name)
+            .filter((name) => name !== "Sleep" && name !== "Unlogged"),
+        ),
+      ),
+    ],
+    [entries],
+  );
   const activityFilters = useMemo(() => {
-    const names = new Set(
-      entries.flatMap(({ activities }) => activities.map((activity) => activity.name)),
-    );
-    const filters = ["All"];
-    if (entries.some(({ sleep }) => sleep > 0)) filters.push("Sleep");
-    return [...filters, ...names];
-  }, [entries]);
-  const legendItems = activityFilters
-    .filter((filter) => filter !== "All")
-    .map((label) => ({
-      label,
-      color: getActivityColor(label, daily.activityColors),
-    }));
-  const filteredEntries = entries.filter(({ row, activities }) => {
+    return ["All", ...activityNames, "Sleep", "Unlogged"];
+  }, [activityNames]);
+  const legendLabels = activityNames.slice();
+  if (!legendLabels.includes("Sleep")) legendLabels.unshift("Sleep");
+  const legendItems = legendLabels.map((label) => ({
+    label,
+    color: getActivityColor(label, daily.activityColors),
+  }));
+  const filteredEntries = entries.filter(({ activities, sleep, studied }) => {
     if (activityFilter === "All") return true;
-    if (activityFilter === "Sleep") return Boolean(row.sleep_time || row.wake_time);
+    if (activityFilter === "Sleep") return sleep > 0;
+    if (activityFilter === "Unlogged") return unloggedMinutesFor(studied, sleep) > 0;
     return activities.some((activity) => activity.name === activityFilter);
   });
   const visibleEntries = filteredEntries.slice(0, visibleCount);
@@ -265,6 +259,10 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                 {label}
               </span>
             ))}
+            <span>
+              <i className="unlogged" aria-hidden="true" />
+              Unlogged
+            </span>
           </div>
         </header>
 
@@ -273,13 +271,20 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
             <div className="full-log-table">
               <div className="full-log-table-header">
                 <span>Date</span>
-                <span>Share of active time</span>
+                <span className="full-log-timeline-heading" aria-label="Share of time">
+                  Share of time
+                </span>
                 <span>Active</span>
                 <span>Sleep</span>
+                <span>Unlogged</span>
                 <span>Solved</span>
               </div>
               <ul className="full-log-day-list">
                 {visibleEntries.map(({ row, activities, sleep, studied, problems }) => {
+                  const unlogged = unloggedMinutesFor(studied, sleep);
+                  const dayMinutes = studied + sleep + unlogged;
+                  const unloggedPercentage =
+                    dayMinutes > 0 ? Math.round((unlogged / dayMinutes) * 100) : 0;
                   const date = new Date(`${row.date}T00:00:00`);
                   const dayLabel = date.toLocaleDateString(undefined, {
                     weekday: "short",
@@ -291,12 +296,7 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                     month: "short",
                     day: "numeric",
                   });
-                  const details = detailEntries(
-                    row,
-                    activities,
-                    activityFilter,
-                    daily.activityColors,
-                  );
+                  const details = detailEntries(activities, activityFilter, daily.activityColors);
                   const isExpanded = expandedDates?.has(row.date) || false;
                   const visibleEntriesForDate = details.slice(
                     0,
@@ -340,6 +340,9 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                           activities={activities}
                           activityColors={daily.activityColors}
                           totalMinutes={studied}
+                          sleepMinutes={sleep}
+                          sleepTime={row.sleep_time}
+                          wakeTime={row.wake_time}
                           activityFilter={activityFilter}
                         />
                         <span
@@ -355,6 +358,13 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                         >
                           <small>Sleep</small>
                           {row.sleep_time || row.wake_time ? formatDuration(sleep) : "—"}
+                        </span>
+                        <span
+                          className="full-log-unlogged-total"
+                          aria-label={`Unlogged ${formatDuration(unlogged)} · ${unloggedPercentage}%`}
+                        >
+                          <small>Unlogged</small>
+                          {formatDuration(unlogged)} · {unloggedPercentage}%
                         </span>
                         <span
                           className="full-log-solved-total"
@@ -377,25 +387,20 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
                                     </span>
                                     <span className="full-log-entry-name">
                                       <i
-                                        className={entry.isSleep ? "sleep" : ""}
                                         aria-hidden="true"
                                         style={{ "--activity-color": entry.color }}
                                       />
                                       {entry.name}
                                     </span>
                                   </span>
-                                  <span
-                                    className={`full-log-entry-duration${entry.isSleep ? " is-sleep" : ""}`}
-                                  >
+                                  <span className="full-log-entry-duration">
                                     {formatDuration(entry.minutes)}
                                   </span>
                                 </li>
                               ))}
                             </ul>
                           ) : (
-                            <p className="full-log-no-entries">
-                              No activity or sleep entries for this day.
-                            </p>
+                            <p className="full-log-no-entries">No matching activity entries.</p>
                           )}
                           {details.length > visibleEntriesForDate.length && (
                             <button

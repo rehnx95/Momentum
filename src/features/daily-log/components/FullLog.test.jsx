@@ -8,7 +8,7 @@ import FullLog from "./FullLog";
 afterEach(cleanup);
 
 describe("FullLog", () => {
-  it("omits activities without a recorded time slot from its filters and timeline", () => {
+  it("omits untimed activities and shows all of a blank day as unlogged", () => {
     const daily = {
       allLogs: [
         {
@@ -40,9 +40,18 @@ describe("FullLog", () => {
       }),
     ).toBeNull();
     expect(container.querySelector(".full-log-timeline-segment")).toBeNull();
+    expect(container.querySelector(".full-log-timeline-gap").getAttribute("aria-label")).toContain(
+      "Unlogged 24h",
+    );
+    expect(
+      Number.parseFloat(container.querySelector(".full-log-timeline-gap").style.width),
+    ).toBeCloseTo(100, 1);
+    const unloggedTotal = container.querySelector(".full-log-unlogged-total");
+    expect(unloggedTotal.getAttribute("aria-label")).toBe("Unlogged 24h · 100%");
+    expect(unloggedTotal.textContent).toContain("100%");
   });
 
-  it("offers each timed activity and sleep in the full log dropdown", () => {
+  it("filters by activities and includes sleep and unlogged options", () => {
     const daily = {
       allLogs: [
         {
@@ -54,6 +63,11 @@ describe("FullLog", () => {
               id: "reading",
               name: "Reading",
               slots: [{ start: "09:00", end: "10:00" }],
+            },
+            {
+              id: "writing",
+              name: "Writing",
+              slots: [{ start: "10:00", end: "11:00" }],
             },
           ],
         },
@@ -71,6 +85,7 @@ describe("FullLog", () => {
     const filterOptions = within(screen.getByRole("listbox", { name: "Filter full log" }));
     expect(filterOptions.getByRole("option", { name: "All activities" })).toBeTruthy();
     expect(filterOptions.getByRole("option", { name: "Sleep" })).toBeTruthy();
+    expect(filterOptions.getByRole("option", { name: "Unlogged" })).toBeTruthy();
     fireEvent.click(filterOptions.getByRole("option", { name: "Reading" }));
     expect(activityFilter.textContent).toContain("Reading");
     expect(screen.getByRole("group", { name: "Activity colors" })).toBeTruthy();
@@ -80,6 +95,17 @@ describe("FullLog", () => {
     expect(
       within(screen.getByRole("group", { name: "Activity colors" })).getByText("Reading"),
     ).toBeTruthy();
+    expect(
+      within(screen.getByRole("group", { name: "Activity colors" })).getByText("Unlogged"),
+    ).toBeTruthy();
+    expect(container.querySelector(".full-log-timeline-gap")).toBeNull();
+    expect(container.querySelector(".full-log-timeline-segment.is-sleep")).toBeNull();
+    const shareSegments = [...container.querySelectorAll(".full-log-timeline-track > span")];
+    expect(shareSegments).toHaveLength(1);
+    expect(shareSegments[0].getAttribute("aria-label")).toMatch(/^Reading /);
+    expect(Number.parseFloat(shareSegments[0].style.left)).toBe(0);
+    expect(Number.parseFloat(shareSegments[0].style.width)).toBeCloseTo((60 / 1440) * 100, 1);
+    expect(screen.getByLabelText("Unlogged 15h · 63%")).toBeTruthy();
     expect(container.querySelector(".full-log-date-button")).toBeTruthy();
   });
 
@@ -105,7 +131,7 @@ describe("FullLog", () => {
     expect(screen.getByLabelText("3 problems solved")).toBeTruthy();
   });
 
-  it("labels the date, activity share, active time, sleep, and solved columns", () => {
+  it("labels the date, share bar, active time, sleep, unlogged time, and solved columns", () => {
     const daily = {
       allLogs: [
         {
@@ -123,11 +149,15 @@ describe("FullLog", () => {
     };
     const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
 
-    expect(
-      [...container.querySelectorAll(".full-log-table-header > span")].map((item) =>
-        item.textContent.trim(),
-      ),
-    ).toEqual(["Date", "Share of active time", "Active", "Sleep", "Solved"]);
+    const headers = [...container.querySelectorAll(".full-log-table-header > span")];
+    expect(headers[0].textContent.trim()).toBe("Date");
+    expect(headers[1].getAttribute("aria-label")).toBe("Share of time");
+    expect(headers.slice(2).map((item) => item.textContent.trim())).toEqual([
+      "Active",
+      "Sleep",
+      "Unlogged",
+      "Solved",
+    ]);
   });
 
   it("keeps dates collapsed until they are explicitly expanded", () => {
@@ -165,6 +195,58 @@ describe("FullLog", () => {
     expect(container.querySelector(".full-log-day-details")).toBeTruthy();
   });
 
+  it("filters days by sleep and unlogged time", () => {
+    const daily = {
+      allLogs: [
+        {
+          date: "2025-01-02",
+          sleep_time: "23:00",
+          wake_time: "06:00",
+          custom_tasks: [
+            {
+              id: "work",
+              name: "Work",
+              slots: [{ start: "06:00", end: "23:00" }],
+            },
+          ],
+        },
+        {
+          date: "2025-01-01",
+          sleep_time: "",
+          wake_time: "",
+          custom_tasks: [],
+        },
+      ],
+      problemCounts: {},
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+    };
+    const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
+    const activityFilter = screen.getByRole("combobox", { name: "Filter full log" });
+
+    fireEvent.click(activityFilter);
+    fireEvent.click(
+      within(screen.getByRole("listbox", { name: "Filter full log" })).getByRole("option", {
+        name: "Sleep",
+      }),
+    );
+    expect(container.querySelectorAll(".full-log-day")).toHaveLength(1);
+    expect(container.querySelector(".full-log-sleep-total").textContent).toContain("7h");
+    fireEvent.click(container.querySelector(".full-log-expand-button"));
+    expect(container.querySelector(".full-log-day-details").textContent).not.toContain("Sleep");
+
+    fireEvent.click(activityFilter);
+    fireEvent.click(
+      within(screen.getByRole("listbox", { name: "Filter full log" })).getByRole("option", {
+        name: "Unlogged",
+      }),
+    );
+    expect(container.querySelectorAll(".full-log-day")).toHaveLength(1);
+    expect(container.querySelector(".full-log-unlogged-total").textContent).toContain("24h");
+  });
+
   it("includes a solved date even when no daily log was saved", () => {
     const date = getLocalDateKey();
     const daily = {
@@ -181,7 +263,7 @@ describe("FullLog", () => {
     expect(screen.queryByText("No saved daily logs yet.")).toBeNull();
   });
 
-  it("shows activity and overnight sleep ranges with durations in expanded day details", () => {
+  it("omits sleep from expanded details while keeping activity rows", () => {
     const date = getLocalDateKey();
     const daily = {
       allLogs: [
@@ -208,14 +290,11 @@ describe("FullLog", () => {
 
     fireEvent.click(container.querySelector(".full-log-expand-button"));
     const rows = [...container.querySelectorAll(".full-log-entry")];
-    expect(rows).toHaveLength(2);
+    expect(rows).toHaveLength(1);
     expect(rows[0].textContent).toContain("Reading");
     expect(rows[0].textContent).toContain("09:00");
     expect(rows[0].textContent).toContain("1h 30m");
-    expect(rows[1].textContent).toContain("Sleep");
-    expect(rows[1].textContent).toContain("23:00");
-    expect(rows[1].textContent).toContain("06:00");
-    expect(rows[1].textContent).toContain("7h");
+    expect(rows[0].textContent).not.toContain("Sleep");
     expect(screen.getByLabelText("2 problems solved")).toBeTruthy();
   });
 
@@ -256,7 +335,7 @@ describe("FullLog", () => {
     ).toEqual(["00:00", "12:00", "23:00"]);
   });
 
-  it("shows active-time shares as a stacked bar in descending activity duration order", () => {
+  it("keeps activity shares and adds sleep and unlogged shares to the same bar", () => {
     const date = getLocalDateKey();
     const daily = {
       allLogs: [
@@ -280,15 +359,41 @@ describe("FullLog", () => {
     const segments = [...container.querySelectorAll(".full-log-timeline-segment")];
 
     expect(segments).toHaveLength(2);
-    expect(segments[0].getAttribute("aria-label")).toContain("Project 2h · 67%");
+    expect(segments[0].getAttribute("aria-label")).toBe("Project 2h · 8%");
     expect(segments[0].hasAttribute("title")).toBe(false);
-    expect(Number.parseFloat(segments[0].style.width)).toBeCloseTo(66.67, 1);
-    expect(segments[1].getAttribute("aria-label")).toContain("Reading 1h · 33%");
+    expect(Number.parseFloat(segments[0].style.width)).toBeCloseTo(8.33, 1);
+    expect(segments[1].getAttribute("aria-label")).toBe("Reading 1h · 4%");
+    expect(Number.parseFloat(segments[1].style.left)).toBeCloseTo(8.33, 1);
+    expect(Number.parseFloat(segments[1].style.width)).toBeCloseTo(4.17, 1);
+    expect(container.querySelector(".full-log-timeline-segment.is-sleep")).toBeNull();
+    expect(container.querySelector(".full-log-timeline-gap").getAttribute("aria-label")).toBe(
+      "Unlogged 21h · 88%",
+    );
+    segments[0].getBoundingClientRect = () => ({
+      left: 100,
+      top: 80,
+      right: 140,
+      bottom: 92,
+      width: 40,
+      height: 12,
+    });
 
     fireEvent.mouseEnter(segments[0]);
-    expect(screen.getByRole("tooltip").textContent).toContain("Project 2h · 67%");
+    const activityTooltip = screen.getByRole("tooltip");
+    expect(activityTooltip.textContent).toContain("Project 2h · 8%");
+    expect(activityTooltip.parentElement).toBe(document.body);
+    expect(activityTooltip.style.left).toBe("120px");
     fireEvent.mouseLeave(container.querySelector(".full-log-timeline"));
     expect(screen.queryByRole("tooltip")).toBeNull();
+    expect(container.querySelectorAll(".full-log-timeline-gap")).toHaveLength(1);
+
+    fireEvent.mouseEnter(container.querySelector(".full-log-timeline-gap"));
+    const unloggedTooltip = screen.getByRole("tooltip");
+    const tooltipContent = within(unloggedTooltip);
+    expect(tooltipContent.getByText("Unlogged 21h · 88%")).toBeTruthy();
+    expect(tooltipContent.queryByText(/24h - .*active - .*sleep/)).toBeNull();
+    expect(tooltipContent.getByText("00:00–09:00")).toBeTruthy();
+    expect(tooltipContent.getByText("12:00–24:00")).toBeTruthy();
   });
 
   it("reveals more than ten activity entries for an expanded day", () => {

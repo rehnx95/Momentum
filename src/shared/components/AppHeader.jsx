@@ -4,7 +4,7 @@ import Tooltip from "./Tooltip";
 
 const NAV = [
   { id: "tracker", label: "Tracker", path: "/", icon: LayoutList },
-  { id: "daily-log", label: "Daily Log", path: "/daily-log", icon: ClipboardList },
+  { id: "daily-log", label: "Activity Log", path: "/daily-log", icon: ClipboardList },
   { id: "people", label: "People", path: "/people", icon: Users },
   { id: "profile", label: "Profile", path: "/profile", icon: User },
 ];
