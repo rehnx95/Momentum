@@ -11,6 +11,21 @@ export const AppState = {
 const ACCOUNT_CACHE_KEY = "momentum:account-cache";
 const profileRequests = new Map();
 
+function clearAppScopedStorage() {
+  try {
+    const keysToRemove = [];
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (key && key.startsWith("momentum:")) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+  } catch {
+    // Ignore quota or browser-storage errors during sign-out and account switches.
+  }
+}
+
 function fetchProfile(userId) {
   const existingRequest = profileRequests.get(userId);
   if (existingRequest) return existingRequest;
@@ -47,6 +62,7 @@ function readCachedAccount() {
 
 export default function useAuthentication() {
   const [cachedAccount] = useState(readCachedAccount);
+  const previousUserId = useRef(null);
   const [appState, setAppState] = useState(() => {
     if (!cachedAccount) return AppState.LOADING;
     return cachedAccount.profile.onboarding_completed
@@ -72,6 +88,11 @@ export default function useAuthentication() {
       );
     }
 
+    if (user?.id && previousUserId.current && previousUserId.current !== user.id) {
+      clearAppScopedStorage();
+    }
+    if (user?.id) previousUserId.current = user.id;
+
     if (!isSupabaseConfigured) {
       setAuthError(
         "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY, then restart the app.",
@@ -90,6 +111,7 @@ export default function useAuthentication() {
       setAuthError("");
       setUser(session?.user ?? null);
       if (!session) {
+        clearAppScopedStorage();
         localStorage.removeItem(ACCOUNT_CACHE_KEY);
         setProfile(null);
         setAppState(AppState.UNAUTHENTICATED);
@@ -103,6 +125,7 @@ export default function useAuthentication() {
         if (error) throw error;
         setUser(session?.user ?? null);
         if (!session) {
+          clearAppScopedStorage();
           localStorage.removeItem(ACCOUNT_CACHE_KEY);
           setProfile(null);
           setAppState(AppState.UNAUTHENTICATED);
@@ -119,7 +142,7 @@ export default function useAuthentication() {
       active = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!userId || !supabase || loadedProfileUserId.current === userId) return undefined;
@@ -193,7 +216,9 @@ export default function useAuthentication() {
       if (!supabase) return;
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      clearAppScopedStorage();
       localStorage.removeItem(ACCOUNT_CACHE_KEY);
+      previousUserId.current = null;
     } catch (error) {
       console.error("Sign out error:", error);
       setAuthError("Could not sign out. Please try again.");

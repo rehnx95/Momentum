@@ -217,7 +217,7 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
                 htmlFor="onboarding-username"
                 className="block text-sm font-medium text-[#EDEDED] mb-2"
               >
-                Username  <span className="text-muted">*</span>
+                Username (Handle) <span className="text-muted">*</span>
               </label>
               <div className="onboarding-username-field">
                 <User

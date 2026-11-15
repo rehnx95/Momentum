@@ -28,6 +28,13 @@ export default function useDailyLog(user, activityLog = {}) {
     return cached ? JSON.stringify(normalizeLog(cached, dateKey)) : null;
   });
   const savedSnapshotRef = useRef(savedSnapshot);
+  const savedUpdatedAtRef = useRef(
+    (() => {
+      const dateKey = getLocalDateKey();
+      const cached = getDailyLogCache(user.id, dateKey);
+      return cached?.updated_at || null;
+    })(),
+  );
   const [loading, setLoading] = useState(() => !getDailyLogCache(user.id, getLocalDateKey()));
   const [loadFailed, setLoadFailed] = useState(false);
   const [loadRequest, setLoadRequest] = useState(0);
@@ -123,6 +130,7 @@ export default function useDailyLog(user, activityLog = {}) {
       setSavedSnapshot,
       setStatus,
       userId: user.id,
+      savedUpdatedAtRef,
       validationErrors: validation.errors,
     });
 

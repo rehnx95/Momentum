@@ -26,6 +26,7 @@ export default function useDailyLogPersistence({
   setSavedSnapshot,
   setStatus,
   userId,
+  savedUpdatedAtRef = { current: null },
   validationErrors,
 }) {
   const [saving, setSaving] = useState(false);
@@ -54,6 +55,24 @@ export default function useDailyLogPersistence({
           setStatus("Saving…");
           setMessage("");
         }
+        const existing = await supabase
+          .from("daily_logs")
+          .select("updated_at")
+          .eq("user_id", userId)
+          .eq("date", nextDate)
+          .maybeSingle();
+        if (existing?.data && savedUpdatedAtRef.current && existing.data.updated_at) {
+          const savedAt = savedUpdatedAtRef.current;
+          if (savedAt !== existing.data.updated_at) {
+            if (nextDate === dateRef.current) {
+              setStatus("This day changed elsewhere");
+              setMessage("This day changed elsewhere. Reload the date to keep the latest version.");
+            }
+            return false;
+          }
+        }
+
+        const updatedAt = new Date().toISOString();
         const { error } = await supabase.from("daily_logs").upsert(
           {
             user_id: userId,
@@ -65,15 +84,19 @@ export default function useDailyLogPersistence({
             custom_tasks: nextDraft.custom_tasks,
             dsa_hours: null,
             backend_hours: null,
+            updated_at: updatedAt,
           },
           { onConflict: "user_id,date" },
         );
         if (error) throw error;
         invalidateDailyLogHistoryCache(userId);
         invalidateFullLogCache(userId);
-        setDailyLogCache(userId, nextDate, normalizeLog(nextDraft, nextDate));
+        const normalizedLog = normalizeLog(nextDraft, nextDate);
+        normalizedLog.updated_at = updatedAt;
+        setDailyLogCache(userId, nextDate, normalizedLog);
         if (nextDate === dateRef.current) {
           savedSnapshotRef.current = snapshot;
+          savedUpdatedAtRef.current = updatedAt;
           setSavedSnapshot(snapshot);
           setStatus("Saved");
           setMessage("");
@@ -110,6 +133,7 @@ export default function useDailyLogPersistence({
       loadFailed,
       logRef,
       savedSnapshotRef,
+      savedUpdatedAtRef,
       setMessage,
       setSavedSnapshot,
       setStatus,
@@ -130,7 +154,7 @@ export default function useDailyLogPersistence({
     const snapshotAtRequestStart = savedSnapshotRef.current;
     supabase
       .from("daily_logs")
-      .select("date, sleep_time, wake_time, custom_tasks")
+      .select("date, sleep_time, wake_time, custom_tasks, updated_at")
       .eq("user_id", userId)
       .eq("date", date)
       .maybeSingle()
@@ -145,8 +169,10 @@ export default function useDailyLogPersistence({
           JSON.stringify(logRef.current) !== savedSnapshotRef.current;
         if (hasUnsavedChanges) return;
         const snapshot = JSON.stringify(nextLog);
+        nextLog.updated_at = data?.updated_at ?? null;
         setDailyLogCache(userId, date, nextLog);
         savedSnapshotRef.current = snapshot;
+        savedUpdatedAtRef.current = data?.updated_at ?? null;
         setSavedSnapshot(snapshot);
         setLog(nextLog);
         setStatus("Saved");
@@ -175,6 +201,7 @@ export default function useDailyLogPersistence({
     loadRequest,
     logRef,
     savedSnapshotRef,
+    savedUpdatedAtRef,
     setLoadFailed,
     setLoading,
     setLog,
