@@ -59,6 +59,46 @@ textarea {
   .app-tooltip-anchor:has(:focus-visible) .app-tooltip {
     transform: translateY(0);
   }
+
+  .app-header-inner {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.5rem;
+  }
+
+  .app-header .momentum-brand {
+    min-width: 0;
+    gap: 0.45rem;
+  }
+
+  .app-header .momentum-brand-copy,
+  .app-header .momentum-brand-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-nav {
+    gap: 0.15rem;
+  }
+
+  .app-nav button {
+    flex-basis: 5.25rem;
+    gap: 0.3rem;
+    padding-inline: 0.25rem;
+    font-size: 0.78rem;
+  }
+
+  .app-header .signout-label {
+    display: none;
+  }
+
+  .app-header .signout-btn {
+    width: 2.25rem;
+    flex: none;
+    justify-content: center;
+    padding: 0;
+  }
 }
 
 @media (max-width: 767px) {
