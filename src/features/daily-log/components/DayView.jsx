@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDuration, getSlotDurationMinutes } from "../../../shared/utils/time";
 import { getLocalDateKey } from "../../../shared/utils/date";
@@ -35,13 +35,6 @@ function overlapsSleep(warnings, activityName) {
 
 export default function DayView({ daily, sheets = [], askConfirmation }) {
   const [quickActivityName, setQuickActivityName] = useState("");
-  const quickActivityInputRef = useRef(null);
-  const focusQuickActivityInput = () => {
-    if (quickActivityInputRef.current) {
-      quickActivityInputRef.current.focus();
-      quickActivityInputRef.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    }
-  };
   const activities = useMemo(
     () =>
       daily.activeCustomTasks
@@ -150,14 +143,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                   {formatDuration(totalLoggedMinutes + runningTimerMinutes)}
                 </span>
               </div>
-              <button
-                type="button"
-                className="daily-add-activity-button"
-                onClick={focusQuickActivityInput}
-                disabled={entryDisabled}
-              >
-                Add activity
-              </button>
             </div>
 
             {activities.length === 0 && (
@@ -230,7 +215,6 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             </label>
             <div className="quick-log-input-row">
               <input
-                ref={quickActivityInputRef}
                 id="quick-activity-name"
                 type="text"
                 placeholder="What did you work on?"

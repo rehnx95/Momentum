@@ -31,16 +31,16 @@ export default function TrackerControls({
               {label}
             </button>
           ))}
-          <button
-            type="button"
-            onClick={() => setHideSkipped((hidden) => !hidden)}
-            aria-pressed={hideSkipped}
-            aria-label={hideSkipped ? "Show skipped problems" : "Hide skipped problems"}
-            className={`tracker-filter-chip tracker-skip-toggle px-3 py-1 rounded-md text-xs font-medium transition-colors ${chipActive("skip-visibility")}`}
-          >
-            <span>{hideSkipped ? "Show skip" : "Hide skip"}</span>
-          </button>
         </div>
+        <button
+          type="button"
+          onClick={() => setHideSkipped((hidden) => !hidden)}
+          aria-pressed={hideSkipped}
+          aria-label={hideSkipped ? "Show skipped problems" : "Hide skipped problems"}
+          className={`tracker-filter-chip tracker-skip-toggle px-3 py-1 rounded-md text-xs font-medium transition-colors ${chipActive("skip-visibility")}`}
+        >
+          <span>{hideSkipped ? "Show skip" : "Hide skip"}</span>
+        </button>
       </div>
       <span className="tracker-controls-spacer" aria-hidden="true" />
       <div

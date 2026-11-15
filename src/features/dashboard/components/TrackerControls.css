@@ -20,7 +20,8 @@
   gap: 0.4rem;
 }
 
-.tracker-filter-group {
+.tracker-filter-group,
+.tracker-skip-toggle {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
@@ -29,6 +30,12 @@
   border: 1px solid var(--border);
   border-radius: 0.7rem;
   background: var(--surface);
+}
+
+.tracker-skip-toggle {
+  padding: 0.2rem 0.6rem;
+  min-height: 2rem;
+  border-radius: 0.7rem;
 }
 
 .tracker-dashboard-shell:not([data-theme="light"]) .tracker-filter-group {
@@ -94,7 +101,7 @@
 
   .tracker-filter-group {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.15rem;
     min-width: 0;
   }
@@ -104,6 +111,11 @@
     height: 2rem;
     padding-inline: 0.25rem;
     font-size: 0.72rem;
+  }
+
+  .tracker-skip-toggle {
+    width: 100%;
+    justify-content: center;
   }
 
   .tracker-bulk-actions {

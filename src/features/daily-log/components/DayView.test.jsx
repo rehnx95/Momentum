@@ -163,7 +163,6 @@ describe("DayView activity entry", () => {
 
     expect(screen.getByRole("heading", { name: "Activities" })).toBeTruthy();
     expect(screen.getByText("1 category · 1h")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Add activity" })).toBeTruthy();
   });
 
   it("adds a built-in activity when its previous empty slot was discarded", () => {

@@ -1,4 +1,4 @@
-import { RefreshCcw, Search, X } from "lucide-react";
+import { Check, Circle, Minus, RefreshCcw, Search, X } from "lucide-react";
 import AppHeader from "../../shared/components/AppHeader";
 import TrackerControls from "./components/TrackerControls";
 import SheetSwitcher from "../sheets/components/SheetSwitcher";
@@ -237,18 +237,27 @@ export default function TrackerDashboard({ context }) {
                 </div>
               </div>
               <div className="mt-2 pt-2 border-t border-zinc-800/50">
-                <div className="grid grid-cols-3 gap-2 mb-2">
-                  <div className="text-center">
+                <div className="mb-2 grid grid-cols-3 gap-2">
+                  <div className="rounded-lg border border-[#262626] bg-[#121212] p-2 text-center">
+                    <div className="mb-1 flex items-center justify-center gap-1 text-emerald-400">
+                      <Check size={12} />
+                      <span className="text-[10px] uppercase tracking-wide">Done</span>
+                    </div>
                     <div className="text-lg font-bold text-white tabular-nums">{doneCount}</div>
-                    <div className="text-[10px] text-zinc-500 uppercase tracking-wide">Done</div>
                   </div>
-                  <div className="text-center">
+                  <div className="rounded-lg border border-[#262626] bg-[#121212] p-2 text-center">
+                    <div className="mb-1 flex items-center justify-center gap-1 text-amber-300">
+                      <Minus size={12} />
+                      <span className="text-[10px] uppercase tracking-wide">Skipped</span>
+                    </div>
                     <div className="text-lg font-bold text-muted tabular-nums">{skippedCount}</div>
-                    <div className="text-[10px] text-zinc-500 uppercase tracking-wide">Skipped</div>
                   </div>
-                  <div className="text-center">
+                  <div className="rounded-lg border border-[#262626] bg-[#121212] p-2 text-center">
+                    <div className="mb-1 flex items-center justify-center gap-1 text-zinc-400">
+                      <Circle size={10} />
+                      <span className="text-[10px] uppercase tracking-wide">To do</span>
+                    </div>
                     <div className="text-lg font-bold text-white tabular-nums">{todoCount}</div>
-                    <div className="text-[10px] text-zinc-500 uppercase tracking-wide">To Do</div>
                   </div>
                 </div>
                 <button
