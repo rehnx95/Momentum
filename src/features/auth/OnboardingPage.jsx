@@ -320,6 +320,23 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
               </button>
             </div>
           </form>
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[#A1A1A1]">
+            <button
+              type="button"
+              onClick={() => window.location.assign("/privacy")}
+              className="hover:text-[#EDEDED] hover:underline"
+            >
+              Privacy Policy
+            </button>
+            <span>•</span>
+            <button
+              type="button"
+              onClick={() => window.location.assign("/terms")}
+              className="hover:text-[#EDEDED] hover:underline"
+            >
+              Terms of Service
+            </button>
+          </div>
         </div>
       </main>
     </div>

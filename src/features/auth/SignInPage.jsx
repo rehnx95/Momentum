@@ -50,6 +50,23 @@ export default function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
               <span>SECURE SIGN IN</span>
             </div>
             <p className="auth-legal">Your sheets and progress sync to your account.</p>
+            <div className="auth-footer">
+              <button
+                type="button"
+                onClick={() => window.location.assign("/privacy")}
+                className="text-[#A1A1A1] underline-offset-2 hover:text-[#EDEDED] hover:underline"
+              >
+                Privacy Policy
+              </button>
+              <span> • </span>
+              <button
+                type="button"
+                onClick={() => window.location.assign("/terms")}
+                className="text-[#A1A1A1] underline-offset-2 hover:text-[#EDEDED] hover:underline"
+              >
+                Terms of Service
+              </button>
+            </div>
           </div>
         </section>
       </div>

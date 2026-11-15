@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import useAuthentication, { AppState } from "./features/auth/useAuthentication";
+import LegalPage from "./features/dashboard/LegalPage";
 import AppLoadingFallback from "./shared/components/AppLoadingFallback";
 
 const UnauthenticatedView = lazy(() => import("./features/auth/SignInPage"));
@@ -33,6 +34,7 @@ function App() {
     user,
   } = useAuthentication();
   const userId = user?.id;
+  const pathname = typeof window === "undefined" ? "/" : window.location.pathname;
 
   useEffect(() => {
     if (!userId) return;
@@ -42,6 +44,18 @@ function App() {
       console.warn("Could not preload the current page:", error);
     });
   }, [userId]);
+
+  if (pathname === "/privacy" || pathname === "/terms") {
+    return (
+      <div className="auth-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
+        <div className="auth-layout auth-layout-simple">
+          <section className="auth-panel-wrap">
+            <LegalPage mode={pathname === "/privacy" ? "privacy" : "terms"} onBack={() => window.location.assign("/")} />
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   if (appState === AppState.UNAUTHENTICATED) {
     return (
