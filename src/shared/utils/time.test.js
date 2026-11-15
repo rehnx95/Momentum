@@ -109,6 +109,20 @@ describe("time helpers", () => {
       Backend: [{ start: "12:30", end: "14:00" }],
     });
     expect(overlaps).toHaveLength(2);
+    expect(overlaps.map(({ slotIndexA, slotIndexB }) => [slotIndexA, slotIndexB])).toEqual([
+      [0, 1],
+      [1, 0],
+    ]);
+  });
+
+  it("reports one overlap per slot pair across midnight", () => {
+    const overlaps = findOverlaps({
+      Overnight: [{ start: "23:00", end: "01:00", wrap: true }],
+      Early: [{ start: "00:30", end: "02:00", wrap: true }],
+    });
+
+    expect(overlaps).toHaveLength(1);
+    expect(overlaps[0].overlapRanges).toEqual([[30, 60]]);
   });
 
   it("flags invalid ordering and totals beyond one day", () => {
@@ -119,6 +133,12 @@ describe("time helpers", () => {
     });
     expect(invalid.errors.some((error) => error.code === "invalid-slot-order")).toBe(true);
     expect(invalid.totalMinutes).toBe(0);
+    expect(invalid.errors[0]).toMatchObject({
+      activityKey: "dsa",
+      activityId: null,
+      slotIndex: 0,
+      message: "DSA slot 1 must end after it starts.",
+    });
 
     const tooLong = validateDay({
       sleep_time: "22:00",
@@ -128,6 +148,23 @@ describe("time helpers", () => {
       custom_tasks: [],
     });
     expect(tooLong.errors.some((error) => error.code === "day-over-24-hours")).toBe(true);
+  });
+
+  it("explains incomplete or malformed time slots", () => {
+    const result = validateDay({
+      dsa_slots: [{ start: "9:00", end: "" }],
+      backend_slots: [],
+      custom_tasks: [],
+    });
+
+    expect(result.errors).toEqual([
+      expect.objectContaining({
+        code: "invalid-time",
+        activityKey: "dsa",
+        slotIndex: 0,
+        message: "Enter a valid start and end time for DSA slot 1.",
+      }),
+    ]);
   });
 
   it("allows exactly 24 hours and reports long or overlapping study slots", () => {
@@ -142,5 +179,14 @@ describe("time helpers", () => {
     expect(result.totalMinutes).toBe(1440);
     expect(result.warnings.some((warning) => warning.code === "long-slot")).toBe(true);
     expect(result.warnings.some((warning) => warning.code === "overlap")).toBe(true);
+    expect(result.warnings.find((warning) => warning.code === "overlap")).toMatchObject({
+      activityKeyA: "dsa",
+      activityKeyB: "backend",
+      slots: [
+        { activityKey: "dsa", slotIndex: 0 },
+        { activityKey: "backend", slotIndex: 0 },
+      ],
+      message: "DSA slot 1 overlaps Backend slot 1.",
+    });
   });
 });

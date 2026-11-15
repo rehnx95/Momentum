@@ -110,6 +110,43 @@ describe("FullLog", () => {
     expect(container.querySelector(".full-log-date-button")).toBeTruthy();
   });
 
+  it("uses the current sheet title for historical activity names", () => {
+    const daily = {
+      allLogs: [
+        {
+          date: getLocalDateKey(),
+          sleep_time: "",
+          wake_time: "",
+          custom_tasks: [
+            {
+              id: "sheet:sheet-1",
+              sheetId: "sheet-1",
+              name: "algorithms",
+              slots: [{ start: "09:00", end: "10:00" }],
+            },
+          ],
+        },
+      ],
+      problemCounts: {},
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+    };
+    render(
+      <FullLog
+        daily={daily}
+        sheets={[{ id: "sheet-1", title: "Algorithms" }]}
+        askConfirmation={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Filter full log" }));
+    const options = within(screen.getByRole("listbox", { name: "Filter full log" }));
+    expect(options.getByRole("option", { name: "Algorithms" })).toBeTruthy();
+    expect(options.queryByRole("option", { name: "algorithms" })).toBeNull();
+  });
+
   it("shows the saved number of problems solved for each day", () => {
     const date = getLocalDateKey();
     const daily = {

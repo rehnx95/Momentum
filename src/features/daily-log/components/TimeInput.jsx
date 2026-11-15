@@ -63,6 +63,8 @@ export default function TimeInput({
   showPlaceholder = false,
   inputRef,
   onSaveNow,
+  invalid = false,
+  describedBy,
 }) {
   const [segments, setSegments] = useState(() => getSegments(value));
   const pendingAdvance = useRef(null);
@@ -159,6 +161,8 @@ export default function TimeInput({
         data-time-navigation
         data-time-segment="hour"
         aria-label={`${label} hour`}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
         onChange={(event) => changeSegment("hour", event.target.value, event.currentTarget)}
         onFocus={(event) => event.currentTarget.select()}
         onKeyDown={handleKeyDown("hour")}
@@ -176,6 +180,8 @@ export default function TimeInput({
         data-time-navigation
         data-time-segment="minute"
         aria-label={`${label} minute`}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
         onChange={(event) => changeSegment("minute", event.target.value, event.currentTarget)}
         onFocus={(event) => event.currentTarget.select()}
         onKeyDown={handleKeyDown("minute")}

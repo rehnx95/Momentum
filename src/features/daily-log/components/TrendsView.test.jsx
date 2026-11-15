@@ -151,6 +151,46 @@ describe("TrendsView", () => {
     expect(container.querySelector(".sleep-average").getAttribute("data-average")).toBe("420");
   });
 
+  it("uses the current sheet title in chart and time activity labels", () => {
+    const daily = {
+      allLogs: [
+        {
+          date: getLocalDateKey(),
+          sleep_time: "",
+          wake_time: "",
+          custom_tasks: [
+            {
+              id: "sheet:sheet-1",
+              sheetId: "sheet-1",
+              name: "algorithms",
+              slots: [{ start: "09:00", end: "10:00" }],
+            },
+          ],
+        },
+      ],
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      hasOlderLogs: false,
+      loadOlderLogs: vi.fn(),
+    };
+    const { container } = render(
+      <TrendsView daily={daily} sheets={[{ id: "sheet-1", title: "Algorithms" }]} />,
+    );
+    const chartSelect = screen.getByRole("combobox", { name: "Chart activity" });
+
+    fireEvent.click(chartSelect);
+    const chartOptions = within(screen.getByRole("listbox", { name: "Chart activity" }));
+    expect(chartOptions.getByRole("option", { name: "Algorithms" })).toBeTruthy();
+    expect(chartOptions.queryByRole("option", { name: "algorithms" })).toBeNull();
+    fireEvent.click(chartOptions.getByRole("option", { name: "Algorithms" }));
+
+    expect(screen.getByRole("img", { name: /Algorithms hours/ })).toBeTruthy();
+    expect(
+      screen.getByText("Algorithms", { selector: ".trends-time-label span:last-child" }),
+    ).toBeTruthy();
+    expect(container.querySelector(".trends-time-label").textContent).toContain("Algorithms");
+  });
+
   it("limits the chart to the latest seven days on narrow screens", () => {
     const descriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth");
     Object.defineProperty(HTMLElement.prototype, "clientWidth", {

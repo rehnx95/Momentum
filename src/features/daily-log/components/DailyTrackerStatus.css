@@ -15,21 +15,33 @@
   color: var(--warning);
 }
 
-.daily-errors,
-.daily-error-message {
-  color: var(--muted);
+.daily-errors {
+  color: var(--danger);
 }
 
 .daily-save-status {
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
   margin-top: 0.4rem;
   color: var(--muted);
   font-size: 0.75rem;
 }
 
+.daily-save-status-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.65rem;
+  min-width: 0;
+}
+
 .daily-save-status span {
   color: var(--muted);
+}
+
+.daily-save-status .daily-save-message {
+  color: var(--danger);
 }
 
 .daily-save-status button {

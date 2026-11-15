@@ -298,22 +298,12 @@
   margin-right: 0.4rem;
 }
 
-.daily-log-page-shell .activity-card-meta > .activity-sleep-overlap::before {
-  content: none;
-}
-
 .daily-log-page-shell .activity-card-description {
   overflow: hidden;
   color: var(--muted);
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.daily-log-page-shell .activity-sleep-overlap {
-  flex-basis: 100%;
-  color: #ff8a00;
-  font-size: 12px;
 }
 
 .daily-log-page-shell .daily-slot-list {
@@ -345,6 +335,36 @@
   border-radius: 0.5rem;
   background: var(--surface);
   transition: background-color 120ms ease;
+}
+
+.daily-log-page-shell .daily-slot-entry {
+  min-width: 0;
+}
+
+.daily-log-page-shell .daily-slot-row.is-overlapping,
+.daily-log-page-shell .daily-sleep-time-range.is-overlapping {
+  border-color: var(--warning);
+  box-shadow: 0 0 0 1px var(--warning);
+}
+
+.daily-log-page-shell .daily-slot-row.has-slot-error,
+.daily-log-page-shell .daily-sleep-time-range.has-slot-error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 1px var(--danger);
+}
+
+.daily-log-page-shell .daily-slot-feedback,
+.daily-log-page-shell .daily-sleep-feedback {
+  margin: 0.2rem 0 0;
+  padding-left: 1rem;
+  color: var(--warning);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.daily-log-page-shell .daily-slot-feedback.has-slot-error,
+.daily-log-page-shell .daily-sleep-feedback.has-slot-error {
+  color: var(--danger);
 }
 
 .daily-log-page-shell .daily-slot-row:hover,
@@ -459,14 +479,15 @@
 
 .daily-log-page-shell .quick-log-input-row input {
   min-width: 0;
-  min-height: 2.65rem;
+  min-height: 2.5rem;
   margin: 0;
-  padding-inline: 0.85rem;
+  padding-inline: 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 0.85rem;
-  background: transparent;
+  border-radius: 0.5rem;
+  background: var(--surface) !important;
   color: var(--text);
-  font-size: 0.82rem;
+  font-size: 0.875rem;
+  transition: border-color 150ms ease;
 }
 
 .daily-log-page-shell .quick-log-input-row input:focus {
@@ -474,11 +495,19 @@
   outline: none;
 }
 
+.daily-log-page-shell .quick-log-input-row input:autofill,
+.daily-log-page-shell .quick-log-input-row input:-webkit-autofill {
+  background: var(--surface) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--text) !important;
+  caret-color: var(--text);
+}
+
 .daily-log-page-shell .quick-add-primary {
-  min-height: 2.65rem;
+  min-height: 2.5rem;
   padding-inline: 1rem;
   border: 0;
-  border-radius: 0.85rem;
+  border-radius: 0.5rem;
   background: var(--text);
   color: var(--page);
   font-size: 0.82rem;
@@ -625,8 +654,7 @@
 .daily-log-page-shell .full-log-table-header,
 .daily-log-page-shell .full-log-day-header,
 .daily-log-page-shell .full-log-day-details {
-  grid-template-columns:
-    8rem minmax(10rem, 1fr) 5.2rem 4.5rem 5rem 3.5rem;
+  grid-template-columns: 8rem minmax(10rem, 1fr) 5.2rem 4.5rem 5rem 3.5rem;
   column-gap: 0.8rem;
 }
 

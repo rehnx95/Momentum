@@ -2,6 +2,12 @@ import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDuration, getSlotDurationMinutes } from "../../../shared/utils/time";
 import { getLocalDateKey } from "../../../shared/utils/date";
+import {
+  findSheetByTitle,
+  getActivityDisplayName,
+  isSheetActivity,
+  normalizeActivityName,
+} from "../lib/activityName";
 import { getActivityColor, getActivityKey } from "../lib/activityColor";
 import ActivityCard from "./ActivityCard";
 import CustomDatePicker from "./CustomDatePicker";
@@ -13,24 +19,53 @@ function activityTotal(slots) {
   }, 0);
 }
 
-function overlapsSleep(warnings, activityName) {
-  const name = activityName.trim().toLocaleLowerCase();
-  return warnings.some(
-    (warning) =>
-      warning.code === "overlap" &&
-      [warning.activityA, warning.activityB].some(
-        (activity) =>
-          String(activity || "")
-            .trim()
-            .toLocaleLowerCase() === name,
-      ) &&
-      [warning.activityA, warning.activityB].some(
-        (activity) =>
-          String(activity || "")
-            .trim()
-            .toLocaleLowerCase() === "sleep",
-      ),
-  );
+function getActivitySlotFeedback(validation, activityId) {
+  const activityKey = `custom:${activityId}`;
+  const feedbackBySlot = new Map();
+  const addFeedback = (slotIndex, feedback) => {
+    const feedbackForSlot = feedbackBySlot.get(slotIndex) || [];
+    feedbackForSlot.push(feedback);
+    feedbackBySlot.set(slotIndex, feedbackForSlot);
+  };
+
+  validation.errors.forEach((error) => {
+    if (error.activityKey === activityKey && Number.isInteger(error.slotIndex)) {
+      addFeedback(error.slotIndex, { type: "error", message: error.message });
+    }
+  });
+
+  validation.warnings.forEach((warning) => {
+    if (warning.code !== "overlap" || !Array.isArray(warning.slots)) return;
+    warning.slots.forEach((slot, index) => {
+      if (slot.activityKey !== activityKey) return;
+      const otherSlot = warning.slots[index === 0 ? 1 : 0];
+      addFeedback(slot.slotIndex, {
+        type: "overlap",
+        message: `${otherSlot.activity} slot ${otherSlot.slotIndex + 1} overlaps this slot.`,
+      });
+    });
+  });
+
+  return Object.fromEntries(feedbackBySlot);
+}
+
+function getSleepFeedback(validation) {
+  const feedback = validation.errors
+    .filter((error) => ["incomplete-sleep", "invalid-sleep"].includes(error.code))
+    .map((error) => ({ type: "error", message: error.message }));
+
+  validation.warnings.forEach((warning) => {
+    if (warning.code !== "overlap" || !Array.isArray(warning.slots)) return;
+    const sleepSlot = warning.slots.find((slot) => slot.activityKey === "sleep");
+    if (!sleepSlot) return;
+    const otherSlot = warning.slots.find((slot) => slot !== sleepSlot);
+    feedback.push({
+      type: "overlap",
+      message: `${otherSlot.activity} slot ${otherSlot.slotIndex + 1} overlaps Sleep.`,
+    });
+  });
+
+  return feedback;
 }
 
 export default function DayView({ daily, sheets = [], askConfirmation }) {
@@ -40,10 +75,11 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
       daily.activeCustomTasks
         .map((task) => ({
           ...task,
+          name: getActivityDisplayName(task, sheets),
           slots: daily.log.custom_tasks.find((item) => item.id === task.id)?.slots || [],
         }))
         .filter((task) => task.slots.length > 0),
-    [daily.activeCustomTasks, daily.log.custom_tasks],
+    [daily.activeCustomTasks, daily.log.custom_tasks, sheets],
   );
   const entryDisabled = daily.loading || daily.loadFailed;
   const totalLoggedMinutes = activities.reduce(
@@ -55,18 +91,9 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
     Number.isFinite(runningTimerStart) && Number.isFinite(daily.timerNow)
       ? Math.max(0, Math.floor((daily.timerNow - runningTimerStart) / 60_000))
       : 0;
-  const summaryWarnings = daily.validation.warnings.filter(
-    (warning) =>
-      !(
-        warning.code === "overlap" &&
-        [warning.activityA, warning.activityB].some(
-          (activity) =>
-            String(activity || "")
-              .trim()
-              .toLocaleLowerCase() === "sleep",
-        ) &&
-        activities.some((activity) => overlapsSleep([warning], activity.name))
-      ),
+  const summaryWarnings = daily.validation.warnings.filter((warning) => warning.code !== "overlap");
+  const summaryErrors = daily.validation.errors.filter(
+    (error) => !error.activityKey && !["incomplete-sleep", "invalid-sleep"].includes(error.code),
   );
 
   const addQuickActivity = async (event) => {
@@ -74,10 +101,14 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
     const name = quickActivityName.trim();
     if (!name) return;
     const existing = activities.find(
-      (activity) => activity.name.trim().toLowerCase() === name.toLowerCase(),
+      (activity) => normalizeActivityName(activity.name) === normalizeActivityName(name),
     );
     if (existing) daily.addSlot(existing.id);
-    else if (!(await daily.addCustomTask(name))) return;
+    else {
+      const sheet = findSheetByTitle(name, sheets);
+      if (sheet) await daily.addSheetActivity(sheet);
+      else if (!(await daily.addCustomTask(name))) return;
+    }
     setQuickActivityName("");
   };
 
@@ -167,12 +198,8 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                       ? undefined
                       : (color) => daily.setActivityColor?.(activity.name, color)
                   }
-                  fromSheet={Boolean(
-                    activity.sheetId ||
-                    activity.sheet_id ||
-                    String(activity.id || "").startsWith("sheet:"),
-                  )}
-                  overlapsSleep={overlapsSleep(daily.validation.warnings, activity.name)}
+                  fromSheet={isSheetActivity(activity)}
+                  slotFeedback={getActivitySlotFeedback(daily.validation, activity.id)}
                   disabled={entryDisabled}
                   runningTimer={daily.runningTimer}
                   onSaveNow={daily.saveNow}
@@ -195,9 +222,9 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                 ))}
               </ul>
             )}
-            {daily.validation.errors.length > 0 && (
+            {summaryErrors.length > 0 && (
               <ul className="daily-errors" aria-label="Daily log errors">
-                {daily.validation.errors.map((error, index) => (
+                {summaryErrors.map((error, index) => (
                   <li key={`${error.code}-${index}`}>{error.message}</li>
                 ))}
               </ul>
@@ -215,6 +242,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
               <input
                 id="quick-activity-name"
                 type="text"
+                autoComplete="off"
                 placeholder="What did you work on?"
                 value={quickActivityName}
                 onChange={(event) => setQuickActivityName(event.target.value)}
@@ -246,6 +274,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             sleepTime={daily.log.sleep_time || ""}
             wakeTime={daily.log.wake_time || ""}
             totalMinutes={daily.sleptMinutes}
+            feedback={getSleepFeedback(daily.validation)}
             disabled={entryDisabled}
             onSaveNow={daily.saveNow}
             onChange={(field, value) => daily.updateField(field, value)}

@@ -64,21 +64,25 @@ export default function useDailyLogPersistence({
           setStatus("Saving…");
           setMessage("");
         }
-        const existing = await supabase
+        const { data: existingLog, error: existingError } = await supabase
           .from("daily_logs")
           .select("updated_at")
           .eq("user_id", userId)
           .eq("date", nextDate)
           .maybeSingle();
-        if (existing?.data && savedUpdatedAtRef.current && existing.data.updated_at) {
-          const savedAt = savedUpdatedAtRef.current;
-          if (!sameTimestamp(savedAt, existing.data.updated_at)) {
-            if (nextDate === dateRef.current) {
-              setStatus("This day changed elsewhere");
-              setMessage("This day changed elsewhere. Reload the date to keep the latest version.");
-            }
-            return false;
+        if (existingError) throw existingError;
+
+        const savedAt = savedUpdatedAtRef.current;
+        const remoteAt = existingLog?.updated_at;
+        const hasConflict = savedAt
+          ? !remoteAt || !sameTimestamp(savedAt, remoteAt)
+          : Boolean(remoteAt);
+        if (hasConflict) {
+          if (nextDate === dateRef.current) {
+            setStatus("This day changed elsewhere");
+            setMessage("This day changed elsewhere. Reload the date to keep the latest version.");
           }
+          return false;
         }
 
         const updatedAt = new Date().toISOString();
@@ -177,8 +181,8 @@ export default function useDailyLogPersistence({
           savedSnapshotRef.current !== null &&
           JSON.stringify(logRef.current) !== savedSnapshotRef.current;
         if (hasUnsavedChanges) return;
-        const snapshot = JSON.stringify(nextLog);
         nextLog.updated_at = data?.updated_at ?? null;
+        const snapshot = JSON.stringify(nextLog);
         setDailyLogCache(userId, date, nextLog);
         savedSnapshotRef.current = snapshot;
         savedUpdatedAtRef.current = data?.updated_at ?? null;
@@ -237,7 +241,7 @@ export default function useDailyLogPersistence({
   const flushPendingSave = useCallback(async () => {
     window.clearTimeout(autosaveTimer.current);
     if (loading && !loadFailed) return false;
-    if (loadFailed) return true;
+    if (loadFailed) return JSON.stringify(logRef.current) === savedSnapshotRef.current;
     if (JSON.stringify(logRef.current) === savedSnapshotRef.current) return true;
     return saveLog(logRef.current, dateRef.current);
   }, [dateRef, loadFailed, loading, logRef, saveLog, savedSnapshotRef]);

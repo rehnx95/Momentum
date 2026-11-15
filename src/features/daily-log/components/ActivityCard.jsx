@@ -28,15 +28,17 @@ export default function ActivityCard({
   onRemoveActivity,
   onDiscardEmptySlot,
   activityColor,
+  slotFeedback = {},
   onSetActivityColor,
   fromSheet = false,
-  overlapsSleep = false,
   allowAddSlot = true,
   allowRemoveActivity = true,
   allowRemoveSlot = true,
   startInputRef,
 }) {
   const cardRef = useRef(null);
+  const colorToggleRef = useRef(null);
+  const colorPickerRef = useRef(null);
   const pendingSlotFocus = useRef(false);
   const previousSlotCount = useRef(slots.length);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
@@ -54,6 +56,23 @@ export default function ActivityCard({
     }
     previousSlotCount.current = slots.length;
   }, [activityId, slots.length]);
+
+  useEffect(() => {
+    if (!colorPickerOpen) return undefined;
+
+    const closeColorPickerOnOutsidePointer = (event) => {
+      if (
+        colorPickerRef.current?.contains(event.target) ||
+        colorToggleRef.current?.contains(event.target)
+      ) {
+        return;
+      }
+      setColorPickerOpen(false);
+    };
+
+    document.addEventListener("pointerdown", closeColorPickerOnOutsidePointer);
+    return () => document.removeEventListener("pointerdown", closeColorPickerOnOutsidePointer);
+  }, [colorPickerOpen]);
 
   useEffect(() => {
     const discardUnfilledSlots = (event) => {
@@ -111,11 +130,10 @@ export default function ActivityCard({
           <strong className="activity-card-name">{activityName}</strong>
         </div>
         <div className="activity-card-meta">
-          {fromSheet && <span className="activity-from-sheet">From sheet</span>}
+          {fromSheet && <span className="activity-from-sheet"></span>}
           {activityDescription && (
             <span className="activity-card-description">{activityDescription}</span>
           )}
-          {overlapsSleep && <span className="activity-sleep-overlap">Overlaps sleep</span>}
         </div>
       </div>
       {visibleSlots.length > 0 && (
@@ -126,6 +144,7 @@ export default function ActivityCard({
               activityName={activityName}
               index={index}
               slot={slot}
+              issues={slotFeedback[index] || []}
               startInputRef={index === 0 ? startInputRef : undefined}
               onSaveNow={onSaveNow}
               slotDescription={
@@ -146,6 +165,7 @@ export default function ActivityCard({
           {onSetActivityColor && (
             <Tooltip label="Choose activity color">
               <button
+                ref={colorToggleRef}
                 type="button"
                 className="activity-color-toggle"
                 aria-label={`Choose color for ${activityName}`}
@@ -199,7 +219,12 @@ export default function ActivityCard({
         </div>
       )}
       {colorPickerOpen && (
-        <div className="activity-color-picker" role="group" aria-label={`${activityName} color`}>
+        <div
+          ref={colorPickerRef}
+          className="activity-color-picker"
+          role="group"
+          aria-label={`${activityName} color`}
+        >
           <div className="activity-color-swatches">
             {ACTIVITY_COLOR_PALETTE.map(({ id, name, hex }) => (
               <button

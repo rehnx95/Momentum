@@ -9,6 +9,7 @@ import {
 } from "../../../shared/utils/time";
 import Tooltip from "../../../shared/components/Tooltip";
 import Dropdown from "../../../shared/components/Dropdown";
+import { getActivityDisplayName, isSheetActivity } from "../lib/activityName";
 import FullLogTimeline, { unloggedMinutesFor } from "./FullLogTimeline";
 import { getActivityColor } from "../lib/activityColor";
 
@@ -31,19 +32,21 @@ function sleepTotal(row) {
   );
 }
 
-function activityBreakdown(row) {
+function activityBreakdown(row, sheets) {
   return (Array.isArray(row.custom_tasks) ? row.custom_tasks : [])
-    .map((task) => ({
-      id: task.id,
-      name:
-        String(task.name || "Activity")
-          .trim()
-          .toLowerCase() === "dsa"
+    .map((task) => {
+      const name = isSheetActivity(task)
+        ? getActivityDisplayName(task, sheets) || "Activity"
+        : String(task.name || "Activity").trim().toLowerCase() === "dsa"
           ? "DSA"
-          : task.name || "Activity",
-      slots: Array.isArray(task.slots) ? task.slots : [],
-      minutes: slotTotal(task.slots || []),
-    }))
+          : task.name || "Activity";
+      return {
+        id: task.id,
+        name,
+        slots: Array.isArray(task.slots) ? task.slots : [],
+        minutes: slotTotal(task.slots || []),
+      };
+    })
     .filter((activity) => activity.minutes > 0);
 }
 
@@ -69,7 +72,7 @@ function detailEntries(activities, filter, activityColors) {
   return details.sort((first, second) => toMinutes(first.start) - toMinutes(second.start));
 }
 
-export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
+export default function FullLog({ daily, sheets = [], askConfirmation, toolbarContainer }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activityFilter, setActivityFilter] = useState("All");
   const [expandedDates, setExpandedDates] = useState(null);
@@ -90,7 +93,7 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
           wake_time: "",
           custom_tasks: [],
         };
-        const activities = activityBreakdown(row);
+        const activities = activityBreakdown(row, sheets);
         return {
           row,
           activities,
@@ -99,7 +102,7 @@ export default function FullLog({ daily, askConfirmation, toolbarContainer }) {
           problems: daily.problemCounts[row.date] || 0,
         };
       });
-  }, [daily.allLogs, daily.problemCounts]);
+  }, [daily.allLogs, daily.problemCounts, sheets]);
   const activityNames = useMemo(
     () => [
       ...new Set(

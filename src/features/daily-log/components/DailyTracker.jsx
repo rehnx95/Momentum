@@ -22,6 +22,14 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
       : daily.viewMode === "full"
         ? "Every day at a glance."
         : "How your days add up over time.";
+  const canSaveNow =
+    daily.dirty &&
+    !daily.saving &&
+    !daily.loading &&
+    !daily.loadFailed &&
+    daily.status !== "This day changed elsewhere" &&
+    daily.validation.errors.length === 0;
+  const showSaveStatus = daily.status || daily.message || daily.dirty;
 
   return (
     <section className="daily-tracker surface-card" aria-labelledby="daily-log-title">
@@ -73,21 +81,35 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
         </div>
       </header>
 
+      {showSaveStatus && (
+        <div
+          className="daily-save-status"
+          role={daily.message ? "alert" : "status"}
+          aria-live={daily.message ? "assertive" : "polite"}
+        >
+          <div className="daily-save-status-copy">
+            {daily.status && <span>{daily.status}</span>}
+            {daily.message && <span className="daily-save-message">{daily.message}</span>}
+          </div>
+          {canSaveNow && (
+            <button type="button" onClick={() => void daily.saveNow()}>
+              {daily.status === "Could not save" ? "Retry save" : "Save now"}
+            </button>
+          )}
+        </div>
+      )}
+
       {daily.viewMode === "daily" ? (
         <DayView daily={daily} sheets={sheets} askConfirmation={askConfirmation} />
       ) : daily.viewMode === "full" ? (
         <FullLog
           daily={daily}
+          sheets={sheets}
           askConfirmation={askConfirmation}
           toolbarContainer={fullLogToolbarTarget}
         />
       ) : (
-        <TrendsView daily={daily} />
-      )}
-      {daily.message && (
-        <p className="daily-error-message" role="alert">
-          {daily.message}
-        </p>
+        <TrendsView daily={daily} sheets={sheets} />
       )}
     </section>
   );

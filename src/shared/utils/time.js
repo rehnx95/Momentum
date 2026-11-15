@@ -123,9 +123,7 @@ export function findOverlaps(slotsByActivity) {
   Object.entries(slotsByActivity || {}).forEach(([activity, entries]) => {
     (Array.isArray(entries) ? entries : []).forEach((slot, slotIndex) => {
       const intervals = intervalsFor(slot, Boolean(slot?.wrap));
-      intervals.forEach(([start, end]) => {
-        slots.push({ activity, slot, slotIndex, start, end });
-      });
+      if (intervals.length) slots.push({ activity, slot, slotIndex, intervals });
     });
   });
 
@@ -134,26 +132,25 @@ export function findOverlaps(slotsByActivity) {
     for (let j = i + 1; j < slots.length; j += 1) {
       const first = slots[i];
       const second = slots[j];
-      if (first.slot === second.slot && first.activity === second.activity) continue;
-      if (first.start < second.end && second.start < first.end) {
-        const duplicate = overlaps.some(
-          (overlap) =>
-            overlap.slotA === first.slot &&
-            overlap.slotB === second.slot &&
-            overlap.activityA === first.activity &&
-            overlap.activityB === second.activity,
-        );
-        if (!duplicate) {
-          overlaps.push({
-            activityA: first.activity,
-            slotA: first.slot,
-            slotIndexA: first.slotIndex,
-            activityB: second.activity,
-            slotB: second.slot,
-            slotIndexB: second.slotIndex,
-          });
-        }
-      }
+      const overlapRanges = first.intervals.flatMap(([firstStart, firstEnd]) =>
+        second.intervals
+          .map(([secondStart, secondEnd]) => [
+            Math.max(firstStart, secondStart),
+            Math.min(firstEnd, secondEnd),
+          ])
+          .filter(([start, end]) => start < end),
+      );
+      if (!overlapRanges.length) continue;
+
+      overlaps.push({
+        activityA: first.activity,
+        slotA: first.slot,
+        slotIndexA: first.slotIndex,
+        activityB: second.activity,
+        slotB: second.slot,
+        slotIndexB: second.slotIndex,
+        overlapRanges,
+      });
     }
   }
   return overlaps;
@@ -163,19 +160,25 @@ function collectStudyActivities(log) {
   return [
     {
       key: "dsa",
+      id: null,
       label: "DSA",
       slots: Array.isArray(log?.dsa_slots) ? log.dsa_slots : [],
     },
     {
       key: "backend",
+      id: null,
       label: "Backend",
       slots: Array.isArray(log?.backend_slots) ? log.backend_slots : [],
     },
-    ...(Array.isArray(log?.custom_tasks) ? log.custom_tasks : []).map((task, index) => ({
-      key: `custom:${task.id || index}`,
-      label: task.name || "Custom activity",
-      slots: Array.isArray(task.slots) ? task.slots : [],
-    })),
+    ...(Array.isArray(log?.custom_tasks) ? log.custom_tasks : []).map((task, index) => {
+      const id = task.id ?? index;
+      return {
+        key: `custom:${id}`,
+        id: task.id ?? null,
+        label: task.name || "Custom activity",
+        slots: Array.isArray(task.slots) ? task.slots : [],
+      };
+    }),
   ];
 }
 
@@ -185,7 +188,7 @@ export function validateDay(log) {
   const activities = collectStudyActivities(log);
   let totalMinutes = 0;
 
-  activities.forEach(({ label: activity, slots }) => {
+  activities.forEach(({ key, id, label: activity, slots }) => {
     slots.forEach((slot, slotIndex) => {
       const start = toMinutes(slot?.start);
       const end = toMinutes(slot?.end);
@@ -194,8 +197,10 @@ export function validateDay(log) {
           errors.push({
             code: "invalid-time",
             activity,
+            activityKey: key,
+            activityId: id,
             slotIndex,
-            message: `${activity} slot ${slotIndex + 1} needs valid start and end times.`,
+            message: `Enter a valid start and end time for ${activity} slot ${slotIndex + 1}.`,
           });
         }
         return;
@@ -207,6 +212,8 @@ export function validateDay(log) {
           warnings.push({
             code: "long-slot",
             activity,
+            activityKey: key,
+            activityId: id,
             slotIndex,
             message: `${activity} slot ${slotIndex + 1} is longer than 8 hours.`,
           });
@@ -217,6 +224,8 @@ export function validateDay(log) {
         errors.push({
           code: "invalid-slot-order",
           activity,
+          activityKey: key,
+          activityId: id,
           slotIndex,
           message: `${activity} slot ${slotIndex + 1} must end after it starts.`,
         });
@@ -228,6 +237,8 @@ export function validateDay(log) {
         warnings.push({
           code: "long-slot",
           activity,
+          activityKey: key,
+          activityId: id,
           slotIndex,
           message: `${activity} slot ${slotIndex + 1} is longer than 8 hours.`,
         });
@@ -276,12 +287,27 @@ export function validateDay(log) {
   findOverlaps(overlapActivities).forEach((overlap) => {
     const activityA = overlapLabels.get(overlap.activityA) || overlap.activityA;
     const activityB = overlapLabels.get(overlap.activityB) || overlap.activityB;
+    const slotLabel = (activity, slotIndex) => `${activity} slot ${slotIndex + 1}`;
     warnings.push({
       code: "overlap",
       ...overlap,
+      activityKeyA: overlap.activityA,
+      activityKeyB: overlap.activityB,
       activityA,
       activityB,
-      message: `${activityA} overlaps ${activityB}.`,
+      slots: [
+        {
+          activityKey: overlap.activityA,
+          activity: activityA,
+          slotIndex: overlap.slotIndexA,
+        },
+        {
+          activityKey: overlap.activityB,
+          activity: activityB,
+          slotIndex: overlap.slotIndexB,
+        },
+      ],
+      message: `${slotLabel(activityA, overlap.slotIndexA)} overlaps ${slotLabel(activityB, overlap.slotIndexB)}.`,
     });
   });
 

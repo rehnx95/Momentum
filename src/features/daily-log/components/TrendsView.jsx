@@ -9,6 +9,7 @@ import { getLocalDateKey } from "../../../shared/utils/date";
 import Dropdown from "../../../shared/components/Dropdown";
 import Tooltip from "../../../shared/components/Tooltip";
 import { SleepStudyGraph } from "../../activity/components/SleepStudyChart";
+import { getActivityDisplayName, isSheetActivity } from "../lib/activityName";
 import { getActivityColor } from "../lib/activityColor";
 
 const EMPTY_LOGS = [];
@@ -20,16 +21,14 @@ function activityName(name) {
   return value.toLowerCase() === "dsa" ? "DSA Sheet" : value;
 }
 
-function isSheetActivity(task) {
-  return Boolean(task.sheetId || task.sheet_id || String(task.id || "").startsWith("sheet:"));
-}
-
-function activityEntries(log) {
+function activityEntries(log, sheets) {
   const activities = new Map();
   const tasks = Array.isArray(log?.custom_tasks) ? log.custom_tasks : [];
 
   tasks.forEach((task) => {
-    const name = activityName(task.name);
+    const name = isSheetActivity(task)
+      ? getActivityDisplayName(task, sheets)
+      : activityName(task.name);
     if (!name) return;
     const minutes = (Array.isArray(task.slots) ? task.slots : []).reduce(
       (total, slot) => total + (getSlotDurationMinutes(slot) || 0),
@@ -111,7 +110,7 @@ function RangeNavigation({
   );
 }
 
-export default function TrendsView({ daily }) {
+export default function TrendsView({ daily, sheets = [] }) {
   const [chartSelection, setChartSelection] = useState("active");
   const [chartOffset, setChartOffset] = useState(0);
   const [weekOffset, setWeekOffset] = useState(0);
@@ -141,14 +140,14 @@ export default function TrendsView({ daily }) {
   const activityOptions = useMemo(() => {
     const byKey = new Map();
     allLogs.forEach((log) => {
-      activityEntries(log).forEach(({ key, name, isSheet }) => {
+      activityEntries(log, sheets).forEach(({ key, name, isSheet }) => {
         if (!byKey.has(key)) byKey.set(key, { key, name, isSheet });
       });
     });
     return [...byKey.values()].sort((first, second) =>
       first.name.localeCompare(second.name, undefined, { sensitivity: "base" }),
     );
-  }, [allLogs]);
+  }, [allLogs, sheets]);
   const chartModes = useMemo(
     () => [
       { id: "sleep", label: "Sleep", title: "Sleep hours", series: ["sleep"] },
@@ -187,7 +186,7 @@ export default function TrendsView({ daily }) {
     const chartDays = dates.map((date) => {
       const key = dateKey(date);
       const log = logsByDate.get(key);
-      const activities = activityEntries(log);
+      const activities = activityEntries(log, sheets);
       const activeMinutes = chartMode.activityKey
         ? activities.find((activity) => activity.key === chartMode.activityKey)?.minutes || 0
         : activities.reduce((total, activity) => total + activity.minutes, 0);
@@ -217,12 +216,14 @@ export default function TrendsView({ daily }) {
       : null;
     const totalActive = logsInRange.reduce(
       (total, log) =>
-        total + activityEntries(log).reduce((sum, activity) => sum + activity.minutes, 0),
+        total + activityEntries(log, sheets).reduce((sum, activity) => sum + activity.minutes, 0),
       0,
     );
     const daysLogged = new Set(
       logsInRange
-        .filter((log) => activityEntries(log).length > 0 || log.sleep_time || log.wake_time)
+        .filter(
+          (log) => activityEntries(log, sheets).length > 0 || log.sleep_time || log.wake_time,
+        )
         .map((log) => log.date),
     ).size;
     const averageActive = logsInRange.length ? totalActive / logsInRange.length : null;
@@ -238,7 +239,7 @@ export default function TrendsView({ daily }) {
         averageActive: averageActive === null ? "—" : formatDuration(averageActive),
       },
     };
-  }, [allLogs, chartMode, chartOffset, chartWindowDays, todayKey]);
+  }, [allLogs, chartMode, chartOffset, chartWindowDays, sheets, todayKey]);
 
   const { weekRangeLabel, timeWent, totalTimeWent, weekStartKey } = useMemo(() => {
     const logsByDate = new Map(allLogs.map((log) => [log.date, log]));
@@ -253,7 +254,7 @@ export default function TrendsView({ daily }) {
     });
     const totals = new Map();
     dates.forEach((date) => {
-      activityEntries(logsByDate.get(dateKey(date))).forEach(({ name, minutes }) => {
+      activityEntries(logsByDate.get(dateKey(date)), sheets).forEach(({ name, minutes }) => {
         const key = name.toLowerCase();
         const existing = totals.get(key);
         totals.set(key, {
@@ -282,7 +283,7 @@ export default function TrendsView({ daily }) {
           color: getActivityColor(name, daily.activityColors),
         })),
     };
-  }, [allLogs, daily.activityColors, todayKey, weekOffset]);
+  }, [allLogs, daily.activityColors, sheets, todayKey, weekOffset]);
 
   const requiredStartKey = [chartStartKey, weekStartKey].sort()[0];
   const oldestLoadedDate = allLogs[allLogs.length - 1]?.date;

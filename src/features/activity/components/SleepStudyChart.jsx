@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "../../../shared/lib/supabase";
 import {
   getDailyLogHistoryCache,
@@ -223,9 +224,12 @@ export function SleepStudyGraph({
             );
           })}
         </svg>
-        {tooltip && (
+      </div>
+      {tooltip &&
+        typeof document !== "undefined" &&
+        createPortal(
           <div
-            className="hm-tip"
+            className="sleep-study-tooltip"
             role="tooltip"
             style={{
               left: tooltip.x,
@@ -233,9 +237,9 @@ export function SleepStudyGraph({
             }}
           >
             {tooltip.text}
-          </div>
+          </div>,
+          document.body,
         )}
-      </div>
     </section>
   );
 }

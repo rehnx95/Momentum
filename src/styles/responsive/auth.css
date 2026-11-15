@@ -1,59 +1,173 @@
-@media (max-width: 760px) {
+@media (max-width: 980px) {
   .auth-layout {
-    width: min(100%, 38rem);
     grid-template-columns: minmax(0, 1fr);
-    gap: 1.75rem;
-    padding: 2rem clamp(0.75rem, 5vw, 2rem);
-  }
-
-  .auth-showcase {
-    padding: 0;
+    gap: 2.5rem;
+    padding-block: 3.5rem;
   }
 
   .auth-showcase-copy {
-    margin-top: 2rem;
+    max-width: 46rem;
   }
 
-  .auth-showcase-copy h1 {
-    max-width: 12ch;
-    font-size: clamp(2.4rem, 11vw, 4.5rem);
+  .landing-hero-visual {
+    width: min(100%, 44rem);
+    justify-self: center;
   }
 
-  .auth-showcase-copy p {
-    max-width: 34rem;
-  }
-
-  .auth-preview,
-  .auth-showcase-footnote {
-    display: none;
-  }
-
-  .auth-panel-wrap {
-    min-height: auto;
-    padding: 0;
-  }
-
-  .auth-panel {
-    padding: clamp(1.25rem, 5vw, 2rem);
+  .landing-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 420px) {
-  .auth-layout {
-    gap: 1.25rem;
-    padding: 1.25rem 0.75rem;
+@media (max-width: 760px) {
+  .landing-header-inner {
+    min-height: 4.5rem;
   }
 
-  .auth-showcase-copy {
-    margin-top: 1.25rem;
+  .landing-nav {
+    display: none;
+  }
+
+  .auth-layout {
+    gap: 2rem;
+    padding-block: 3rem 3.5rem;
   }
 
   .auth-showcase-copy h1 {
-    font-size: clamp(2.1rem, 10vw, 2.8rem);
+    max-width: 13ch;
+    font-size: clamp(3rem, 9vw, 4.7rem);
   }
 
-  .auth-preview-footer {
+  .landing-final-cta {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .landing-header-inner {
+    gap: 0.75rem;
+    padding-inline: 1rem;
+  }
+
+  .landing-brand {
+    gap: 0.55rem;
+    font-size: 0.94rem;
+  }
+
+  .landing-brand-mark {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .landing-header-cta {
+    min-height: 2.5rem;
+    padding-inline: 0.8rem;
+  }
+
+  .auth-layout {
+    gap: 1.5rem;
+    padding: 2.5rem 1rem 3.25rem;
+  }
+
+  .auth-showcase-copy {
+    margin-top: 0;
+  }
+
+  .auth-showcase-copy h1 {
+    font-size: clamp(2.7rem, 12vw, 4rem);
+  }
+
+  .landing-hero-actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .google-signin-button.landing-google-button {
+    width: 100%;
+  }
+
+  .landing-secondary-link {
+    justify-content: center;
+    padding-block: 0.35rem;
+  }
+
+  .landing-preview-topbar {
+    padding-inline: 0.9rem;
+  }
+
+  .landing-preview-content {
+    gap: 0.8rem;
+    padding: 0.9rem;
+  }
+
+  .landing-preview-stats {
+    gap: 0.4rem;
+  }
+
+  .landing-preview-stat {
+    gap: 0.35rem;
+    padding: 0.55rem;
+  }
+
+  .landing-preview-stat > span {
+    font-size: 0.56rem;
+  }
+
+  .landing-preview-stat strong {
+    font-size: 0.78rem;
+  }
+
+  .landing-preview-date {
+    display: none;
+  }
+
+  .landing-floating-note {
+    right: 0.5rem;
+    font-size: 0.62rem;
+  }
+
+  .landing-section {
+    padding: 3.5rem 1rem;
+  }
+
+  .landing-section-heading {
+    margin-bottom: 1.75rem;
+    text-align: left;
+  }
+
+  .landing-section-heading h2 {
+    font-size: clamp(1.8rem, 8vw, 2.4rem);
+  }
+
+  .landing-feature-grid,
+  .landing-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .landing-feature-card {
+    min-height: 0;
+  }
+
+  .landing-step {
+    padding: 1rem 0.25rem;
+  }
+
+  .landing-final-cta {
+    width: calc(100% - 2rem);
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .landing-final-cta .landing-google-button {
+    width: 100%;
+  }
+
+  .landing-footer {
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1.25rem 1rem;
   }
 }

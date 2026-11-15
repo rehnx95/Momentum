@@ -124,6 +124,138 @@ describe("useDailyLogPersistence", () => {
     expect(setLog).toHaveBeenCalledWith(expect.objectContaining({ date: "2025-03-14" }));
     expect(setStatus).toHaveBeenCalledWith("Saved");
     expect(setLoading).toHaveBeenCalled();
+    expect(setSavedSnapshot).toHaveBeenLastCalledWith(JSON.stringify(setLog.mock.calls[0][0]));
+  });
+
+  it("allows overlapping slots to save while keeping overlap validation as a warning", async () => {
+    const date = "2025-03-14";
+    const baseLog = {
+      date,
+      sleep_time: "",
+      wake_time: "",
+      dsa_slots: [],
+      backend_slots: [],
+      custom_tasks: [],
+    };
+    const logRef = { current: baseLog };
+    const savedSnapshotRef = { current: JSON.stringify(baseLog) };
+    const upsert = vi.fn().mockResolvedValue({ error: null });
+    fromMock.mockImplementation(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+      upsert,
+    }));
+    let hookResult;
+
+    function HookHarness() {
+      hookResult = useDailyLogPersistence({
+        date,
+        dateRef: { current: date },
+        dirty: false,
+        loadFailed: false,
+        loadRequest: 0,
+        loading: false,
+        log: logRef.current,
+        logRef,
+        savedSnapshotRef,
+        setLoadFailed: vi.fn(),
+        setLoading: vi.fn(),
+        setLog: vi.fn(),
+        setMessage: vi.fn(),
+        setSavedSnapshot: vi.fn(),
+        setStatus: vi.fn(),
+        userId: "user-1",
+        validationErrors: [],
+      });
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    let result;
+    await act(async () => {
+      result = await hookResult.saveLog(
+        {
+          ...baseLog,
+          custom_tasks: [
+            { id: "reading", name: "Reading", slots: [{ start: "09:00", end: "11:00" }] },
+            { id: "coding", name: "Coding", slots: [{ start: "10:00", end: "12:00" }] },
+          ],
+        },
+        date,
+      );
+    });
+
+    expect(result).toBe(true);
+    expect(upsert).toHaveBeenCalledOnce();
+  });
+
+  it("does not save an invalid time slot", async () => {
+    const date = "2025-03-14";
+    const logRef = {
+      current: { date, sleep_time: "", wake_time: "", custom_tasks: [] },
+    };
+    const savedSnapshotRef = { current: JSON.stringify(logRef.current) };
+    const upsert = vi.fn();
+    const setStatus = vi.fn();
+    fromMock.mockImplementation(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+      upsert,
+    }));
+    let hookResult;
+
+    function HookHarness() {
+      hookResult = useDailyLogPersistence({
+        date,
+        dateRef: { current: date },
+        dirty: false,
+        loadFailed: false,
+        loadRequest: 0,
+        loading: false,
+        log: logRef.current,
+        logRef,
+        savedSnapshotRef,
+        setLoadFailed: vi.fn(),
+        setLoading: vi.fn(),
+        setLog: vi.fn(),
+        setMessage: vi.fn(),
+        setSavedSnapshot: vi.fn(),
+        setStatus,
+        userId: "user-1",
+        validationErrors: [],
+      });
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    let result;
+    await act(async () => {
+      result = await hookResult.saveLog(
+        {
+          ...logRef.current,
+          custom_tasks: [
+            { id: "reading", name: "Reading", slots: [{ start: "12:00", end: "11:00" }] },
+          ],
+        },
+        date,
+      );
+    });
+
+    expect(result).toBe(false);
+    expect(upsert).not.toHaveBeenCalled();
+    expect(setStatus).toHaveBeenCalledWith("Fix errors to save");
   });
 
   it("does not report a conflict for equivalent timestamp formats", async () => {
