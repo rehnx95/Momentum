@@ -69,6 +69,23 @@ export default function LegalPage({ mode = "privacy", onBack }) {
           </article>
         ))}
       </div>
+
+      <div className="mt-8 flex flex-wrap items-center gap-3 text-sm text-[#A1A1A1]">
+        <button
+          type="button"
+          onClick={() => window.location.assign(isPrivacy ? "/terms" : "/privacy")}
+          className="rounded-lg border border-[#2E2E2E] bg-[#111111] px-3 py-2 text-[#EDEDED] transition-colors hover:border-[#4B4B4B] hover:bg-[#1A1A1A]"
+        >
+          {isPrivacy ? "Read Terms of Service" : "Read Privacy Policy"}
+        </button>
+        <button
+          type="button"
+          onClick={onBack}
+          className="rounded-lg border border-[#2E2E2E] bg-transparent px-3 py-2 text-[#EDEDED] transition-colors hover:border-[#4B4B4B] hover:bg-[#111111]"
+        >
+          Return home
+        </button>
+      </div>
     </section>
   );
 }
