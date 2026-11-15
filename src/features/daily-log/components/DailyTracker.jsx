@@ -22,6 +22,12 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
       : daily.viewMode === "full"
         ? "Every day at a glance."
         : "How your days add up over time.";
+  const savedStatusText =
+    daily.status && daily.status !== ""
+      ? daily.status === "Saved"
+        ? `Saved ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
+        : daily.status
+      : "";
 
   return (
     <section className="daily-tracker surface-card" aria-labelledby="daily-log-title">
@@ -30,6 +36,11 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
           <h2 id="daily-log-title" className="page-title">
             {title}
           </h2>
+          {savedStatusText && (
+            <span className="daily-save-status" role="status" aria-live="polite">
+              {savedStatusText}
+            </span>
+          )}
           <p className="daily-toolbar-subtitle">{subtitle}</p>
         </div>
         <div className="daily-toolbar-controls" data-view-mode={daily.viewMode}>

@@ -55,7 +55,18 @@
 }
 
 .daily-log-page-shell .daily-toolbar-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
   min-width: 0;
+}
+
+.daily-log-page-shell .daily-toolbar-copy .daily-save-status {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .daily-log-page-shell .daily-toolbar .page-title {
