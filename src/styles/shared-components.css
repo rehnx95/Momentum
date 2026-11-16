@@ -6,7 +6,7 @@
   margin-top: 0.15rem;
   padding: 0.12rem 0.4rem;
   border: 1px solid var(--border);
-  border-radius: 0.35rem;
+  border-radius: var(--radius-context);
   background: var(--surface-raised);
   color: var(--text);
   font-size: 0.625rem;
@@ -118,7 +118,7 @@
   gap: 0.45rem;
   padding: 0.35rem 0.65rem;
   border: 1px solid var(--popup-border);
-  border-radius: 0.65rem;
+  border-radius: var(--radius-menu);
   background: var(--popup-background);
   color: var(--popup-foreground);
   font: inherit;
@@ -168,7 +168,7 @@
   overflow: hidden;
   padding: 0.4rem 0.6rem;
   border: 0;
-  border-radius: 0.4rem;
+  border-radius: var(--radius-option);
   background: transparent;
   color: var(--muted);
   font: inherit;
@@ -204,7 +204,7 @@
   padding: 0.4rem 0.65rem;
   transform: translate(-50%, -0.15rem);
   border: 1px solid var(--border-strong);
-  border-radius: 0.55rem;
+  border-radius: var(--radius-tooltip);
   background: var(--surface-raised);
   box-shadow: 0 8px 24px var(--shadow);
   color: var(--text);
@@ -242,7 +242,7 @@
   width: min(100%, 26rem);
   padding: 1.35rem;
   border: 1px solid var(--border-strong);
-  border-radius: 1rem;
+  border-radius: var(--radius-dialog);
   background: var(--surface);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   color: var(--text);
@@ -298,7 +298,7 @@
   min-height: 2.75rem;
   padding: 0.65rem 0.7rem;
   border: 1px solid var(--border);
-  border-radius: 0.6rem;
+  border-radius: var(--radius-control);
   background: var(--surface-raised);
   color: var(--text);
 }
