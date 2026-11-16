@@ -74,7 +74,7 @@
 }
 
 .dashboard-header button {
-  border-radius: 0.6rem;
+  border-radius: var(--radius-control);
   flex: none;
 }
 
@@ -92,7 +92,7 @@
 
 .dashboard-header input {
   min-height: 2.5rem;
-  border-radius: 0.6rem;
+  border-radius: var(--radius-control);
 }
 
 .dashboard-main {
@@ -110,7 +110,7 @@
 }
 
 .dashboard-content .surface-card.rounded-xl {
-  border-radius: 0.85rem;
+  border-radius: var(--radius-xl-minus);
   transition:
     border-color 150ms ease,
     background-color 150ms ease;
@@ -129,7 +129,7 @@
   top: 5.8rem;
   align-self: flex-start;
   max-height: calc(100vh - 7rem);
-  border-radius: 0.9rem;
+  border-radius: var(--radius-xl);
 }
 
 .dashboard-content > .tracker-toolbar {
