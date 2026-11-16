@@ -27,22 +27,22 @@
   margin-bottom: 0.5rem;
 }
 
+/* Keep tracker surfaces aligned with the app-wide theme tokens. */
 .tracker-dashboard-shell:not([data-theme="light"]) .dashboard-content .surface-card.rounded-xl,
 .tracker-dashboard-shell:not([data-theme="light"]) .tracker-side .surface-card,
 .tracker-dashboard-shell:not([data-theme="light"]) .mobile-progress-summary,
 .tracker-dashboard-shell:not([data-theme="light"])
   .dashboard-content
-  input[aria-label="Search problems"],
-.tracker-dashboard-shell:not([data-theme="light"]) .tracker-side button {
-  background-color: #000000 !important;
-}
-
-.tracker-dashboard-shell:not([data-theme="light"]) .tracker-side button:hover:not(:disabled) {
-  background-color: #1f1f1f !important;
+  input[aria-label="Search problems"] {
+  background-color: var(--surface) !important;
 }
 
 .tracker-dashboard-shell:not([data-theme="light"]) .problem-row:not(:hover):not(:focus-within) {
-  background-color: #000000 !important;
+  background-color: var(--surface) !important;
+}
+
+.tracker-dashboard-shell:not([data-theme="light"]) .tracker-side button:hover:not(:disabled) {
+  background-color: var(--surface-hover) !important;
 }
 
 .tracker-dashboard-shell .tracker-alignment-container {
@@ -186,7 +186,7 @@
 .dashboard-header .profile-trigger:hover {
   border-color: var(--border-strong);
   background: var(--surface-hover);
-  color: #fff;
+  color: var(--text);
 }
 
 .sheet-nav-item {
