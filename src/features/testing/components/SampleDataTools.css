@@ -12,7 +12,7 @@
   place-items: center;
   padding: 0;
   border: 1px solid var(--border-strong);
-  border-radius: 0.55rem;
+  border-radius: var(--radius-md-plus);
   background: var(--surface);
   color: var(--muted);
   cursor: pointer;
@@ -41,7 +41,7 @@
   max-width: min(24rem, calc(100vw - 1rem));
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border-strong);
-  border-radius: 0.65rem;
+  border-radius: var(--radius-menu);
   background: var(--surface);
   color: var(--text);
   box-shadow: 0 8px 24px var(--shadow);
