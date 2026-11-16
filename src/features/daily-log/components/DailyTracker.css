@@ -12,10 +12,6 @@
   --daily-surface: rgba(255, 255, 255, 0.02);
 }
 
-.daily-tracker.surface-card {
-  background: var(--page) !important;
-}
-
 .daily-toolbar,
 .daily-date-nav,
 .daily-view-switch,
@@ -719,14 +715,9 @@
   font-weight: 600;
 }
 
-:root[data-theme="light"] .daily-view-switch button.active {
-  background: #111111;
-  color: #ffffff;
-}
-
-:root:not([data-theme="light"]) .daily-view-switch button.active {
-  background: #ededed;
-  color: #111111;
+.daily-view-switch button.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .daily-day-header {
