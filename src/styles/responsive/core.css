@@ -137,7 +137,7 @@ textarea {
     width: 2.15rem;
     height: 2.15rem;
     flex-basis: 2.15rem;
-    border-radius: 0.65rem;
+    border-radius: var(--radius-menu);
   }
 
   .app-header .momentum-brand-logo svg {
