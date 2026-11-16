@@ -129,7 +129,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
         <div className="app-page-narrow profile-settings-content">
           <div className="mb-5">
             <button type="button" onClick={onBack} className="btn-secondary mb-4">
-              <ChevronLeft size={14} /> Back to profile
+              <ChevronLeft size={14} /> Back
             </button>
             <h1 className="page-title mb-2">Edit profile</h1>
             <p className="text-sm text-muted">
