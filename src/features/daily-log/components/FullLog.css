@@ -45,6 +45,7 @@
 }
 
 .full-log-table {
+  --full-log-grid-columns: 8rem minmax(10rem, 1fr) 5.2rem 4.5rem 5rem 3.5rem;
   min-width: 0;
   padding: 0;
   overflow: hidden;
@@ -56,9 +57,39 @@
 .full-log-table-header,
 .full-log-day-header {
   display: grid;
-  grid-template-columns: 8rem minmax(10rem, 1fr) 5.2rem 4.5rem 5rem 3.5rem;
+  grid-template-columns: var(--full-log-grid-columns);
   align-items: center;
   column-gap: 0.8rem;
+}
+
+.full-log-table-header > span:nth-child(1),
+.full-log-day-header > .full-log-day-date {
+  grid-column: 1;
+}
+
+.full-log-table-header > span:nth-child(2),
+.full-log-day-header > .full-log-timeline {
+  grid-column: 2;
+}
+
+.full-log-table-header > span:nth-child(3),
+.full-log-day-header > .full-log-active-total {
+  grid-column: 3;
+}
+
+.full-log-table-header > span:nth-child(4),
+.full-log-day-header > .full-log-sleep-total {
+  grid-column: 4;
+}
+
+.full-log-table-header > span:nth-child(5),
+.full-log-day-header > .full-log-unlogged-total {
+  grid-column: 5;
+}
+
+.full-log-table-header > span:nth-child(6),
+.full-log-day-header > .full-log-solved-total {
+  grid-column: 6;
 }
 
 .full-log-table-header {
@@ -74,6 +105,10 @@
 .full-log-table-header > span:nth-child(n + 3) {
   min-width: 0;
   text-align: right;
+}
+
+.full-log-table-header > span:nth-child(6) {
+  text-align: center;
 }
 
 .full-log-timeline-heading {
@@ -196,9 +231,14 @@
   font-weight: 700;
 }
 
+.full-log-solved-total {
+  justify-items: center;
+  text-align: center;
+}
+
 .full-log-day-details {
   display: grid;
-  grid-template-columns: 8rem minmax(10rem, 1fr) 5.2rem 4.5rem 5rem 3.5rem;
+  grid-template-columns: var(--full-log-grid-columns);
   column-gap: 0.8rem;
   padding: 0 1rem 0.65rem;
 }

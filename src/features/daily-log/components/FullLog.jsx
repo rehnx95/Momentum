@@ -37,7 +37,9 @@ function activityBreakdown(row, sheets) {
     .map((task) => {
       const name = isSheetActivity(task)
         ? getActivityDisplayName(task, sheets) || "Activity"
-        : String(task.name || "Activity").trim().toLowerCase() === "dsa"
+        : String(task.name || "Activity")
+              .trim()
+              .toLowerCase() === "dsa"
           ? "DSA"
           : task.name || "Activity";
       return {
@@ -248,7 +250,8 @@ export default function FullLog({ daily, sheets = [], askConfirmation, toolbarCo
             }}
             options={activityFilters.map((filter) => ({
               value: filter,
-              label: filter === "All" ? "All activities" : filter,
+              label:
+                filter === "All" ? "All activities" : filter === "Unlogged" ? "Untracked" : filter,
             }))}
           />
           <div className="full-log-legend" role="group" aria-label="Activity colors">
@@ -264,7 +267,7 @@ export default function FullLog({ daily, sheets = [], askConfirmation, toolbarCo
             ))}
             <span>
               <i className="unlogged" aria-hidden="true" />
-              Unlogged
+              Untracked
             </span>
           </div>
         </header>
@@ -279,7 +282,7 @@ export default function FullLog({ daily, sheets = [], askConfirmation, toolbarCo
                 </span>
                 <span>Active</span>
                 <span>Sleep</span>
-                <span>Unlogged</span>
+                <span>Untracked</span>
                 <span>Solved</span>
               </div>
               <ul className="full-log-day-list">
@@ -347,10 +350,18 @@ export default function FullLog({ daily, sheets = [], askConfirmation, toolbarCo
                         />
                         <span
                           className="full-log-active-total"
-                          aria-label={`Active ${activityFilter === "Sleep" ? "time not shown" : formatDuration(studied)}`}
+                          aria-label={`Active ${
+                            activityFilter === "Sleep"
+                              ? "time not shown"
+                              : studied > 0
+                                ? formatDuration(studied)
+                                : "not recorded"
+                          }`}
                         >
                           <small>Active</small>
-                          {activityFilter === "Sleep" ? "—" : formatDuration(studied)}
+                          {activityFilter === "Sleep" || studied === 0
+                            ? "—"
+                            : formatDuration(studied)}
                         </span>
                         <span
                           className="full-log-sleep-total"
@@ -361,9 +372,9 @@ export default function FullLog({ daily, sheets = [], askConfirmation, toolbarCo
                         </span>
                         <span
                           className="full-log-unlogged-total"
-                          aria-label={`Unlogged ${formatDuration(unlogged)}`}
+                          aria-label={`Untracked ${formatDuration(unlogged)}`}
                         >
-                          <small>Unlogged</small>
+                          <small>Untracked</small>
                           {formatDuration(unlogged)}
                         </span>
                         <span

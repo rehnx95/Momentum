@@ -32,6 +32,10 @@ describe("FullLog", () => {
     };
     const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
 
+    const activeTotal = container.querySelector(".full-log-active-total");
+    expect(activeTotal.textContent).toContain("—");
+    expect(activeTotal.getAttribute("aria-label")).toBe("Active not recorded");
+
     const activityFilter = screen.getByRole("combobox", { name: "Filter full log" });
     fireEvent.click(activityFilter);
     expect(
@@ -41,13 +45,13 @@ describe("FullLog", () => {
     ).toBeNull();
     expect(container.querySelector(".full-log-timeline-segment")).toBeNull();
     expect(container.querySelector(".full-log-timeline-gap").getAttribute("aria-label")).toContain(
-      "Unlogged 24h",
+      "Untracked 24h",
     );
     expect(
       Number.parseFloat(container.querySelector(".full-log-timeline-gap").style.width),
     ).toBeCloseTo(100, 1);
     const unloggedTotal = container.querySelector(".full-log-unlogged-total");
-    expect(unloggedTotal.getAttribute("aria-label")).toBe("Unlogged 24h");
+    expect(unloggedTotal.getAttribute("aria-label")).toBe("Untracked 24h");
     expect(unloggedTotal.textContent).toContain("24h");
     expect(unloggedTotal.textContent).not.toContain("%");
   });
@@ -86,7 +90,7 @@ describe("FullLog", () => {
     const filterOptions = within(screen.getByRole("listbox", { name: "Filter full log" }));
     expect(filterOptions.getByRole("option", { name: "All activities" })).toBeTruthy();
     expect(filterOptions.getByRole("option", { name: "Sleep" })).toBeTruthy();
-    expect(filterOptions.getByRole("option", { name: "Unlogged" })).toBeTruthy();
+    expect(filterOptions.getByRole("option", { name: "Untracked" })).toBeTruthy();
     fireEvent.click(filterOptions.getByRole("option", { name: "Reading" }));
     expect(activityFilter.textContent).toContain("Reading");
     expect(screen.getByRole("group", { name: "Activity colors" })).toBeTruthy();
@@ -97,7 +101,7 @@ describe("FullLog", () => {
       within(screen.getByRole("group", { name: "Activity colors" })).getByText("Reading"),
     ).toBeTruthy();
     expect(
-      within(screen.getByRole("group", { name: "Activity colors" })).getByText("Unlogged"),
+      within(screen.getByRole("group", { name: "Activity colors" })).getByText("Untracked"),
     ).toBeTruthy();
     expect(container.querySelector(".full-log-timeline-gap")).toBeNull();
     expect(container.querySelector(".full-log-timeline-segment.is-sleep")).toBeNull();
@@ -106,7 +110,7 @@ describe("FullLog", () => {
     expect(shareSegments[0].getAttribute("aria-label")).toMatch(/^Reading /);
     expect(Number.parseFloat(shareSegments[0].style.left)).toBe(0);
     expect(Number.parseFloat(shareSegments[0].style.width)).toBeCloseTo((60 / 1440) * 100, 1);
-    expect(screen.getByLabelText("Unlogged 15h")).toBeTruthy();
+    expect(screen.getByLabelText("Untracked 15h")).toBeTruthy();
     expect(container.querySelector(".full-log-date-button")).toBeTruthy();
   });
 
@@ -193,7 +197,7 @@ describe("FullLog", () => {
     expect(headers.slice(2).map((item) => item.textContent.trim())).toEqual([
       "Active",
       "Sleep",
-      "Unlogged",
+      "Untracked",
       "Solved",
     ]);
   });
@@ -278,7 +282,7 @@ describe("FullLog", () => {
     fireEvent.click(activityFilter);
     fireEvent.click(
       within(screen.getByRole("listbox", { name: "Filter full log" })).getByRole("option", {
-        name: "Unlogged",
+        name: "Untracked",
       }),
     );
     expect(container.querySelectorAll(".full-log-day")).toHaveLength(1);
@@ -407,7 +411,7 @@ describe("FullLog", () => {
     expect(Number.parseFloat(segments[1].style.width)).toBeCloseTo(4.17, 1);
     expect(container.querySelector(".full-log-timeline-segment.is-sleep")).toBeNull();
     expect(container.querySelector(".full-log-timeline-gap").getAttribute("aria-label")).toBe(
-      "Unlogged 21h · 88%",
+      "Untracked 21h · 88%",
     );
     segments[0].getBoundingClientRect = () => ({
       left: 100,
@@ -430,7 +434,7 @@ describe("FullLog", () => {
     fireEvent.mouseEnter(container.querySelector(".full-log-timeline-gap"));
     const unloggedTooltip = screen.getByRole("tooltip");
     const tooltipContent = within(unloggedTooltip);
-    expect(tooltipContent.getByText("Unlogged 21h · 88%")).toBeTruthy();
+    expect(tooltipContent.getByText("Untracked 21h · 88%")).toBeTruthy();
     expect(tooltipContent.queryByText(/24h - .*active - .*sleep/)).toBeNull();
     expect(tooltipContent.getByText("00:00–09:00")).toBeTruthy();
     expect(tooltipContent.getByText("12:00–24:00")).toBeTruthy();

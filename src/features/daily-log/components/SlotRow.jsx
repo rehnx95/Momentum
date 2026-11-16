@@ -59,27 +59,27 @@ export default function SlotRow({
               onSaveNow={onSaveNow}
             />
           </div>
-          {allowRemove && (
-            <Tooltip label="Remove slot">
-              <button
-                type="button"
-                className="slot-remove"
-                aria-label={`Remove ${activityName} slot ${index + 1}`}
-                onClick={() => onRemove(index)}
-                disabled={disabled}
-              >
-                <X size={14} aria-hidden="true" />
-              </button>
-            </Tooltip>
-          )}
+          <span className="slot-hours" aria-label={`${activityName} slot ${index + 1} duration`}>
+            {durationMinutes === null ? "—" : formatDuration(durationMinutes)}
+          </span>
         </div>
         <span className="slot-activity-description" aria-hidden={!slotDescription}>
           {slotDescription}
         </span>
-        <span className="slot-hours" aria-label={`${activityName} slot ${index + 1} duration`}>
-          {durationMinutes === null ? "—" : formatDuration(durationMinutes)}
-        </span>
         {slot.endDayOffset === 1 && <span className="slot-next-day">+1 day</span>}
+        {allowRemove && (
+          <Tooltip label="Remove slot">
+            <button
+              type="button"
+              className="slot-remove"
+              aria-label={`Remove ${activityName} slot ${index + 1}`}
+              onClick={() => onRemove(index)}
+              disabled={disabled}
+            >
+              <X size={14} aria-hidden="true" />
+            </button>
+          </Tooltip>
+        )}
       </div>
       {issues.length > 0 && (
         <ul

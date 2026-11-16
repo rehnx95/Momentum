@@ -1,5 +1,3 @@
-import Tooltip from "../../../shared/components/Tooltip";
-
 export default function RecentAcceptedProblems({ problems }) {
   return (
     <section className="recent-ac-card surface-card" aria-labelledby="recent-ac-heading">
@@ -24,19 +22,10 @@ export default function RecentAcceptedProblems({ problems }) {
                 <div className="recent-ac-check" aria-hidden="true">
                   ✓
                 </div>
-                <Tooltip label={problem.title} className="recent-ac-tooltip">
-                  <p className="recent-ac-title" tabIndex={0}>
-                    {problem.title}
-                  </p>
-                </Tooltip>
-                <Tooltip
-                  label={problem.sheetTitle === "Dsa" ? "DSA" : problem.sheetTitle}
-                  className="recent-ac-tooltip"
-                >
-                  <span className="recent-ac-topic" tabIndex={0}>
-                    {problem.sheetTitle === "Dsa" ? "DSA" : problem.sheetTitle}
-                  </span>
-                </Tooltip>
+                <p className="recent-ac-title recent-ac-problem">{problem.title}</p>
+                <span className="recent-ac-topic recent-ac-sheet">
+                  {problem.sheetTitle === "Dsa" ? "DSA" : problem.sheetTitle}
+                </span>
                 {problem.acceptedOn ? (
                   <time className="recent-ac-date" dateTime={problem.acceptedOn}>
                     {new Date(`${problem.acceptedOn}T00:00:00`).toLocaleDateString(undefined, {

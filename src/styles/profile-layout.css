@@ -115,14 +115,14 @@
 
 .recent-ac-item {
   display: grid;
-  grid-template-columns: 1.35rem minmax(0, 1fr) minmax(5rem, 0.4fr) auto;
+  grid-template-columns: var(--recent-ac-grid-columns);
   align-items: center;
   gap: 0.65rem;
 }
 
 .recent-ac-columns {
   display: grid;
-  grid-template-columns: 1.35rem minmax(0, 1fr) minmax(5rem, 0.4fr) auto;
+  grid-template-columns: var(--recent-ac-grid-columns);
   gap: 0.65rem;
   padding: 0.65rem 0 0.45rem;
   border-bottom: 1px solid var(--border);
@@ -133,8 +133,33 @@
   text-transform: uppercase;
 }
 
+.recent-ac-columns > span:first-child,
+.recent-ac-check {
+  grid-column: 1;
+}
+
+.recent-ac-columns > span:nth-child(2),
+.recent-ac-problem {
+  grid-column: 2;
+}
+
+.recent-ac-columns > span:nth-child(3),
+.recent-ac-sheet {
+  grid-column: 3;
+}
+
+.recent-ac-columns > span:nth-child(4),
+.recent-ac-date {
+  grid-column: 4;
+}
+
+.recent-ac-columns > span:nth-child(4) {
+  text-align: right;
+}
+
 .recent-ac-title {
   min-width: 0;
+  margin: 0;
   overflow: hidden;
   color: var(--text);
   font-size: 0.82rem;

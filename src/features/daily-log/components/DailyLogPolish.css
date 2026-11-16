@@ -1,9 +1,14 @@
 /* Keep Quick log and Sleep in view beside a long Activities list. */
-@media (min-width: 981px) {
+@media (min-width: 761px) {
   .daily-log-page-shell .daily-side-panel {
     position: sticky;
     top: calc(var(--header-h) + 1rem);
+    z-index: 20;
     align-self: start;
+    max-height: calc(100vh - var(--header-h) - 2rem);
+    max-height: calc(100dvh - var(--header-h) - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 

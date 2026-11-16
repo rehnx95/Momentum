@@ -131,12 +131,20 @@
 
   .recent-ac-item,
   .recent-ac-columns {
-    grid-template-columns: 1.25rem minmax(0, 1fr) auto;
+    grid-template-columns: var(--recent-ac-grid-columns);
     gap: 0.35rem 0.55rem;
+  }
+
+  .recent-ac-card {
+    --recent-ac-grid-columns: 1.25rem minmax(0, 1fr) 3.2rem;
   }
 
   .recent-ac-columns span:nth-child(3) {
     display: none;
+  }
+
+  .recent-ac-columns span:nth-child(4) {
+    grid-column: 3;
   }
 
   .recent-ac-columns span:nth-child(2)::after {
@@ -154,7 +162,17 @@
     grid-row: 1;
   }
 
+  .recent-ac-problem {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
   .recent-ac-topic {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .recent-ac-sheet {
     grid-column: 2;
     grid-row: 2;
   }

@@ -66,6 +66,7 @@
 }
 
 .recent-ac-card {
+  --recent-ac-grid-columns: 1.35rem minmax(0, 1fr) minmax(5rem, 0.4fr) 3.5rem;
   overflow: visible;
   padding: 1.1rem;
   border: 1px solid var(--border);

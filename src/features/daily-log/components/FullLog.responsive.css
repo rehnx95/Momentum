@@ -1,9 +1,7 @@
 @container daily-tracker (max-width: 460px) {
   .full-log-table-header {
     display: grid;
-    grid-template-columns:
-      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(1.7rem, 0.5fr);
+    grid-template-columns: var(--full-log-grid-columns);
     column-gap: 0.25rem;
     min-height: 2.5rem;
     padding: 0.45rem;
@@ -11,13 +9,14 @@
   }
 
   .full-log-table {
+    --full-log-grid-columns:
+      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
+      minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
     padding-inline: 0.45rem;
   }
 
   .full-log-day-header {
-    grid-template-columns:
-      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(1.7rem, 0.5fr);
+    grid-template-columns: var(--full-log-grid-columns);
     column-gap: 0.25rem;
     min-height: 0;
     padding: 0.75rem 0.45rem 0.5rem;
@@ -43,30 +42,40 @@
     grid-row: 1;
   }
 
-  .full-log-day-header > .full-log-solved-total {
+  .full-log-day-header > .full-log-unlogged-total {
     grid-column: 5;
+    grid-row: 1;
+  }
+
+  .full-log-day-header > .full-log-solved-total {
+    grid-column: 6;
     grid-row: 1;
   }
 
   .full-log-active-total,
   .full-log-sleep-total,
+  .full-log-unlogged-total,
   .full-log-solved-total {
     justify-items: end;
     text-align: right;
     font-size: 0.68rem;
   }
 
+  .full-log-solved-total {
+    justify-items: center;
+    text-align: center;
+  }
+
   .full-log-active-total small,
   .full-log-sleep-total small,
+  .full-log-unlogged-total small,
   .full-log-solved-total small {
     display: none;
   }
 
   .full-log-day-details {
     display: grid;
-    grid-template-columns:
-      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(1.7rem, 0.5fr);
+    grid-template-columns: var(--full-log-grid-columns);
     column-gap: 0.25rem;
     padding: 0 0.45rem 0.6rem;
   }
@@ -86,9 +95,7 @@
   }
 
   .full-log-entry {
-    grid-template-columns:
-      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(1.7rem, 0.5fr);
+    grid-template-columns: var(--full-log-grid-columns);
     column-gap: 0.3rem;
     align-items: center;
     font-size: 0.75rem;

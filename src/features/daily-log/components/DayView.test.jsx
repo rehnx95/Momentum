@@ -342,9 +342,16 @@ describe("DayView activity entry", () => {
       "1h",
       "30m",
     ]);
-    expect(slotRows.every((row) => row.lastElementChild.classList.contains("slot-hours"))).toBe(
-      true,
-    );
+    expect(
+      slotRows.every((row) => {
+        const [timeRange, duration] = row.querySelector(".slot-time-controls").children;
+        return (
+          timeRange.classList.contains("slot-time-range") &&
+          duration.classList.contains("slot-hours") &&
+          Boolean(row.lastElementChild.querySelector(".slot-remove"))
+        );
+      }),
+    ).toBe(true);
     expect(activityCard.querySelector(".activity-slot-totals")).toBeNull();
   });
 

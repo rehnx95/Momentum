@@ -87,7 +87,7 @@ export default function FullLogTimeline({
     sleepTime && wakeTime ? `${String(sleepTime).slice(0, 5)}–${String(wakeTime).slice(0, 5)}` : "";
   const sleepTooltip = `Sleep ${formatDuration(sleepMinutes)}${sleepTimeRange ? ` · ${sleepTimeRange}` : ""} · ${Math.round(sleepShare)}%`;
   const unloggedTooltip = {
-    title: `Unlogged ${formatDuration(shareUnloggedMinutes)} · ${Math.round(unloggedShare)}%`,
+    title: `Untracked ${formatDuration(shareUnloggedMinutes)} · ${Math.round(unloggedShare)}%`,
     intervals: unloggedSegments.map(([start, end]) => ({
       range: `${clockLabel(start)}–${clockLabel(end)}`,
       duration: formatDuration(end - start),
@@ -189,7 +189,7 @@ export default function FullLogTimeline({
             <span
               className="full-log-timeline-gap"
               role="img"
-              aria-label={`Unlogged ${formatDuration(shareUnloggedMinutes)} · ${Math.round(unloggedShare)}%`}
+              aria-label={`Untracked ${formatDuration(shareUnloggedMinutes)} · ${Math.round(unloggedShare)}%`}
               tabIndex={0}
               onMouseEnter={(event) => showTooltip(event, unloggedTooltip)}
               onFocus={(event) => showTooltip(event, unloggedTooltip)}
