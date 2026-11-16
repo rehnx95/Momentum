@@ -42,7 +42,7 @@ describe("DailyTracker save status", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save now" }));
 
     expect(daily.saveNow).toHaveBeenCalledOnce();
-    expect(screen.getByRole("status").textContent).toContain("Saving soon…");
+    expect(screen.getByRole("status").textContent).toContain("Saving…");
   });
 
   it("shows a retry action after a save failure", () => {

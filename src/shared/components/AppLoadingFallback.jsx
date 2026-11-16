@@ -20,42 +20,58 @@ function LoadingBar({ className = "" }) {
 
 function TrackerLoadingContent() {
   return (
-    <>
-      <div className="app-loading-tracker-heading">
-        <LoadingBar className="app-loading-tracker-title" />
-        <LoadingBar className="app-loading-tracker-count" />
-      </div>
-      <LoadingBar className="app-loading-search" />
-      <div className="app-loading-filters">
-        {Array.from({ length: 5 }, (_, index) => (
-          <LoadingBar key={index} className={index === 0 ? "is-active" : ""} />
-        ))}
-      </div>
-      <section className="app-loading-progress-card">
-        <div className="app-loading-progress-heading">
-          <div>
-            <LoadingBar className="app-loading-label" />
-            <LoadingBar className="app-loading-copy" />
+    <div className="app-loading-tracker-layout">
+      <div className="app-loading-tracker-main">
+        <div className="app-loading-tracker-heading">
+          <LoadingBar className="app-loading-tracker-title" />
+          <LoadingBar className="app-loading-tracker-count" />
+          <span className="app-loading-spacer" />
+          <LoadingBar className="app-loading-search app-loading-tracker-search" />
+        </div>
+        <div className="app-loading-filters">
+          {Array.from({ length: 5 }, (_, index) => (
+            <LoadingBar key={index} className={index === 0 ? "is-active" : ""} />
+          ))}
+        </div>
+        <section className="app-loading-progress-card app-loading-progress-inline">
+          <div className="app-loading-progress-heading">
+            <div>
+              <LoadingBar className="app-loading-label" />
+              <LoadingBar className="app-loading-copy" />
+            </div>
+            <LoadingBar className="app-loading-progress-number" />
           </div>
+          <LoadingBar className="app-loading-progress-track" />
+          <div className="app-loading-progress-stats">
+            <LoadingBar />
+            <LoadingBar />
+            <LoadingBar />
+          </div>
+        </section>
+        <div className="app-loading-row-list">
+          {Array.from({ length: 8 }, (_, index) => (
+            <div className="app-loading-list-row" key={index}>
+              <LoadingBar className="app-loading-row-icon" />
+              <LoadingBar className="app-loading-row-title" />
+              <LoadingBar className="app-loading-row-count" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <aside className="app-loading-tracker-side">
+        <section className="app-loading-progress-card">
+          <LoadingBar className="app-loading-label" />
           <LoadingBar className="app-loading-progress-number" />
-        </div>
-        <LoadingBar className="app-loading-progress-track" />
-        <div className="app-loading-progress-stats">
-          <LoadingBar />
-          <LoadingBar />
-          <LoadingBar />
-        </div>
-      </section>
-      <div className="app-loading-row-list">
-        {Array.from({ length: 4 }, (_, index) => (
-          <div className="app-loading-list-row" key={index}>
-            <LoadingBar className="app-loading-row-icon" />
-            <LoadingBar className="app-loading-row-title" />
-            <LoadingBar className="app-loading-row-count" />
+          <LoadingBar className="app-loading-copy" />
+          <LoadingBar className="app-loading-progress-track" />
+          <div className="app-loading-progress-stats">
+            <LoadingBar />
+            <LoadingBar />
+            <LoadingBar />
           </div>
-        ))}
-      </div>
-    </>
+        </section>
+      </aside>
+    </div>
   );
 }
 

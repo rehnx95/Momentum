@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DayView from "./DayView";
 import FullLog from "./FullLog";
 import TrendsView from "./TrendsView";
@@ -11,9 +11,19 @@ import "./FullLog.responsive.css";
 import "./DailyTracker.css";
 import "./DailyLogPage.css";
 
+function formatClock(date) {
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
 export default function DailyTracker({ user, sheets, activityLog, askConfirmation }) {
   const [fullLogToolbarTarget, setFullLogToolbarTarget] = useState(null);
+  const [savedAt, setSavedAt] = useState(null);
   const daily = useDailyLog(user, activityLog);
+
+  useEffect(() => {
+    if (daily.status === "Saved") setSavedAt(new Date());
+  }, [daily.status]);
+
   const title =
     daily.viewMode === "daily" ? "Daily Log" : daily.viewMode === "full" ? "Full Log" : "Trends";
   const subtitle =
@@ -30,14 +40,37 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
     daily.status !== "This day changed elsewhere" &&
     daily.validation.errors.length === 0;
   const showSaveStatus = daily.status || daily.message || daily.dirty;
+  const statusLabel =
+    daily.status === "Saved"
+      ? savedAt
+        ? `Saved ${formatClock(savedAt)}`
+        : "Saved"
+      : daily.status === "Saving…" || daily.status === "Saving soon…"
+        ? "Saving…"
+        : daily.status;
 
   return (
     <section className="daily-tracker surface-card" aria-labelledby="daily-log-title">
       <header className="daily-toolbar">
         <div className="daily-toolbar-copy">
-          <h2 id="daily-log-title" className="page-title">
-            {title}
-          </h2>
+          <div className="daily-title-row">
+            <h2 id="daily-log-title" className="page-title">
+              {title}
+            </h2>
+            {showSaveStatus && (
+              <div
+                className="daily-save-status"
+                role={daily.message ? "alert" : "status"}
+                aria-live={daily.message ? "assertive" : "polite"}
+              >
+                <div className="daily-save-status-copy">
+                  {statusLabel && <span>{statusLabel}</span>}
+                  {daily.message && <span className="daily-save-message">{daily.message}</span>}
+                </div>
+               
+              </div>
+            )}
+          </div>
           <p className="daily-toolbar-subtitle">{subtitle}</p>
         </div>
         <div className="daily-toolbar-controls" data-view-mode={daily.viewMode}>
@@ -80,24 +113,6 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
           </div>
         </div>
       </header>
-
-      {showSaveStatus && (
-        <div
-          className="daily-save-status"
-          role={daily.message ? "alert" : "status"}
-          aria-live={daily.message ? "assertive" : "polite"}
-        >
-          <div className="daily-save-status-copy">
-            {daily.status && <span>{daily.status}</span>}
-            {daily.message && <span className="daily-save-message">{daily.message}</span>}
-          </div>
-          {canSaveNow && (
-            <button type="button" onClick={() => void daily.saveNow()}>
-              {daily.status === "Could not save" ? "Retry save" : "Save now"}
-            </button>
-          )}
-        </div>
-      )}
 
       {daily.viewMode === "daily" ? (
         <DayView daily={daily} sheets={sheets} askConfirmation={askConfirmation} />

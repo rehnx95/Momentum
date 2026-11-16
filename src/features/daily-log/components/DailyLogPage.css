@@ -1208,3 +1208,117 @@
       minmax(3rem, 0.7fr) minmax(2.5rem, 0.5fr);
   }
 }
+
+/* save-status-inline-title */
+.daily-log-page-shell .daily-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.85rem;
+}
+
+.daily-log-page-shell .daily-title-row .daily-save-status {
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  margin: 0;
+  text-align: left;
+}
+
+.daily-log-page-shell .daily-title-row .daily-save-status-copy {
+  align-items: baseline;
+  font-size: 0.82rem;
+}
+
+.daily-log-page-shell .daily-title-row .daily-save-status button {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* full-log-mobile-columns */
+@media (max-width: 760px) {
+  .daily-log-page-shell .full-log-table {
+    --fl-cols: 4.4rem minmax(2.2rem, 1fr) 2.9rem 2.7rem 3.3rem 2.6rem;
+    padding-inline: 0;
+  }
+
+  .daily-log-page-shell .full-log-table-header,
+  .daily-log-page-shell .full-log-day-header,
+  .daily-log-page-shell .full-log-day-details,
+  .daily-log-page-shell .full-log-entry {
+    grid-template-columns: var(--fl-cols);
+    column-gap: 0.35rem;
+  }
+
+  .daily-log-page-shell .full-log-table-header,
+  .daily-log-page-shell .full-log-day-header,
+  .daily-log-page-shell .full-log-day-details {
+    padding-inline: 0.5rem;
+  }
+
+  /* Header labels: smaller, no letter-spacing, right aligned, never clipped */
+  .daily-log-page-shell .full-log-table-header {
+    font-size: 0.58rem;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .daily-log-page-shell .full-log-table-header > span {
+    overflow: visible;
+    text-overflow: clip;
+    min-width: 0;
+  }
+  .daily-log-page-shell .full-log-table-header > span:nth-child(2) {
+    text-align: left;
+  }
+
+  /* Date cell: chevron + stacked weekday / date, no clipping */
+  .daily-log-page-shell .full-log-day-date {
+    min-width: 0;
+    gap: 0.2rem;
+  }
+  .daily-log-page-shell .full-log-date-button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.15;
+  }
+  .daily-log-page-shell .full-log-date-button > span {
+    display: block;
+    font-size: 0.66rem;
+  }
+  .daily-log-page-shell .full-log-date-button > strong {
+    display: block;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  /* Totals: compact and right aligned */
+  .daily-log-page-shell .full-log-active-total,
+  .daily-log-page-shell .full-log-sleep-total,
+  .daily-log-page-shell .full-log-unlogged-total,
+  .daily-log-page-shell .full-log-solved-total {
+    font-size: 0.7rem;
+    justify-items: end;
+    text-align: right;
+  }
+
+  .daily-log-page-shell .full-log-timeline {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .daily-log-page-shell .full-log-table {
+    --fl-cols: 4rem minmax(1.6rem, 1fr) 2.7rem 2.5rem 3.1rem 2.3rem;
+  }
+  .daily-log-page-shell .full-log-active-total,
+  .daily-log-page-shell .full-log-sleep-total,
+  .daily-log-page-shell .full-log-unlogged-total,
+  .daily-log-page-shell .full-log-solved-total {
+    font-size: 0.66rem;
+  }
+}

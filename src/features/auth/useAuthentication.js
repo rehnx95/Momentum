@@ -11,6 +11,20 @@ export const AppState = {
 const ACCOUNT_CACHE_KEY = "momentum:account-cache";
 const profileRequests = new Map();
 
+function hasStoredSession() {
+  try {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("code") || url.hash.includes("access_token")) return true;
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (key && key.startsWith("sb-") && key.endsWith("-auth-token")) return true;
+    }
+    return false;
+  } catch {
+    return true;
+  }
+}
+
 function clearAppScopedStorage() {
   try {
     const keysToRemove = [];
@@ -64,7 +78,7 @@ export default function useAuthentication() {
   const [cachedAccount] = useState(readCachedAccount);
   const previousUserId = useRef(null);
   const [appState, setAppState] = useState(() => {
-    if (!cachedAccount) return AppState.LOADING;
+    if (!cachedAccount) return hasStoredSession() ? AppState.LOADING : AppState.UNAUTHENTICATED;
     return cachedAccount.profile.onboarding_completed
       ? AppState.AUTHENTICATED
       : AppState.ONBOARDING;

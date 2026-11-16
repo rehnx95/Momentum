@@ -8,6 +8,23 @@
       name="description"
       content="Momentum brings learning tracks, daily routines, and personal progress together. Log your activities, build consistent habits, and review your progress over time."
     />
+    <!-- perf-boot -->
+    <style>
+      html,
+      body {
+        background: #000;
+      }
+      html[data-theme="light"],
+      html[data-theme="light"] body {
+        background: #f5f5f5;
+      }
+    </style>
+    <script>
+      try {
+        if (localStorage.getItem("theme") === "light")
+          document.documentElement.setAttribute("data-theme", "light");
+      } catch (e) {}
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body class="bg-[#000000] text-[#EDEDED]">
