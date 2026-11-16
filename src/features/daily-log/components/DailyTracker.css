@@ -428,7 +428,7 @@
 }
 
 :root[data-theme="light"] .quick-add-primary {
-  background: #111111;
+  background: #000000;
   color: #ffffff;
 }
 
