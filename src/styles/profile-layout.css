@@ -51,7 +51,7 @@
   min-width: 0;
   padding: 0.65rem;
   border: 1px solid var(--border);
-  border-radius: 0.65rem;
+  border-radius: var(--radius-menu);
   background: var(--page);
 }
 
@@ -75,7 +75,7 @@
   height: 0.35rem;
   overflow: hidden;
   margin: 0.45rem 0 0.35rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface-hover);
 }
 
@@ -154,7 +154,7 @@
 }
 
 .recent-ac-tooltip > :focus-visible {
-  border-radius: 0.2rem;
+  border-radius: var(--radius-2xs);
   outline: 2px solid var(--border-strong);
   outline-offset: 2px;
 }
