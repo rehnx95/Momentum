@@ -109,7 +109,7 @@
     max-height: calc(100dvh - 6.5rem);
     align-self: auto;
     border: 1px solid var(--border) !important;
-    border-radius: 1rem !important;
+    border-radius: var(--radius-2xl) !important;
     background: var(--surface) !important;
     box-shadow: 0 8px 24px var(--shadow) !important;
   }
