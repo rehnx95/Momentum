@@ -3,7 +3,7 @@
   margin-bottom: 1rem;
   padding: 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 1rem;
+  border-radius: var(--radius-2xl);
   background: var(--page);
   --daily-sleep-bar: #6b6b6b;
   --daily-dsa-bar: #e1dcc9;
@@ -72,7 +72,7 @@
   height: 2rem;
   place-items: center;
   border: 1px solid var(--border-strong);
-  border-radius: 0.6rem;
+  border-radius: var(--radius-control);
   color: var(--muted);
   background: transparent;
 }
@@ -84,7 +84,7 @@
 .quick-log-card input {
   min-height: 2.45rem;
   border: 1px solid var(--border-strong);
-  border-radius: 0.7rem;
+  border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.02);
   color: var(--text);
   padding-inline: 0.8rem;
@@ -98,13 +98,13 @@
   gap: 0.15rem;
   padding: 0.2rem;
   border: 1px solid var(--border-strong);
-  border-radius: 0.65rem;
+  border-radius: var(--radius-menu);
   background: rgba(255, 255, 255, 0.02);
 }
 
 .daily-view-switch button {
   min-height: 1.9rem;
-  border-radius: 0.45rem;
+  border-radius: var(--radius-sm-plus);
   padding: 0 0.65rem;
   color: var(--muted);
   font-size: 0.75rem;
@@ -120,7 +120,7 @@
   margin: 0;
   padding: 1rem;
   border: 1px dashed var(--border-strong);
-  border-radius: 0.75rem;
+  border-radius: var(--radius-popover);
   color: var(--muted);
   text-align: center;
 }
@@ -132,7 +132,7 @@
   margin-bottom: 0.75rem;
   padding: 0.75rem;
   border: 1px solid var(--border-strong);
-  border-radius: 0.65rem;
+  border-radius: var(--radius-menu);
   color: var(--muted);
   font-size: 0.75rem;
 }
@@ -166,7 +166,7 @@
 .mini-stat-card,
 .trends-panel {
   border: 1px solid var(--border-strong);
-  border-radius: 0.8rem;
+  border-radius: var(--radius-lg-plus);
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -202,7 +202,7 @@
   gap: 0.45rem;
   min-height: 2rem;
   border: 1px solid var(--border-strong);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--text);
   font-size: 0.75rem;
@@ -222,7 +222,7 @@
 .quick-pick,
 .quick-add-primary {
   min-height: 2.25rem;
-  border-radius: 0.7rem;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-strong);
   background: transparent;
   color: var(--text);
@@ -300,7 +300,7 @@
   position: relative;
   padding: 0.75rem 0.85rem 0.65rem;
   border: 1px solid var(--border-strong);
-  border-radius: 0.75rem;
+  border-radius: var(--radius-popover);
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -342,7 +342,7 @@
 .slot-row input {
   min-height: 2rem;
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.02);
   color: var(--text);
 }
@@ -358,7 +358,7 @@
   min-height: 1.9rem;
   padding: 0 0.75rem;
   border: 1px dashed var(--border-strong);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--muted);
   font-size: 0.7rem;
@@ -375,7 +375,7 @@
 
 .daily-save-status button {
   border: 1px solid var(--border-strong);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   background: transparent;
   padding: 0.36rem 0.7rem;
   color: var(--text);
@@ -499,7 +499,7 @@
   gap: 0.2rem;
   padding: 0.15rem;
   border: 1px solid var(--border);
-  border-radius: 0.7rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
@@ -542,7 +542,7 @@
   place-items: center;
   padding: 0;
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--text);
   cursor: pointer;
@@ -627,7 +627,7 @@
   grid-column: 1 / -1;
   position: relative;
   height: 0.38rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.08);
   overflow: hidden;
 }
@@ -706,14 +706,14 @@
   gap: 0.15rem;
   padding: 0.2rem;
   border: 1px solid var(--border);
-  border-radius: 0.85rem;
+  border-radius: var(--radius-xl-minus);
   background: var(--surface);
 }
 
 .daily-view-switch button {
   min-height: 2rem;
   padding-inline: 0.85rem;
-  border-radius: 0.65rem;
+  border-radius: var(--radius-menu);
   color: var(--text);
   font-size: 0.82rem;
   font-weight: 600;
@@ -742,7 +742,7 @@
   width: 2.75rem;
   height: 2.75rem;
   border-color: var(--border);
-  border-radius: 0.8rem;
+  border-radius: var(--radius-lg-plus);
   background: var(--surface);
   color: var(--text);
 }
@@ -752,7 +752,7 @@
   min-width: 7.3rem;
   padding-inline: 1rem;
   border: 1px solid var(--border);
-  border-radius: 0.8rem;
+  border-radius: var(--radius-lg-plus);
   background: var(--surface);
   color: var(--text);
   font-size: 0.85rem;
@@ -769,7 +769,7 @@
 .trends-panel,
 .activity-card {
   border: 1px solid var(--border);
-  border-radius: 1.15rem;
+  border-radius: var(--radius-2xl-plus);
   background: var(--surface);
 }
 
@@ -795,7 +795,7 @@
   margin-top: 0.55rem;
   padding: 0.55rem 0.75rem 0.7rem;
   border: 1px solid var(--border);
-  border-radius: 1.15rem;
+  border-radius: var(--radius-2xl-plus);
   background: var(--surface);
 }
 
@@ -955,7 +955,7 @@
   margin-left: auto;
   margin-right: 1.2rem;
   padding: 0.1rem 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface-hover);
   color: var(--muted);
   font-size: 0.7rem;
@@ -1103,7 +1103,7 @@
   padding: 0.65rem 0.8rem;
   border: 1px solid var(--border);
   border-left: 3px solid var(--daily-sleep-bar);
-  border-radius: 0.85rem;
+  border-radius: var(--radius-xl-minus);
   background: var(--surface);
 }
 
@@ -1152,7 +1152,7 @@
   min-height: 2.65rem;
   margin-bottom: 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 0.85rem;
+  border-radius: var(--radius-xl-minus);
   background: transparent;
   font-size: 0.82rem;
 }
@@ -1179,7 +1179,7 @@
   min-height: 2.65rem;
   padding-inline: 1rem;
   border: 0;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-xl-minus);
   background: var(--text);
   color: var(--page);
   font-size: 0.82rem;
@@ -1196,7 +1196,7 @@
   min-height: 2.45rem;
   padding-inline: 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--text);
   font-size: 0.78rem;
@@ -1222,7 +1222,7 @@
   min-height: 2.65rem;
   padding-inline: 0.8rem;
   border: 1px solid var(--border);
-  border-radius: 0.85rem;
+  border-radius: var(--radius-xl-minus);
   background: var(--surface);
   color: var(--text);
   font-size: 0.8rem;
@@ -1232,7 +1232,7 @@
   min-height: 2.65rem;
   padding-inline: 1rem;
   border: 0;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-xl-minus);
   background: var(--text);
   color: var(--page);
   font-size: 0.82rem;
