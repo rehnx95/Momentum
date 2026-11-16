@@ -56,7 +56,7 @@ export default function AppHeader({
               onClick={onSignOut}
             >
               <LogOut size={18} />
-              <span className="signout-label">Sign out</span>
+             
             </button>
           </Tooltip>
         </div>

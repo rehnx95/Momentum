@@ -23,7 +23,12 @@ describe("ProfileSettings", () => {
 
     expect(screen.getAllByRole("textbox")).toHaveLength(2);
     expect(screen.getByRole("textbox", { name: "Name" })).toBeTruthy();
-    expect(screen.getByRole("textbox", { name: "Username" })).toBeTruthy();
+    expect(screen.getByRole("textbox", { name: "Username" }).getAttribute("aria-describedby")).toBe(
+      "profile-username-help",
+    );
+    expect(screen.getByText("3–45 characters; lowercase letters, numbers, and hyphens.").id).toBe(
+      "profile-username-help",
+    );
     expect(screen.queryByLabelText("Location")).toBeNull();
     expect(screen.queryByLabelText("Website / URL")).toBeNull();
   });

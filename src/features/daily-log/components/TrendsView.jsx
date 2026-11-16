@@ -291,6 +291,7 @@ export default function TrendsView({ daily, sheets = [] }) {
     key,
     label: key === "sleep" ? "Sleep" : chartMode.activityName || "Active",
   }));
+  const showSeriesLegend = legendItems.length > 1;
   const activityColor = chartMode.activityName
     ? getActivityColor(chartMode.activityName, daily.activityColors)
     : undefined;
@@ -366,22 +367,23 @@ export default function TrendsView({ daily, sheets = [] }) {
           </div>
         </div>
         <div className="sleep-study-tabpanel trends-chart-panel">
-          {(legendItems.length > 1 || chartAverages.length > 0) && (
+          {(showSeriesLegend || chartAverages.length > 0) && (
             <div className="sleep-study-legend" aria-label="Chart legend">
-              {legendItems.map(({ key, label }) => (
-                <span key={key}>
-                  <i
-                    className={`sleep-study-legend-swatch ${key}`}
-                    aria-hidden="true"
-                    style={
-                      key === "study" && activityColor
-                        ? { "--study-chart-color": activityColor }
-                        : undefined
-                    }
-                  />
-                  {label}
-                </span>
-              ))}
+              {showSeriesLegend &&
+                legendItems.map(({ key, label }) => (
+                  <span key={key}>
+                    <i
+                      className={`sleep-study-legend-swatch ${key}`}
+                      aria-hidden="true"
+                      style={
+                        key === "study" && activityColor
+                          ? { "--study-chart-color": activityColor }
+                          : undefined
+                      }
+                    />
+                    {label}
+                  </span>
+                ))}
               {chartAverages.map(({ key, label }) => (
                 <span key={`${key}-average`}>
                   <i className="sleep-study-legend-swatch average" aria-hidden="true" />

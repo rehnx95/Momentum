@@ -1,8 +1,4 @@
 @media (min-width: 768px) {
-  .tracker-dashboard-shell {
-    --tracker-page-gutter: 1.5rem;
-  }
-
   .tracker-sidebar-toggle {
     left: -0.25rem;
   }

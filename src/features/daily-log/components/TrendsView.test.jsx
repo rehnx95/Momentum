@@ -74,6 +74,10 @@ describe("TrendsView", () => {
     chooseChart("Active");
     expect(screen.getByRole("img", { name: /Active hours over the last 30 days/ })).toBeTruthy();
     expect(container.querySelector(".study-average").getAttribute("data-average")).toBe("120");
+    expect(
+      screen.queryByText("Active", { selector: ".sleep-study-legend span" }),
+    ).toBeNull();
+    expect(screen.getByText("Average Active")).toBeTruthy();
     chooseChart("Sleep + Active");
     expect(
       screen.getByRole("img", { name: /Sleep \+ active hours over the last 30 days/ }),

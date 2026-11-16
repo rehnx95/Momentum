@@ -658,4 +658,9 @@
       minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(3rem, 0.7fr)
       minmax(3rem, 0.7fr) minmax(2.5rem, 0.5fr);
   }
+
+  .full-log-day-header > .full-log-solved-total {
+    justify-items: center;
+    text-align: center;
+  }
 }

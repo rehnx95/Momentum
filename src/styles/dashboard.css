@@ -20,7 +20,7 @@
 .tracker-dashboard-shell {
   --tracker-header-height: var(--header-h);
   --tracker-content-gap: 0.75rem;
-  --tracker-page-gutter: 1rem;
+  --tracker-page-gutter: var(--page-gutter);
 }
 
 .tracker-dashboard-shell .page-head {

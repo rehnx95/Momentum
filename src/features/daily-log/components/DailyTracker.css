@@ -1176,6 +1176,7 @@
 }
 
 .quick-log-input-row .quick-add-primary {
+  flex: none;
   min-height: 2.65rem;
   padding-inline: 1rem;
   border: 0;
@@ -1184,6 +1185,7 @@
   color: var(--page);
   font-size: 0.82rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .quick-log-input-row .quick-add-primary:disabled {

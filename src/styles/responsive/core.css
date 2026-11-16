@@ -125,7 +125,7 @@ textarea {
   .app-header-inner {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 0.5rem;
-    padding-inline: 0.75rem;
+    padding-inline: var(--page-gutter);
   }
 
   .app-header .momentum-brand {
@@ -226,8 +226,8 @@ textarea {
 
   .dashboard-shell > main.app-page,
   .profile-shell > main.app-page {
-    padding-right: 0.75rem;
-    padding-left: 0.75rem;
+    padding-right: var(--page-gutter);
+    padding-left: var(--page-gutter);
   }
 }
 

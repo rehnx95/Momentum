@@ -1,12 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 export default function AppDialog({ dialog, onClose, onConfirm }) {
   const [typedValue, setTypedValue] = useState("");
   const dialogRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const previous = document.activeElement;
-    return () => previous?.focus?.();
+    const dialogNode = dialogRef.current;
+    const initialFocus =
+      dialogNode?.querySelector("#app-dialog-confirmation-input:not(:disabled)") ||
+      dialogNode?.querySelector("button:not(:disabled), input:not(:disabled)");
+    (initialFocus || dialogNode)?.focus();
+
+    return () => {
+      if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+    };
   }, []);
   const isConfirmDangerous = Boolean(dialog?.dangerous);
   const requiredWord = dialog?.requireWord || "";
@@ -19,20 +27,27 @@ export default function AppDialog({ dialog, onClose, onConfirm }) {
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
+        event.preventDefault();
         onClose();
         return;
       }
       if (event.key !== "Tab") return;
-      const focusable = dialogRef.current?.querySelectorAll(
-        'button:not(:disabled), input:not(:disabled), [href], [tabindex]:not([tabindex="-1"])',
+      const dialogNode = dialogRef.current;
+      const focusable = dialogNode?.querySelectorAll(
+        'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])',
       );
-      if (!focusable?.length) return;
+      if (!focusable?.length) {
+        event.preventDefault();
+        dialogNode?.focus();
+        return;
+      }
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      const focusIsInside = dialogNode.contains(document.activeElement);
+      if (event.shiftKey && (document.activeElement === first || !focusIsInside)) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (!event.shiftKey && (document.activeElement === last || !focusIsInside)) {
         event.preventDefault();
         first.focus();
       }
@@ -60,6 +75,7 @@ export default function AppDialog({ dialog, onClose, onConfirm }) {
         aria-labelledby="app-dialog-title"
         aria-describedby="app-dialog-message"
         className="app-dialog"
+        tabIndex={-1}
       >
         <h2 id="app-dialog-title">{dialog.title}</h2>
         <p id="app-dialog-message">{dialog.message}</p>
@@ -87,7 +103,6 @@ export default function AppDialog({ dialog, onClose, onConfirm }) {
             type="button"
             className={actionButtonClass}
             onClick={dialog.type === "confirm" ? () => isTypedConfirmValid && onConfirm() : onClose}
-            autoFocus
             disabled={dialog.type === "confirm" && requiredWord && !isTypedConfirmValid}
           >
             {dialog.type === "confirm" ? confirmLabel : "Got it"}

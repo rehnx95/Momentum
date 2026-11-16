@@ -1,7 +1,7 @@
 @media (min-width: 768px) {
   .app-header-inner,
   .app-page {
-    padding-inline: 1.5rem;
+    padding-inline: var(--page-gutter);
   }
 
   .daily-basics {

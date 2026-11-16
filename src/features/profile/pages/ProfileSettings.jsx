@@ -122,23 +122,28 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
   };
 
   return (
-    <div className="profile-settings-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
+    <div className="profile-settings-shell min-h-screen bg-page text-text font-sans">
       {header}
 
       <main className="app-page">
         <div className="app-page-narrow profile-settings-content">
-          <button type="button" onClick={onBack} className="btn-secondary mb-4">
-            <ChevronLeft size={14} /> Back to profile
-          </button>
-          <h1 className="page-title mb-4">Edit profile</h1>
+          <div className="mb-5">
+            <button type="button" onClick={onBack} className="btn-secondary mb-4">
+              <ChevronLeft size={14} /> Back to profile
+            </button>
+            <h1 className="page-title mb-2">Edit profile</h1>
+            <p className="text-sm text-muted">
+              Change the name and username shown on your profile.
+            </p>
+          </div>
           <form
             onSubmit={handleSubmit}
-            className="settings-form space-y-4 rounded-xl border border-[#262626] bg-[#0A0A0A] p-4 md:p-5"
+            className="settings-form space-y-4 rounded-xl border border-border bg-panel p-4 md:p-5"
           >
             {errorMessage && (
               <p
                 role="alert"
-                className="rounded-lg border border-border-strong bg-rowHover p-3 text-sm text-muted"
+                className="rounded-lg border border-danger bg-panel p-3 text-sm text-danger"
               >
                 {errorMessage}
               </p>
@@ -146,15 +151,29 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
             {successMessage && (
               <p
                 role="status"
-                className="rounded-lg border border-border-strong bg-rowHover p-3 text-sm text-muted"
+                className="rounded-lg border border-success bg-panel p-3 text-sm text-success"
               >
                 {successMessage}
               </p>
             )}
 
             {[
-              { name: "name", label: "Name", type: "text", required: true, maxLength: 100 },
-              { name: "username", label: "Username", type: "text", required: true, maxLength: 45 },
+              {
+                name: "name",
+                label: "Name",
+                type: "text",
+                autoComplete: "name",
+                required: true,
+                maxLength: 100,
+              },
+              {
+                name: "username",
+                label: "Username",
+                type: "text",
+                autoComplete: "username",
+                required: true,
+                maxLength: 45,
+              },
             ].map((field) => (
               <div key={field.name}>
                 <label
@@ -167,40 +186,42 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
                   id={`profile-${field.name}`}
                   name={field.name}
                   type={field.type}
+                  autoComplete={field.autoComplete}
+                  aria-describedby={field.name === "username" ? "profile-username-help" : undefined}
+                  aria-invalid={field.name === "username" && usernameAvailability === "taken"}
                   required={field.required}
                   maxLength={field.maxLength}
-                  placeholder={field.placeholder}
                   value={form[field.name]}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-[#262626] bg-[#000000] px-3 py-2.5 text-[#EDEDED] placeholder-[#A1A1A1] outline-none transition-colors focus:border-[#EDEDED] focus:outline-none"
+                  className="w-full rounded-lg border border-border-strong bg-page px-3 py-2.5 text-text placeholder:text-muted outline-none transition-colors focus:border-accent focus:outline-none"
                 />
                 {field.name === "username" && (
                   <div className="mt-1 space-y-1">
-                    <p className="text-xs text-[#A1A1A1]">
+                    <p id="profile-username-help" className="text-xs text-muted">
                       3–45 characters; lowercase letters, numbers, and hyphens.
                     </p>
                     {usernameAvailability === "checking" && (
-                      <p role="status" className="text-xs text-[#A1A1A1]">
+                      <p role="status" className="text-xs text-muted">
                         Checking username…
                       </p>
                     )}
                     {usernameAvailability === "available" && (
-                      <p role="status" className="text-xs text-muted">
+                      <p role="status" className="text-xs text-success">
                         Username is available.
                       </p>
                     )}
                     {usernameAvailability === "taken" && (
-                      <p role="status" className="text-xs text-muted">
+                      <p role="status" className="text-xs text-danger">
                         That username is already taken.
                       </p>
                     )}
                     {usernameAvailability === "current" && (
-                      <p role="status" className="text-xs text-[#A1A1A1]">
+                      <p role="status" className="text-xs text-muted">
                         This is your current username.
                       </p>
                     )}
                     {usernameAvailability === "error" && (
-                      <p role="alert" className="text-xs text-muted">
+                      <p role="alert" className="text-xs text-danger">
                         Could not check username availability. You can still try saving.
                       </p>
                     )}
@@ -212,9 +233,9 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
             <button
               type="submit"
               disabled={isSaving}
-              className="w-full rounded-lg bg-[#EDEDED] px-4 py-2.5 font-medium text-black transition-colors hover:bg-white disabled:cursor-wait disabled:opacity-60"
+              className="w-full rounded-lg bg-accent px-4 py-2.5 font-medium text-page transition-colors hover:bg-accent-hover disabled:cursor-wait disabled:opacity-60"
             >
-              {isSaving ? "Saving…" : "Save profile"}
+              {isSaving ? "Saving…" : "Save changes"}
             </button>
           </form>
         </div>
