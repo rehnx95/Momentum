@@ -47,7 +47,7 @@
 .daily-save-status button {
   padding: 0.3rem 0.6rem;
   border: 1px solid var(--border-strong);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   color: var(--text);
   font-weight: 700;
 }
