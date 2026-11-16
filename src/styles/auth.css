@@ -7,7 +7,7 @@
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border-strong);
-  border-radius: 0.65rem;
+  border-radius: var(--radius-menu);
   background: var(--surface-raised);
   color: var(--text);
   font-weight: 600;
@@ -43,7 +43,7 @@
 
 .onboarding-panel {
   border: 1px solid var(--border);
-  border-radius: 1.5rem;
+  border-radius: var(--radius-3xl);
   background: var(--page);
   box-shadow: none;
   padding: clamp(1.5rem, 5vw, 3.5rem);
@@ -51,7 +51,7 @@
 
 .onboarding-panel input {
   min-height: 3rem;
-  border-radius: 0.6rem;
+  border-radius: var(--radius-control);
   background: var(--page) !important;
 }
 
@@ -78,7 +78,7 @@
   margin-bottom: 1rem;
   padding: 0.2rem 0.65rem;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--muted);
   font-size: 0.65rem;
   font-weight: 700;
