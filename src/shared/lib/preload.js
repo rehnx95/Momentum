@@ -34,17 +34,3 @@ export function preloadForPath(pathname) {
   if (routeLoaders[pathname]) safe(routeLoaders[pathname]);
   else if (/^\/(?:user|u)\/[A-Za-z0-9-]{3,48}\/?$/.test(pathname)) safe(publicProfileLoader);
 }
-
-export function prefetchRoutesWhenIdle() {
-  if (!hasCachedAccount()) return;
-  const run = () => {
-    Object.values(routeLoaders).forEach(safe);
-    safe(publicProfileLoader);
-  };
-  const schedule = () =>
-    "requestIdleCallback" in window
-      ? window.requestIdleCallback(run, { timeout: 4000 })
-      : window.setTimeout(run, 2000);
-  if (document.readyState === "complete") schedule();
-  else window.addEventListener("load", schedule, { once: true });
-}

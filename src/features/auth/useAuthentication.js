@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { supabase, isSupabaseConfigured } from "../../shared/lib/supabase";
+import { preconnectBackend } from "../../shared/lib/preload";
 
 export const AppState = {
   LOADING: "LOADING",
@@ -10,6 +10,24 @@ export const AppState = {
 
 const ACCOUNT_CACHE_KEY = "momentum:account-cache";
 const profileRequests = new Map();
+let supabaseModulePromise;
+
+function hasSupabaseConfiguration() {
+  return Boolean(
+    import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  );
+}
+
+function loadSupabaseModule() {
+  if (!supabaseModulePromise) {
+    const request = import("../../shared/lib/supabase");
+    supabaseModulePromise = request.catch((error) => {
+      supabaseModulePromise = undefined;
+      throw error;
+    });
+  }
+  return supabaseModulePromise;
+}
 
 function hasStoredSession() {
   try {
@@ -44,13 +62,14 @@ function fetchProfile(userId) {
   const existingRequest = profileRequests.get(userId);
   if (existingRequest) return existingRequest;
 
-  const request = Promise.resolve(
-    supabase
+  const request = loadSupabaseModule().then(({ supabase }) => {
+    if (!supabase) throw new Error("Supabase is not configured.");
+    return supabase
       .from("profiles")
       .select("id, name, username, onboarding_completed")
       .eq("id", userId)
-      .maybeSingle(),
-  );
+      .maybeSingle();
+  });
   profileRequests.set(userId, request);
   const clearRequest = () => {
     if (profileRequests.get(userId) === request) profileRequests.delete(userId);
@@ -107,7 +126,7 @@ export default function useAuthentication() {
     }
     if (user?.id) previousUserId.current = user.id;
 
-    if (!isSupabaseConfigured) {
+    if (!hasSupabaseConfiguration()) {
       setAuthError(
         "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY, then restart the app.",
       );
@@ -115,27 +134,42 @@ export default function useAuthentication() {
       return undefined;
     }
 
-    let active = true;
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!active || event === "INITIAL_SESSION") return;
-      if (event === "TOKEN_REFRESHED") return;
-      authEventOccurred.current = true;
-      setAuthError("");
-      setUser(session?.user ?? null);
-      if (!session) {
-        clearAppScopedStorage();
-        localStorage.removeItem(ACCOUNT_CACHE_KEY);
-        setProfile(null);
-        setAppState(AppState.UNAUTHENTICATED);
-      }
-    });
+    if (!cachedAccount && !hasStoredSession()) {
+      setAppState(AppState.UNAUTHENTICATED);
+      return undefined;
+    }
 
-    supabase.auth
-      .getSession()
-      .then(({ data: { session }, error }) => {
-        if (!active || authEventOccurred.current) return;
+    preconnectBackend();
+    let active = true;
+    let subscription;
+    loadSupabaseModule()
+      .then(({ supabase }) => {
+        if (!active) return null;
+        if (!supabase) throw new Error("Supabase is not configured.");
+        const {
+          data: { subscription: authSubscription },
+        } = supabase.auth.onAuthStateChange((event, session) => {
+          if (!active || event === "INITIAL_SESSION") return;
+          if (event === "TOKEN_REFRESHED") return;
+          authEventOccurred.current = true;
+          setAuthError("");
+          setUser(session?.user ?? null);
+          if (!session) {
+            clearAppScopedStorage();
+            localStorage.removeItem(ACCOUNT_CACHE_KEY);
+            setProfile(null);
+            setAppState(AppState.UNAUTHENTICATED);
+          }
+        });
+        subscription = authSubscription;
+        return supabase.auth.getSession();
+      })
+      .then((result) => {
+        if (!active || !result || authEventOccurred.current) return;
+        const {
+          data: { session },
+          error,
+        } = result;
         if (error) throw error;
         setUser(session?.user ?? null);
         if (!session) {
@@ -154,12 +188,18 @@ export default function useAuthentication() {
 
     return () => {
       active = false;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
-  }, [user?.id]);
+  }, [cachedAccount, user?.id]);
 
   useEffect(() => {
-    if (!userId || !supabase || loadedProfileUserId.current === userId) return undefined;
+    if (
+      !userId ||
+      !hasSupabaseConfiguration() ||
+      loadedProfileUserId.current === userId
+    ) {
+      return undefined;
+    }
 
     let active = true;
     if (!hasCachedProfile) setAppState(AppState.LOADING);
@@ -204,10 +244,13 @@ export default function useAuthentication() {
   }, [profile, user]);
 
   const handleSignIn = async () => {
-    if (!supabase) return;
+    if (!hasSupabaseConfiguration()) return;
     setIsSigningIn(true);
     setAuthError("");
     try {
+      preconnectBackend();
+      const { supabase } = await loadSupabaseModule();
+      if (!supabase) throw new Error("Supabase is not configured.");
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -227,6 +270,8 @@ export default function useAuthentication() {
 
   const handleSignOut = useCallback(async () => {
     try {
+      if (!hasSupabaseConfiguration()) return;
+      const { supabase } = await loadSupabaseModule();
       if (!supabase) return;
       const { error } = await supabase.auth.signOut();
       if (error) throw error;

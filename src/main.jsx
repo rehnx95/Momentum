@@ -19,7 +19,7 @@ import "./styles/responsive/dashboard.css";
 import "./styles/responsive/tracker.css";
 import "./styles/responsive/profile.css";
 import App from "./App";
-import { preconnectBackend, preloadForPath, prefetchRoutesWhenIdle } from "./shared/lib/preload";
+import { preloadForPath } from "./shared/lib/preload";
 
 function RevealScrollbarsWhileScrolling() {
   React.useEffect(() => {
@@ -92,9 +92,7 @@ class AppErrorBoundary extends React.Component {
   }
 }
 
-preconnectBackend();
 preloadForPath(window.location.pathname);
-prefetchRoutesWhenIdle();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

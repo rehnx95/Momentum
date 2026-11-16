@@ -69,6 +69,17 @@ export default function AuthenticatedApp({
     reset,
   } = useProgress(sheetBootstrapComplete ? user : null);
   const {
+    dailyLogPage,
+    navigateTo,
+    peopleSearchPage,
+    openPublicProfile: navigateToPublicProfile,
+    publicProfileReturnPath,
+    returnFromPublicProfile,
+    selectedPublicUsername,
+    showProfile,
+    showSettings,
+  } = useAuthenticatedNavigation();
+  const {
     search,
     setSearch,
     expandedSteps,
@@ -96,20 +107,10 @@ export default function AuthenticatedApp({
     progress,
     getState,
     update,
+    enabled: !dailyLogPage && !peopleSearchPage && !selectedPublicUsername && !showProfile,
   });
   const handleRemoveSheet = (sheet) => removeSheet(sheet, reset);
   const [todayDateKey, setTodayDateKey] = useState(() => getLocalDateKey(new Date()));
-  const {
-    dailyLogPage,
-    navigateTo,
-    peopleSearchPage,
-    openPublicProfile: navigateToPublicProfile,
-    publicProfileReturnPath,
-    returnFromPublicProfile,
-    selectedPublicUsername,
-    showProfile,
-    showSettings,
-  } = useAuthenticatedNavigation();
   const {
     clearSearch,
     error: peopleSearchError,

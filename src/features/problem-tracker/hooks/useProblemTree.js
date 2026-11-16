@@ -8,7 +8,7 @@ function safeLocalStorageGet(key, fallback = "") {
   }
 }
 
-export default function useProblemTree({ data, progress, getState, update }) {
+export default function useProblemTree({ data, progress, getState, update, enabled = true }) {
   const [search, setSearch] = useState(() => safeLocalStorageGet("momentum:learning-search", ""));
   const [expandedSteps, setExpandedSteps] = useState(() => {
     try {
@@ -75,21 +75,27 @@ export default function useProblemTree({ data, progress, getState, update }) {
 
   const sheetProblems = useMemo(
     () =>
-      data.steps.flatMap((step) => step.subsections.flatMap((subsection) => subsection.problems)),
-    [data.steps],
+      enabled
+        ? data.steps.flatMap((step) =>
+            step.subsections.flatMap((subsection) => subsection.problems),
+          )
+        : [],
+    [data.steps, enabled],
   );
   const totalProblems = useMemo(
     () =>
-      data.steps.reduce(
-        (sum, step) =>
-          sum +
-          step.subsections.reduce(
-            (subsectionTotal, subsection) => subsectionTotal + subsection.problems.length,
+      enabled
+        ? data.steps.reduce(
+            (sum, step) =>
+              sum +
+              step.subsections.reduce(
+                (subsectionTotal, subsection) => subsectionTotal + subsection.problems.length,
+                0,
+              ),
             0,
-          ),
-        0,
-      ),
-    [data.steps],
+          )
+        : 0,
+    [data.steps, enabled],
   );
   const doneCount = sheetProblems.filter((problem) => progress[problem.id] === "done").length;
   const skippedCount = sheetProblems.filter((problem) => progress[problem.id] === "skipped").length;
@@ -152,6 +158,7 @@ export default function useProblemTree({ data, progress, getState, update }) {
   }, []);
 
   const filteredSteps = useMemo(() => {
+    if (!enabled) return [];
     const query = search.trim().toLowerCase();
     return data.steps
       .map((step) => {
@@ -173,7 +180,7 @@ export default function useProblemTree({ data, progress, getState, update }) {
         return { ...step, subsections };
       })
       .filter((step) => step.subsections.length > 0);
-  }, [activeFilter, data, getState, hideSkipped, search]);
+  }, [activeFilter, data, enabled, getState, hideSkipped, search]);
 
   const chipActive = (type) =>
     (type === "skip-visibility" ? hideSkipped : activeFilter === type)

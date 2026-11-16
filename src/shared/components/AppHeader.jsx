@@ -1,6 +1,7 @@
 import { ClipboardList, LayoutList, LogOut, Moon, Sun, User, Users } from "lucide-react";
 import MomentumBrand from "./MomentumBrand";
 import Tooltip from "./Tooltip";
+import { preloadForPath } from "../lib/preload";
 
 const NAV = [
   { id: "tracker", label: "Tracker", path: "/", icon: LayoutList },
@@ -26,6 +27,8 @@ export default function AppHeader({
             <button
               key={id}
               type="button"
+              onPointerEnter={() => preloadForPath(path)}
+              onFocus={() => preloadForPath(path)}
               onClick={() => onNavigate(path)}
               aria-current={active === id ? "page" : undefined}
               className={active === id ? "active" : ""}
