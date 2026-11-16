@@ -27,6 +27,16 @@
   --study-chart-color: #22c55e;
   --progress-fill: #ffffff;
   --font-sans: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+
+  /* Shape tokens mirror the existing UI values; aliases only, no visual redesign. */
+  --radius-context: 0.35rem;
+  --radius-option: 0.4rem;
+  --radius-control: 0.6rem;
+  --radius-menu: 0.65rem;
+  --radius-brand: 0.75rem;
+  --radius-popover: 0.75rem;
+  --radius-tooltip: 0.55rem;
+  --radius-dialog: 1rem;
 }
 
 :root[data-theme="light"] {
