@@ -37,6 +37,23 @@
   --radius-popover: 0.75rem;
   --radius-tooltip: 0.55rem;
   --radius-dialog: 1rem;
+  --radius-2xs: 0.2rem;
+  --radius-2xs-plus: 0.25rem;
+  --radius-xs: 0.35rem;
+  --radius-sm: 0.4rem;
+  --radius-sm-plus: 0.45rem;
+  --radius-md: 0.5rem;
+  --radius-md-plus: 0.55rem;
+  --radius-lg: 0.7rem;
+  --radius-lg-plus: 0.8rem;
+  --radius-xl-minus: 0.85rem;
+  --radius-xl: 0.9rem;
+  --radius-2xl-plus: 1.15rem;
+  --radius-3xl-minus: 1.2rem;
+  --radius-3xl: 1.5rem;
+  --radius-pill: 999px;
+  --radius-6px: 6px;
+  --radius-2px: 2px;
 }
 
 :root[data-theme="light"] {
