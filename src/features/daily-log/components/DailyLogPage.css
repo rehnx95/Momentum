@@ -1226,27 +1226,65 @@
 .daily-log-page-shell .daily-title-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 0.85rem;
+  align-items: center;
+  gap: 0.25rem 0.45rem;
 }
 
 .daily-log-page-shell .daily-title-row .daily-save-status {
-  flex-direction: row;
-  align-items: baseline;
-  justify-content: flex-start;
-  gap: 0.6rem;
+  display: grid;
+  grid-template-columns: max-content 4.75rem;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 0.25rem 0.4rem;
   margin: 0;
   text-align: left;
+  width: max-content;
 }
 
 .daily-log-page-shell .daily-title-row .daily-save-status-copy {
-  align-items: baseline;
+  display: grid;
+  grid-template-areas: "status-label";
   font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.daily-log-page-shell .daily-title-row .daily-save-status-copy::after {
+  content: "Saved 00:00";
+  grid-area: status-label;
+  visibility: hidden;
+  white-space: nowrap;
+}
+
+.daily-log-page-shell .daily-title-row .daily-save-status-copy > span {
+  grid-area: status-label;
+  white-space: nowrap;
 }
 
 .daily-log-page-shell .daily-title-row .daily-save-status button {
-  padding: 0.15rem 0.5rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  font-weight: 600;
   font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.daily-log-page-shell .daily-title-row .daily-save-status button:hover {
+  background: transparent;
+  color: var(--accent);
+}
+
+.daily-log-page-shell .daily-save-action-slot {
+  display: flex;
+  min-height: 1.2rem;
+  width: 4.75rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.daily-log-page-shell .daily-title-row .daily-save-message {
+  flex-basis: 100%;
 }
 
 /* full-log-mobile-columns */

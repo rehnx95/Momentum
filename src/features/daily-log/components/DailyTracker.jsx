@@ -61,15 +61,25 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
             {showSaveStatus && (
               <div
                 className="daily-save-status"
-                role={daily.message ? "alert" : "status"}
-                aria-live={daily.message ? "assertive" : "polite"}
+                role="status"
+                aria-live="polite"
               >
                 <div className="daily-save-status-copy">
                   {statusLabel && <span>{statusLabel}</span>}
-                  {daily.message && <span className="daily-save-message">{daily.message}</span>}
                 </div>
-               
+                <div className="daily-save-action-slot">
+                  {canSaveNow && (
+                    <button type="button" onClick={() => void daily.saveNow()}>
+                      {daily.status === "Could not save" ? "Retry save" : "Save now"}
+                    </button>
+                  )}
+                </div>
               </div>
+            )}
+            {daily.message && (
+              <span className="daily-save-message" role="alert" aria-live="assertive">
+                {daily.message}
+              </span>
             )}
           </div>
           <p className="daily-toolbar-subtitle">{subtitle}</p>

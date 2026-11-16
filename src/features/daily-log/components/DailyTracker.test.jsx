@@ -56,6 +56,24 @@ describe("DailyTracker save status", () => {
     expect(screen.getByRole("button", { name: "Retry save" })).toBeTruthy();
   });
 
+  it("keeps the save action slot when the status changes to saved", () => {
+    const daily = createDaily();
+    useDailyLogMock.mockReturnValue(daily);
+    const { container, rerender } = render(
+      <DailyTracker user={{ id: "user-1" }} sheets={[]} activityLog={{}} />,
+    );
+    const actionSlot = container.querySelector(".daily-save-action-slot");
+
+    expect(actionSlot).toBeTruthy();
+    expect(actionSlot.querySelector("button").textContent).toBe("Save now");
+
+    useDailyLogMock.mockReturnValue(createDaily({ status: "Saved", dirty: false }));
+    rerender(<DailyTracker user={{ id: "user-1" }} sheets={[]} activityLog={{}} />);
+
+    expect(container.querySelector(".daily-save-action-slot")).toBe(actionSlot);
+    expect(actionSlot.querySelector("button")).toBeNull();
+  });
+
   it("does not offer saving while validation errors remain", () => {
     useDailyLogMock.mockReturnValue({
       ...createDaily(),

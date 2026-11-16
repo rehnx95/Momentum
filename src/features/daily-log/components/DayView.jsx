@@ -252,7 +252,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                 className="quick-add-primary"
                 disabled={!quickActivityName.trim() || entryDisabled}
               >
-                Add   
+                Add
               </button>
             </div>
 

@@ -314,7 +314,7 @@ describe("DayView activity entry", () => {
     fireEvent.change(screen.getByLabelText("New activity"), {
       target: { value: "algorithms" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Add activity" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add" }));
 
     await waitFor(() => {
       expect(emptyDaily.addSheetActivity).toHaveBeenCalledWith(sheet);
