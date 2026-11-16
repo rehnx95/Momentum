@@ -4,7 +4,8 @@ import AppLoadingFallback from "./shared/components/AppLoadingFallback";
 
 const UnauthenticatedView = lazy(() => import("./features/auth/SignInPage"));
 const OnboardingPage = lazy(() => import("./features/auth/OnboardingPage"));
-const AuthenticatedApp = lazy(() => import("./features/dashboard/AuthenticatedApp"));
+const loadAuthenticatedApp = () => import("./features/dashboard/AuthenticatedApp");
+const AuthenticatedApp = lazy(loadAuthenticatedApp);
 
 function preloadCurrentPage(pathname) {
   if (pathname === "/profile/edit") return import("./features/profile/pages/ProfileSettings");
@@ -15,6 +16,17 @@ function preloadCurrentPage(pathname) {
     return import("./features/people/PublicProfilePage");
   }
   return null;
+}
+
+// If this browser has signed in before, start fetching the app chunks now so the
+// download overlaps with the session check instead of waiting for it.
+try {
+  if (localStorage.getItem("momentum:account-cache")) {
+    loadAuthenticatedApp().catch(() => {});
+    preloadCurrentPage(window.location.pathname)?.catch(() => {});
+  }
+} catch {
+  // Storage may be unavailable; normal lazy loading still works.
 }
 
 function App() {

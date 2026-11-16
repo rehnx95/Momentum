@@ -1,210 +1,220 @@
 import { Activity, Users } from "lucide-react";
+import "./AppLoadingFallback.css";
 
-const navigation = [
-  { id: "tracker", label: "Tracker" },
-  { id: "daily-log", label: "Activity Log" },
-  { id: "people", label: "People" },
-  { id: "profile", label: "Profile" },
-];
+const NAV = ["tracker", "daily-log", "people", "profile"];
 
-function getLoadingVariant(pathname) {
+const Bar = ({ className = "" }) => <span className={`sk-bar ${className}`} />;
+const times = (count, render) => Array.from({ length: count }, (_, index) => render(index));
+
+function getVariant(pathname) {
   if (pathname === "/daily-log") return "daily-log";
   if (pathname === "/people") return "people";
-  if (/^\/(?:profile|u\/|user\/)/.test(pathname)) return "profile";
+  if (pathname === "/profile/edit") return "settings";
+  if (pathname === "/profile") return "profile";
+  if (/^\/(?:u|user)\//.test(pathname)) return "public";
   return "tracker";
 }
 
-function LoadingBar({ className = "" }) {
-  return <span className={`app-loading-bar ${className}`} />;
+const ACTIVE_NAV = {
+  tracker: "tracker",
+  "daily-log": "daily-log",
+  people: "people",
+  public: "people",
+  profile: "profile",
+  settings: "profile",
+};
+
+function getDailyView() {
+  try {
+    const userId = JSON.parse(localStorage.getItem("momentum:account-cache"))?.user?.id;
+    const view = userId && localStorage.getItem(`momentum:daily-log-view:${userId}`);
+    return view === "full" || view === "trends" ? view : "daily";
+  } catch {
+    return "daily";
+  }
 }
 
-function TrackerLoadingContent() {
+/* ---------- Header and mobile nav ---------- */
+
+function HeaderSkeleton({ active }) {
   return (
-    <div className="app-loading-tracker-layout">
-      <div className="app-loading-tracker-main">
-        <div className="app-loading-tracker-heading">
-          <LoadingBar className="app-loading-tracker-title" />
-          <LoadingBar className="app-loading-tracker-count" />
-          <span className="app-loading-spacer" />
-          <LoadingBar className="app-loading-search app-loading-tracker-search" />
-        </div>
-        <div className="app-loading-filters">
-          {Array.from({ length: 5 }, (_, index) => (
-            <LoadingBar key={index} className={index === 0 ? "is-active" : ""} />
+    <header className="sk-header" aria-hidden="true">
+      <div className="sk-header-inner">
+        <span className="sk-brand">
+          <span className="sk-brand-icon">
+            <Activity size={21} strokeWidth={2.25} />
+          </span>
+          <span>Momentum</span>
+        </span>
+        <nav className="sk-nav">
+          {NAV.map((id) => (
+            <Bar key={id} className={id === active ? "is-active" : ""} />
           ))}
+        </nav>
+        <div className="sk-actions">
+          <Bar />
+          <Bar className="sk-signout" />
         </div>
-        <section className="app-loading-progress-card app-loading-progress-inline">
-          <div className="app-loading-progress-heading">
-            <div>
-              <LoadingBar className="app-loading-label" />
-              <LoadingBar className="app-loading-copy" />
-            </div>
-            <LoadingBar className="app-loading-progress-number" />
+      </div>
+    </header>
+  );
+}
+
+function MobileNavSkeleton({ active }) {
+  return (
+    <nav className="sk-mobile-nav" aria-hidden="true">
+      {NAV.map((id) => (
+        <span className={`sk-mobile-item${id === active ? " is-active" : ""}`} key={id}>
+          <Bar />
+          <Bar />
+        </span>
+      ))}
+    </nav>
+  );
+}
+
+/* ---------- Tracker ---------- */
+
+function TrackerSkeleton() {
+  return (
+    <div className="sk-tracker">
+      <div className="sk-tracker-main">
+        <div className="sk-tracker-head">
+          <Bar className="sk-tracker-title" />
+          <Bar className="sk-tracker-count" />
+          <span className="sk-grow" />
+          <Bar className="sk-tracker-search" />
+        </div>
+
+        <div className="sk-tracker-controls">
+          <div className="sk-filter-group">
+            {times(5, (i) => (
+              <Bar key={i} className={i === 0 ? "is-active" : ""} />
+            ))}
           </div>
-          <LoadingBar className="app-loading-progress-track" />
-          <div className="app-loading-progress-stats">
-            <LoadingBar />
-            <LoadingBar />
-            <LoadingBar />
+          <Bar className="sk-expand" />
+        </div>
+
+        {/* Replaces the side panel below 1100px, like the real page */}
+        <section className="sk-card sk-mobile-summary">
+          <div className="sk-row-between">
+            <div className="sk-stack">
+              <Bar className="sk-label-sm" />
+              <Bar className="sk-text-sm" />
+            </div>
+            <Bar className="sk-percent-sm" />
+          </div>
+          <Bar className="sk-progress" />
+          <div className="sk-row-between">
+            <Bar className="sk-text-xs" />
+            <Bar className="sk-text-xs" />
+            <Bar className="sk-text-xs" />
           </div>
         </section>
-        <div className="app-loading-row-list">
-          {Array.from({ length: 8 }, (_, index) => (
-            <div className="app-loading-list-row" key={index}>
-              <LoadingBar className="app-loading-row-icon" />
-              <LoadingBar className="app-loading-row-title" />
-              <LoadingBar className="app-loading-row-count" />
+
+        <div className="sk-step-list">
+          {times(9, (i) => (
+            <div className="sk-card sk-step-row" key={i}>
+              <Bar className="sk-chevron" />
+              <Bar className="sk-step-title" />
+              <Bar className="sk-step-track" />
+              <Bar className="sk-step-count" />
             </div>
           ))}
         </div>
       </div>
-      <aside className="app-loading-tracker-side">
-        <section className="app-loading-progress-card">
-          <LoadingBar className="app-loading-label" />
-          <LoadingBar className="app-loading-progress-number" />
-          <LoadingBar className="app-loading-copy" />
-          <LoadingBar className="app-loading-progress-track" />
-          <div className="app-loading-progress-stats">
-            <LoadingBar />
-            <LoadingBar />
-            <LoadingBar />
+
+      <aside className="sk-tracker-side">
+        <section className="sk-card sk-side-card">
+          <Bar className="sk-label-sm" />
+          <Bar className="sk-percent-lg" />
+          <Bar className="sk-text-sm" />
+          <Bar className="sk-progress sk-progress-lg" />
+          <div className="sk-side-stats">
+            {times(3, (i) => (
+              <div key={i}>
+                <Bar className="sk-stat-number" />
+                <Bar className="sk-stat-label" />
+              </div>
+            ))}
           </div>
+          <Bar className="sk-reset" />
         </section>
       </aside>
     </div>
   );
 }
 
-function ProfileLoadingContent() {
+/* ---------- Daily Log (Day / Full Log / Trends) ---------- */
+
+function DailyToolbar({ view }) {
   return (
-    <div className="app-loading-profile-layout">
-      <div className="app-loading-profile-column">
-        <section className="app-loading-profile-card">
-          <div className="app-loading-profile-identity">
-            <LoadingBar className="app-loading-avatar" />
-            <div className="app-loading-profile-copy">
-              <LoadingBar className="app-loading-profile-name" />
-              <LoadingBar className="app-loading-copy" />
-              <LoadingBar className="app-loading-copy app-loading-email" />
-            </div>
-          </div>
-          <div className="app-loading-profile-stats">
-            {Array.from({ length: 4 }, (_, index) => (
-              <div key={index}>
-                <LoadingBar className="app-loading-copy" />
-                <LoadingBar className="app-loading-stat-value" />
-              </div>
-            ))}
-          </div>
-        </section>
-        <section className="app-loading-profile-card app-loading-sheet-progress">
-          <div className="app-loading-card-heading">
-            <LoadingBar className="app-loading-section-title" />
-            <LoadingBar className="app-loading-button" />
-          </div>
-          {Array.from({ length: 3 }, (_, index) => (
-            <div className="app-loading-sheet-row" key={index}>
-              <div className="app-loading-sheet-meta">
-                <LoadingBar className="app-loading-sheet-name" />
-                <LoadingBar className="app-loading-copy" />
-              </div>
-              <LoadingBar className="app-loading-sheet-track" />
-            </div>
-          ))}
-        </section>
+    <header className="sk-toolbar">
+      <div className="sk-toolbar-copy">
+        <Bar className="sk-daily-title" />
+        <Bar className="sk-daily-sub" />
       </div>
-      <div className="app-loading-profile-column">
-        <section className="app-loading-profile-card">
-          <div className="app-loading-card-heading">
-            <LoadingBar className="app-loading-section-title" />
-            <LoadingBar className="app-loading-button" />
-          </div>
-          <div className="app-loading-heatmap-clip">
-            <div className="app-loading-heatmap-months">
-              {Array.from({ length: 12 }, (_, index) => (
-                <LoadingBar key={index} />
-              ))}
-            </div>
-            <div className="app-loading-heatmap">
-              {Array.from({ length: 53 }, (_, week) => (
-                <div className="app-loading-heat-week" key={week}>
-                  {Array.from({ length: 7 }, (_, day) => (
-                    <LoadingBar
-                      className={`app-loading-heat-cell tone-${(week + day) % 4}`}
-                      key={day}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-        <section className="app-loading-profile-card">
-          <div className="app-loading-card-heading">
-            <LoadingBar className="app-loading-section-title" />
-            <LoadingBar className="app-loading-button" />
-          </div>
-          {Array.from({ length: 4 }, (_, index) => (
-            <div className="app-loading-activity-row" key={index}>
-              <LoadingBar className="app-loading-row-icon" />
-              <LoadingBar className="app-loading-row-title" />
-              <LoadingBar className="app-loading-row-count" />
-            </div>
-          ))}
-        </section>
+      <div className="sk-switch" data-view={view}>
+        {times(3, (i) => (
+          <Bar key={i} className={i === ["daily", "full", "trends"].indexOf(view) ? "is-active" : ""} />
+        ))}
       </div>
-    </div>
+    </header>
   );
 }
 
-function DailyLogLoadingContent() {
+function DaySkeleton() {
   return (
     <>
-      <header className="app-loading-daily-toolbar">
-        <div className="app-loading-daily-title-group">
-          <LoadingBar className="app-loading-section-title" />
-          <LoadingBar className="app-loading-daily-subtitle" />
-        </div>
-        <LoadingBar className="app-loading-daily-switcher" />
-      </header>
-      <div className="app-loading-daily-date">
-        <LoadingBar className="app-loading-date-arrow" />
-        <LoadingBar className="app-loading-button app-loading-date" />
-        <LoadingBar className="app-loading-date-arrow" />
+      <div className="sk-date-row">
+        <Bar className="sk-sq" />
+        <Bar className="sk-date" />
+        <Bar className="sk-sq" />
       </div>
-      <div className="app-loading-daily-layout">
-        <section className="app-loading-profile-card app-loading-daily-activities">
-          <div className="app-loading-card-heading">
-            <LoadingBar className="app-loading-section-title" />
-            <LoadingBar className="app-loading-copy" />
+      <div className="sk-daily-layout">
+        <section className="sk-card sk-activities">
+          <div className="sk-row-between">
+            <Bar className="sk-h-md" />
+            <Bar className="sk-text-sm" />
           </div>
-          {Array.from({ length: 2 }, (_, index) => (
-            <div className="app-loading-activity-row" key={index}>
-              <LoadingBar className="app-loading-row-icon" />
-              <LoadingBar className="app-loading-row-title" />
-              <LoadingBar className="app-loading-row-count" />
+          {[3, 2, 3, 2].map((slots, i) => (
+            <div className="sk-activity" key={i}>
+              <div className="sk-activity-head">
+                <Bar className="sk-dot" />
+                <Bar className="sk-activity-name" />
+                <span className="sk-grow" />
+                {times(3, (j) => (
+                  <Bar key={j} className="sk-icon-btn" />
+                ))}
+              </div>
+              <div className="sk-slot-grid">
+                {times(slots, (j) => (
+                  <Bar key={j} className="sk-slot" />
+                ))}
+              </div>
             </div>
           ))}
         </section>
-        <div className="app-loading-daily-panels">
-          <section className="app-loading-profile-card app-loading-quick-log">
-            <LoadingBar className="app-loading-section-title" />
-            <LoadingBar className="app-loading-search" />
-            <div className="app-loading-quick-tags">
-              <LoadingBar />
-              <LoadingBar />
+
+        <div className="sk-side-panel">
+          <section className="sk-card sk-small-card">
+            <Bar className="sk-h-sm" />
+            <div className="sk-quick-row">
+              <Bar className="sk-quick-input" />
+              <Bar className="sk-quick-add" />
+            </div>
+            <div className="sk-chips">
+              <Bar />
+              <Bar />
             </div>
           </section>
-          <section className="app-loading-profile-card app-loading-sleep">
-            <div className="app-loading-card-heading">
-              <LoadingBar className="app-loading-section-title" />
-              <LoadingBar className="app-loading-copy" />
+          <section className="sk-card sk-small-card">
+            <div className="sk-row-between">
+              <Bar className="sk-h-sm" />
+              <Bar className="sk-text-xs" />
             </div>
-            <div className="app-loading-sleep-times">
-              <LoadingBar />
-              <LoadingBar />
-            </div>
-            <LoadingBar className="app-loading-sleep-note" />
+            <Bar className="sk-sleep-range" />
+            <Bar className="sk-text-sm" />
           </section>
         </div>
       </div>
@@ -212,88 +222,252 @@ function DailyLogLoadingContent() {
   );
 }
 
-function PeopleLoadingContent() {
+function FullLogSkeleton() {
   return (
-    <div className="app-loading-people-layout">
-      <LoadingBar className="app-loading-section-title app-loading-people-title" />
-      <div className="app-loading-people-description">
-        <LoadingBar />
-        <LoadingBar />
-      </div>
-      <LoadingBar className="app-loading-search app-loading-people-search" />
-      <LoadingBar className="app-loading-people-hint" />
-      <section className="app-loading-people-empty">
-        <Users size={22} aria-hidden="true" />
-        <LoadingBar className="app-loading-people-empty-title" />
-        <div className="app-loading-people-description">
-          <LoadingBar />
-          <LoadingBar />
+    <>
+      <div className="sk-full-toolbar">
+        <Bar className="sk-dropdown" />
+        <div className="sk-legend">
+          {times(7, (i) => (
+            <Bar key={i} />
+          ))}
         </div>
+      </div>
+      <div className="sk-card sk-table">
+        <div className="sk-cols sk-table-head">
+          {times(6, (i) => (
+            <Bar key={i} />
+          ))}
+        </div>
+        {times(7, (i) => (
+          <div className="sk-cols sk-table-row" key={i}>
+            <Bar className="sk-cell-date" />
+            <div className="sk-timeline">
+              <Bar className="sk-track-bar" />
+              <Bar className="sk-breakdown" />
+            </div>
+            {times(4, (j) => (
+              <Bar key={j} className="sk-cell" />
+            ))}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function TrendsSkeleton() {
+  const navGroup = (
+    <div className="sk-nav-group">
+      <Bar className="sk-sq" />
+      <Bar className="sk-range" />
+      <Bar className="sk-sq" />
+    </div>
+  );
+  return (
+    <div className="sk-trends">
+      <section className="sk-card sk-panel">
+        <div className="sk-row-between">
+          <Bar className="sk-h-md" />
+          <Bar className="sk-dropdown sk-dropdown-wide" />
+        </div>
+        <div className="sk-row-between sk-period">
+          {navGroup}
+          <Bar className="sk-summary" />
+        </div>
+        <div className="sk-chart" />
+      </section>
+      <section className="sk-card sk-panel">
+        <div className="sk-row-between sk-period">
+          <div className="sk-heading-group">
+            <Bar className="sk-h-md" />
+            <Bar className="sk-text-sm" />
+          </div>
+          {navGroup}
+        </div>
+        {times(5, (i) => (
+          <div className="sk-time-row" key={i}>
+            <Bar className="sk-time-label" />
+            <Bar className="sk-time-pct" />
+            <Bar className="sk-time-value" />
+            <Bar className="sk-time-track" />
+          </div>
+        ))}
       </section>
     </div>
   );
 }
 
+function DailyLogSkeleton() {
+  const view = getDailyView();
+  return (
+    <>
+      <DailyToolbar view={view} />
+      {view === "full" ? <FullLogSkeleton /> : view === "trends" ? <TrendsSkeleton /> : <DaySkeleton />}
+    </>
+  );
+}
+
+/* ---------- Profile (own and public) ---------- */
+
+function ProfileSkeleton({ isPublic }) {
+  return (
+    <div className="sk-profile">
+      <div className="sk-profile-left">
+        <section className="sk-card sk-hero">
+          <Bar className="sk-avatar" />
+          <div className="sk-identity">
+            <Bar className="sk-name" />
+            <Bar className="sk-handle" />
+            <Bar className="sk-email" />
+          </div>
+          <div className="sk-hero-actions">
+            <Bar />
+            {!isPublic && <Bar />}
+          </div>
+          <div className="sk-stats">
+            {times(4, (i) => (
+              <div key={i}>
+                <Bar className="sk-stat-label-lg" />
+                <Bar className="sk-stat-value" />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="sk-card sk-sheets">
+          <div className="sk-row-between sk-sheets-head">
+            <Bar className="sk-h-md" />
+            {!isPublic && (
+              <div className="sk-sheet-actions">
+                <Bar />
+                <Bar />
+                <Bar />
+              </div>
+            )}
+          </div>
+          {times(2, (i) => (
+            <div className="sk-sheet-row" key={i}>
+              <div className="sk-row-between">
+                <Bar className="sk-sheet-name" />
+                <Bar className="sk-sheet-counts" />
+              </div>
+              <Bar className="sk-progress sk-progress-md" />
+            </div>
+          ))}
+        </section>
+      </div>
+
+      <div className="sk-profile-main">
+        <section className="sk-card sk-heat-card">
+          <div className="sk-row-between">
+            <Bar className="sk-heat-title" />
+            <Bar className="sk-year" />
+          </div>
+          <Bar className="sk-heat-months" />
+          <div className="sk-heat">
+            <div className="sk-heat-days" />
+            <div className="sk-heat-grid">
+              {times(53 * 7, (i) => (
+                <span className="sk-heat-cell" key={i} />
+              ))}
+            </div>
+          </div>
+          <div className="sk-row-between">
+            <Bar className="sk-text-sm" />
+            <Bar className="sk-text-sm" />
+          </div>
+        </section>
+
+        <section className="sk-card sk-recent">
+          <div className="sk-row-between sk-recent-head">
+            <div className="sk-stack">
+              <Bar className="sk-h-sm" />
+              {!isPublic && <Bar className="sk-text-sm" />}
+            </div>
+            <Bar className="sk-count-box" />
+          </div>
+          {times(8, (i) => (
+            <div className="sk-ac-row" key={i}>
+              <Bar className="sk-check" />
+              <Bar className="sk-ac-title" />
+              <Bar className="sk-ac-sheet" />
+              <Bar className="sk-ac-date" />
+            </div>
+          ))}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Settings and People ---------- */
+
+function SettingsSkeleton() {
+  return (
+    <div className="sk-settings">
+      <Bar className="sk-back" />
+      <Bar className="sk-settings-title" />
+      <section className="sk-card sk-form">
+        {times(2, (i) => (
+          <div className="sk-field" key={i}>
+            <Bar className="sk-label" />
+            <Bar className="sk-input" />
+          </div>
+        ))}
+        <Bar className="sk-submit" />
+      </section>
+    </div>
+  );
+}
+
+function PeopleSkeleton() {
+  return (
+    <div className="sk-people">
+      <Bar className="sk-people-title" />
+      <Bar className="sk-people-desc" />
+      <Bar className="sk-people-search" />
+      <Bar className="sk-people-hint" />
+      <section className="sk-empty">
+        <Users size={22} aria-hidden="true" />
+        <Bar className="sk-empty-title" />
+        <Bar className="sk-empty-text" />
+      </section>
+    </div>
+  );
+}
+
+/* ---------- Entry ---------- */
+
 export default function AppLoadingFallback({ fullScreen = true }) {
   const pathname = typeof window === "undefined" ? "/" : window.location.pathname;
-  const variant = getLoadingVariant(pathname);
+  const variant = getVariant(pathname);
+  const active = ACTIVE_NAV[variant];
   const Content = fullScreen ? "main" : "div";
-  const activeNavigation = variant === "profile" ? "profile" : variant;
 
   return (
     <div
-      className={`app-loading-fallback app-loading-fallback-${variant}${fullScreen ? " app-loading-fallback-fullscreen" : ""}`}
+      className={`sk-root sk-v-${variant}${fullScreen ? " sk-fullscreen" : ""}`}
       role="status"
       aria-label="Loading app"
     >
-      {fullScreen && (
-        <header className="app-loading-fallback-header" aria-hidden="true">
-          <div className="app-loading-header-inner">
-            <span className="app-loading-brand">
-              <span className="app-loading-brand-icon">
-                <Activity size={20} aria-hidden="true" />
-              </span>
-              <span className="app-loading-brand-name">Momentum</span>
-            </span>
-            <nav className="app-loading-desktop-nav">
-              {navigation.map(({ id }) => (
-                <LoadingBar
-                  className={id === activeNavigation ? "is-active" : ""}
-                  key={id}
-                />
-              ))}
-            </nav>
-            <div className="app-loading-header-actions">
-              <LoadingBar />
-              <LoadingBar />
-            </div>
-          </div>
-        </header>
-      )}
-      <Content className="app-loading-fallback-content" aria-hidden="true">
-        {variant === "profile" ? (
-          <ProfileLoadingContent />
-        ) : variant === "daily-log" ? (
-          <DailyLogLoadingContent />
+      {fullScreen && <HeaderSkeleton active={active} />}
+      <Content className="sk-page" aria-hidden="true">
+        {variant === "daily-log" ? (
+          <DailyLogSkeleton />
+        ) : variant === "profile" ? (
+          <ProfileSkeleton />
+        ) : variant === "public" ? (
+          <ProfileSkeleton isPublic />
+        ) : variant === "settings" ? (
+          <SettingsSkeleton />
         ) : variant === "people" ? (
-          <PeopleLoadingContent />
+          <PeopleSkeleton />
         ) : (
-          <TrackerLoadingContent />
+          <TrackerSkeleton />
         )}
       </Content>
-      {fullScreen && (
-        <nav className="app-loading-mobile-nav" aria-hidden="true">
-          {navigation.map(({ id }) => (
-            <span
-              className={`app-loading-mobile-item${id === activeNavigation ? " is-active" : ""}`}
-              key={id}
-            >
-              <LoadingBar />
-              <LoadingBar />
-            </span>
-          ))}
-        </nav>
-      )}
+      {fullScreen && <MobileNavSkeleton active={active} />}
     </div>
   );
 }
