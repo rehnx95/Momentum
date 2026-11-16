@@ -9,7 +9,7 @@
   min-height: 2rem;
   padding: 0 0.6rem;
   border: 1px solid var(--border-strong);
-  border-radius: 0.6rem;
+  border-radius: var(--radius-control);
   background: var(--surface);
   color: var(--text);
   font-size: 0.78rem;
@@ -34,7 +34,7 @@
   width: 18rem;
   padding: 0.65rem;
   border: 1px solid var(--border-strong);
-  border-radius: 0.8rem;
+  border-radius: var(--radius-lg-plus);
   background: var(--surface);
   box-shadow: 0 14px 36px var(--shadow);
 }
@@ -58,7 +58,7 @@
   width: 2rem;
   height: 2rem;
   place-items: center;
-  border-radius: 0.45rem;
+  border-radius: var(--radius-sm-plus);
   color: var(--muted);
 }
 
@@ -99,7 +99,7 @@
   aspect-ratio: 1;
   min-width: 0;
   place-items: center;
-  border-radius: 0.45rem;
+  border-radius: var(--radius-sm-plus);
   color: var(--text);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
@@ -144,7 +144,7 @@
 .custom-calendar-footer button {
   min-height: 1.8rem;
   padding-inline: 0.5rem;
-  border-radius: 0.4rem;
+  border-radius: var(--radius-sm);
   color: var(--text);
   font-size: 0.7rem;
   font-weight: 700;
