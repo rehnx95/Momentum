@@ -1,7 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function AppDialog({ dialog, onClose, onConfirm }) {
   const [typedValue, setTypedValue] = useState("");
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    const previous = document.activeElement;
+    return () => previous?.focus?.();
+  }, []);
   const isConfirmDangerous = Boolean(dialog?.dangerous);
   const requiredWord = dialog?.requireWord || "";
   const confirmLabel = dialog?.confirmText || (isConfirmDangerous ? "Reset" : "Continue");
@@ -12,7 +18,24 @@ export default function AppDialog({ dialog, onClose, onConfirm }) {
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = dialogRef.current?.querySelectorAll(
+        'button:not(:disabled), input:not(:disabled), [href], [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -32,6 +55,7 @@ export default function AppDialog({ dialog, onClose, onConfirm }) {
     >
       <section
         role="alertdialog"
+        ref={dialogRef}
         aria-modal="true"
         aria-labelledby="app-dialog-title"
         aria-describedby="app-dialog-message"

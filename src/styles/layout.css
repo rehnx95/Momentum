@@ -146,7 +146,7 @@ html {
 
 .app-page-narrow {
   max-width: 42rem;
-  margin-inline: auto;
+  margin-inline: 0;
 }
 
 .page-head {

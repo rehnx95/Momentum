@@ -71,14 +71,14 @@ export function SleepStudyGraph({
   const chartHeight = isMobileChart ? MOBILE_CHART_HEIGHT : (chartHeightOverride ?? CHART_HEIGHT);
   const plotHeight = chartHeight - PLOT.top - PLOT.bottom;
   const maxMinutes = Math.max(0, ...visibleDays.flatMap((day) => series.map((key) => day[key])));
-  const maxHours = maxMinutes > 12 * 60 ? 24 : 12;
+  const maxHours = Math.min(24, Math.max(4, Math.ceil(maxMinutes / 60 / 4) * 4));
   const currentYear = new Date().getFullYear();
   const dateLabelIndexes =
     visibleDays.length <= MOBILE_DAY_COUNT
       ? [...new Set([0, Math.floor((visibleDays.length - 1) / 2), visibleDays.length - 1])]
       : DATE_LABEL_INDEXES;
   const yFor = (minutes) =>
-    PLOT.top + plotHeight - (Math.min(minutes / 60, 24) / maxHours) * plotHeight;
+    PLOT.top + plotHeight - (Math.min(minutes / 60, maxHours) / maxHours) * plotHeight;
   const xFor = (index) => PLOT.left + (plotWidth * index) / Math.max(1, visibleDays.length - 1);
   const ticks = [0, 1, 2, 3, 4].map((step) => (maxHours * step) / 4);
   const showTooltip = (event) => {

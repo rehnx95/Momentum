@@ -10,6 +10,7 @@ import "./FullLog.css";
 import "./FullLog.responsive.css";
 import "./DailyTracker.css";
 import "./DailyLogPage.css";
+import "./DailyLogPolish.css";
 
 function formatClock(date) {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });

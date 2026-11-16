@@ -1,0 +1,21 @@
+/* Keep Quick log and Sleep in view beside a long Activities list. */
+@media (min-width: 981px) {
+  .daily-log-page-shell .daily-side-panel {
+    position: sticky;
+    top: calc(var(--header-h) + 1rem);
+    align-self: start;
+  }
+}
+
+.daily-log-page-shell .activity-card-name {
+  font-weight: 500;
+}
+
+.daily-log-page-shell .daily-entry-heading h3 {
+  font-weight: 600;
+}
+
+.daily-log-page-shell .activity-total,
+.daily-log-page-shell .daily-sleep-total {
+  font-variant-numeric: tabular-nums;
+}

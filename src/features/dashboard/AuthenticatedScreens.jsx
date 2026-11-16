@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import AppHeader from "../../shared/components/AppHeader";
 import AppLoadingFallback from "../../shared/components/AppLoadingFallback";
 import TrackerDashboard from "./TrackerDashboard";
@@ -99,6 +99,21 @@ export default function AuthenticatedScreens({ context }) {
     userUsername,
     yearlyActiveDays,
   } = context;
+
+  useEffect(() => {
+    const label = peopleSearchPage
+      ? "People"
+      : selectedPublicUsername
+        ? `@${selectedPublicUsername}`
+        : showSettings
+          ? "Edit profile"
+          : dailyLogPage
+            ? "Activity Log"
+            : showProfile
+              ? "Profile"
+              : "Tracker";
+    document.title = `${label} | Momentum`;
+  }, [dailyLogPage, peopleSearchPage, selectedPublicUsername, showProfile, showSettings]);
 
   if (peopleSearchPage) {
     return (
