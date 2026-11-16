@@ -209,19 +209,19 @@
 :root:not([data-theme="light"]) .own-profile-layout .profile-hero,
 :root:not([data-theme="light"]) .own-profile-layout .profile-sheet-progress,
 :root:not([data-theme="light"]) .own-profile-layout .recent-ac-card {
-  background: #000000 !important;
+  background: var(--surface) !important;
 }
 
 :root:not([data-theme="light"]) .own-profile-layout .profile-avatar,
 :root:not([data-theme="light"]) .own-profile-layout .profile-hero-actions .btn-secondary,
 :root:not([data-theme="light"]) .own-profile-layout .recent-ac-count {
-  border-color: #262626;
-  background: #000000 !important;
+  border-color: var(--border);
+  background: var(--surface) !important;
 }
 
 :root:not([data-theme="light"]) .profile-settings-shell .settings-form {
-  border-color: #262626 !important;
-  background: #000000 !important;
+  border-color: var(--border) !important;
+  background: var(--surface) !important;
 }
 
 :root:not([data-theme="light"]) .profile-settings-shell .settings-form input {
@@ -230,7 +230,7 @@
 }
 
 :root:not([data-theme="light"]) .own-profile-layout .hm-card {
-  --hm-surface: #000000;
-  --hm-border: #2b2b2b;
-  background: #000000 !important;
+  --hm-surface: var(--surface);
+  --hm-border: var(--border);
+  background: var(--surface) !important;
 }
