@@ -28,13 +28,29 @@ log activities and sleep, then review your history and habits over time.
 
 ## Screenshots
 
-| Tracker | Daily Log |
+| DSA tracker (dark) | DSA tracker (light) |
 | --- | --- |
-| ![Tracker dashboard in dark theme](./docs/screenshots/tracker-dashboard.png) | ![Daily Log in dark theme](./docs/screenshots/daily-log.png) |
+| ![DSA tracker in dark theme](./docs/screenshots/tracker-dashboard.png) | ![DSA tracker in light theme](./docs/screenshots/tracker-dashboard-light.png) |
 
-| Full Log | Profile |
+| Expanded DSA tracker (dark) | Expanded DSA tracker (light) |
 | --- | --- |
-| ![Full Log in dark theme](./docs/screenshots/full-log.png) | ![Profile in dark theme](./docs/screenshots/profile.png) |
+| ![Expanded DSA tracker in dark theme](./docs/screenshots/tracker-expanded-category.png) | ![Expanded DSA tracker in light theme](./docs/screenshots/tracker-expanded-category-light.png) |
+
+| Backend tracker (dark) | Backend tracker (light) |
+| --- | --- |
+| ![Backend tracker in dark theme](./docs/screenshots/backend-tracker.png) | ![Backend tracker in light theme](./docs/screenshots/backend-tracker-light.png) |
+
+| Daily Log (dark) | Daily Log (light) |
+| --- | --- |
+| ![Daily Log in dark theme](./docs/screenshots/daily-log.png) | ![Daily Log in light theme](./docs/screenshots/daily-log-light.png) |
+
+| Full Log (dark) | Full Log (light) |
+| --- | --- |
+| ![Full Log in dark theme](./docs/screenshots/full-log.png) | ![Full Log in light theme](./docs/screenshots/full-log-light.png) |
+
+| Profile (dark) | Profile (light) |
+| --- | --- |
+| ![Profile in dark theme](./docs/screenshots/profile.png) | ![Profile in light theme](./docs/screenshots/profile-light.png) |
 
 More views and light-theme screenshots are in [`docs/screenshots/`](./docs/screenshots/).
 
