@@ -120,8 +120,11 @@ Built-in track sources are plain text files in `source/`. The
 `convert-sheet` script parses one source into JSON under
 `src/features/sheets/data/`. At runtime, `bootstrapBuiltInSheets` submits
 versioned built-in templates to `ensure_builtin_sheet_copies`, which creates
-per-user copies without overwriting existing copies. The selected track is
-stored in browser storage.
+per-user copies without overwriting existing copies. Follow-up bootstrap RPCs
+synchronize supported titles and LeetCode IDs on existing copies by stable
+problem ID. These metadata updates preserve problem progress and other saved
+sheet data. New accounts receive the current bundled template. The selected
+track is stored in browser storage.
 
 Users may upload `.txt` tracks up to 2 MB. `parseSheet` validates and
 normalizes steps, subsections, problem names, and external problem numbers
@@ -248,6 +251,7 @@ Important RPCs include `is_username_available`,
 `search_public_profiles`, `get_public_profile`,
 `get_public_profile_email`, `get_public_activity`,
 `ensure_builtin_sheet_copies`, `delete_user_sheet`,
+`sync_builtin_sheet_problem_titles`, `sync_builtin_sheet_problem_links`,
 `get_or_assign_activity_color`, and `set_activity_color`.
 
 ## Local development and deployment
@@ -316,14 +320,18 @@ The current deployment is [momentum-rehnx.vercel.app](https://momentum-rehnx.ver
 
 ### Built-in track maintenance
 
-1. Edit a source in `source/`.
+1. Edit a source in `source/`, such as `source/dsa.txt`.
 2. Convert it, for example: `npm run convert-sheet -- dsa`.
-3. Review the generated JSON in `src/features/sheets/data/`.
-4. Run tests and build before committing both files.
+3. Review the generated JSON in `src/features/sheets/data/` and run the
+   relevant tests and build.
+4. If the change adds or updates metadata on existing built-in copies, include
+   the corresponding bootstrap RPC and timestamped SQL migration. Apply all
+   unapplied migrations before deploying the matching frontend.
 
-Existing users keep their built-in copies and progress. When a built-in
-template changes, bootstrap synchronizes problem titles by stable problem ID
-while preserving the rest of each user's saved sheet data.
+Existing users keep their built-in copies and progress. Bootstrap synchronizes
+supported titles and LeetCode IDs by stable problem ID while preserving
+progress and other saved sheet data. The sync applies on the next successful
+authenticated bootstrap.
 
 ### Local sample-data workflow
 
@@ -350,7 +358,7 @@ They do not use a service-role key or a separate database.
 | Daily Log cannot load or save | Check the daily-log migrations, owner policy, date, and database error. |
 | Username search fails | Use `npx vercel dev` locally and check function environment, bearer token, prefix, and RPC grants. |
 | A deep link fails after refresh | Confirm Vercel's SPA rewrite and `/api/search` function are deployed. |
-| A template update is not visible to an existing user | Built-in copies are intentionally not overwritten during bootstrap. |
+| An existing user sees a stale built-in title or LeetCode link | Deploy the matching frontend and apply its metadata-sync migrations; the next successful authenticated bootstrap updates matching problem IDs without changing progress. |
 
 ## 8. Maintenance rules
 

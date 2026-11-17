@@ -103,6 +103,16 @@ username search locally, run the app with `npx vercel dev`.
 | `npm run lint` | Check JavaScript and JSX with ESLint |
 | `npm run convert-sheet -- dsa` | Convert `source/dsa.txt` into its bundled JSON track |
 
+## Built-in track updates
+
+Edit a built-in track's source in `source/` and regenerate its JSON before
+committing both files. Existing accounts receive supported title and
+LeetCode-link metadata updates by stable problem ID on their next successful
+sign-in bootstrap; saved progress is preserved. Apply the corresponding
+Supabase migrations when deploying metadata-sync changes. See the
+[architecture guide](./docs/architecture.md#built-in-track-maintenance) for
+the update flow.
+
 ## Sample-data mode
 
 Sample-data controls are available only in the local test-mode development

@@ -2,9 +2,9 @@
 
 **Repository:** [rehnx95/Momentum](https://github.com/rehnx95/Momentum)
 
-**History covered:** `8f28602` (initial app baseline, Oct 19, 2026) through `074ef14` (Nov 16, 2026)
+**History covered:** `8f28602` (initial app baseline, Oct 19, 2026) through `3d2f71e` (Nov 17, 2026)
 
-**Commits:** 262, including the initial baseline
+**Commits:** 278, including the initial baseline
 **How to read this:** This is a product and engineering history based on the committed code, migrations, tests, and documentation. Related commits are grouped where they are iterative refinements; the descriptions explain the resulting work rather than restating commit subjects or reproducing patches.
 
 The local Git remote has historically used the name `Track-Sheet`; the product was later rebranded to **Momentum**.
@@ -24,7 +24,7 @@ The most important turning points were the October account/track foundation, the
 
 ## Activity by day
 
-The history has work on 17 dates. The number of commits reflects the scale of iteration as well as feature count: several dense runs are visual tuning and bug-fix passes rather than separate features.
+The history has work on 18 dates. The number of commits reflects the scale of iteration as well as feature count: several dense runs are visual tuning and bug-fix passes rather than separate features.
 
 | Date | Commits | Main focus |
 | --- | ---: | --- |
@@ -44,7 +44,8 @@ The history has work on 17 dates. The number of commits reflects the scale of it
 | Nov 13 | 8 | Skip-state, storage, heatmap, and redesign iterations |
 | Nov 14 | 7 | Daily Log/Full Log/Trends cleanup and refactoring |
 | Nov 15 | 22 | Trends, activity colors, profile, mobile UI, screenshots, and tests |
-| Nov 16 | 11 | Startup/loading, sign-in, accessibility, and save recovery |
+| Nov 16 | 12 | Startup/loading, sign-in, accessibility, save recovery, and history docs |
+| Nov 17 | 15 | Built-in track metadata sync, startup reliability, and UI polish |
 
 ## Product evolution
 
@@ -151,7 +152,17 @@ The Nov 16 commits focus on reliability and finish:
 - `034f7ce` restores the sign-in presentation, while `e4204f3` polishes activity-log and profile layouts.
 - `16b7426` removes redundant accessibility attributes/text while preserving status/error semantics and updates the related tests.
 - `1786f2b` shortens the edit-profile back control; `8f19d08` updates the README and architecture to match the current product.
-- The latest commit, `074ef14`, separates save feedback from validation alerts and adds an explicit **Save now / Retry save** action when a save is pending or fails. The change includes focused component tests.
+- `074ef14` separates save feedback from validation alerts and adds an explicit **Save now / Retry save** action when a save is pending or fails. The change includes focused component tests.
+- `afe6597` updates this archive through the Nov 16 endpoint.
+
+### 9. Built-in track sync and reliability polish — Nov 17
+
+- `7ed2be1` adds LeetCode links to tracker problems, and `0fd3cb0` aligns the LeetCode icon with its official mark.
+- `bc9fd68` adds title synchronization for existing built-in sheets through a migration and bootstrap RPC.
+- `3d2f71e` updates DSA source/generated content and LeetCode mappings, then adds a migration and bootstrap RPC to synchronize LeetCode IDs on existing built-in copies by stable problem ID without resetting progress.
+- `bc39956` improves sign-in persistence and startup; `0d3e8e7` addresses stale application chunks after deployment.
+- `893cc76`, `5c18d71`, `fab0b05`, `483c4ac`, `d459cc7`, and `1b00004` refine the heatmap scrollbar, profile progress/restore controls, Daily Log alignment, UI behavior, and loading presentation.
+- `99822e7`, `27a50f0`, and `0ca93fd` refresh screenshots and continue code consistency cleanup.
 
 ## Chronological change ledger
 
@@ -225,7 +236,7 @@ This ledger accounts for every commit in the stated range. Commits are grouped b
 - Nov 12 — `8b47015`, `248bd46`, `10bede5`, `ea5e6e3`, `d32873a`: refine mobile styling across activity charts and Daily Log controls, then bring README/architecture documentation and the affected styles into line with the app.
 - Nov 12 — `182f19e`: move sleep/study chart use into the Daily Log review experience and add a local test-mode sample-data path with generation, cleanup, and tests.
 
-### Nov 13–16 — robustness, metric refinements, and release polish
+### Nov 13–17 — robustness, metric refinements, and release polish
 
 - Nov 13 — `d5b87d2`, `6fa7c1d`, `878a73e`: fix heatmap layout and clarify skip-state controls.
 - Nov 13 — `b11868d`, `8a227c6`, `7bca7ed`, `36ebd15`, `fdb2974`: make a broad storage/theme/profile pass, begin another redesign, back out some of it, and refine the retained visual changes.
@@ -234,7 +245,8 @@ This ledger accounts for every commit in the stated range. Commits are grouped b
 - Nov 15 — `67c94d3`, `b1a4925`, `54abb55`, `a323d0f`, `b27639d`, `68787eb`, `09e0ee8`: update docs, add account-specific activity-color selection, redesign Full Log and Daily Log elements, and continue responsiveness/robustness work.
 - Nov 15 — `87c0bbe`, `1aac991`, `9dbc3ce`, `9e7c697`: refine startup/refresh loading and correct onboarding/cache behavior while making the app header responsive.
 - Nov 15 — `49e4b34`, `5bfda0a`, `304f9fd`, `6636618`, `916224e`: update screenshots, improve signed-out and historical-log views, refine Daily Log interactions, and fix validation-message overlap with activity slots while extending tests.
-- Nov 16 — `70926a8`, `571c44b`, `297a2cf`, `ddfec59`, `034f7ce`, `e4204f3`, `ff787ae`, `16b7426`, `1786f2b`, `8f19d08`, `074ef14`: improve save feedback and loading states, restore/significantly polish sign-in, harden startup behavior, refine activity/profile visuals and accessibility semantics, simplify profile navigation copy, update product docs, and add a manual save/retry action.
+- Nov 16 — `70926a8`, `571c44b`, `297a2cf`, `ddfec59`, `034f7ce`, `e4204f3`, `ff787ae`, `16b7426`, `1786f2b`, `8f19d08`, `074ef14`, `afe6597`: improve save feedback and loading states, restore/significantly polish sign-in, harden startup behavior, refine activity/profile visuals and accessibility semantics, simplify profile navigation copy, update product docs/history, and add a manual save/retry action.
+- Nov 17 — `7ed2be1`, `0fd3cb0`, `bc9fd68`, `bc39956`, `0d3e8e7`, `893cc76`, `5c18d71`, `fab0b05`, `483c4ac`, `d459cc7`, `1b00004`, `99822e7`, `27a50f0`, `0ca93fd`, `3d2f71e`: add tracker LeetCode links and built-in title/link sync for existing accounts, improve sign-in and deployment loading reliability, refine profile and Daily Log UI, and clean up code/screenshots.
 
 ## Technical deep dives
 
@@ -256,6 +268,7 @@ The track feature moves through a complete content lifecycle:
 4. Built-in tracks are provisioned as per-user copies, allowing user-specific visibility or removal without mutating the shared source.
 5. Problem progress is namespaced to a selected track, and backup/import/export lets a user carry those states between sessions or copies.
 6. `todo`, `done`, and `skipped` states feed the tracker UI and profile summaries; an absent saved completion remains distinct from an explicitly skipped item. Progress changes are applied optimistically in the UI and writes are serialized so quick successive state changes do not race.
+7. Built-in title and LeetCode ID metadata can be synchronized to existing copies by stable problem ID, while preserving saved progress and other sheet data; new copies use the current bundled template.
 
 The sheet-management migrations matter because they encode the distinction between deleting a user's uploaded content, hiding a built-in option, and keeping a personal copy. The UI iterations on the switcher and removal controls are therefore tied to database ownership semantics, not just dropdown styling.
 
@@ -290,7 +303,7 @@ The performance work is layered rather than one general-purpose cache:
 - Cache invalidation follows writes and account changes; sign-out/account switching clears app-owned cached state.
 - Route-based code splitting and preload adjustments reduce the amount of feature code needed at initial startup.
 
-These are responsiveness techniques, not an offline database. The source of truth remains Supabase, and the save/conflict path is designed separately from read caching. Nov 15–16 loading commits also improve the visual fallback and refresh state so a fast cache hit, session validation, and an actual load failure do not all look like the same indefinite spinner.
+These are responsiveness techniques, not an offline database. The source of truth remains Supabase, and the save/conflict path is designed separately from read caching. Nov 15–17 loading commits also improve the visual fallback and refresh state, preserve sign-in during session checks, and handle stale deployed chunks so a fast cache hit, session validation, and an actual load failure do not all look like the same indefinite spinner.
 
 ### Migration ledger
 
@@ -303,6 +316,7 @@ Database migrations track the product's functional milestones. Related files are
 | Oct 25 | `20261025000000_public_activity_by_year.sql` | Year-bounded activity data for the heatmap/profile |
 | Nov 3–8 | `20261103000000_daily_logs.sql`, `20261103000001_daily_log_preferences.sql`, `20261108150000_daily_log_sanity.sql` | Persisted daily sleep/activity records, display preference, and daily time sanity checks |
 | Nov 14–15 | `20261114223500_add_public_profile_email.sql`, `20261115001600_remove_profile_location_website.sql`, `20261115003400_sync_activity_log_with_progress.sql`, `20261115010000_activity_color_assignments.sql`, `20261115020000_fix_activity_color_key_ambiguity.sql`, `20261115024000_fix_activity_color_key_ambiguity.sql` | Public profile field changes, progress/activity consistency, and per-account activity color assignment/fixes |
+| Nov 17 | `20261117130500_sync_builtin_sheet_problem_titles.sql`, `20261117150000_sync_builtin_sheet_problem_links.sql` | Synchronize supported titles and LeetCode IDs for existing built-in copies by stable problem ID while preserving progress |
 
 ## Cross-cutting engineering outcomes
 
@@ -336,4 +350,4 @@ Tests are introduced alongside core time helpers and later cover UI components, 
 
 ## Repository state represented by this report
 
-The endpoint is `074ef14` on Nov 16, 2026. At this point the product includes account-backed learning tracks, upload/import/export workflows, searchable public profiles, activity history, Daily Log/Full Log/Trends, sleep/study charts, sample-data tooling, and a feature-based React structure. The report describes the changes accumulated in the recorded history; it does not claim that every intermediate experiment remained in the final application.
+The endpoint is `3d2f71e` on Nov 17, 2026. At this point the product includes account-backed learning tracks, upload/import/export workflows, searchable public profiles, activity history, Daily Log/Full Log/Trends, sleep/study charts, sample-data tooling, and a feature-based React structure. Built-in track metadata updates can reach existing accounts without replacing their saved progress. The report describes the changes accumulated in the recorded history; it does not claim that every intermediate experiment remained in the final application.
