@@ -9,7 +9,6 @@ export default function useSheetLibrary(user, askConfirmation) {
   const [customSheetsLoading, setCustomSheetsLoading] = useState(
     () => !Array.isArray(cachedSheets),
   );
-  const [sheetBootstrapComplete, setSheetBootstrapComplete] = useState(false);
   const [customSheets, setCustomSheets] = useState(() =>
     Array.isArray(cachedSheets) ? cachedSheets : [],
   );
@@ -68,7 +67,6 @@ export default function useSheetLibrary(user, askConfirmation) {
       try {
         const defaultSheetId = await bootstrapBuiltInSheets(user.id, () => active);
         if (!active) return;
-        setSheetBootstrapComplete(true);
 
         const { data: savedSheets, error } = await supabase
           .from("user_sheets")
@@ -97,7 +95,6 @@ export default function useSheetLibrary(user, askConfirmation) {
         setSelectedSheetId((savedSheet || defaultSheet)?.id || "");
       } catch (error) {
         if (!active) return;
-        setSheetBootstrapComplete(true);
         console.error("Failed to load sheets:", error);
         setSheetError(
           "Could not load your sheets. Apply the latest Supabase sheet migration and try again.",
@@ -245,7 +242,6 @@ export default function useSheetLibrary(user, askConfirmation) {
     selectedSheet,
     selectedSheetId,
     setSelectedSheetId,
-    sheetBootstrapComplete,
     customSheetsLoading,
     uploadingSheet,
     deletingSheetId,

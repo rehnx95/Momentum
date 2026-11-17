@@ -37,6 +37,7 @@ function App() {
     handleSignOut,
     isSigningIn,
     profile,
+    retryAuthentication,
     setAppState,
     setProfile,
     user,
@@ -45,6 +46,9 @@ function App() {
 
   useEffect(() => {
     if (!userId) return;
+    loadAuthenticatedApp().catch((error) => {
+      console.warn("Could not preload the authenticated app:", error);
+    });
     const preload = preloadCurrentPage(window.location.pathname);
     if (!preload) return;
     void preload.catch((error) => {
@@ -82,7 +86,32 @@ function App() {
   }
 
   if (appState === AppState.LOADING) {
-    return <AppLoadingFallback />;
+    return (
+      <>
+        <AppLoadingFallback />
+        {authError && (
+          <div
+            role="alert"
+            className="fixed bottom-4 left-4 right-4 z-[100] mx-auto flex max-w-xl items-center justify-between gap-4 rounded-lg border p-4 text-sm shadow-xl"
+            style={{
+              backgroundColor: "var(--surface-raised)",
+              borderColor: "var(--border)",
+              color: "var(--text)",
+            }}
+          >
+            <p>{authError}</p>
+            <button
+              type="button"
+              onClick={retryAuthentication}
+              className="flex-shrink-0 rounded-md px-3 py-1.5 font-semibold"
+              style={{ backgroundColor: "var(--accent)", color: "var(--page)" }}
+            >
+              Retry
+            </button>
+          </div>
+        )}
+      </>
+    );
   }
 
   return (

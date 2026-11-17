@@ -55,9 +55,12 @@ LOADING -> UNAUTHENTICATED
         -> AUTHENTICATED
 ```
 
-A valid cached account can render an initial authenticated view while Supabase
-validates the session. Account-scoped data is loaded after authentication.
-Signing out or switching accounts clears Momentum-owned local storage.
+A cached account and its cached data can render while Supabase validates the
+session and refreshes server data. Progress loads in parallel with built-in
+sheet setup. Transient session or profile lookup failures preserve the signed-in
+state and expose retry instead of sending users to sign-in. A confirmed missing
+session or explicit sign-out clears Momentum-owned local storage; switching
+accounts also clears it.
 
 ### Authenticated screen selection
 

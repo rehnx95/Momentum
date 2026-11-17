@@ -106,6 +106,7 @@ export default function useAuthentication() {
   const [profile, setProfile] = useState(cachedAccount?.profile || null);
   const [authError, setAuthError] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [authRetryCount, setAuthRetryCount] = useState(0);
   const authEventOccurred = useRef(false);
   const loadedProfileUserId = useRef(null);
   const userId = user?.id;
@@ -121,10 +122,10 @@ export default function useAuthentication() {
       );
     }
 
-    if (user?.id && previousUserId.current && previousUserId.current !== user.id) {
+    if (userId && previousUserId.current && previousUserId.current !== userId) {
       clearAppScopedStorage();
     }
-    if (user?.id) previousUserId.current = user.id;
+    if (userId) previousUserId.current = userId;
 
     if (!hasSupabaseConfiguration()) {
       setAuthError(
@@ -150,16 +151,24 @@ export default function useAuthentication() {
           data: { subscription: authSubscription },
         } = supabase.auth.onAuthStateChange((event, session) => {
           if (!active || event === "INITIAL_SESSION") return;
-          if (event === "TOKEN_REFRESHED") return;
+          if (event === "TOKEN_REFRESHED") {
+            setAuthError("");
+            return;
+          }
+          if (session?.user) {
+            authEventOccurred.current = true;
+            setAuthError("");
+            setUser(session.user);
+            return;
+          }
+          if (event !== "SIGNED_OUT") return;
           authEventOccurred.current = true;
           setAuthError("");
-          setUser(session?.user ?? null);
-          if (!session) {
-            clearAppScopedStorage();
-            localStorage.removeItem(ACCOUNT_CACHE_KEY);
-            setProfile(null);
-            setAppState(AppState.UNAUTHENTICATED);
-          }
+          setUser(null);
+          clearAppScopedStorage();
+          localStorage.removeItem(ACCOUNT_CACHE_KEY);
+          setProfile(null);
+          setAppState(AppState.UNAUTHENTICATED);
         });
         subscription = authSubscription;
         return supabase.auth.getSession();
@@ -171,6 +180,7 @@ export default function useAuthentication() {
           error,
         } = result;
         if (error) throw error;
+        setAuthError("");
         setUser(session?.user ?? null);
         if (!session) {
           clearAppScopedStorage();
@@ -183,14 +193,16 @@ export default function useAuthentication() {
         if (!active || authEventOccurred.current) return;
         console.error("Failed to restore authentication session:", error);
         setAuthError("Could not restore your session. Please refresh and try again.");
-        setAppState(AppState.UNAUTHENTICATED);
+        if (!cachedAccount && !userId && !hasStoredSession()) {
+          setAppState(AppState.UNAUTHENTICATED);
+        }
       });
 
     return () => {
       active = false;
       subscription?.unsubscribe();
     };
-  }, [cachedAccount, user?.id]);
+  }, [authRetryCount, cachedAccount, userId]);
 
   useEffect(() => {
     if (
@@ -220,13 +232,12 @@ export default function useAuthentication() {
         setAuthError(
           "Could not load your profile. Check the Supabase database setup and try again.",
         );
-        if (!hasCachedProfile) setAppState(AppState.UNAUTHENTICATED);
       });
 
     return () => {
       active = false;
     };
-  }, [userId, hasCachedProfile]);
+  }, [authRetryCount, userId, hasCachedProfile]);
 
   useEffect(() => {
     if (!user || profile?.id !== user.id) return;
@@ -283,6 +294,10 @@ export default function useAuthentication() {
       setAuthError("Could not sign out. Please try again.");
     }
   }, []);
+  const retryAuthentication = useCallback(() => {
+    setAuthError("");
+    setAuthRetryCount((current) => current + 1);
+  }, []);
 
   return {
     appState,
@@ -291,6 +306,7 @@ export default function useAuthentication() {
     handleSignOut,
     isSigningIn,
     profile,
+    retryAuthentication,
     setAppState,
     setProfile,
     user,

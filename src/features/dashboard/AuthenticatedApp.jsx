@@ -44,7 +44,6 @@ export default function AuthenticatedApp({
     availableSheets,
     selectedSheet,
     setSelectedSheetId,
-    sheetBootstrapComplete,
     uploadingSheet,
     deletingSheetId,
     sheetError,
@@ -67,7 +66,7 @@ export default function AuthenticatedApp({
     theme,
     setTheme,
     reset,
-  } = useProgress(sheetBootstrapComplete ? user : null);
+  } = useProgress(user);
   const {
     dailyLogPage,
     navigateTo,
