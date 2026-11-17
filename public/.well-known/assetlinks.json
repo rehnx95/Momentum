@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.momentum_rehnx.twa",
+        "sha256_cert_fingerprints": ["0C:F4:99:3B:51:C2:F7:7F:28:05:85:7D:CE:39:B7:ED:65:A0:F8:EE:BD:51:A5:69:88:F5:AF:BA:69:15:D2:8A"]
+      }
+    }]
