@@ -32,7 +32,13 @@ describe("ProblemRow", () => {
     expect(actionGroup.className).toContain("grid-cols-[auto_1.25rem_1.25rem]");
     expect(actionGroup.children).toHaveLength(3);
     expect(link.textContent).toBe("");
-    expect(link.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 24 24");
+    const leetcodeIcon = link.querySelector("svg");
+    expect(leetcodeIcon?.getAttribute("viewBox")).toBe("0 0 94 111");
+    expect(leetcodeIcon?.getAttribute("width")).toBe("13");
+    expect(leetcodeIcon?.getAttribute("height")).toBe("15.3");
+    expect(
+      Array.from(leetcodeIcon.querySelectorAll("path")).map((path) => path.getAttribute("fill")),
+    ).toEqual(["#FFA116", "#B3B3B3", "var(--text)"]);
     expect(link.getAttribute("href")).toBe("https://leetcode.com/problems/two-sum/");
     expect(link.getAttribute("target")).toBe("_blank");
     expect(link.getAttribute("rel")).toBe("noopener noreferrer");
@@ -49,6 +55,21 @@ describe("ProblemRow", () => {
 
     fireEvent.click(difficulty);
     expect(onToggle).toHaveBeenCalledWith("two-sum");
+  });
+
+  it("uses the LeetCode orange for Medium difficulty", () => {
+    render(
+      <ProblemRow
+        prob={{ id: "add-two-numbers", title: "Add Two Numbers", lc: 2 }}
+        state="todo"
+        onToggle={vi.fn()}
+        onSkip={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Toggle Add Two Numbers completion" }).className).toContain(
+      "text-[#FFA116]",
+    );
   });
 
   it("does not show a LeetCode link when the problem has no mapped ID", () => {
