@@ -92,6 +92,23 @@ class AppErrorBoundary extends React.Component {
   }
 }
 
+window.addEventListener("vite:preloadError", (event) => {
+  let shouldReload = false;
+  try {
+    const lastReload = Number(sessionStorage.getItem("momentum:chunk-reload-at"));
+    shouldReload = !lastReload || Date.now() - lastReload > 60_000;
+    if (shouldReload) {
+      sessionStorage.setItem("momentum:chunk-reload-at", String(Date.now()));
+    }
+  } catch (error) {
+    console.warn("Could not check the chunk-reload state:", error);
+  }
+
+  if (!shouldReload) return;
+  event.preventDefault();
+  window.location.reload();
+});
+
 preloadForPath(window.location.pathname);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
