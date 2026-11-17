@@ -1,9 +1,12 @@
-import { defineConfig } from "vite";
+import { configDefaults, defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
   server: { port: 5173 },
+  test: {
+    exclude: [...configDefaults.exclude, ".kilo/worktrees/**"],
+  },
   build: {
     target: "es2020",
     rollupOptions: {
