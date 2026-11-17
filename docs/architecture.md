@@ -318,8 +318,9 @@ The current deployment is [momentum-rehnx.vercel.app](https://momentum-rehnx.ver
 3. Review the generated JSON in `src/features/sheets/data/`.
 4. Run tests and build before committing both files.
 
-Existing users keep their current built-in copies; bootstrap intentionally
-does not overwrite user data when a template changes.
+Existing users keep their built-in copies and progress. When a built-in
+template changes, bootstrap synchronizes problem titles by stable problem ID
+while preserving the rest of each user's saved sheet data.
 
 ### Local sample-data workflow
 

@@ -6,12 +6,14 @@ const sheetAssets = import.meta.glob("./*.json", {
   import: "default",
   query: "?url",
 });
+const BUILTIN_SYNC_VERSION = "problem-titles-v1";
 
 function getSheetManifestVersion() {
   let hash = 2166136261;
-  const manifest = JSON.stringify(
-    Object.entries(sheetAssets).sort(([first], [second]) => first.localeCompare(second)),
-  );
+  const manifest = JSON.stringify({
+    syncVersion: BUILTIN_SYNC_VERSION,
+    assets: Object.entries(sheetAssets).sort(([first], [second]) => first.localeCompare(second)),
+  });
   for (let index = 0; index < manifest.length; index += 1) {
     hash ^= manifest.charCodeAt(index);
     hash = Math.imul(hash, 16777619);
@@ -68,14 +70,19 @@ export async function bootstrapBuiltInSheets(userId, isActive = () => true) {
     .sort((a, b) => a.title.localeCompare(b.title));
   const defaultSheetId = getDefaultSheetId(builtInSheets.map(({ id }) => id));
   if (!isBootstrapped) {
+    const requestedSheets = builtInSheets.map((sheet) => ({
+      id: sheet.id,
+      title: sheet.title,
+      sheet_data: sheet.sheet,
+    }));
     const { error } = await supabase.rpc("ensure_builtin_sheet_copies", {
-      requested_sheets: builtInSheets.map((sheet) => ({
-        id: sheet.id,
-        title: sheet.title,
-        sheet_data: sheet.sheet,
-      })),
+      requested_sheets: requestedSheets,
     });
     if (error) throw error;
+    const { error: syncError } = await supabase.rpc("sync_builtin_sheet_problem_titles", {
+      requested_sheets: requestedSheets,
+    });
+    if (syncError) throw syncError;
     try {
       localStorage.setItem(bootstrapKey, manifestVersion);
     } catch (error) {
