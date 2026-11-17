@@ -1,35 +1,43 @@
-import TestRenderer, { act } from "react-test-renderer";
-import { describe, expect, it, vi } from "vitest";
+// @vitest-environment jsdom
+
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import ProfileSheetProgress from "./ProfileSheetProgress";
 
+afterEach(cleanup);
+
 describe("ProfileSheetProgress", () => {
-  it("offers a DSA restore action and disables it while restoring", () => {
+  it("renders icon-only actions with tooltips and disables restore while busy", () => {
+    const onExport = vi.fn();
+    const onImport = vi.fn();
     const onRestoreDsa = vi.fn();
-    let renderer;
+    const onReset = vi.fn();
+    const { rerender } = render(
+      <ProfileSheetProgress
+        sheets={[]}
+        onExport={onExport}
+        onImport={onImport}
+        onRestoreDsa={onRestoreDsa}
+        onReset={onReset}
+      />,
+    );
 
-    act(() => {
-      renderer = TestRenderer.create(
-        <ProfileSheetProgress sheets={[]} onRestoreDsa={onRestoreDsa} />,
-      );
-    });
+    const buttons = screen.getAllByRole("button");
+    expect(buttons.map((button) => button.getAttribute("aria-label"))).toEqual([
+      "Export progress",
+      "Import progress",
+      "Restore DSA",
+      "Reset all progress",
+    ]);
+    expect(buttons.every((button) => button.querySelectorAll("svg").length === 1)).toBe(true);
+    expect(
+      [...document.body.querySelectorAll('[role="tooltip"]')].map((tooltip) => tooltip.textContent),
+    ).toEqual(["Export progress", "Import progress", "Restore DSA", "Reset all progress"]);
 
-    let restoreButton = renderer.root
-      .findAllByType("button")
-      .find((button) => button.children.includes("Restore DSA"));
-    expect(restoreButton).toBeDefined();
-    act(() => restoreButton.props.onClick());
+    fireEvent.click(buttons[2]);
     expect(onRestoreDsa).toHaveBeenCalledOnce();
 
-    act(() => {
-      renderer.update(
-        <ProfileSheetProgress sheets={[]} onRestoreDsa={onRestoreDsa} restoreDisabled />,
-      );
-    });
-    restoreButton = renderer.root
-      .findAllByType("button")
-      .find((button) => button.children.includes("Restore DSA"));
-    expect(restoreButton.props.disabled).toBe(true);
-
-    act(() => renderer.unmount());
+    rerender(<ProfileSheetProgress sheets={[]} onRestoreDsa={onRestoreDsa} restoreDisabled />);
+    expect(screen.getByRole("button", { name: "Restore DSA" }).disabled).toBe(true);
   });
 });

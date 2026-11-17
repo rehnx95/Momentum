@@ -74,7 +74,7 @@ function detailEntries(activities, filter, activityColors) {
   return details.sort((first, second) => toMinutes(first.start) - toMinutes(second.start));
 }
 
-export default function FullLog({ daily, sheets = [], askConfirmation, toolbarContainer }) {
+export default function FullLog({ daily, sheets = [], toolbarContainer }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activityFilter, setActivityFilter] = useState("All");
   const [expandedDates, setExpandedDates] = useState(null);
@@ -163,15 +163,6 @@ export default function FullLog({ daily, sheets = [], askConfirmation, toolbarCo
     });
   };
 
-  const clearHistory = async () => {
-    const confirmed = await askConfirmation(
-      "This permanently deletes your saved Daily Log entries. This cannot be undone.",
-      "Clear saved log history?",
-      { dangerous: true, requireWord: "CLEAR", confirmText: "Clear" },
-    );
-    if (confirmed) await daily.clearAllLogs();
-  };
-
   const toolbarActions = toolbarContainer
     ? createPortal(
         <div className="full-log-toolbar-actions">
@@ -186,7 +177,7 @@ export default function FullLog({ daily, sheets = [], askConfirmation, toolbarCo
                 daily.olderLogsLoading ||
                 daily.loading
               }
-              onClick={() => void clearHistory()}
+              onClick={() => void daily.clearAllLogs()}
             >
               <Trash2 size={16} aria-hidden="true" />
             </button>

@@ -59,11 +59,7 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
               {title}
             </h2>
             {showSaveStatus && (
-              <div
-                className="daily-save-status"
-                role="status"
-                aria-live="polite"
-              >
+              <div className="daily-save-status" role="status" aria-live="polite">
                 <div className="daily-save-status-copy">
                   {statusLabel && <span>{statusLabel}</span>}
                 </div>
@@ -128,12 +124,7 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
       {daily.viewMode === "daily" ? (
         <DayView daily={daily} sheets={sheets} askConfirmation={askConfirmation} />
       ) : daily.viewMode === "full" ? (
-        <FullLog
-          daily={daily}
-          sheets={sheets}
-          askConfirmation={askConfirmation}
-          toolbarContainer={fullLogToolbarTarget}
-        />
+        <FullLog daily={daily} sheets={sheets} toolbarContainer={fullLogToolbarTarget} />
       ) : (
         <TrendsView daily={daily} sheets={sheets} />
       )}

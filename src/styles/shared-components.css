@@ -224,7 +224,7 @@
 .app-tooltip.app-tooltip-portal {
   right: auto;
   bottom: auto;
-  z-index: 1000;
+  z-index: 1200;
   transform: none;
 }
 

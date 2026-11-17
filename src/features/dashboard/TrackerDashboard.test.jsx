@@ -168,8 +168,8 @@ describe("TrackerDashboard DSA progress gauge", () => {
     expect(doneTile.parentElement.className).toContain("justify-start");
     expect(doneTile.className).toContain("h-[44px]");
     expect(todoTile.className).toContain("h-[44px]");
-    expect(doneTile.className).toContain("bg-white/[0.06]");
-    expect(todoTile.className).toContain("bg-white/[0.06]");
+    expect(doneTile.className).toContain("bg-[var(--surface-hover)]");
+    expect(todoTile.className).toContain("bg-[var(--surface-hover)]");
     expect(screen.getByText(/Skipped/)).toBeTruthy();
     expect(screen.getByRole("button", { name: `Reset ${title} progress` })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Reset DSA progress" })).toBeNull();
@@ -183,6 +183,22 @@ describe("TrackerDashboard DSA progress gauge", () => {
 
     expect(screen.queryByRole("img")).toBeNull();
     expect(container.querySelector(".tracker-sheet-progress").textContent).toContain("25%");
+  });
+
+  it("uses theme-aware surfaces and text in the tracker progress card", () => {
+    const { container } = render(
+      <TrackerDashboard context={createContext({ title: "DSA", builtinTemplateId: "dsa" })} />,
+    );
+    const gauge = screen.getByRole("img", { name: "1 of 4 problems solved, 2 skipped" });
+
+    expect(gauge.parentElement.className).toContain("bg-[var(--surface-raised)]");
+    expect(gauge.querySelector(".text-\\[var\\(--text\\)\\]")).toBeTruthy();
+    expect(container.querySelector(".tracker-sheet-progress").className).toContain(
+      "bg-[var(--surface)]",
+    );
+    expect(
+      container.querySelector(".mobile-progress-summary [role='progressbar'] > div").className,
+    ).toContain("bg-[var(--progress-fill)]");
   });
 
   it("keeps DSA difficulty tiles out of a Backend sheet with stale template metadata", () => {

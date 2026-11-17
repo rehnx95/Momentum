@@ -33,7 +33,7 @@ function getDsaDifficultyStats(sheetProblems, progressState) {
 function ProgressGauge({ done, total, skipped, centerLabel, ariaLabel, segments }) {
   const circumference = 2 * Math.PI * 42;
   return (
-    <div className="relative flex h-full flex-1 items-center justify-center overflow-hidden rounded-lg bg-white/[0.02]">
+    <div className="relative flex h-full flex-1 items-center justify-center overflow-hidden rounded-lg bg-[var(--surface-raised)]">
       <div
         className="relative aspect-square w-[160px] overflow-hidden"
         role="img"
@@ -87,7 +87,7 @@ function ProgressGauge({ done, total, skipped, centerLabel, ariaLabel, segments 
           </svg>
         </div>
         <div className="absolute inset-0">
-          <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5 whitespace-nowrap text-sm text-[#f5f5f5]">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5 whitespace-nowrap text-sm text-[var(--text)]">
             <div className="tabular-nums">
               <span className="text-[30px] font-semibold leading-[32px]">{done}</span>
               <span>/{total}</span>
@@ -101,7 +101,7 @@ function ProgressGauge({ done, total, skipped, centerLabel, ariaLabel, segments 
               {centerLabel}
             </div>
           </div>
-          <div className="absolute bottom-[8%] left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-[#a1a1a1]">
+          <div className="absolute bottom-[8%] left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-[var(--muted)]">
             <span className="font-semibold">{skipped}</span> Skipped
           </div>
         </div>
@@ -152,14 +152,14 @@ function DsaDifficultyProgress({ stats }) {
         return (
           <div
             key={name}
-            className="flex w-full flex-1 flex-col items-center justify-center gap-0.5 rounded-lg bg-white/[0.06] text-center leading-tight"
+            className="flex w-full flex-1 flex-col items-center justify-center gap-0.5 rounded-lg bg-[var(--surface-hover)] text-center leading-tight"
             role="group"
             aria-label={`${name}: ${done} solved out of ${total}`}
           >
             <span className="text-xs font-medium" style={{ color }}>
               {label}
             </span>
-            <span className="text-xs font-medium tabular-nums text-[#f5f5f5]">
+            <span className="text-xs font-medium tabular-nums text-[var(--text)]">
               {done}/{total}
             </span>
           </div>
@@ -215,14 +215,14 @@ function SheetStatusProgress({ done, todo }) {
       ].map(({ label, value, color }) => (
         <div
           key={label}
-          className="flex h-[44px] w-full flex-none flex-col items-center justify-center gap-0.5 rounded-lg bg-white/[0.06] text-center leading-tight"
+          className="flex h-[44px] w-full flex-none flex-col items-center justify-center gap-0.5 rounded-lg bg-[var(--surface-hover)] text-center leading-tight"
           role="group"
           aria-label={`${label}: ${value}`}
         >
           <span className="text-xs font-medium" style={{ color }}>
             {label}
           </span>
-          <span className="text-xs font-medium tabular-nums text-[#f5f5f5]">{value}</span>
+          <span className="text-xs font-medium tabular-nums text-[var(--text)]">{value}</span>
         </div>
       ))}
     </div>
@@ -384,7 +384,7 @@ export default function TrackerDashboard({ context }) {
               setHideSkipped={setHideSkipped}
             />
             <section
-              className="mobile-progress-summary surface-card mb-3 rounded-xl border border-[#262626] bg-[#0A0A0A] p-3 lg:hidden"
+              className="mobile-progress-summary surface-card mb-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 lg:hidden"
               aria-label="Overall progress"
             >
               <div className="flex items-center justify-between gap-3">
@@ -401,7 +401,7 @@ export default function TrackerDashboard({ context }) {
                 </span>
               </div>
               <div
-                className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#262626]"
+                className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface-hover)]"
                 role="progressbar"
                 aria-label="Overall problem completion"
                 aria-valuemin={0}
@@ -409,7 +409,7 @@ export default function TrackerDashboard({ context }) {
                 aria-valuenow={doneCount}
               >
                 <div
-                  className="h-full rounded-full bg-[#EDEDED] transition-all"
+                  className="h-full rounded-full bg-[var(--progress-fill)] transition-all"
                   style={{
                     width: `${totalProblems > 0 ? (doneCount / totalProblems) * 100 : 0}%`,
                   }}
@@ -447,7 +447,7 @@ export default function TrackerDashboard({ context }) {
             </div>
           </section>
           <aside className="tracker-side hidden lg:block space-y-3">
-            <div className="tracker-sheet-progress surface-card bg-[#0A0A0A] rounded-2xl border border-[#262626] p-3 relative">
+            <div className="tracker-sheet-progress surface-card rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 relative">
               <div
                 className={`mb-2 ${canResetSheetProgress ? "flex items-center justify-between" : ""}`}
               >
@@ -463,7 +463,7 @@ export default function TrackerDashboard({ context }) {
                     <button
                       type="button"
                       aria-label={`Reset ${selectedSheet?.title || "sheet"} progress`}
-                      className="grid h-5 w-5 min-h-0 place-items-center rounded text-zinc-400 hover:bg-[#1F1F1F] hover:text-white"
+                      className="grid h-5 w-5 min-h-0 place-items-center rounded text-[var(--muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
                       onClick={async () => {
                         const sheetName = selectedSheet?.title || "this sheet";
                         const confirmationMessage = isDsaProgressCard
@@ -505,7 +505,7 @@ export default function TrackerDashboard({ context }) {
                 <>
                   <div className="mb-2">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-white tabular-nums">
+                      <span className="text-4xl font-bold text-[var(--text)] tabular-nums">
                         {totalProblems > 0 ? Math.round((doneCount / totalProblems) * 100) : 0}%
                       </span>
                     </div>
@@ -514,25 +514,27 @@ export default function TrackerDashboard({ context }) {
                     </p>
                   </div>
                   <div className="relative mt-3">
-                    <div className="h-2 bg-zinc-800 rounded-full overflow-visible relative">
+                    <div className="h-2 bg-[var(--surface-hover)] rounded-full overflow-visible relative">
                       <div
-                        className="h-full bg-[#EDEDED] rounded-full transition-all duration-500 ease-out relative"
+                        className="h-full bg-[var(--progress-fill)] rounded-full transition-all duration-500 ease-out relative"
                         style={{
                           width: `${totalProblems > 0 ? (doneCount / totalProblems) * 100 : 0}%`,
                         }}
                       />
                     </div>
                   </div>
-                  <div className="mt-2 pt-2 border-t border-zinc-800/50">
+                  <div className="mt-2 pt-2 border-t border-[var(--border)]">
                     <div className="grid grid-cols-3 gap-2 mb-2">
                       <div className="text-center">
-                        <div className="text-lg font-bold text-white tabular-nums">{doneCount}</div>
+                        <div className="text-lg font-bold text-[var(--text)] tabular-nums">
+                          {doneCount}
+                        </div>
                         <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
                           Done
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-bold text-muted tabular-nums">
+                        <div className="text-lg font-bold text-[var(--muted)] tabular-nums">
                           {skippedCount}
                         </div>
                         <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
@@ -540,7 +542,9 @@ export default function TrackerDashboard({ context }) {
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-bold text-white tabular-nums">{todoCount}</div>
+                        <div className="text-lg font-bold text-[var(--text)] tabular-nums">
+                          {todoCount}
+                        </div>
                         <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
                           To Do
                         </div>
@@ -554,7 +558,7 @@ export default function TrackerDashboard({ context }) {
                         );
                         if (confirmed) await reset(sheetProblems.map((problem) => problem.id));
                       }}
-                      className="w-full border border-[#262626] text-xs py-1.5 bg-[#1F1F1F] hover:bg-[#262626] text-[#A1A1A1] hover:text-[#EDEDED] rounded-md transition-colors flex items-center justify-center gap-1"
+                      className="w-full border border-[var(--border)] text-xs py-1.5 bg-[var(--surface-hover)] hover:bg-[var(--surface-raised)] text-[var(--muted)] hover:text-[var(--text)] rounded-md transition-colors flex items-center justify-center gap-1"
                     >
                       <RefreshCcw size={12} /> Reset This Sheet
                     </button>

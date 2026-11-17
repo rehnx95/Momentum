@@ -1,4 +1,5 @@
 import { Download, RefreshCcw, RotateCcw, Upload } from "lucide-react";
+import Tooltip from "../../../shared/components/Tooltip";
 
 export default function ProfileSheetProgress({
   sheets,
@@ -26,29 +27,53 @@ export default function ProfileSheetProgress({
         {showActions && (
           <div className="profile-progress-actions">
             {onExport && (
-              <button type="button" className="btn-secondary" onClick={onExport}>
-                <Download size={14} /> Export
-              </button>
+              <Tooltip label="Export progress" portal>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={onExport}
+                  aria-label="Export progress"
+                >
+                  <Download size={14} aria-hidden="true" />
+                </button>
+              </Tooltip>
             )}
             {onImport && (
-              <button type="button" className="btn-secondary" onClick={onImport}>
-                <Upload size={14} /> Import
-              </button>
+              <Tooltip label="Import progress" portal>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={onImport}
+                  aria-label="Import progress"
+                >
+                  <Upload size={14} aria-hidden="true" />
+                </button>
+              </Tooltip>
             )}
             {onRestoreDsa && (
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={onRestoreDsa}
-                disabled={restoring || restoreDisabled}
-              >
-                <RotateCcw size={14} /> {restoring ? "Restoring DSA..." : "Restore DSA"}
-              </button>
+              <Tooltip label={restoring ? "Restoring DSA..." : "Restore DSA"} portal>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={onRestoreDsa}
+                  disabled={restoring || restoreDisabled}
+                  aria-label="Restore DSA"
+                >
+                  <RotateCcw size={14} aria-hidden="true" />
+                </button>
+              </Tooltip>
             )}
             {onReset && (
-              <button type="button" className="btn-secondary btn-danger" onClick={onReset}>
-                <RefreshCcw size={14} /> Reset all
-              </button>
+              <Tooltip label="Reset all progress" portal>
+                <button
+                  type="button"
+                  className="btn-secondary btn-danger"
+                  onClick={onReset}
+                  aria-label="Reset all progress"
+                >
+                  <RefreshCcw size={14} aria-hidden="true" />
+                </button>
+              </Tooltip>
             )}
           </div>
         )}

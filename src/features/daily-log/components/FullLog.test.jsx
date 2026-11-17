@@ -516,12 +516,22 @@ describe("FullLog", () => {
       loadOlderLogs: vi.fn(),
       clearAllLogs: vi.fn(),
     };
+    const askConfirmation = vi.fn();
 
-    render(<FullLog daily={daily} askConfirmation={vi.fn()} toolbarContainer={toolbarContainer} />);
+    render(
+      <FullLog
+        daily={daily}
+        askConfirmation={askConfirmation}
+        toolbarContainer={toolbarContainer}
+      />,
+    );
 
     expect(within(toolbarContainer).getByRole("button", { name: "Clear log" }).textContent).toBe(
       "",
     );
+    fireEvent.click(within(toolbarContainer).getByRole("button", { name: "Clear log" }));
+    expect(daily.clearAllLogs).toHaveBeenCalledOnce();
+    expect(askConfirmation).not.toHaveBeenCalled();
     expect(
       within(toolbarContainer).getByRole("button", { name: "Load 10 older days" }),
     ).toBeTruthy();

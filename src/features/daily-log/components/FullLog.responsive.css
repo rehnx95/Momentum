@@ -9,9 +9,8 @@
   }
 
   .full-log-table {
-    --full-log-grid-columns:
-      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
+    --full-log-grid-columns: minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr)
+      minmax(2.4rem, 0.7fr) minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
     padding-inline: 0.45rem;
   }
 
@@ -56,8 +55,8 @@
   .full-log-sleep-total,
   .full-log-unlogged-total,
   .full-log-solved-total {
-    justify-items: end;
-    text-align: right;
+    justify-items: center;
+    text-align: center;
     font-size: 0.68rem;
   }
 

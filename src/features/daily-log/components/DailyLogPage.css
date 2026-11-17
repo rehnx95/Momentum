@@ -808,9 +808,8 @@
 
 @media (max-width: 520px) {
   .daily-log-page-shell .full-log-table {
-    --full-log-grid-columns:
-      minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr) minmax(2.4rem, 0.7fr)
-      minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
+    --full-log-grid-columns: minmax(3.9rem, 1.1fr) minmax(3.2rem, 1fr) minmax(2.5rem, 0.75fr)
+      minmax(2.4rem, 0.7fr) minmax(2.6rem, 0.8fr) minmax(1.7rem, 0.5fr);
   }
 
   .daily-log-page-shell .sleep-study-chart-wrap {
@@ -1168,8 +1167,7 @@
   }
 
   .daily-log-page-shell .full-log-table-header {
-    grid-template-columns:
-      var(--full-log-grid-columns);
+    grid-template-columns: var(--full-log-grid-columns);
     column-gap: 0.25rem;
     padding-inline: 0.45rem;
   }
@@ -1347,14 +1345,14 @@
     white-space: nowrap;
   }
 
-  /* Totals: compact and right aligned */
+  /* Totals: compact and centered */
   .daily-log-page-shell .full-log-active-total,
   .daily-log-page-shell .full-log-sleep-total,
   .daily-log-page-shell .full-log-unlogged-total,
   .daily-log-page-shell .full-log-solved-total {
     font-size: 0.7rem;
-    justify-items: end;
-    text-align: right;
+    justify-items: center;
+    text-align: center;
   }
 
   .daily-log-page-shell .full-log-timeline {
