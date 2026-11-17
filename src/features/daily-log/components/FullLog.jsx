@@ -37,11 +37,7 @@ function activityBreakdown(row, sheets) {
     .map((task) => {
       const name = isSheetActivity(task)
         ? getActivityDisplayName(task, sheets) || "Activity"
-        : String(task.name || "Activity")
-              .trim()
-              .toLowerCase() === "dsa"
-          ? "DSA"
-          : task.name || "Activity";
+        : String(task.name || "").trim() || "Activity";
       return {
         id: task.id,
         name,

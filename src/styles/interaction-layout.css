@@ -1,14 +1,14 @@
 .section-kicker {
-  color: #a1a1a1;
-  font-size: 0.7rem;
-  font-weight: 700;
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: 0.16em;
 }
 
 .main-page-navigation {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .unified-header-inner {
@@ -16,8 +16,8 @@
   width: 100%;
   height: 3.75rem;
   min-height: 3.75rem;
-  padding-top: 0.5rem !important;
-  padding-bottom: 0.5rem !important;
+  padding-top: var(--space-2) !important;
+  padding-bottom: var(--space-2) !important;
 }
 
 .unified-header-inner > .main-page-navigation {
@@ -25,7 +25,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  z-index: 2;
+  z-index: var(--z-local-raised);
 }
 
 .unified-header-actions {
@@ -36,20 +36,20 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.45rem;
-  z-index: 3;
+  gap: var(--space-2);
+  z-index: var(--z-local-top);
 }
 
 .main-page-navigation button {
   display: inline-flex;
-  height: 2.25rem;
+  height: var(--button-height-md);
   align-items: center;
-  gap: 0.4rem;
-  border-radius: 0.6rem;
-  padding: 0 0.6rem;
+  gap: var(--space-2);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-2);
   color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   white-space: nowrap;
 }
 
@@ -80,7 +80,7 @@
 
 .dashboard-shell input::placeholder,
 .profile-settings-shell input::placeholder {
-  color: #777;
+  color: var(--muted);
 }
 
 .surface-card,
@@ -93,15 +93,16 @@
 }
 
 .settings-form input {
-  min-height: 2.75rem;
-  border-radius: 0.6rem;
+  min-height: var(--button-height-lg);
+  border-radius: var(--radius-sm);
 }
 
 .settings-form button[type="submit"] {
-  min-height: 2.75rem;
-  border-radius: 0.6rem;
+  min-height: var(--button-height-lg);
+  border-radius: var(--radius-sm);
   background: var(--accent);
-  font-weight: 650;
+  color: var(--on-accent);
+  font-weight: var(--font-weight-semibold);
 }
 
 .settings-form button[type="submit"]:hover {
@@ -127,12 +128,12 @@
 }
 
 ::-webkit-scrollbar-track {
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: transparent;
 }
 

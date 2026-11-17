@@ -1,14 +1,13 @@
 import { ChevronDown, ChevronRight, SkipForward } from "lucide-react";
-import { cloneElement, useEffect, useId, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import leetcodeProblemLinks from "../../sheets/leetcodeProblemLinks.json";
+import Tooltip from "../../../shared/components/Tooltip";
 import { getProblemDifficulty } from "../utils/problemDifficulty";
 
 export function ProgressBar({ done, total }) {
   const pct = total ? Math.round((done / total) * 100) : 0;
   return (
     <div
-      className="h-1.5 w-full overflow-hidden rounded-full bg-[#262626]"
+      className="h-1.5 w-full overflow-hidden rounded-full bg-subtle"
       aria-label={`${pct}% complete`}
     >
       <div
@@ -30,78 +29,6 @@ const difficultyStyles = {
   Hard: "bg-rose-500/10 text-rose-400",
 };
 
-function TrackerTooltip({ children, label }) {
-  const tooltipId = useId();
-  const anchorRef = useRef(null);
-  const tooltipRef = useRef(null);
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
-  const [position, setPosition] = useState(null);
-  const visible = hovered || focused;
-  const describedBy = [children.props["aria-describedby"], tooltipId].filter(Boolean).join(" ");
-
-  useEffect(() => {
-    if (!visible) return undefined;
-
-    const updatePosition = () => {
-      const anchor = anchorRef.current?.getBoundingClientRect();
-      const tooltip = tooltipRef.current?.getBoundingClientRect();
-      if (!anchor || !tooltip) return;
-
-      const margin = 8;
-      const top = Math.max(margin + tooltip.height, anchor.top - margin);
-      const left = Math.max(
-        tooltip.width / 2 + margin,
-        Math.min(anchor.left + anchor.width / 2, window.innerWidth - tooltip.width / 2 - margin),
-      );
-
-      setPosition({ left, top });
-    };
-
-    updatePosition();
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition, true);
-    return () => {
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition, true);
-    };
-  }, [visible]);
-
-  return (
-    <>
-      <span
-        ref={anchorRef}
-        className="inline-flex"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onFocusCapture={() => setFocused(true)}
-        onBlurCapture={() => setFocused(false)}
-      >
-        {cloneElement(children, { "aria-describedby": describedBy })}
-      </span>
-      {createPortal(
-        <span
-          ref={tooltipRef}
-          id={tooltipId}
-          role="tooltip"
-          className={`pointer-events-none fixed z-[2000] whitespace-nowrap rounded-md border px-2 py-1 text-xs shadow-lg transition-opacity duration-100 ${visible ? "visible opacity-100" : "invisible opacity-0"}`}
-          style={{
-            left: position?.left ?? 0,
-            top: position?.top ?? 0,
-            transform: "translate(-50%, -100%)",
-            backgroundColor: "var(--popup-background)",
-            borderColor: "var(--popup-border)",
-            color: "var(--popup-foreground)",
-          }}
-        >
-          {label}
-        </span>,
-        document.body,
-      )}
-    </>
-  );
-}
-
 export function ProblemRow({ prob, state, onToggle, onSkip, showDifficulty = false }) {
   const isDone = state === "done";
   const isSkip = state === "skipped";
@@ -110,7 +37,7 @@ export function ProblemRow({ prob, state, onToggle, onSkip, showDifficulty = fal
 
   return (
     <div
-      className={`problem-row group flex items-center gap-3 py-1.5 pl-3 pr-1 rounded-lg transition-colors duration-200 ${isSkip ? "opacity-50 bg-[#0A0A0A]/40" : "hover:bg-[#1F1F1F]"}`}
+      className={`problem-row group flex items-center gap-3 py-2 pl-3 pr-1 rounded-lg transition-colors duration-200 ${isSkip ? "opacity-50 bg-skippedRow" : "hover:bg-rowHover"}`}
     >
       <button
         type="button"
@@ -118,10 +45,10 @@ export function ProblemRow({ prob, state, onToggle, onSkip, showDifficulty = fal
         role="checkbox"
         aria-checked={isDone}
         aria-label={isDone ? `Mark ${prob.title} as not done` : `Mark ${prob.title} as done`}
-        className={`w-[22px] h-[22px] flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${isDone ? "bg-[#EDEDED] border-[#EDEDED]" : "border-[#EDEDED]/60 bg-transparent hover:border-[#EDEDED]"}`}
+        className={`w-[22px] h-[22px] flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${isDone ? "bg-accent border-accent" : "border-accent/60 bg-transparent hover:border-accent"}`}
       >
         {isDone && (
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-black">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-onAccent">
             <path
               d="M2 7l3.5 3.5L12 4.5"
               stroke="currentColor"
@@ -135,13 +62,13 @@ export function ProblemRow({ prob, state, onToggle, onSkip, showDifficulty = fal
 
       <button
         onClick={() => onToggle(prob.id)}
-        className="flex-1 text-left text-[15px] leading-snug text-[#EDEDED] hover:text-white transition-colors duration-200"
+        className="flex-1 text-left text-base leading-snug text-text hover:text-text transition-colors duration-200"
       >
         {prob.title}
       </button>
 
       <div
-        className={`grid flex-shrink-0 items-center gap-x-0.5 ${
+        className={`grid flex-shrink-0 items-center gap-x-1 ${
           showDifficulty ? "grid-cols-[auto_1.25rem_1.25rem]" : "grid-cols-[1.25rem_1.25rem]"
         }`}
       >
@@ -150,20 +77,20 @@ export function ProblemRow({ prob, state, onToggle, onSkip, showDifficulty = fal
             type="button"
             onClick={() => onToggle(prob.id)}
             aria-label={`Toggle ${prob.title} completion`}
-            className={`justify-self-start rounded-md px-1 py-0.5 text-xs font-medium ${difficultyStyles[difficulty]}`}
+            className={`justify-self-start rounded-md px-1 py-1 text-xs font-medium ${difficultyStyles[difficulty]}`}
           >
             {difficulty}
           </button>
         )}
 
         {leetcodeProblem && (
-          <TrackerTooltip label="Open on LeetCode">
+          <Tooltip label="Open on LeetCode" portal>
             <a
               href={leetcodeProblem.url}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Open ${prob.title} on LeetCode`}
-              className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md text-[#A1A1A1] transition-colors duration-200 hover:bg-[#1F1F1F] hover:text-[#EDEDED]"
+              className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md text-muted transition-colors duration-200 hover:bg-rowHover hover:text-text"
             >
               <svg
                 width="13"
@@ -186,19 +113,19 @@ export function ProblemRow({ prob, state, onToggle, onSkip, showDifficulty = fal
                 />
               </svg>
             </a>
-          </TrackerTooltip>
+          </Tooltip>
         )}
         {!leetcodeProblem && <span aria-hidden="true" />}
 
-        <TrackerTooltip label={isSkip ? "Unskip" : "Skip"}>
+        <Tooltip label={isSkip ? "Unskip" : "Skip"} portal>
           <button
             onClick={() => onSkip(prob.id)}
             aria-label={isSkip ? `Unskip ${prob.title}` : `Skip ${prob.title}`}
-            className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isSkip ? "text-muted bg-[#1F1F1F]" : "text-[#A1A1A1] hover:text-[#EDEDED] hover:bg-[#1F1F1F]"}`}
+            className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isSkip ? "text-muted bg-rowHover" : "text-muted hover:text-text hover:bg-rowHover"}`}
           >
             <SkipForward size={16} aria-hidden="true" />
           </button>
-        </TrackerTooltip>
+        </Tooltip>
       </div>
     </div>
   );
@@ -232,23 +159,23 @@ export function SubSectionRow({
   }
 
   return (
-    <div className="ml-4 pl-3 border-l border-[#262626]">
+    <div className="ml-4 pl-3 border-l border-subtle">
       <button
         onClick={() => onToggle(sub.id)}
-        className="w-full flex items-center gap-2 py-1.5 text-sm group text-left hover:text-[#EDEDED] transition-colors"
+        className="w-full flex items-center gap-2 py-2 text-sm group text-left hover:text-text transition-colors"
       >
         {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-        <span className="font-medium text-[#EDEDED]">{sub.title}</span>
+        <span className="font-medium text-text">{sub.title}</span>
         <div className="flex-1 mx-2">
           <ProgressBar done={done} total={total} />
         </div>
-        <span className="text-xs text-[#A1A1A1] tabular-nums">
+        <span className="text-xs text-muted tabular-nums">
           {done}/{total}
         </span>
       </button>
 
       {expanded && (
-        <div className="surface-card mt-1.5 mb-2 bg-[#0A0A0A] rounded-xl border border-[#262626] p-1.5">
+        <div className="surface-card mt-2 mb-2 bg-panel rounded-xl border border-subtle p-2">
           {visible.length > 0 ? (
             visible.map((p) => (
               <ProblemRow
@@ -261,7 +188,7 @@ export function SubSectionRow({
               />
             ))
           ) : (
-            <div className="py-4 text-center text-xs text-[#A1A1A1]">
+            <div className="py-4 text-center text-xs text-muted">
               No problems match the filter
             </div>
           )}
@@ -292,22 +219,22 @@ export function StepRow({
   const expanded = expandedSteps.has(step.id);
 
   return (
-    <div className="surface-card mb-1.5 overflow-hidden rounded-xl border border-[#262626] bg-[#0A0A0A]">
+    <div className="surface-card mb-2 overflow-hidden rounded-xl border border-subtle bg-panel">
       <button
         onClick={() => onToggleStep(step.id)}
         aria-expanded={expanded}
-        className="grid w-full grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-[#1F1F1F] md:grid-cols-[1.5rem_minmax(0,1fr)_14rem_3.5rem]"
+        className="grid w-full grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-rowHover md:grid-cols-[1.5rem_minmax(0,1fr)_14rem_3.5rem]"
       >
         <span className="flex h-6 w-6 items-center justify-center">
           {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         </span>
-        <h2 className="min-w-0 text-[17px] font-semibold leading-snug text-[#EDEDED]">
+        <h2 className="min-w-0 text-lg font-semibold leading-snug text-text">
           {step.title}
         </h2>
         <div className="hidden md:block">
           <ProgressBar done={done} total={total} />
         </div>
-        <span className="text-right text-sm tabular-nums text-[#A1A1A1]">
+        <span className="text-right text-sm tabular-nums text-muted">
           {done}/{total}
         </span>
       </button>

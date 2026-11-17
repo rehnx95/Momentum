@@ -32,7 +32,7 @@ Striver's A2Z DSA Sheet — LeetCode Edition
 - 20. Factorial of a Given Number [Easy]
 - 21. GCD or HCF [Easy]
 - 22. LCM of Two Numbers [Easy]
-- 23. Armstrong Numbers [Easy]
+- 23. [Armstrong Number](https://leetcode.com/problems/armstrong-number/) [Easy] 🔒
 - 24. [Perfect Number](https://leetcode.com/problems/perfect-number/) [Easy]
 - 25. Print all Divisors [Easy]
 - 26. Check for Prime [Easy]
@@ -126,7 +126,7 @@ Striver's A2Z DSA Sheet — LeetCode Edition
 
 ### 4.1 — BS on 1D Arrays
 - 101. [Binary Search](https://leetcode.com/problems/binary-search/) [Easy]
-- 102. [Search Insert Position](https://leetcode.com/problems/search-insert-position/) [Easy]
+- 102. [Implement Lower Bound](https://leetcode.com/problems/search-insert-position/) [Easy] ↪ LC 35
 - 103. [Find First and Last Position of Element in Sorted Array](https://leetcode.com/problems/find-smallest-letter-greater-than-target/) [Easy] ↪ LC 744
 - 104. [Search Insert Position](https://leetcode.com/problems/search-insert-position/) [Easy]
 - 105. Floor and Ceil in Sorted Array [Easy]
@@ -233,7 +233,7 @@ Striver's A2Z DSA Sheet — LeetCode Edition
 ### 6.4 — Medium Problems of DLL
 - 195. Delete all Occurrences of a Key in DLL [Medium]
 - 196. Find Pairs with Given Sum in DLL [Medium]
-- 197. Remove Duplicates from Sorted DLL [Easy]
+- 197. [Remove Duplicates from Sorted DLL](https://leetcode.com/problems/remove-duplicates-from-sorted-list/) [Easy] ↪ LC 83
 ### 6.5 — Hard Problems of LL
 - 198. [Reverse Nodes in k-Group](https://leetcode.com/problems/reverse-nodes-in-k-group/) [Hard]
 - 199. [Rotate List](https://leetcode.com/problems/rotate-list/) [Medium]
@@ -560,7 +560,7 @@ Striver's A2Z DSA Sheet — LeetCode Edition
 - 467. Rod Cutting Problem [Medium]
 ### 16.4 — DP on Strings
 - 468. [Longest Common Subsequence](https://leetcode.com/problems/longest-common-subsequence/) [Medium]
-- 469. Print Longest Common Subsequence [Medium]
+- 469. [Print Longest Common Subsequence](https://leetcode.com/problems/longest-common-subsequence/) [Medium] ↪ LC 1143
 - 470. [Maximum Length of Repeated Subarray](https://leetcode.com/problems/maximum-length-of-repeated-subarray/) [Medium]
 - 471. [Longest Palindromic Subsequence](https://leetcode.com/problems/longest-palindromic-subsequence/) [Medium]
 - 472. [Palindromic Substrings](https://leetcode.com/problems/palindromic-substrings/) [Medium]
@@ -571,7 +571,7 @@ Striver's A2Z DSA Sheet — LeetCode Edition
 - 477. [Edit Distance](https://leetcode.com/problems/edit-distance/) [Medium]
 - 478. [Wildcard Matching](https://leetcode.com/problems/wildcard-matching/) [Hard]
 - 479. [Word Break](https://leetcode.com/problems/word-break/) [Medium]
-- 480. Count Palindromic Subsequences [Hard]
+- 480. [Count Palindromic Subsequences](https://leetcode.com/problems/count-different-palindromic-subsequences/) [Hard] ↪ LC 730
 ### 16.5 — DP on Stocks
 - 481. [Best Time to Buy and Sell Stock](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/) [Easy]
 - 482. [Best Time to Buy and Sell Stock II](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/) [Medium]

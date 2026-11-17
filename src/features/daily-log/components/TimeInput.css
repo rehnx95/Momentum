@@ -5,13 +5,13 @@
   flex: none;
   align-items: center;
   justify-content: center;
-  gap: 0.1rem;
+  gap: var(--space-1);
   min-height: 1.85rem;
   border: 1px solid var(--border-strong);
-  border-radius: 0.55rem;
+  border-radius: var(--radius-sm);
   background: var(--log-day-surface);
   color: var(--text);
-  font-size: 0.8rem;
+  font-size: var(--font-size-sm);
 }
 
 .time-input:focus-within {
@@ -33,6 +33,6 @@
 }
 
 .time-input input:focus {
-  border-radius: 0.2rem;
+  border-radius: var(--radius-sm);
   background: var(--surface-hover);
 }

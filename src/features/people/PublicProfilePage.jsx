@@ -62,7 +62,7 @@ export default function PublicProfilePage({
   const profileProblemsSolved = profileSheetStats.reduce((total, sheet) => total + sheet.solved, 0);
   const profileProblemsTotal = profileSheetStats.reduce((total, sheet) => total + sheet.total, 0);
   return (
-    <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans">
+    <div className="profile-shell min-h-screen bg-page text-text font-sans">
       <AppHeader
         active={publicProfileReturnPath.current === "/profile" ? "profile" : "people"}
         {...headerProps}
@@ -74,12 +74,12 @@ export default function PublicProfilePage({
             <p className="text-sm font-semibold uppercase tracking-wider text-muted">
               {error === "This profile could not be found." ? "404" : "Profile"}
             </p>
-            <h2 className="mt-2 text-2xl font-bold">
+            <h2 className="mt-2 text-xl font-semibold">
               {error === "This profile could not be found."
                 ? "Profile not found"
                 : "Could not load profile"}
             </h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-[#A1A1A1]">
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted">
               {error === "This profile could not be found."
                 ? "This username doesn’t match a public profile. Check the spelling or search for another user."
                 : error}
@@ -87,7 +87,7 @@ export default function PublicProfilePage({
             <button
               type="button"
               onClick={onBack}
-              className="mt-6 rounded-lg bg-[#EDEDED] px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-white"
+              className="mt-6 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-onAccent transition-colors hover:bg-accentHover"
             >
               Find people
             </button>
@@ -101,7 +101,7 @@ export default function PublicProfilePage({
           </div>
         ) : null}
         {loading ? (
-          <div className="surface-card rounded-2xl border p-6 text-sm text-[#A1A1A1]">
+          <div className="surface-card rounded-2xl border p-6 text-sm text-muted">
             Loading profile…
           </div>
         ) : (
@@ -115,12 +115,12 @@ export default function PublicProfilePage({
                     </div>
                     <div className="profile-user-details">
                       <div className="profile-identity">
-                        <h1 className="text-2xl font-bold text-[#EDEDED]">
+                        <h1 className="text-xl font-semibold text-text">
                           {profile.name || profile.username}
                         </h1>
-                        <p className="mt-1 text-sm text-[#A1A1A1]">@{profile.username}</p>
+                        <p className="mt-1 text-sm text-muted">@{profile.username}</p>
                         {profile.email && (
-                          <p className="mt-1 break-all text-sm text-[#A1A1A1]">{profile.email}</p>
+                          <p className="mt-1 break-all text-sm text-muted">{profile.email}</p>
                         )}
                       </div>
                     </div>

@@ -50,15 +50,15 @@ export default function TrackerControls({
       </div>
       <span className="tracker-controls-spacer" aria-hidden="true" />
       <div
-        className="tracker-bulk-actions flex items-center gap-2 text-xs text-[#A1A1A1]"
+        className="tracker-bulk-actions flex items-center gap-2 text-xs text-muted"
         role="group"
         aria-label="Expand or collapse problem groups"
       >
-        <button type="button" onClick={expandAll} className="transition-colors hover:text-white">
+        <button type="button" onClick={expandAll} className="transition-colors hover:text-text">
           Expand all
         </button>
         <span aria-hidden="true">·</span>
-        <button type="button" onClick={collapseAll} className="transition-colors hover:text-white">
+        <button type="button" onClick={collapseAll} className="transition-colors hover:text-text">
           Collapse all
         </button>
       </div>

@@ -12,19 +12,19 @@ export default function PeopleSearchPage({
 }) {
   const { headerProps } = context;
   return (
-    <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
+    <div className="profile-shell min-h-screen bg-page text-text font-sans transition-colors duration-300">
       <AppHeader active="people" {...headerProps} />
 
       <main className="app-page">
         <div className="app-page-narrow">
           <h1 className="page-title mb-1">Find people</h1>
-          <p className="mb-6 text-sm text-[#A1A1A1]">
+          <p className="mb-6 text-sm text-muted">
             Search a username to see their streaks, sheet progress and activity.
           </p>
           <div className="relative">
             <Search
               size={18}
-              className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-[#A1A1A1]"
+              className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-muted"
             />
             <input
               id="people-search"
@@ -40,16 +40,16 @@ export default function PeopleSearchPage({
               placeholder="Search by username"
               aria-autocomplete="list"
               aria-controls="people-search-results"
-              className="h-12 w-full rounded-xl border border-[#383838] bg-[#0A0A0A] pl-11 pr-4 text-sm text-[#EDEDED] placeholder-[#A1A1A1] outline-none transition-colors focus:border-[#EDEDED] focus:outline-none"
+              className="h-12 w-full rounded-xl border border-mid bg-panel pl-11 pr-4 text-sm text-text placeholder:text-muted outline-none transition-colors focus:border-accent focus:outline-none"
             />
             {query.trim().length >= 3 && (
               <div
                 id="people-search-results"
                 role="listbox"
-                className="absolute inset-x-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-[#383838] bg-[#0A0A0A] shadow-2xl"
+                className="absolute inset-x-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-mid bg-panel shadow-2xl"
               >
                 {loading ? (
-                  <p className="px-4 py-3 text-sm text-[#A1A1A1]">Searching people…</p>
+                  <p className="px-4 py-3 text-sm text-muted">Searching people…</p>
                 ) : error ? (
                   <p role="alert" className="px-4 py-3 text-sm text-muted">
                     {error}
@@ -62,31 +62,31 @@ export default function PeopleSearchPage({
                       role="option"
                       aria-selected="false"
                       onClick={() => onSelectProfile(result.username)}
-                      className="flex w-full items-center gap-3 border-b border-[#262626] px-4 py-3 text-left last:border-0 hover:bg-[#1F1F1F]"
+                      className="flex w-full items-center gap-3 border-b border-subtle px-4 py-3 text-left last:border-0 hover:bg-rowHover"
                     >
                       <span className="people-result-avatar">
                         {(result.name || result.username).charAt(0).toUpperCase()}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold text-[#EDEDED]">
+                        <span className="block truncate text-sm font-semibold text-text">
                           {result.name || result.username}
                         </span>
-                        <span className="mt-0.5 block truncate text-xs text-[#A1A1A1]">
+                        <span className="mt-0.5 block truncate text-xs text-muted">
                           @{result.username}
                         </span>
                       </span>
-                      <ChevronRight size={17} className="text-[#A1A1A1]" aria-hidden="true" />
+                      <ChevronRight size={17} className="text-muted" aria-hidden="true" />
                     </button>
                   ))
                 ) : (
-                  <p className="px-4 py-3 text-sm text-[#A1A1A1]">
+                  <p className="px-4 py-3 text-sm text-muted">
                     No users found. Try a different username.
                   </p>
                 )}
               </div>
             )}
           </div>
-          <p className="mt-2 text-xs text-[#A1A1A1]">3 characters minimum.</p>
+          <p className="mt-2 text-xs text-muted">3 characters minimum.</p>
           {query.trim().length < 3 && (
             <div className="empty-state">
               <Users size={22} />

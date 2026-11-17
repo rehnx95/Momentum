@@ -1,13 +1,13 @@
 .tracker-controls {
   position: sticky;
   top: var(--header-h);
-  z-index: 20;
+  z-index: var(--z-floating-control);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.25rem 0 0.5rem;
-  margin-bottom: 0.75rem;
+  gap: var(--space-2);
+  padding: var(--space-1) 0 var(--space-2);
+  margin-bottom: var(--space-3);
   border-bottom: 1px solid var(--border);
   background: var(--page-overlay);
   backdrop-filter: blur(12px);
@@ -17,17 +17,17 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 
 .tracker-filter-group {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 0.15rem;
-  padding: 0.2rem;
+  gap: var(--space-1);
+  padding: var(--space-1);
   border: 1px solid var(--border);
-  border-radius: 0.7rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 
@@ -39,11 +39,11 @@
   display: flex;
   min-width: 4rem;
   flex: 1 1 auto;
-  height: 2rem;
+  height: var(--button-height-sm);
   align-items: center;
   justify-content: center;
-  padding: 0 0.4rem;
-  border-radius: 0.45rem;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
   white-space: nowrap;
 }
 
@@ -58,13 +58,13 @@
 }
 
 .tracker-filter-chip-active {
-  background-color: #ededed;
-  color: #000000;
+  background-color: var(--accent);
+  color: var(--on-accent);
 }
 
 .tracker-filter-chip-active:hover {
-  background-color: #ededed;
-  color: #000000;
+  background-color: var(--accent-hover);
+  color: var(--on-accent);
 }
 
 .tracker-controls-spacer {
@@ -72,19 +72,19 @@
 }
 
 .tracker-skip-toggle {
-  gap: 0.35rem;
-  min-height: 2rem;
+  gap: var(--space-1);
+  min-height: var(--button-height-sm);
   white-space: nowrap;
 }
 
-@media (max-width: 767px) {
+@screen mobile {
   .tracker-controls {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "filters"
       "bulk";
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .tracker-filter-set {
@@ -96,22 +96,22 @@
   .tracker-filter-group {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 0.15rem;
+    gap: var(--space-1);
     min-width: 0;
   }
 
   .tracker-filter-group > button {
     min-width: 0;
-    height: 2rem;
-    padding-inline: 0.25rem;
-    font-size: 0.72rem;
+    height: var(--button-height-sm);
+    padding-inline: var(--space-1);
+    font-size: var(--font-size-xs);
   }
 
   .tracker-bulk-actions {
     grid-area: bulk;
     width: 100%;
     justify-content: flex-start;
-    gap: 0.35rem;
+    gap: var(--space-1);
     white-space: nowrap;
   }
 
@@ -131,13 +131,13 @@
 
 @media (max-width: 360px) {
   .tracker-filter-group > button {
-    padding-inline: 0.15rem;
-    font-size: 0.66rem;
+    padding-inline: var(--space-1);
+    font-size: var(--font-size-xs);
   }
 }
 
 @media (min-width: 768px) and (max-width: 1100px) {
   .tracker-controls {
-    padding-right: 0.5rem;
+    padding-right: var(--space-2);
   }
 }

@@ -16,11 +16,6 @@ const EMPTY_LOGS = [];
 const CHART_WINDOW_DAYS = 30;
 const MOBILE_CHART_WINDOW_DAYS = 7;
 
-function activityName(name) {
-  const value = String(name || "").trim();
-  return value.toLowerCase() === "dsa" ? "DSA Sheet" : value;
-}
-
 function activityEntries(log, sheets) {
   const activities = new Map();
   const tasks = Array.isArray(log?.custom_tasks) ? log.custom_tasks : [];
@@ -28,7 +23,7 @@ function activityEntries(log, sheets) {
   tasks.forEach((task) => {
     const name = isSheetActivity(task)
       ? getActivityDisplayName(task, sheets)
-      : activityName(task.name);
+      : String(task.name || "").trim();
     if (!name) return;
     const minutes = (Array.isArray(task.slots) ? task.slots : []).reduce(
       (total, slot) => total + (getSlotDurationMinutes(slot) || 0),

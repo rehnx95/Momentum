@@ -1,19 +1,19 @@
 .daily-entry-heading {
   justify-content: space-between;
-  gap: 1rem;
-  margin: 0.65rem 0 0.35rem;
+  gap: var(--space-4);
+  margin: var(--space-3) 0 var(--space-1);
 }
 
 .daily-entry-heading h3 {
   margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
 }
 
 .daily-new-inline {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 .daily-new-inline input {
@@ -22,13 +22,13 @@
 }
 
 .daily-new-inline button {
-  min-height: 2.25rem;
-  padding-inline: 0.75rem;
+  min-height: var(--button-height-md);
+  padding-inline: var(--space-3);
   border: 1px solid var(--border-strong);
-  border-radius: 0.6rem;
+  border-radius: var(--radius-sm);
   color: var(--text);
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 .daily-new-inline button[type="submit"] {
@@ -39,7 +39,7 @@
 
 .daily-activity-list {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .activity-card {
@@ -48,17 +48,17 @@
   max-width: 100%;
   min-width: 0;
   min-height: 7rem;
-  padding: 0.8rem 1rem;
+  padding: var(--space-3) var(--space-4);
   overflow: visible;
   border: 1px solid var(--border-strong);
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.02);
 }
 
 .activity-card-heading {
   min-width: 0;
-  gap: 0.45rem;
-  margin-bottom: 0.55rem;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
   color: var(--text);
 }
 
@@ -66,7 +66,7 @@
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 
 .activity-card-identity > svg {
@@ -77,20 +77,20 @@
   min-width: 0;
   overflow: hidden;
   color: var(--text);
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .activity-total {
   margin-left: auto;
-  padding: 0.2rem 0.6rem;
-  border-radius: 0.4rem;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
   background: var(--text);
   color: var(--page);
-  font-size: 0.85rem;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -99,14 +99,14 @@
   display: grid;
   width: 100%;
   min-width: 0;
-  gap: 0.2rem;
+  gap: var(--space-1);
 }
 
 .daily-slot-row {
   position: relative;
   display: grid;
   align-items: center;
-  gap: 0.3rem;
+  gap: var(--space-1);
   width: 100%;
   max-width: 100%;
   grid-template-columns: 4.7rem 0.85rem 4.7rem 1.45rem;
@@ -121,9 +121,9 @@
 .daily-slot-row .time-input {
   width: 100%;
   min-width: 0;
-  height: 2.5rem;
-  min-height: 2.5rem;
-  font-size: 0.9rem;
+  height: var(--button-height-lg);
+  min-height: var(--button-height-lg);
+  font-size: var(--font-size-base);
 }
 
 .slot-arrow {
@@ -138,8 +138,8 @@
 
 .slot-next-day {
   color: var(--muted);
-  font-size: 0.63rem;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
   position: absolute;
   top: -0.55rem;
   right: 2rem;
@@ -151,7 +151,7 @@
   height: 1.45rem;
   min-width: 0;
   place-items: center;
-  border-radius: 0.45rem;
+  border-radius: var(--radius-sm);
   color: var(--muted);
   opacity: 0;
 }
@@ -168,24 +168,24 @@
 .slot-empty {
   margin: 0;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: var(--font-size-xs);
 }
 
 .activity-card-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.55rem;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .activity-color-toggle {
   display: grid;
-  width: 1.8rem;
-  height: 1.8rem;
+  width: var(--button-height-sm);
+  height: var(--button-height-sm);
   place-items: center;
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--muted);
 }
@@ -198,13 +198,13 @@
 
 .activity-color-picker {
   position: absolute;
-  z-index: 20;
+  z-index: var(--z-floating-control);
   right: 0.75rem;
   bottom: 3.25rem;
   width: min(17rem, calc(100% - 1.5rem));
-  padding: 0.65rem;
+  padding: var(--space-3);
   border: 1px solid var(--border-strong);
-  border-radius: 0.65rem;
+  border-radius: var(--radius-md);
   background: var(--surface-raised);
   box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.22);
 }
@@ -212,16 +212,16 @@
 .activity-color-swatches {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 
 .activity-color-swatches button {
-  width: 1.8rem;
-  height: 1.8rem;
+  width: var(--button-height-sm);
+  height: var(--button-height-sm);
   min-width: 0;
   padding: 0;
   border: 2px solid transparent;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
 }
 
 .activity-color-swatches button[aria-pressed="true"] {
@@ -233,19 +233,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.6rem;
-  margin-top: 0.65rem;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
   color: var(--muted);
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 .activity-native-color-picker input {
   width: 2rem;
-  height: 1.8rem;
-  padding: 0.1rem;
+  height: var(--button-height-sm);
+  padding: var(--space-1);
   border: 1px solid var(--border-strong);
-  border-radius: 0.35rem;
+  border-radius: var(--radius-sm);
   background: var(--page);
   cursor: pointer;
 }
@@ -259,36 +259,36 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.4rem;
-  margin-top: 0.65rem;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
 .activity-custom-color label {
   color: var(--muted);
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 .activity-custom-color input {
   min-width: 0;
-  height: 1.9rem;
-  padding: 0 0.4rem;
+  height: var(--button-height-sm);
+  padding: 0 var(--space-2);
   border: 1px solid var(--border-strong);
-  border-radius: 0.4rem;
+  border-radius: var(--radius-sm);
   background: var(--page);
   color: var(--text);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: var(--font-size-xs);
 }
 
 .activity-custom-color button {
-  min-height: 1.9rem;
-  padding: 0 0.5rem;
-  border-radius: 0.4rem;
+  min-height: var(--button-height-sm);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
   background: var(--text);
   color: var(--page);
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 .activity-custom-color button:disabled {
@@ -300,12 +300,12 @@
 .slot-add {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  min-height: 2.25rem;
-  padding: 0 0.85rem;
-  border-radius: 999px;
-  font-size: 0.82rem;
-  font-weight: 700;
+  gap: var(--space-1);
+  min-height: var(--button-height-md);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
 }
 
 .slot-start {

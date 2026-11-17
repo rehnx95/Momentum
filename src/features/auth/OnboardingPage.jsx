@@ -137,9 +137,9 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
   };
 
   return (
-    <div className="profile-settings-shell onboarding-page min-h-screen bg-[#000000] text-[#EDEDED] font-sans flex flex-col">
+    <div className="profile-settings-shell onboarding-page min-h-screen bg-page text-text font-sans flex flex-col">
       {/* Header */}
-      <header className="dashboard-header bg-[#000000]/80 backdrop-blur-xl border-b border-[#262626]">
+      <header className="dashboard-header backdrop-blur-xl border-b border-subtle">
         <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <MomentumBrand onNavigate={onGoToDashboard} subtitle="" />
@@ -147,7 +147,7 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
           <Tooltip label="Sign out of your account">
             <button
               onClick={onSignOut}
-              className="text-[#A1A1A1] hover:text-[#EDEDED] flex items-center gap-2 text-sm"
+              className="text-muted hover:text-text flex items-center gap-2 text-sm"
             >
               <LogOut size={14} />
               Sign out
@@ -185,14 +185,14 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
             <div>
               <label
                 htmlFor="onboarding-name"
-                className="block text-sm font-medium text-[#EDEDED] mb-2"
+                className="block text-sm font-medium text-text mb-2"
               >
                 Full Name <span className="text-muted">*</span>
               </label>
               <div className="relative">
                 <User
                   size={20}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
                   aria-hidden="true"
                 />
                 <input
@@ -204,7 +204,7 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
                   placeholder="John Doe"
                   aria-invalid={Boolean(errors.name)}
                   aria-describedby={errors.name ? "onboarding-name-error" : undefined}
-                  className="w-full pl-10 pr-4 py-3 bg-[#000000] border border-[#262626] rounded-lg text-[#EDEDED] placeholder-[#A1A1A1] focus:outline-none focus:ring-2 focus:ring-[#EDEDED] focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-page border border-subtle rounded-lg text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                 />
               </div>
               {errors.name && (
@@ -218,14 +218,14 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
             <div>
               <label
                 htmlFor="onboarding-username"
-                className="block text-sm font-medium text-[#EDEDED] mb-2"
+                className="block text-sm font-medium text-text mb-2"
               >
                 Username (Handle) <span className="text-muted">*</span>
               </label>
               <div className="onboarding-username-field">
                 <User
                   size={20}
-                  className="onboarding-username-icon absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
+                  className="onboarding-username-icon absolute left-3 top-1/2 -translate-y-1/2 text-muted"
                   aria-hidden="true"
                 />
                 <input
@@ -238,7 +238,7 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
                   maxLength={USERNAME_MAX_LENGTH}
                   aria-invalid={Boolean(errors.username) || usernameAvailable === false}
                   aria-describedby="onboarding-username-status"
-                  className={`onboarding-username-input w-full pr-4 py-3 rounded-lg text-[#EDEDED] placeholder-[#A1A1A1] focus:outline-none focus:ring-2 transition-all ${
+                  className={`onboarding-username-input w-full pr-4 py-3 rounded-lg text-text placeholder:text-muted focus:outline-none focus:ring-2 transition-all ${
                     usernameAvailable === true && !errors.username
                       ? "is-available"
                       : usernameAvailable === false || errors.username
@@ -279,7 +279,7 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
               <button
                 type="submit"
                 disabled={isLoading || usernameAvailable === false}
-                className="onboarding-submit-button w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-[#EDEDED] hover:bg-white disabled:bg-[#262626] disabled:text-[#A1A1A1] disabled:cursor-not-allowed text-black font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#EDEDED] focus:ring-offset-2 focus:ring-offset-[#000000]"
+                className="onboarding-submit-button w-full flex items-center justify-center gap-2 px-4 py-4 bg-accent hover:bg-accentHover disabled:bg-subtle disabled:text-muted disabled:cursor-not-allowed text-onAccent font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-page"
               >
                 {isLoading ? (
                   <>

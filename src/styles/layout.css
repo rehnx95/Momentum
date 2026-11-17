@@ -22,7 +22,7 @@ html {
 .app-header {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: var(--z-app-chrome);
   border-bottom: 1px solid var(--border);
   background: var(--page-overlay);
   backdrop-filter: blur(12px);
@@ -34,7 +34,7 @@ html {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
   height: var(--header-h);
   max-width: 1200px;
   margin-inline: auto;
@@ -50,7 +50,7 @@ html {
   max-width: 100%;
   height: auto;
   justify-self: start;
-  gap: 0.7rem;
+  gap: var(--space-3);
   transform: none;
 }
 
@@ -61,7 +61,7 @@ html {
   flex: 0 0 2.5rem;
   align-items: center;
   justify-content: center;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   box-shadow: 0 1px 2px rgb(0 0 0 / 18%);
 }
 
@@ -80,8 +80,8 @@ html {
 .app-header .momentum-brand-name {
   height: auto;
   color: var(--text);
-  font-size: 1.2rem;
-  font-weight: 750;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
   line-height: 1.2;
   letter-spacing: -0.035em;
 }
@@ -91,12 +91,12 @@ html {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .app-nav {
   display: flex;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .app-nav button {
@@ -104,13 +104,13 @@ html {
   flex: 0 0 7rem;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  height: 2.25rem;
-  padding: 0 0.75rem;
-  border-radius: 0.6rem;
+  gap: var(--space-2);
+  height: var(--button-height-md);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
   color: var(--muted);
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   transition:
     background-color 0.15s,
@@ -130,9 +130,9 @@ html {
 .icon-btn {
   display: grid;
   place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.6rem;
+  width: var(--button-height-md);
+  height: var(--button-height-md);
+  border-radius: var(--radius-sm);
   color: var(--muted);
 }
 
@@ -148,13 +148,13 @@ html {
 .signout-btn {
   display: flex;
   width: auto;
-  padding-inline: 0.55rem;
+  padding-inline: var(--space-2);
 }
 
 .app-page {
   max-width: 1200px;
   margin-inline: auto;
-  padding: 1.5rem var(--page-gutter) 3rem;
+  padding: var(--space-6) var(--page-gutter) var(--space-12);
 }
 
 .app-page-narrow {
@@ -164,12 +164,12 @@ html {
 
 .page-head {
   position: relative;
-  z-index: 30;
+  z-index: var(--z-contextual-overlay);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem 1rem;
-  margin-bottom: 1rem;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .page-head-spacer {
@@ -177,20 +177,20 @@ html {
 }
 
 .page-title {
-  font-size: 1.5rem;
-  font-weight: 650;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: -0.035em;
   line-height: 1.15;
 }
 
 .popover {
   position: absolute;
-  z-index: 60;
+  z-index: var(--z-popover);
   min-width: 16rem;
-  margin-top: 0.5rem;
-  padding: 0.35rem;
+  margin-top: var(--space-2);
+  padding: var(--space-1);
   border: 1px solid var(--border-strong);
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   background: var(--popup-background);
   color: var(--popup-foreground);
   box-shadow: 0 12px 32px var(--shadow);
@@ -209,18 +209,18 @@ html {
 .popover-row {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .popover-item {
   display: flex;
   width: 100%;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 0.65rem;
-  border-radius: 0.5rem;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
   color: var(--muted);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   text-align: left;
 }
 
@@ -236,8 +236,8 @@ html {
 }
 
 .popover-trash {
-  padding: 0.5rem;
-  border-radius: 0.5rem;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
   color: var(--muted);
   opacity: 0;
 }
@@ -249,16 +249,16 @@ html {
 
 .popover-sep {
   height: 1px;
-  margin: 0.35rem 0;
+  margin: var(--space-1) 0;
   background: var(--border);
 }
 
 .sheet-switcher {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.25rem 0.5rem 0.25rem 0;
-  border-radius: 0.6rem;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2) var(--space-1) 0;
+  border-radius: var(--radius-sm);
 }
 
 /* header-tooltip-below */

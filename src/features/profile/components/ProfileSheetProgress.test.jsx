@@ -30,6 +30,8 @@ describe("ProfileSheetProgress", () => {
       "Reset all progress",
     ]);
     expect(buttons.every((button) => button.querySelectorAll("svg").length === 1)).toBe(true);
+    expect(buttons[0].querySelector("svg").classList.contains("lucide-upload")).toBe(true);
+    expect(buttons[1].querySelector("svg").classList.contains("lucide-download")).toBe(true);
     expect(
       [...document.body.querySelectorAll('[role="tooltip"]')].map((tooltip) => tooltip.textContent),
     ).toEqual(["Export progress", "Import progress", "Restore DSA", "Reset all progress"]);

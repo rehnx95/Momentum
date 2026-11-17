@@ -1,9 +1,9 @@
-@media (max-width: 760px) {
+@screen mobile {
   .auth-layout {
     width: min(100%, 38rem);
     grid-template-columns: minmax(0, 1fr);
-    gap: 1.75rem;
-    padding: 2rem clamp(0.75rem, 5vw, 2rem);
+    gap: var(--space-7);
+    padding: var(--space-8) clamp(var(--space-3), 5vw, var(--space-8));
   }
 
   .auth-showcase {
@@ -11,12 +11,12 @@
   }
 
   .auth-showcase-copy {
-    margin-top: 2rem;
+    margin-top: var(--space-8);
   }
 
   .auth-showcase-copy h1 {
     max-width: 12ch;
-    font-size: clamp(2.4rem, 11vw, 4.5rem);
+    font-size: var(--font-size-display);
   }
 
   .auth-showcase-copy p {
@@ -34,22 +34,22 @@
   }
 
   .auth-panel {
-    padding: clamp(1.25rem, 5vw, 2rem);
+    padding: clamp(var(--space-5), 5vw, var(--space-8));
   }
 }
 
 @media (max-width: 420px) {
   .auth-layout {
-    gap: 1.25rem;
-    padding: 1.25rem 0.75rem;
+    gap: var(--space-5);
+    padding: var(--space-5) var(--space-3);
   }
 
   .auth-showcase-copy {
-    margin-top: 1.25rem;
+    margin-top: var(--space-5);
   }
 
   .auth-showcase-copy h1 {
-    font-size: clamp(2.1rem, 10vw, 2.8rem);
+    font-size: var(--font-size-display);
   }
 
   .auth-preview-footer {

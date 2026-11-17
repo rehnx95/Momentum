@@ -24,7 +24,7 @@
 @media (min-width: 1024px) {
   .profile-layout.own-profile-layout {
     grid-template-columns: minmax(16rem, 21rem) minmax(0, 1fr);
-    column-gap: 1rem;
+    column-gap: var(--space-4);
   }
 
   .own-profile-layout .profile-left-column {
@@ -35,7 +35,7 @@
     display: grid;
     width: min(21rem, calc(100vw - 43rem));
     align-content: start;
-    gap: 0.75rem;
+    gap: var(--space-3);
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -64,7 +64,7 @@
 
   .own-profile-layout .profile-hero {
     grid-template-columns: 2.75rem minmax(0, 1fr) auto;
-    padding: 0.75rem;
+    padding: var(--space-3);
   }
 
   .own-profile-layout .profile-avatar {
@@ -72,7 +72,7 @@
     grid-row: 1;
     width: 2.75rem;
     height: 2.75rem;
-    font-size: 1.15rem;
+    font-size: var(--font-size-lg);
   }
 
   .own-profile-layout .profile-user-details {
@@ -86,12 +86,12 @@
   }
 
   .own-profile-layout .profile-identity h1 {
-    font-size: 0.95rem;
+    font-size: var(--font-size-base);
   }
 
   .own-profile-layout .profile-identity p {
-    margin-top: 0.1rem;
-    font-size: 0.65rem;
+    margin-top: var(--space-1);
+    font-size: var(--font-size-xs);
     line-height: 1.25;
   }
 
@@ -99,22 +99,22 @@
     grid-column: 3;
     grid-row: 1;
     justify-self: end;
-    gap: 0.35rem;
+    gap: var(--space-1);
   }
 
   .own-profile-layout .profile-hero-actions .btn-secondary {
-    width: 1.8rem;
-    min-width: 1.8rem;
-    height: 1.8rem;
-    min-height: 1.8rem;
+    width: var(--button-height-sm);
+    min-width: var(--button-height-sm);
+    height: var(--button-height-sm);
+    min-height: var(--button-height-sm);
   }
 
   .own-profile-layout .profile-overview-stats {
     grid-column: 1 / -1;
     grid-row: 2;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.6rem 0.75rem;
-    padding: 0.25rem 0 0;
+    gap: var(--space-2) var(--space-3);
+    padding: var(--space-1) 0 0;
   }
 }
 
@@ -126,13 +126,13 @@
 
 @media (max-width: 520px) {
   .own-profile-layout .profile-hero {
-    padding: 0.7rem;
+    padding: var(--space-3);
   }
 
   .recent-ac-item,
   .recent-ac-columns {
     grid-template-columns: var(--recent-ac-grid-columns);
-    gap: 0.35rem 0.55rem;
+    gap: var(--space-1) var(--space-2);
   }
 
   .recent-ac-card {
@@ -183,7 +183,7 @@
   }
 
   .own-profile-layout .profile-progress-actions .btn-secondary {
-    padding-inline: 0.4rem;
-    font-size: 0.62rem;
+    padding-inline: var(--space-2);
+    font-size: var(--font-size-xs);
   }
 }

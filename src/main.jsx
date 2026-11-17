@@ -72,7 +72,7 @@ class AppErrorBoundary extends React.Component {
       return (
         <main className="app-error-screen flex min-h-screen items-center justify-center px-6">
           <section className="max-w-md text-center">
-            <h1 className="text-2xl font-bold">The app could not load</h1>
+            <h1 className="text-xl font-semibold">The app could not load</h1>
             <p className="mt-3 text-sm text-muted">
               Reload the page to try again. If this keeps happening, contact support and include the
               browser console error.

@@ -186,7 +186,7 @@ export default function AuthenticatedScreens({ context }) {
     return (
       <>
         <div
-          className="dashboard-shell daily-log-page-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300"
+          className="dashboard-shell daily-log-page-shell min-h-screen bg-page text-text font-sans transition-colors duration-300"
           data-theme={theme === "dark" ? undefined : theme}
         >
           <AppHeader active="daily-log" {...headerProps} />

@@ -46,10 +46,10 @@ describe("ProblemRow", () => {
     expect(skipButton.querySelector("svg")).not.toBeNull();
     expect(tooltipLabels).toEqual(["Open on LeetCode", "Skip"]);
     expect(tooltips.every((tooltip) => tooltip.parentElement === document.body)).toBe(true);
-    expect(tooltips.every((tooltip) => tooltip.classList.contains("fixed"))).toBe(true);
-    expect(tooltips.every((tooltip) => tooltip.style.transform === "translate(-50%, -100%)")).toBe(
-      true,
-    );
+    expect(tooltips.every((tooltip) => tooltip.classList.contains("app-tooltip"))).toBe(true);
+    expect(tooltips.every((tooltip) => tooltip.classList.contains("app-tooltip-portal"))).toBe(true);
+    expect(tooltips.every((tooltip) => tooltip.style.position === "fixed")).toBe(true);
+    expect(skipButton.getAttribute("aria-describedby")).toBe(tooltips[1].id);
     expect(link.hasAttribute("title")).toBe(false);
     expect(skipButton.hasAttribute("title")).toBe(false);
 

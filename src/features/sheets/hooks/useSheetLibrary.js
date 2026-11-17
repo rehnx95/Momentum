@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { readUserDataCache, writeUserDataCache } from "../../../shared/lib/userDataCache";
 import { supabase } from "../../../shared/lib/supabase";
 import { countSheetProblems, parseSheet, sampleSheetTemplate } from "../utils/parseSheet";
+import { getUploadedSheetTitle } from "../utils/sheetTitle";
 import { bootstrapBuiltInSheets, loadBuiltInSheet } from "../data/bootstrapBuiltInSheets";
 
 export default function useSheetLibrary(user, askConfirmation) {
@@ -10,7 +11,12 @@ export default function useSheetLibrary(user, askConfirmation) {
     () => !Array.isArray(cachedSheets),
   );
   const [customSheets, setCustomSheets] = useState(() =>
-    Array.isArray(cachedSheets) ? cachedSheets : [],
+    Array.isArray(cachedSheets)
+      ? cachedSheets.map((sheet) => ({
+          ...sheet,
+          title: getUploadedSheetTitle(sheet.sourceName) || sheet.title,
+        }))
+      : [],
   );
   const [uploadingSheet, setUploadingSheet] = useState(false);
   const [deletingSheetId, setDeletingSheetId] = useState(null);
@@ -80,7 +86,7 @@ export default function useSheetLibrary(user, askConfirmation) {
           id: `custom-${row.id}`,
           customId: row.id,
           builtinTemplateId: row.builtin_template_id,
-          title: row.title,
+          title: getUploadedSheetTitle(row.source_name) || row.title,
           sourceName: row.source_name,
           sheet: row.sheet_data,
           problemCount: countSheetProblems(row.sheet_data),
@@ -134,14 +140,12 @@ export default function useSheetLibrary(user, askConfirmation) {
         throw new Error("The TXT file must be smaller than 2 MB.");
       }
       const sheetData = parseSheet(await file.text());
-      const fileBaseName = file.name.replace(/\.txt$/i, "").trim();
-      const title = fileBaseName
-        .replace(/[_-]+/g, " ")
-        .replace(/\s+/g, " ")
-        .replace(/\b\w/g, (character) => character.toUpperCase())
-        .slice(0, 80);
+      const title = getUploadedSheetTitle(file.name);
       if (!title) {
         throw new Error("The file needs a name to use as its sheet title.");
+      }
+      if (title.length > 80) {
+        throw new Error("Sheet names must be 80 characters or fewer.");
       }
 
       const { data: savedSheet, error } = await supabase

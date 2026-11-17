@@ -1,6 +1,6 @@
 @media (max-width: 520px) {
   .sleep-study-card {
-    padding: 0.75rem;
+    padding: var(--space-3);
   }
 
   .sleep-study-range-desktop {
@@ -17,20 +17,20 @@
 
   .sleep-study-tab {
     flex: 1 1 auto;
-    padding-inline: 0.55rem;
+    padding-inline: var(--space-2);
   }
 
   .sleep-study-tabs {
     width: 100%;
-    gap: 0.25rem;
+    gap: var(--space-1);
   }
 
   .sleep-study-tabpanel {
-    padding-inline: 0.35rem;
+    padding-inline: var(--space-1);
   }
 
   .sleep-study-chart text {
-    font-size: 10px;
+    font-size: var(--font-size-xs);
   }
 
   .sleep-study-message {

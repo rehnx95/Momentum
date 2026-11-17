@@ -13,52 +13,49 @@ export default function SheetSwitcherMenu({
 }) {
   return (
     <div className="popover sheet-switcher-menu left-0 top-full" role="menu">
-      {sheets.map((sheet) => {
-        const title = sheet.title === "Dsa" ? "DSA" : sheet.title;
-        return (
-          <div key={sheet.id} className="popover-row">
-            <button
-              type="button"
-              role="menuitem"
-              className="popover-item"
-              onClick={() => {
-                onSelect(sheet.id);
-                onClose();
+      {sheets.map((sheet) => (
+        <div key={sheet.id} className="popover-row">
+          <button
+            type="button"
+            role="menuitem"
+            className="popover-item"
+            onClick={() => {
+              onSelect(sheet.id);
+              onClose();
+            }}
+          >
+            <span className="w-4 shrink-0">
+              {selected?.id === sheet.id && <Check size={14} />}
+            </span>
+            <span
+              className="min-w-0 flex-1 truncate"
+              style={{
+                color: selected?.id === sheet.id ? "var(--text)" : undefined,
               }}
             >
-              <span className="w-4 shrink-0">
-                {selected?.id === sheet.id && <Check size={14} />}
-              </span>
-              <span
-                className="min-w-0 flex-1 truncate"
-                style={{
-                  color: selected?.id === sheet.id ? "var(--text)" : undefined,
-                }}
-              >
-                {title}
-              </span>
-              <span className="text-xs tabular-nums text-[#A1A1A1]">
-                {sheet.problemCount}{" "}
-                <span className="text-[10px] uppercase tracking-wide">problems</span>
-              </span>
+              {sheet.title}
+            </span>
+            <span className="text-xs tabular-nums text-muted">
+              {sheet.problemCount}{" "}
+              <span className="text-xs uppercase tracking-wide">problems</span>
+            </span>
+          </button>
+          {sheet.customId && (
+            <button
+              type="button"
+              className="popover-trash"
+              aria-label={`Permanently remove ${sheet.title}`}
+              disabled={deletingId !== null}
+              onClick={() => {
+                onClose();
+                onDelete(sheet);
+              }}
+            >
+              <Trash2 size={14} />
             </button>
-            {sheet.customId && (
-              <button
-                type="button"
-                className="popover-trash"
-                aria-label={`Permanently remove ${title}`}
-                disabled={deletingId !== null}
-                onClick={() => {
-                  onClose();
-                  onDelete(sheet);
-                }}
-              >
-                <Trash2 size={14} />
-              </button>
-            )}
-          </div>
-        );
-      })}
+          )}
+        </div>
+      ))}
       {sheets.length === 0 && (
         <p className="px-3 py-2 text-sm" style={{ color: "var(--muted)" }}>
           No sheets yet.

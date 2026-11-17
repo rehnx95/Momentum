@@ -140,15 +140,15 @@ describe("FullLog", () => {
     render(
       <FullLog
         daily={daily}
-        sheets={[{ id: "sheet-1", title: "Algorithms" }]}
+        sheets={[{ id: "sheet-1", title: "algorithms" }]}
         askConfirmation={vi.fn()}
       />,
     );
 
     fireEvent.click(screen.getByRole("combobox", { name: "Filter full log" }));
     const options = within(screen.getByRole("listbox", { name: "Filter full log" }));
-    expect(options.getByRole("option", { name: "Algorithms" })).toBeTruthy();
-    expect(options.queryByRole("option", { name: "algorithms" })).toBeNull();
+    expect(options.getByRole("option", { name: "algorithms" })).toBeTruthy();
+    expect(options.queryByRole("option", { name: "Algorithms" })).toBeNull();
   });
 
   it("shows the saved number of problems solved for each day", () => {

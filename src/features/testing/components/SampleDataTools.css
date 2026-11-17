@@ -2,17 +2,17 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .sample-data-tools button {
   display: grid;
-  width: 2rem;
-  min-height: 2rem;
+  width: var(--button-height-sm);
+  min-height: var(--button-height-sm);
   place-items: center;
   padding: 0;
   border: 1px solid var(--border-strong);
-  border-radius: 0.55rem;
+  border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--muted);
   cursor: pointer;
@@ -36,16 +36,16 @@
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
-  z-index: 60;
+  z-index: var(--z-popover);
   width: max-content;
   max-width: min(24rem, calc(100vw - 1rem));
-  padding: 0.6rem 0.75rem;
+  padding: var(--space-2) var(--space-3);
   border: 1px solid var(--border-strong);
-  border-radius: 0.65rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
   color: var(--text);
   box-shadow: 0 8px 24px var(--shadow);
-  font-size: 0.72rem;
+  font-size: var(--font-size-xs);
   line-height: 1.4;
   white-space: normal;
 }

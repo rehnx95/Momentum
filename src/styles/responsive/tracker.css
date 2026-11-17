@@ -17,8 +17,8 @@
 
   .signout-label {
     display: inline;
-    margin-left: 0.35rem;
-    font-size: 0.8rem;
+    margin-left: var(--space-1);
+    font-size: var(--font-size-sm);
   }
 }
 
@@ -59,7 +59,7 @@
 
 @media (max-width: 520px) {
   .stat-strip {
-    gap: 0.4rem;
+    gap: var(--space-2);
   }
 
   .stat-icon {
@@ -68,15 +68,15 @@
 
   .stat-chip {
     min-width: 0;
-    gap: 0.4rem;
-    padding: 0.6rem 0.55rem;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-2);
   }
 
   .stat-value {
-    font-size: 1.15rem;
+    font-size: var(--font-size-lg);
   }
 
   .stat-value small {
-    font-size: 0.65rem;
+    font-size: var(--font-size-xs);
   }
 }

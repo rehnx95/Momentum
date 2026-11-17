@@ -1,4 +1,6 @@
 import { Activity, Users } from "lucide-react";
+import { buildHeatmap } from "../../features/activity/utils/heatmap";
+import { getLocalDateKey } from "../utils/date";
 import "./AppLoadingFallback.css";
 
 const NAV = ["tracker", "daily-log", "people", "profile"];
@@ -334,6 +336,8 @@ function DailyLogSkeleton() {
 /* ---------- Profile (own and public) ---------- */
 
 function ProfileSkeleton({ isPublic }) {
+  const heat = buildHeatmap({ todayKey: getLocalDateKey() });
+
   return (
     <div className="sk-profile">
       <div className="sk-profile-left">
@@ -363,9 +367,9 @@ function ProfileSkeleton({ isPublic }) {
             <Bar className="sk-h-md" />
             {!isPublic && (
               <div className="sk-sheet-actions">
-                <Bar />
-                <Bar />
-                <Bar />
+                {times(4, (i) => (
+                  <Bar key={i} />
+                ))}
               </div>
             )}
           </div>
@@ -373,7 +377,11 @@ function ProfileSkeleton({ isPublic }) {
             <div className="sk-sheet-row" key={i}>
               <div className="sk-row-between">
                 <Bar className="sk-sheet-name" />
-                <Bar className="sk-sheet-counts" />
+                <div className="sk-sheet-counts">
+                  <Bar />
+                  <Bar />
+                  <Bar />
+                </div>
               </div>
               <Bar className="sk-progress sk-progress-md" />
             </div>
@@ -383,22 +391,40 @@ function ProfileSkeleton({ isPublic }) {
 
       <div className="sk-profile-main">
         <section className="sk-card sk-heat-card">
-          <div className="sk-row-between">
+          <div className="sk-heat-header">
             <Bar className="sk-heat-title" />
             <Bar className="sk-year" />
           </div>
-          <Bar className="sk-heat-months" />
-          <div className="sk-heat">
-            <div className="sk-heat-days" />
-            <div className="sk-heat-grid">
-              {times(53 * 7, (i) => (
-                <span className="sk-heat-cell" key={i} />
-              ))}
+          <div className="sk-heat-scroll">
+            <div className="sk-heat-inner" style={{ "--sk-weeks": heat.columns }}>
+              <div className="sk-heat-months">
+                {heat.labels.map((label, i) => (
+                  <span key={i}>{label && <Bar className="sk-heat-month-label" />}</span>
+                ))}
+              </div>
+              <div className="sk-heat">
+                <div className="sk-heat-days">
+                  {["", "Mon", "", "Wed", "", "Fri", ""].map((label, i) => (
+                    <span key={i}>{label && <Bar className="sk-heat-weekday" />}</span>
+                  ))}
+                </div>
+                <div className="sk-heat-grid">
+                  {heat.weeks.flatMap((week) =>
+                    week.map((day) => <Bar className="sk-heat-cell" key={day.key} />),
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-          <div className="sk-row-between">
-            <Bar className="sk-text-sm" />
-            <Bar className="sk-text-sm" />
+          <div className="sk-heat-foot">
+            <Bar className="sk-heat-summary" />
+            <div className="sk-heat-legend">
+              <Bar className="sk-heat-legend-label" />
+              {times(5, (i) => (
+                <Bar className="sk-heat-swatch" key={i} />
+              ))}
+              <Bar className="sk-heat-legend-label" />
+            </div>
           </div>
         </section>
 
@@ -409,6 +435,12 @@ function ProfileSkeleton({ isPublic }) {
               {!isPublic && <Bar className="sk-text-sm" />}
             </div>
             <Bar className="sk-count-box" />
+          </div>
+          <div className="sk-recent-columns">
+            <span />
+            <Bar className="sk-column-label" />
+            <Bar className="sk-column-label" />
+            <Bar className="sk-column-label" />
           </div>
           {times(8, (i) => (
             <div className="sk-ac-row" key={i}>

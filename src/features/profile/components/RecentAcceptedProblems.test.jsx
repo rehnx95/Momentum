@@ -14,7 +14,7 @@ describe("RecentAcceptedProblems", () => {
           {
             id: "problem-1",
             title: "Two Sum",
-            sheetTitle: "Dsa",
+            sheetTitle: "dsa",
             acceptedOn: "2026-11-16",
           },
         ]}
@@ -22,7 +22,7 @@ describe("RecentAcceptedProblems", () => {
     );
 
     expect(screen.getByText("Two Sum")).toBeTruthy();
-    expect(screen.getByText("DSA")).toBeTruthy();
+    expect(screen.getByText("dsa")).toBeTruthy();
     expect(screen.queryByRole("tooltip")).toBeNull();
   });
 });

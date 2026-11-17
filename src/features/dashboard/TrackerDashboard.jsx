@@ -87,9 +87,9 @@ function ProgressGauge({ done, total, skipped, centerLabel, ariaLabel, segments 
           </svg>
         </div>
         <div className="absolute inset-0">
-          <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5 whitespace-nowrap text-sm text-[var(--text)]">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 whitespace-nowrap text-sm text-[var(--text)]">
             <div className="tabular-nums">
-              <span className="text-[30px] font-semibold leading-[32px]">{done}</span>
+              <span className="text-3xl font-semibold leading-[32px]">{done}</span>
               <span>/{total}</span>
             </div>
             <div className="relative">
@@ -152,7 +152,7 @@ function DsaDifficultyProgress({ stats }) {
         return (
           <div
             key={name}
-            className="flex w-full flex-1 flex-col items-center justify-center gap-0.5 rounded-[0.55rem] border border-[var(--border)] bg-[#000000] text-center leading-tight"
+            className="flex w-full flex-1 flex-col items-center justify-center gap-1 rounded border border-[var(--border)] bg-page text-center leading-tight"
             role="group"
             aria-label={`${name}: ${done} solved out of ${total}`}
           >
@@ -215,7 +215,7 @@ function SheetStatusProgress({ done, todo }) {
       ].map(({ label, value, color }) => (
         <div
           key={label}
-          className="flex h-[44px] w-full flex-none flex-col items-center justify-center gap-0.5 rounded-[0.55rem] border border-[var(--border)] bg-[#000000] text-center leading-tight"
+          className="flex h-[44px] w-full flex-none flex-col items-center justify-center gap-1 rounded border border-[var(--border)] bg-page text-center leading-tight"
           role="group"
           aria-label={`${label}: ${value}`}
         >
@@ -288,7 +288,7 @@ export default function TrackerDashboard({ context }) {
   return (
     <>
       <div
-        className="dashboard-shell tracker-dashboard-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300"
+        className="dashboard-shell tracker-dashboard-shell min-h-screen bg-page text-text font-sans transition-colors duration-300"
         data-theme={theme === "light" ? "light" : undefined}
       >
         <AppHeader active="tracker" {...headerProps} />
@@ -296,14 +296,14 @@ export default function TrackerDashboard({ context }) {
           {progressError && (
             <div
               role="alert"
-              className="fixed bottom-4 right-4 z-[60] max-w-md rounded-lg border border-[#383838] bg-[#0A0A0A] p-4 text-sm text-[#A1A1A1] shadow-xl"
+              className="fixed bottom-4 right-4 z-[60] max-w-md rounded-lg border border-mid bg-panel p-4 text-sm text-muted shadow-xl"
             >
               <div className="flex items-start gap-3">
                 <p>{progressError}</p>
                 <button
                   onClick={() => setProgressError("")}
                   aria-label="Dismiss sync error"
-                  className="text-[#A1A1A1] hover:text-white"
+                  className="text-muted hover:text-text"
                 >
                   <X size={16} />
                 </button>
@@ -313,7 +313,7 @@ export default function TrackerDashboard({ context }) {
           {authError && (
             <div
               role="alert"
-              className="fixed bottom-4 right-4 z-[60] max-w-md rounded-lg border border-[#383838] bg-[#0A0A0A] p-4 text-sm text-[#A1A1A1] shadow-xl"
+              className="fixed bottom-4 right-4 z-[60] max-w-md rounded-lg border border-mid bg-panel p-4 text-sm text-muted shadow-xl"
             >
               <div className="flex items-start gap-3">
                 <p>{authError}</p>
@@ -332,26 +332,26 @@ export default function TrackerDashboard({ context }) {
                 onDelete={handleRemoveSheet}
                 deletingId={deletingSheetId}
               />
-              <span className="text-sm text-[#A1A1A1]">{totalProblems} problems</span>
+              <span className="text-sm text-muted tabular-nums">{totalProblems} problems</span>
               <span className="page-head-spacer" />
               <div className="relative w-full sm:w-72">
                 <Search
                   size={15}
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1A1]"
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
                 />
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   aria-label="Search problems"
                   placeholder="Search problems…"
-                  className="h-10 w-full rounded-lg border border-[#262626] bg-[#0A0A0A] pl-9 pr-9 text-sm text-[#EDEDED] placeholder-[#A1A1A1] outline-none transition-colors focus:border-[#EDEDED] focus:outline-none"
+                  className="h-10 w-full rounded-lg border border-subtle bg-panel pl-9 pr-9 text-sm text-text placeholder:text-muted outline-none transition-colors focus:border-accent focus:outline-none"
                 />
                 {search && (
                   <button
                     type="button"
                     onClick={() => setSearch("")}
                     aria-label="Clear problem search"
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A1A1A1] hover:text-white"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-text"
                   >
                     <X size={14} />
                   </button>
@@ -402,7 +402,7 @@ export default function TrackerDashboard({ context }) {
                   />
                 ))
               ) : (
-                <p className="py-10 text-center text-sm text-[#A1A1A1]">
+                <p className="py-10 text-center text-sm text-muted">
                   No problems match your current filters.
                 </p>
               )}
@@ -414,7 +414,7 @@ export default function TrackerDashboard({ context }) {
                 className={`mb-2 ${canResetSheetProgress ? "flex items-center justify-between" : ""}`}
               >
                 <h3
-                  className={`text-xs font-medium text-zinc-400 uppercase tracking-wide ${
+                  className={`text-xs font-medium text-muted uppercase tracking-wide ${
                     canResetSheetProgress ? "leading-5" : ""
                   }`}
                 >
@@ -467,11 +467,11 @@ export default function TrackerDashboard({ context }) {
                 <>
                   <div className="mb-2">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-[var(--text)] tabular-nums">
+                      <span className="text-3xl font-semibold text-[var(--text)] tabular-nums">
                         {totalProblems > 0 ? Math.round((doneCount / totalProblems) * 100) : 0}%
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-500 mt-1">
+                    <p className="text-xs text-muted mt-1">
                       {doneCount} / {totalProblems} problems solved
                     </p>
                   </div>
@@ -488,26 +488,26 @@ export default function TrackerDashboard({ context }) {
                   <div className="mt-2 pt-2 border-t border-[var(--border)]">
                     <div className="grid grid-cols-3 gap-2 mb-2">
                       <div className="text-center">
-                        <div className="text-lg font-bold text-[var(--text)] tabular-nums">
+                        <div className="text-lg font-semibold text-[var(--text)] tabular-nums">
                           {doneCount}
                         </div>
-                        <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
+                        <div className="text-xs text-muted uppercase tracking-wide">
                           Done
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-bold text-[var(--muted)] tabular-nums">
+                        <div className="text-lg font-semibold text-[var(--muted)] tabular-nums">
                           {skippedCount}
                         </div>
-                        <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
+                        <div className="text-xs text-muted uppercase tracking-wide">
                           Skipped
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-bold text-[var(--text)] tabular-nums">
+                        <div className="text-lg font-semibold text-[var(--text)] tabular-nums">
                           {todoCount}
                         </div>
-                        <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
+                        <div className="text-xs text-muted uppercase tracking-wide">
                           To Do
                         </div>
                       </div>
@@ -520,7 +520,7 @@ export default function TrackerDashboard({ context }) {
                         );
                         if (confirmed) await reset(sheetProblems.map((problem) => problem.id));
                       }}
-                      className="w-full border border-[var(--border)] text-xs py-1.5 bg-[var(--surface-hover)] hover:bg-[var(--surface-raised)] text-[var(--muted)] hover:text-[var(--text)] rounded-md transition-colors flex items-center justify-center gap-1"
+                      className="w-full border border-[var(--border)] text-xs py-2 bg-[var(--surface-hover)] hover:bg-[var(--surface-raised)] text-[var(--muted)] hover:text-[var(--text)] rounded-md transition-colors flex items-center justify-center gap-1"
                     >
                       <RefreshCcw size={12} /> Reset This Sheet
                     </button>

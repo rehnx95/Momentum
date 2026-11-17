@@ -1,14 +1,14 @@
 .daily-warnings,
 .daily-errors {
-  margin: 0.75rem 0 0;
-  padding-left: 1.2rem;
-  font-size: 0.75rem;
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-5);
+  font-size: var(--font-size-xs);
 }
 
 .daily-empty-state {
-  margin: 0.3rem 0;
+  margin: var(--space-1) 0;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .daily-warnings {
@@ -22,17 +22,17 @@
 .daily-save-status {
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin-top: 0.4rem;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .daily-save-status-copy {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.25rem 0.65rem;
+  gap: var(--space-1) var(--space-3);
   min-width: 0;
 }
 
@@ -45,11 +45,11 @@
 }
 
 .daily-save-status button {
-  padding: 0.3rem 0.6rem;
+  padding: var(--space-1) var(--space-2);
   border: 1px solid var(--border-strong);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-sm);
   color: var(--text);
-  font-weight: 700;
+  font-weight: var(--font-weight-semibold);
 }
 
 .daily-save-status button:hover {

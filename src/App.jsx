@@ -103,7 +103,7 @@ function App() {
             <button
               type="button"
               onClick={retryAuthentication}
-              className="flex-shrink-0 rounded-md px-3 py-1.5 font-semibold"
+              className="flex-shrink-0 rounded-md px-3 py-2 font-semibold"
               style={{ backgroundColor: "var(--accent)", color: "var(--page)" }}
             >
               Retry

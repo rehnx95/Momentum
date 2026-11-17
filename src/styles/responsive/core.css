@@ -50,9 +50,7 @@ textarea {
   .app-tooltip {
     right: 0;
     left: auto;
-    max-width: calc(100vw - 1rem);
     transform: translateY(-0.15rem);
-    white-space: normal;
   }
 
   .app-tooltip-anchor:hover .app-tooltip,
@@ -62,12 +60,12 @@ textarea {
 
   .app-header-inner {
     grid-template-columns: minmax(0, 1fr) auto auto;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .app-header .momentum-brand {
     min-width: 0;
-    gap: 0.45rem;
+    gap: var(--space-2);
   }
 
   .app-header .momentum-brand-copy,
@@ -79,14 +77,14 @@ textarea {
   }
 
   .app-nav {
-    gap: 0.15rem;
+    gap: var(--space-1);
   }
 
   .app-nav button {
     flex-basis: 5.25rem;
-    gap: 0.3rem;
-    padding-inline: 0.25rem;
-    font-size: 0.78rem;
+    gap: var(--space-1);
+    padding-inline: var(--space-1);
+    font-size: var(--font-size-sm);
   }
 
   .app-header .signout-label {
@@ -101,14 +99,13 @@ textarea {
   }
 }
 
-@media (max-width: 767px) {
+@screen mobile {
   .app-tooltip {
     top: auto;
     right: 0;
     bottom: calc(100% + 0.4rem);
     left: auto;
     transform: translateY(0.15rem);
-    white-space: normal;
   }
 
   .app-tooltip-anchor:active .app-tooltip,
@@ -124,20 +121,15 @@ textarea {
 
   .app-header-inner {
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 0.5rem;
+    gap: var(--space-2);
     padding-inline: var(--page-gutter);
-  }
-
-  .app-header .momentum-brand {
-    min-width: 0;
-    gap: 0.45rem;
   }
 
   .app-header .momentum-brand-logo {
     width: 2.15rem;
     height: 2.15rem;
     flex-basis: 2.15rem;
-    border-radius: 0.65rem;
+    border-radius: var(--radius-md);
   }
 
   .app-header .momentum-brand-logo svg {
@@ -154,22 +146,22 @@ textarea {
   .app-header .momentum-brand-name {
     overflow: hidden;
     max-width: 100%;
-    font-size: 1.05rem;
+    font-size: var(--font-size-lg);
     letter-spacing: -0.025em;
     text-overflow: ellipsis;
   }
 
   .app-header-actions {
-    gap: 0.1rem;
+    gap: var(--space-1);
   }
 
   .app-nav {
     position: fixed;
     inset: auto 0 0;
-    z-index: 50;
+    z-index: var(--z-app-chrome);
     justify-content: space-around;
-    gap: 0.1rem;
-    padding: 0.35rem 0.4rem calc(0.35rem + env(safe-area-inset-bottom));
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border);
     background: var(--page-overlay);
     backdrop-filter: blur(12px);
@@ -178,17 +170,17 @@ textarea {
   .app-nav button {
     flex: 1 1 0;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: var(--space-1);
     min-width: 0;
     min-height: 2.75rem;
     height: auto;
-    padding: 0.35rem 0.15rem;
-    font-size: 0.68rem;
+    padding: var(--space-1) var(--space-1);
+    font-size: var(--font-size-xs);
   }
 
   .dashboard-shell,
   .profile-shell {
-    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--space-17) + env(safe-area-inset-bottom));
   }
 }
 
@@ -219,9 +211,9 @@ textarea {
     flex: 1 1 0;
     justify-content: center;
     min-width: 0;
-    height: 2.5rem;
-    padding-inline: 0.25rem;
-    font-size: 0.68rem;
+    height: var(--button-height-lg);
+    padding-inline: var(--space-1);
+    font-size: var(--font-size-xs);
   }
 
   .dashboard-shell > main.app-page,
@@ -233,7 +225,7 @@ textarea {
 
 @media (max-width: 420px) {
   html {
-    font-size: 16px;
+    font-size: var(--font-size-base);
   }
 
   .app-dialog-actions {

@@ -34,6 +34,11 @@ describe("TrendsView", () => {
               slots: [{ start: "10:00", end: "11:00" }],
             },
             {
+              id: "dsa-activity",
+              name: "dsa",
+              slots: [{ start: "11:00", end: "12:00" }],
+            },
+            {
               id: "writing",
               name: "Writing",
               slots: [{ start: "", end: "" }],
@@ -57,6 +62,7 @@ describe("TrendsView", () => {
     expect(chartOptions.getByRole("option", { name: "Sleep + Active" })).toBeTruthy();
     expect(chartOptions.getByRole("option", { name: "Reading" })).toBeTruthy();
     expect(chartOptions.getByRole("option", { name: "DSA Sheet" })).toBeTruthy();
+    expect(chartOptions.getByRole("option", { name: "dsa" })).toBeTruthy();
     expect(chartOptions.queryByRole("option", { name: "Writing" })).toBeNull();
     fireEvent.click(chartOptions.getByRole("option", { name: "Sleep" }));
     expect(
@@ -64,6 +70,9 @@ describe("TrendsView", () => {
     ).toBeTruthy();
     expect(
       screen.getByText("DSA Sheet", { selector: ".trends-time-label span:last-child" }),
+    ).toBeTruthy();
+    expect(
+      screen.getByText("dsa", { selector: ".trends-time-label span:last-child" }),
     ).toBeTruthy();
 
     expect(screen.getByRole("img", { name: /Sleep hours over the last 30 days/ })).toBeTruthy();
@@ -73,7 +82,7 @@ describe("TrendsView", () => {
     };
     chooseChart("Active");
     expect(screen.getByRole("img", { name: /Active hours over the last 30 days/ })).toBeTruthy();
-    expect(container.querySelector(".study-average").getAttribute("data-average")).toBe("120");
+    expect(container.querySelector(".study-average").getAttribute("data-average")).toBe("180");
     expect(
       screen.queryByText("Active", { selector: ".sleep-study-legend span" }),
     ).toBeNull();

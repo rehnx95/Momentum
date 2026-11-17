@@ -17,11 +17,11 @@ export default function ProfileSheetProgress({
 
   return (
     <section
-      className="profile-sheet-progress surface-card rounded-2xl border border-[#262626] bg-[#0A0A0A] p-6"
+      className="profile-sheet-progress surface-card rounded-2xl border border-subtle bg-panel p-6"
       aria-labelledby={headingId}
     >
       <header className="profile-progress-heading">
-        <h2 id={headingId} className="text-lg font-semibold text-[#EDEDED]">
+        <h2 id={headingId} className="text-lg font-semibold text-text">
           Sheet progress
         </h2>
         {showActions && (
@@ -34,7 +34,7 @@ export default function ProfileSheetProgress({
                   onClick={onExport}
                   aria-label="Export progress"
                 >
-                  <Download size={14} aria-hidden="true" />
+                  <Upload size={14} aria-hidden="true" />
                 </button>
               </Tooltip>
             )}
@@ -46,7 +46,7 @@ export default function ProfileSheetProgress({
                   onClick={onImport}
                   aria-label="Import progress"
                 >
-                  <Upload size={14} aria-hidden="true" />
+                  <Download size={14} aria-hidden="true" />
                 </button>
               </Tooltip>
             )}
@@ -84,7 +84,7 @@ export default function ProfileSheetProgress({
           return (
             <div className="profile-sheet-tile" key={sheet.id}>
               <div className="profile-sheet-tile-heading">
-                <span className="truncate font-medium text-[#EDEDED]">{sheet.title}</span>
+                <span className="truncate font-medium text-text">{sheet.title}</span>
                 <span className="profile-sheet-counts profile-sheet-count-breakdown">
                   <span>
                     {sheet.solved} / {sheet.total}

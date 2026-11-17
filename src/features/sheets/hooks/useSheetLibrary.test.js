@@ -90,7 +90,7 @@ describe("useSheetLibrary DSA restore", () => {
       { persist: false },
     );
     expect(library.selectedSheet.id).toBe("custom-restored-dsa-id");
-    expect(library.availableSheets.map((sheet) => sheet.title)).toEqual(["DSA", "Personal"]);
+    expect(library.availableSheets.map((sheet) => sheet.title)).toEqual(["DSA", "personal"]);
     expect(library.restoringDsaSheet).toBe(false);
 
     act(() => renderer.unmount());

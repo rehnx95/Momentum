@@ -83,7 +83,7 @@ describe("TrackerDashboard DSA progress gauge", () => {
     expect(screen.getByRole("group", { name: "Hard: 0 solved out of 1" })).toBeTruthy();
     for (const name of ["Easy", "Medium", "Hard"]) {
       const tileClassName = screen.getByRole("group", { name: new RegExp(`^${name}:`) }).className;
-      expect(tileClassName).toContain("bg-[#000000]");
+      expect(tileClassName).toContain("bg-page");
       expect(tileClassName).toContain("border-[var(--border)]");
     }
     const dsaGauge = screen.getByRole("img", { name: "1 of 4 problems solved, 2 skipped" });
@@ -173,8 +173,8 @@ describe("TrackerDashboard DSA progress gauge", () => {
     expect(doneTile.parentElement.className).toContain("justify-start");
     expect(doneTile.className).toContain("h-[44px]");
     expect(todoTile.className).toContain("h-[44px]");
-    expect(doneTile.className).toContain("bg-[#000000]");
-    expect(todoTile.className).toContain("bg-[#000000]");
+    expect(doneTile.className).toContain("bg-page");
+    expect(todoTile.className).toContain("bg-page");
     expect(doneTile.className).toContain("border-[var(--border)]");
     expect(todoTile.className).toContain("border-[var(--border)]");
     expect(screen.getByText(/Skipped/)).toBeTruthy();

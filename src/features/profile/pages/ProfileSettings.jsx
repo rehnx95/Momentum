@@ -193,7 +193,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
                   maxLength={field.maxLength}
                   value={form[field.name]}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-border-strong bg-page px-3 py-2.5 text-text placeholder:text-muted outline-none transition-colors focus:border-accent focus:outline-none"
+                  className="w-full rounded-lg border border-border-strong bg-page px-3 py-3 text-text placeholder:text-muted outline-none transition-colors focus:border-accent focus:outline-none"
                 />
                 {field.name === "username" && (
                   <div className="mt-1 space-y-1">
@@ -233,7 +233,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
             <button
               type="submit"
               disabled={isSaving}
-              className="w-full rounded-lg bg-accent px-4 py-2.5 font-medium text-page transition-colors hover:bg-accent-hover disabled:cursor-wait disabled:opacity-60"
+              className="w-full rounded-lg bg-accent px-4 py-3 font-medium text-page transition-colors hover:bg-accent-hover disabled:cursor-wait disabled:opacity-60"
             >
               {isSaving ? "Saving…" : "Save changes"}
             </button>

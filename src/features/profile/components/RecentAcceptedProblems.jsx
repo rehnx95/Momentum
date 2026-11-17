@@ -24,7 +24,7 @@ export default function RecentAcceptedProblems({ problems }) {
                 </div>
                 <p className="recent-ac-title recent-ac-problem">{problem.title}</p>
                 <span className="recent-ac-topic recent-ac-sheet">
-                  {problem.sheetTitle === "Dsa" ? "DSA" : problem.sheetTitle}
+                  {problem.sheetTitle}
                 </span>
                 {problem.acceptedOn ? (
                   <time className="recent-ac-date" dateTime={problem.acceptedOn}>
