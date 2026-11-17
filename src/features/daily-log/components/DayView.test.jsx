@@ -148,6 +148,30 @@ describe("DayView activity entry", () => {
     expect(screen.getByRole("group", { name: "Reading color" })).toBeTruthy();
   });
 
+  it("keeps an empty slot when a touch scroll starts outside the activity", () => {
+    const task = { id: "reading-1", name: "Reading", slots: [{ start: "", end: "" }] };
+    const daily = createDaily([task]);
+    const { container } = render(
+      <DayView daily={daily} sheets={[]} askConfirmation={vi.fn()} />,
+    );
+
+    fireEvent.pointerDown(document.body, { pointerType: "touch" });
+
+    expect(daily.discardEmptySlot).not.toHaveBeenCalled();
+    expect(container.querySelector(".daily-slot-row")).toBeTruthy();
+    expect(screen.getByText("Reading", { selector: ".activity-card-name" })).toBeTruthy();
+  });
+
+  it("discards an empty slot after an actual outside click", () => {
+    const task = { id: "reading-1", name: "Reading", slots: [{ start: "", end: "" }] };
+    const daily = createDaily([task]);
+    render(<DayView daily={daily} sheets={[]} askConfirmation={vi.fn()} />);
+
+    fireEvent.click(document.body);
+
+    expect(daily.discardEmptySlot).toHaveBeenCalledWith("reading-1", 0);
+  });
+
   it("closes the activity color picker on an outside pointer press", () => {
     const task = {
       id: "reading-1",

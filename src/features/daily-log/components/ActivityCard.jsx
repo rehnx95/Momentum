@@ -98,8 +98,8 @@ export default function ActivityCard({
       });
     };
 
-    document.addEventListener("pointerdown", discardUnfilledSlots);
-    return () => document.removeEventListener("pointerdown", discardUnfilledSlots);
+    document.addEventListener("click", discardUnfilledSlots);
+    return () => document.removeEventListener("click", discardUnfilledSlots);
   }, [onDiscardEmptySlot, slots]);
 
   const addSlot = () => {
