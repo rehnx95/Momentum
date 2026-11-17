@@ -311,7 +311,18 @@ export function useProgress(user) {
 
       if (Array.isArray(problemIds)) {
         const idsToReset = [...new Set(problemIds)].filter((id) => progressRef.current[id]);
-        if (idsToReset.length === 0) return;
+        if (idsToReset.length === 0) {
+          if (!persist) {
+            cacheProgress(
+              user.id,
+              progressRef.current,
+              activityRef.current,
+              completedOnRef.current,
+              completedAtRef.current,
+            );
+          }
+          return;
+        }
 
         const nextProgress = { ...progressRef.current };
         const nextCompletedOn = { ...completedOnRef.current };
@@ -340,7 +351,10 @@ export function useProgress(user) {
         replaceCompletedAt(nextCompletedAt);
         if (changedDates.length > 0) replaceActivity(nextActivity);
 
-        if (!persist) return;
+        if (!persist) {
+          cacheProgress(user.id, nextProgress, nextActivity, nextCompletedOn, nextCompletedAt);
+          return;
+        }
 
         await save(async () => {
           const { error: progressError } = await supabase
@@ -366,7 +380,15 @@ export function useProgress(user) {
         if (progressError) throw progressError;
       });
     },
-    [user, replaceActivity, replaceCompletedAt, replaceCompletedOn, replaceProgress, save],
+    [
+      user,
+      cacheProgress,
+      replaceActivity,
+      replaceCompletedAt,
+      replaceCompletedOn,
+      replaceProgress,
+      save,
+    ],
   );
 
   return {

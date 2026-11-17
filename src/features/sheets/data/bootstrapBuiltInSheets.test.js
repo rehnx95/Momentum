@@ -7,7 +7,7 @@ vi.mock("../../../shared/lib/supabase", () => ({
 }));
 
 import { supabase } from "../../../shared/lib/supabase";
-import { bootstrapBuiltInSheets } from "./bootstrapBuiltInSheets";
+import { bootstrapBuiltInSheets, loadBuiltInSheet } from "./bootstrapBuiltInSheets";
 
 describe("bootstrapBuiltInSheets", () => {
   beforeEach(() => {
@@ -31,5 +31,13 @@ describe("bootstrapBuiltInSheets", () => {
     const ensuredSheets = vi.mocked(supabase.rpc).mock.calls[0][1].requested_sheets;
     const synchronizedSheets = vi.mocked(supabase.rpc).mock.calls[1][1].requested_sheets;
     expect(synchronizedSheets).toEqual(ensuredSheets);
+  });
+
+  it("loads the canonical DSA template for restoration", async () => {
+    const sheet = await loadBuiltInSheet("dsa");
+
+    expect(sheet.id).toBe("dsa");
+    expect(sheet.title).toBe("DSA");
+    expect(sheet.sheet.steps.length).toBeGreaterThan(0);
   });
 });

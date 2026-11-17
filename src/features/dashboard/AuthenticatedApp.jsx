@@ -27,10 +27,10 @@ export default function AuthenticatedApp({
     setDialog({ type: "notice", title, message });
   }, []);
   const askConfirmation = useCallback(
-    (message, title = "Are you sure?") =>
+    (message, title = "Are you sure?", options = {}) =>
       new Promise((resolve) => {
         dialogResolver.current = resolve;
-        setDialog({ type: "confirm", title, message });
+        setDialog({ type: "confirm", title, message, ...options });
       }),
     [],
   );
@@ -44,17 +44,21 @@ export default function AuthenticatedApp({
     availableSheets,
     selectedSheet,
     setSelectedSheetId,
+    customSheetsLoading,
     uploadingSheet,
     deletingSheetId,
+    restoringDsaSheet,
     sheetError,
     uploadSheetInput,
     data,
     handleUploadSheet,
     handleRemoveSheet: removeSheet,
+    restoreDsaSheet: restoreSheet,
     downloadSampleFormat,
   } = useSheetLibrary(user, askConfirmation);
   const {
     progress,
+    loading: progressLoading,
     activityLog,
     completedOn,
     completedAt,
@@ -109,6 +113,7 @@ export default function AuthenticatedApp({
     enabled: !dailyLogPage && !peopleSearchPage && !selectedPublicUsername && !showProfile,
   });
   const handleRemoveSheet = (sheet) => removeSheet(sheet, reset);
+  const restoreDsaSheet = () => restoreSheet(reset);
   const [todayDateKey, setTodayDateKey] = useState(() => getLocalDateKey(new Date()));
   const {
     clearSearch,
@@ -266,6 +271,10 @@ export default function AuthenticatedApp({
     recentAccepted,
     renderDialog,
     reset,
+    restoreDsaSheet,
+    restoringDsaSheet,
+    customSheetsLoading,
+    progressLoading,
     returnFromPublicProfile,
     search,
     selectedPublicUsername,

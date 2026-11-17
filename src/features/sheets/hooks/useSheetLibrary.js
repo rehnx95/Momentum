@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { readUserDataCache, writeUserDataCache } from "../../../shared/lib/userDataCache";
 import { supabase } from "../../../shared/lib/supabase";
 import { countSheetProblems, parseSheet, sampleSheetTemplate } from "../utils/parseSheet";
-import { bootstrapBuiltInSheets } from "../data/bootstrapBuiltInSheets";
+import { bootstrapBuiltInSheets, loadBuiltInSheet } from "../data/bootstrapBuiltInSheets";
 
 export default function useSheetLibrary(user, askConfirmation) {
   const [cachedSheets] = useState(() => readUserDataCache(user.id, "sheets"));
@@ -14,6 +14,7 @@ export default function useSheetLibrary(user, askConfirmation) {
   );
   const [uploadingSheet, setUploadingSheet] = useState(false);
   const [deletingSheetId, setDeletingSheetId] = useState(null);
+  const [restoringDsaSheet, setRestoringDsaSheet] = useState(false);
   const [sheetError, setSheetError] = useState("");
   const uploadSheetInput = useRef(null);
   const savedSheetIdRef = useRef(null);
@@ -226,6 +227,57 @@ export default function useSheetLibrary(user, askConfirmation) {
     }
   };
 
+  const restoreDsaSheet = async (resetProgress) => {
+    if (customSheetsLoading) {
+      throw new Error("Wait for your sheets to finish loading before restoring DSA.");
+    }
+    if (typeof resetProgress !== "function") {
+      throw new Error("Progress reset is unavailable. Please reload and try again.");
+    }
+
+    setRestoringDsaSheet(true);
+    try {
+      const template = await loadBuiltInSheet("dsa");
+      const { data: restored, error } = await supabase.rpc("restore_builtin_dsa_sheet", {
+        requested_sheet: {
+          id: template.id,
+          title: template.title,
+          sheet_data: template.sheet,
+        },
+      });
+      if (error) throw error;
+      if (!restored || typeof restored.id !== "string") {
+        throw new Error("The restored DSA sheet could not be loaded.");
+      }
+
+      const nextSheet = {
+        id: `custom-${restored.id}`,
+        customId: restored.id,
+        builtinTemplateId: "dsa",
+        title: template.title,
+        sourceName: "builtin:dsa",
+        sheet: template.sheet,
+        problemCount: countSheetProblems(template.sheet),
+      };
+      const problemIds = template.sheet.steps.flatMap((step) =>
+        step.subsections.flatMap((subsection) =>
+          subsection.problems.flatMap((problem) => [problem.id, `${nextSheet.id}::${problem.id}`]),
+        ),
+      );
+      await resetProgress(problemIds, { persist: false });
+      setCustomSheets((current) => [
+        ...current.filter((sheet) => sheet.builtinTemplateId !== "dsa"),
+        nextSheet,
+      ]);
+      setSelectedSheetId(nextSheet.id);
+    } catch (error) {
+      console.error("Failed to restore DSA sheet:", error);
+      throw error;
+    } finally {
+      setRestoringDsaSheet(false);
+    }
+  };
+
   const downloadSampleFormat = () => {
     const url = URL.createObjectURL(
       new Blob([sampleSheetTemplate], { type: "text/plain;charset=utf-8" }),
@@ -245,12 +297,14 @@ export default function useSheetLibrary(user, askConfirmation) {
     customSheetsLoading,
     uploadingSheet,
     deletingSheetId,
+    restoringDsaSheet,
     sheetError,
     setSheetError,
     uploadSheetInput,
     data,
     handleUploadSheet,
     handleRemoveSheet,
+    restoreDsaSheet,
     downloadSampleFormat,
   };
 }

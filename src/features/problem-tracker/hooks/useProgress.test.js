@@ -1,6 +1,7 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { writeUserDataCache } from "../../../shared/lib/userDataCache";
 import { useProgress } from "./useProgress";
 
 const fromMock = vi.hoisted(() => vi.fn());
@@ -170,5 +171,33 @@ describe("useProgress", () => {
     expect(progressUpsert).toHaveBeenCalledOnce();
     expect(activityWrite).not.toHaveBeenCalled();
     expect(fromMock).not.toHaveBeenCalledWith("activity_log");
+  });
+
+  it("caches local-only progress resets without changing other sheet progress", async () => {
+    let hookResult;
+    const user = { id: "user-1" };
+
+    function HookHarness() {
+      hookResult = useProgress(user);
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      await hookResult.reset(["problem-1"], { persist: false });
+    });
+
+    const cachedProgress = vi.mocked(writeUserDataCache).mock.lastCall[2];
+    expect(cachedProgress.progress).not.toHaveProperty("problem-1");
+    expect(cachedProgress.progress).toMatchObject({
+      "problem-2": "done",
+      "problem-3": "todo",
+    });
+    expect(cachedProgress.activityLog["2025-03-14"]).toBe(1);
   });
 });

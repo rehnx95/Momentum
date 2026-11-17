@@ -30,6 +30,10 @@ export default function ProfilePage({ context }) {
     publicProfileReturnPath,
     recentAccepted,
     reset,
+    restoreDsaSheet,
+    restoringDsaSheet,
+    customSheetsLoading,
+    progressLoading,
     setBackupAction,
     setOwnHeatmapYear,
     showNotice,
@@ -129,6 +133,29 @@ export default function ProfilePage({ context }) {
                 sheets={profileSheetStats}
                 onExport={() => setBackupAction("export")}
                 onImport={() => setBackupAction("import")}
+                onRestoreDsa={async () => {
+                  const confirmed = await askConfirmation(
+                    "Restore the original DSA sheet and reset all DSA progress? Other sheets will not be changed. This cannot be undone.",
+                    "Restore DSA sheet?",
+                    { dangerous: true, requireWord: "RESTORE", confirmText: "Restore DSA" },
+                  );
+                  if (!confirmed) return;
+                  try {
+                    await restoreDsaSheet();
+                    showNotice(
+                      "The original DSA sheet was restored and its progress was reset.",
+                      "DSA restored",
+                    );
+                  } catch (error) {
+                    console.error("Failed to restore DSA sheet:", error);
+                    showNotice(
+                      error.message || "Could not restore the DSA sheet. Please try again.",
+                      "Restore failed",
+                    );
+                  }
+                }}
+                restoring={restoringDsaSheet}
+                restoreDisabled={customSheetsLoading || progressLoading}
                 onReset={async () => {
                   const confirmed = await askConfirmation(
                     "Reset all progress across every sheet? This cannot be undone.",

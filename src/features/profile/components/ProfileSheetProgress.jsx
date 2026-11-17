@@ -1,15 +1,18 @@
-import { Download, RefreshCcw, Upload } from "lucide-react";
+import { Download, RefreshCcw, RotateCcw, Upload } from "lucide-react";
 
 export default function ProfileSheetProgress({
   sheets,
   onExport,
   onImport,
   onReset,
+  onRestoreDsa,
+  restoring = false,
+  restoreDisabled = false,
   importFileInput,
   importProgress,
   headingId = "profile-sheet-progress",
 }) {
-  const showActions = onExport || onImport || onReset;
+  const showActions = onExport || onImport || onRestoreDsa || onReset;
 
   return (
     <section
@@ -30,6 +33,16 @@ export default function ProfileSheetProgress({
             {onImport && (
               <button type="button" className="btn-secondary" onClick={onImport}>
                 <Upload size={14} /> Import
+              </button>
+            )}
+            {onRestoreDsa && (
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={onRestoreDsa}
+                disabled={restoring || restoreDisabled}
+              >
+                <RotateCcw size={14} /> {restoring ? "Restoring DSA..." : "Restore DSA"}
               </button>
             )}
             {onReset && (

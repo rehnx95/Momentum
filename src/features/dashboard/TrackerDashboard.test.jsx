@@ -81,6 +81,11 @@ describe("TrackerDashboard DSA progress gauge", () => {
     expect(screen.getByRole("group", { name: "Easy: 1 solved out of 2" })).toBeTruthy();
     expect(screen.getByRole("group", { name: "Medium: 0 solved out of 1" })).toBeTruthy();
     expect(screen.getByRole("group", { name: "Hard: 0 solved out of 1" })).toBeTruthy();
+    const dsaGauge = screen.getByRole("img", { name: "1 of 4 problems solved, 2 skipped" });
+    const difficultyColors = [...dsaGauge.querySelectorAll("g[transform^='rotate(']")].map(
+      (segment) => segment.querySelectorAll("circle")[1].getAttribute("stroke"),
+    );
+    expect(difficultyColors).toEqual(["#34D399", "#FFA116", "#FB7185"]);
     const resetButton = screen.getByRole("button", { name: "Reset DSA progress" });
     expect(resetButton.hasAttribute("title")).toBe(false);
     expect(resetButton.getAttribute("aria-describedby")).toBeTruthy();

@@ -12,9 +12,9 @@ const SHEET_STATUS_COLORS = {
   todo: "hsl(43 100% 50%)",
 };
 const DSA_DIFFICULTIES = [
-  { name: "Easy", label: "Easy", color: "hsl(180 74% 42%)" },
-  { name: "Medium", label: "Med.", color: "hsl(43 100% 50%)" },
-  { name: "Hard", label: "Hard", color: "hsl(0 91% 59%)" },
+  { name: "Easy", label: "Easy", color: "#34D399" },
+  { name: "Medium", label: "Med.", color: "#FFA116" },
+  { name: "Hard", label: "Hard", color: "#FB7185" },
 ];
 
 function getDsaDifficultyStats(sheetProblems, progressState) {

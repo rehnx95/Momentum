@@ -22,7 +22,10 @@ function getSheetManifestVersion() {
 }
 
 function getSheetId(filePath) {
-  return filePath.split("/").pop().replace(/\.json$/i, "");
+  return filePath
+    .split("/")
+    .pop()
+    .replace(/\.json$/i, "");
 }
 
 function getSheetTitle(id) {
@@ -37,6 +40,18 @@ function getDefaultSheetId(sheetIds) {
     : sheetIds.sort((first, second) =>
         getSheetTitle(first).localeCompare(getSheetTitle(second)),
       )[0];
+}
+
+export async function loadBuiltInSheet(id) {
+  const loadSheet = sheetModules[`./${id}.json`];
+  if (!loadSheet) {
+    throw new Error(`The built-in "${id}" sheet could not be found.`);
+  }
+  const sheet = await loadSheet();
+  if (!Array.isArray(sheet?.steps)) {
+    throw new Error(`The built-in "${id}" sheet is invalid.`);
+  }
+  return { id, title: getSheetTitle(id), sheet };
 }
 
 export async function bootstrapBuiltInSheets(userId, isActive = () => true) {
