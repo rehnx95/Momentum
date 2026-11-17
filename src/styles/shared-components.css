@@ -197,12 +197,13 @@
 
 .app-tooltip {
   position: absolute;
-  top: calc(100% + 0.5rem);
+  top: auto;
+  bottom: calc(100% + 0.5rem);
   left: 50%;
   z-index: 100;
   max-width: calc(100vw - 1rem);
   padding: 0.4rem 0.65rem;
-  transform: translate(-50%, -0.15rem);
+  transform: translate(-50%, 0.15rem);
   border: 1px solid var(--border-strong);
   border-radius: 0.55rem;
   background: var(--surface-raised);
@@ -218,6 +219,18 @@
     opacity 120ms ease,
     transform 120ms ease,
     visibility 120ms ease;
+}
+
+.app-tooltip.app-tooltip-portal {
+  right: auto;
+  bottom: auto;
+  z-index: 1000;
+  transform: none;
+}
+
+.app-tooltip-portal.app-tooltip-visible {
+  opacity: 1;
+  visibility: visible;
 }
 
 .app-tooltip-anchor:hover .app-tooltip,

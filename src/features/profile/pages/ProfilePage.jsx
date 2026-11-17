@@ -67,7 +67,7 @@ export default function ProfilePage({ context }) {
                   </div>
                 </div>
                 <div className="profile-hero-actions flex flex-wrap gap-2">
-                  <Tooltip label="Edit profile">
+                  <Tooltip label="Edit profile" portal>
                     <button
                       type="button"
                       className="btn-secondary"
@@ -78,7 +78,7 @@ export default function ProfilePage({ context }) {
                     </button>
                   </Tooltip>
                   {userUsername && (
-                    <Tooltip label="Public view">
+                    <Tooltip label="Public view" portal>
                       <button
                         type="button"
                         className="btn-secondary"

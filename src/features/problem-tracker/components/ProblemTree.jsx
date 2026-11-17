@@ -1,8 +1,8 @@
 import { ChevronDown, ChevronRight, SkipForward } from "lucide-react";
 import { cloneElement, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import dsaProblemDifficulties from "../../sheets/dsaProblemDifficulties.json";
 import leetcodeProblemLinks from "../../sheets/leetcodeProblemLinks.json";
+import { getProblemDifficulty } from "../utils/problemDifficulty";
 
 export function ProgressBar({ done, total }) {
   const pct = total ? Math.round((done / total) * 100) : 0;
@@ -102,12 +102,11 @@ function TrackerTooltip({ children, label }) {
   );
 }
 
-export function ProblemRow({ prob, state, onToggle, onSkip }) {
+export function ProblemRow({ prob, state, onToggle, onSkip, showDifficulty = false }) {
   const isDone = state === "done";
   const isSkip = state === "skipped";
   const leetcodeProblem = prob.lc ? leetcodeProblemLinks[prob.lc] : null;
-  const problemNumber = prob.id.match(/-p(\d+)$/)?.[1];
-  const difficulty = dsaProblemDifficulties[problemNumber] ?? leetcodeProblem?.difficulty;
+  const difficulty = showDifficulty ? getProblemDifficulty(prob) : undefined;
 
   return (
     <div
@@ -141,7 +140,11 @@ export function ProblemRow({ prob, state, onToggle, onSkip }) {
         {prob.title}
       </button>
 
-      <div className="grid flex-shrink-0 grid-cols-[auto_1.25rem_1.25rem] items-center gap-x-0.5">
+      <div
+        className={`grid flex-shrink-0 items-center gap-x-0.5 ${
+          showDifficulty ? "grid-cols-[auto_1.25rem_1.25rem]" : "grid-cols-[1.25rem_1.25rem]"
+        }`}
+      >
         {difficulty && (
           <button
             type="button"
@@ -210,6 +213,7 @@ export function SubSectionRow({
   onSkipProb,
   hideSkipped,
   filter,
+  showDifficulty = false,
 }) {
   const done = sub.problems.filter((p) => progressState(p.id) === "done").length;
   const total = sub.problems.length;
@@ -253,6 +257,7 @@ export function SubSectionRow({
                 state={progressState(p.id)}
                 onToggle={onToggleProb}
                 onSkip={onSkipProb}
+                showDifficulty={showDifficulty}
               />
             ))
           ) : (
@@ -277,6 +282,7 @@ export function StepRow({
   onSkipProb,
   hideSkipped,
   filter,
+  showDifficulty = false,
 }) {
   const done = step.subsections.reduce(
     (sum, s) => sum + s.problems.filter((p) => progressState(p.id) === "done").length,
@@ -319,6 +325,7 @@ export function StepRow({
               onSkipProb={onSkipProb}
               hideSkipped={hideSkipped}
               filter={filter}
+              showDifficulty={showDifficulty}
             />
           ))}
         </div>
