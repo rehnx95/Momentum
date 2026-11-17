@@ -124,7 +124,12 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
       {daily.viewMode === "daily" ? (
         <DayView daily={daily} sheets={sheets} askConfirmation={askConfirmation} />
       ) : daily.viewMode === "full" ? (
-        <FullLog daily={daily} sheets={sheets} toolbarContainer={fullLogToolbarTarget} />
+        <FullLog
+          daily={daily}
+          sheets={sheets}
+          toolbarContainer={fullLogToolbarTarget}
+          askConfirmation={askConfirmation}
+        />
       ) : (
         <TrendsView daily={daily} sheets={sheets} />
       )}

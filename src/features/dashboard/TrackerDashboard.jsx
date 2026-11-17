@@ -35,7 +35,7 @@ function ProgressGauge({ done, total, skipped, centerLabel, ariaLabel, segments 
   return (
     <div className="relative flex h-full flex-1 items-center justify-center overflow-hidden rounded-lg bg-[var(--surface-raised)]">
       <div
-        className="relative aspect-square w-[160px] overflow-hidden"
+        className="relative aspect-square w-full max-w-[160px] overflow-hidden"
         role="img"
         aria-label={ariaLabel}
       >
@@ -152,7 +152,7 @@ function DsaDifficultyProgress({ stats }) {
         return (
           <div
             key={name}
-            className="flex w-full flex-1 flex-col items-center justify-center gap-0.5 rounded-lg bg-[var(--surface-hover)] text-center leading-tight"
+            className="flex w-full flex-1 flex-col items-center justify-center gap-0.5 border border-[var(--border-strong)] rounded-[0.55rem] bg-[var(--surface-hover)] text-center leading-tight"
             role="group"
             aria-label={`${name}: ${done} solved out of ${total}`}
           >
@@ -215,7 +215,7 @@ function SheetStatusProgress({ done, todo }) {
       ].map(({ label, value, color }) => (
         <div
           key={label}
-          className="flex h-[44px] w-full flex-none flex-col items-center justify-center gap-0.5 rounded-lg bg-[var(--surface-hover)] text-center leading-tight"
+          className="flex h-[44px] w-full flex-none flex-col items-center justify-center gap-0.5 border border-[var(--border-strong)] rounded-[0.55rem] bg-[var(--surface-hover)] text-center leading-tight"
           role="group"
           aria-label={`${label}: ${value}`}
         >
@@ -383,44 +383,6 @@ export default function TrackerDashboard({ context }) {
               setActiveFilter={setActiveFilter}
               setHideSkipped={setHideSkipped}
             />
-            <section
-              className="mobile-progress-summary surface-card mb-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 lg:hidden"
-              aria-label="Overall progress"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-xs font-medium uppercase tracking-wide text-[#A1A1A1]">
-                    Overall progress
-                  </h2>
-                  <p className="mt-1 text-sm text-[#A1A1A1]">
-                    {doneCount} of {totalProblems} problems solved
-                  </p>
-                </div>
-                <span className="text-2xl font-bold tabular-nums text-[#EDEDED]">
-                  {totalProblems > 0 ? Math.round((doneCount / totalProblems) * 100) : 0}%
-                </span>
-              </div>
-              <div
-                className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface-hover)]"
-                role="progressbar"
-                aria-label="Overall problem completion"
-                aria-valuemin={0}
-                aria-valuemax={totalProblems}
-                aria-valuenow={doneCount}
-              >
-                <div
-                  className="h-full rounded-full bg-[var(--progress-fill)] transition-all"
-                  style={{
-                    width: `${totalProblems > 0 ? (doneCount / totalProblems) * 100 : 0}%`,
-                  }}
-                />
-              </div>
-              <div className="mt-2 flex justify-between gap-2 text-xs text-[#A1A1A1]">
-                <span>{doneCount} done</span>
-                <span>{skippedCount} skipped</span>
-                <span>{todoCount} to do</span>
-              </div>
-            </section>
             <div>
               {filteredSteps.length > 0 ? (
                 filteredSteps.map((step) => (
@@ -446,7 +408,7 @@ export default function TrackerDashboard({ context }) {
               )}
             </div>
           </section>
-          <aside className="tracker-side hidden lg:block space-y-3">
+          <aside className="tracker-side block space-y-3">
             <div className="tracker-sheet-progress surface-card rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 relative">
               <div
                 className={`mb-2 ${canResetSheetProgress ? "flex items-center justify-between" : ""}`}

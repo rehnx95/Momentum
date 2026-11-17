@@ -21,7 +21,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
 
   useEffect(() => {
     const username = form.username.trim().toLowerCase();
-    if (!/^(?=.*[a-z0-9])[a-z0-9-]{3,45}$/.test(username)) {
+    if (!/^(?=.*[a-z0-9])[a-z0-9-]{3,20}$/.test(username)) {
       setUsernameAvailability("idle");
       return undefined;
     }
@@ -74,9 +74,9 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
       setErrorMessage("Name is required.");
       return;
     }
-    if (!/^(?=.*[a-z0-9])[a-z0-9-]{3,45}$/.test(values.username)) {
+    if (!/^(?=.*[a-z0-9])[a-z0-9-]{3,20}$/.test(values.username)) {
       setErrorMessage(
-        "Username must be 3–45 characters using lowercase letters, numbers, and hyphens.",
+        "Username must be 3–20 characters using lowercase letters, numbers, and hyphens.",
       );
       return;
     }
@@ -172,7 +172,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
                 type: "text",
                 autoComplete: "username",
                 required: true,
-                maxLength: 45,
+                maxLength: 20,
               },
             ].map((field) => (
               <div key={field.name}>
@@ -198,7 +198,7 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
                 {field.name === "username" && (
                   <div className="mt-1 space-y-1">
                     <p id="profile-username-help" className="text-xs text-muted">
-                      3–45 characters; lowercase letters, numbers, and hyphens.
+                      3–20 characters; lowercase letters, numbers, and hyphens.
                     </p>
                     {usernameAvailability === "checking" && (
                       <p role="status" className="text-xs text-muted">

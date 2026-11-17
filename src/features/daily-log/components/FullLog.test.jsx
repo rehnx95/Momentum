@@ -503,7 +503,7 @@ describe("FullLog", () => {
     });
   });
 
-  it("renders icon-only history actions in the supplied toolbar target", () => {
+  it("renders icon-only history actions in the supplied toolbar target", async () => {
     const toolbarContainer = document.createElement("div");
     document.body.appendChild(toolbarContainer);
     const daily = {
@@ -516,7 +516,7 @@ describe("FullLog", () => {
       loadOlderLogs: vi.fn(),
       clearAllLogs: vi.fn(),
     };
-    const askConfirmation = vi.fn();
+    const askConfirmation = vi.fn().mockResolvedValue(true);
 
     render(
       <FullLog
@@ -530,8 +530,8 @@ describe("FullLog", () => {
       "",
     );
     fireEvent.click(within(toolbarContainer).getByRole("button", { name: "Clear log" }));
-    expect(daily.clearAllLogs).toHaveBeenCalledOnce();
-    expect(askConfirmation).not.toHaveBeenCalled();
+    await waitFor(() => expect(daily.clearAllLogs).toHaveBeenCalledOnce());
+    expect(askConfirmation).toHaveBeenCalledOnce();
     expect(
       within(toolbarContainer).getByRole("button", { name: "Load 10 older days" }),
     ).toBeTruthy();

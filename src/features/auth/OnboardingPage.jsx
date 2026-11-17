@@ -9,7 +9,10 @@ const USERNAME_MAX_LENGTH = 20;
 export default function OnboardingPage({ user, profile, onGoToDashboard, onComplete, onSignOut }) {
   const [formData, setFormData] = useState({
     name: profile?.name || user.user_metadata?.full_name || user.user_metadata?.name || "",
-    username: profile?.username || "",
+    username:
+      profile?.username && profile.username.length <= USERNAME_MAX_LENGTH
+        ? profile.username
+        : "",
   });
 
   const [isLoading, setIsLoading] = useState(false);

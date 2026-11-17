@@ -37,17 +37,17 @@
   }
 }
 
-@media (min-width: 1024px) and (max-width: 1099px) {
+@media (max-width: 1099px) {
   .tracker-dashboard-shell .dashboard-main {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* Progress card sits on top, full width on phones, capped on tablets */
   .tracker-dashboard-shell .tracker-side {
-    display: none;
-  }
-
-  .tracker-dashboard-shell .mobile-progress-summary {
-    display: block;
+    order: -1;
+    position: static;
+    width: 100%;
+    max-width: 28rem;
   }
 }
 

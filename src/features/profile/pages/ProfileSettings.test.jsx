@@ -26,7 +26,7 @@ describe("ProfileSettings", () => {
     expect(screen.getByRole("textbox", { name: "Username" }).getAttribute("aria-describedby")).toBe(
       "profile-username-help",
     );
-    expect(screen.getByText("3–45 characters; lowercase letters, numbers, and hyphens.").id).toBe(
+    expect(screen.getByText("3–20 characters; lowercase letters, numbers, and hyphens.").id).toBe(
       "profile-username-help",
     );
     expect(screen.queryByLabelText("Location")).toBeNull();

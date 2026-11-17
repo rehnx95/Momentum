@@ -74,7 +74,7 @@ function detailEntries(activities, filter, activityColors) {
   return details.sort((first, second) => toMinutes(first.start) - toMinutes(second.start));
 }
 
-export default function FullLog({ daily, sheets = [], toolbarContainer }) {
+export default function FullLog({ daily, sheets = [], toolbarContainer, askConfirmation }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activityFilter, setActivityFilter] = useState("All");
   const [expandedDates, setExpandedDates] = useState(null);
@@ -177,7 +177,15 @@ export default function FullLog({ daily, sheets = [], toolbarContainer }) {
                 daily.olderLogsLoading ||
                 daily.loading
               }
-              onClick={() => void daily.clearAllLogs()}
+              onClick={async () => {
+                const confirmed = askConfirmation
+                  ? await askConfirmation(
+                      "Clear all saved Daily Log entries for your account? This cannot be undone.",
+                      "Clear log?",
+                    )
+                  : true;
+                if (confirmed) void daily.clearAllLogs();
+              }}
             >
               <Trash2 size={16} aria-hidden="true" />
             </button>

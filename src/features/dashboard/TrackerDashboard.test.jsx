@@ -196,9 +196,6 @@ describe("TrackerDashboard DSA progress gauge", () => {
     expect(container.querySelector(".tracker-sheet-progress").className).toContain(
       "bg-[var(--surface)]",
     );
-    expect(
-      container.querySelector(".mobile-progress-summary [role='progressbar'] > div").className,
-    ).toContain("bg-[var(--progress-fill)]");
   });
 
   it("keeps DSA difficulty tiles out of a Backend sheet with stale template metadata", () => {

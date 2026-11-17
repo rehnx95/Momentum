@@ -272,3 +272,15 @@
   border: 0;
   background: rgba(0, 0, 0, 0.58);
 }
+
+/* tracker-progress-theme */
+.tracker-dashboard-shell:not([data-theme="light"]) .tracker-sheet-progress,
+.tracker-dashboard-shell:not([data-theme="light"]) .tracker-sheet-progress .rounded-lg.bg-\[var\(--surface-raised\)\],
+.tracker-dashboard-shell:not([data-theme="light"]) .tracker-sheet-progress .rounded-lg.bg-\[var\(--surface-hover\)\] {
+  background-color: #000000 !important;
+}
+.tracker-dashboard-shell[data-theme="light"] .tracker-sheet-progress,
+.tracker-dashboard-shell[data-theme="light"] .tracker-sheet-progress .rounded-lg.bg-\[var\(--surface-raised\)\],
+.tracker-dashboard-shell[data-theme="light"] .tracker-sheet-progress .rounded-lg.bg-\[var\(--surface-hover\)\] {
+  background-color: #ffffff !important;
+}

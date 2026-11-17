@@ -42,6 +42,7 @@ export default function ProfilePage({ context }) {
     userUsername,
     yearlyActiveDays,
   } = context;
+  const { askConfirmation } = context;
   return (
     <div className="profile-shell min-h-screen bg-[#000000] text-[#EDEDED] font-sans transition-colors duration-300">
       <AppHeader active="profile" {...headerProps} />
@@ -134,6 +135,11 @@ export default function ProfilePage({ context }) {
                 onImport={() => setBackupAction("import")}
                 onRestoreDsa={async () => {
                   try {
+                    const confirmed = await askConfirmation(
+                      "Restore the original DSA sheet? Your DSA progress will be reset. Other sheets will not be affected.",
+                      "Restore DSA?",
+                    );
+                    if (!confirmed) return;
                     await restoreDsaSheet();
                     showNotice(
                       "The original DSA sheet was restored and its progress was reset.",
@@ -149,7 +155,13 @@ export default function ProfilePage({ context }) {
                 }}
                 restoring={restoringDsaSheet}
                 restoreDisabled={customSheetsLoading || progressLoading}
-                onReset={reset}
+                onReset={async () => {
+                  const confirmed = await askConfirmation(
+                    "Reset progress for ALL sheets? This cannot be undone.",
+                    "Reset all progress?",
+                  );
+                  if (confirmed) await reset();
+                }}
                 importFileInput={importFileInput}
                 importProgress={importProgress}
               />
@@ -189,7 +201,7 @@ export default function ProfilePage({ context }) {
               <p className="mb-4 mt-1 text-sm text-[#A1A1A1]">
                 {backupAction === "export"
                   ? "Download progress for one sheet."
-                  : "Choose the sheet you want to restore, then select its progress backup file. This dialog stays open if you cancel the file picker."}
+                  : "Choose the sheet you want to restore, then select its progress backup file."}
               </p>
               {backupAction === "import" && (
                 <div className="mb-4 rounded-lg border border-[#262626] bg-[#0A0A0A] p-3 text-sm text-[#EDEDED]">

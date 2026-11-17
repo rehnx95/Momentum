@@ -125,7 +125,7 @@ export default function PublicProfilePage({
                       </div>
                     </div>
                     <div className="profile-hero-actions flex flex-wrap gap-2">
-                      <Tooltip label={copied ? "Link copied" : "Share profile"}>
+                      <Tooltip label={copied ? "Link copied" : "Share profile"} portal>
                         <button
                           type="button"
                           className="btn-secondary"
