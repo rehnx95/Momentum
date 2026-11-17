@@ -152,7 +152,7 @@ function DsaDifficultyProgress({ stats }) {
         return (
           <div
             key={name}
-            className="flex w-full flex-1 flex-col items-center justify-center gap-0.5 border border-[var(--border-strong)] rounded-[0.55rem] bg-[var(--surface-hover)] text-center leading-tight"
+            className="flex w-full flex-1 flex-col items-center justify-center gap-0.5 rounded-[0.55rem] border border-[var(--border)] bg-[#000000] text-center leading-tight"
             role="group"
             aria-label={`${name}: ${done} solved out of ${total}`}
           >
@@ -215,7 +215,7 @@ function SheetStatusProgress({ done, todo }) {
       ].map(({ label, value, color }) => (
         <div
           key={label}
-          className="flex h-[44px] w-full flex-none flex-col items-center justify-center gap-0.5 border border-[var(--border-strong)] rounded-[0.55rem] bg-[var(--surface-hover)] text-center leading-tight"
+          className="flex h-[44px] w-full flex-none flex-col items-center justify-center gap-0.5 rounded-[0.55rem] border border-[var(--border)] bg-[#000000] text-center leading-tight"
           role="group"
           aria-label={`${label}: ${value}`}
         >

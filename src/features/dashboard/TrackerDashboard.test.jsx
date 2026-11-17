@@ -81,6 +81,11 @@ describe("TrackerDashboard DSA progress gauge", () => {
     expect(screen.getByRole("group", { name: "Easy: 1 solved out of 2" })).toBeTruthy();
     expect(screen.getByRole("group", { name: "Medium: 0 solved out of 1" })).toBeTruthy();
     expect(screen.getByRole("group", { name: "Hard: 0 solved out of 1" })).toBeTruthy();
+    for (const name of ["Easy", "Medium", "Hard"]) {
+      const tileClassName = screen.getByRole("group", { name: new RegExp(`^${name}:`) }).className;
+      expect(tileClassName).toContain("bg-[#000000]");
+      expect(tileClassName).toContain("border-[var(--border)]");
+    }
     const dsaGauge = screen.getByRole("img", { name: "1 of 4 problems solved, 2 skipped" });
     const difficultyColors = [...dsaGauge.querySelectorAll("g[transform^='rotate(']")].map(
       (segment) => segment.querySelectorAll("circle")[1].getAttribute("stroke"),
@@ -168,8 +173,10 @@ describe("TrackerDashboard DSA progress gauge", () => {
     expect(doneTile.parentElement.className).toContain("justify-start");
     expect(doneTile.className).toContain("h-[44px]");
     expect(todoTile.className).toContain("h-[44px]");
-    expect(doneTile.className).toContain("bg-[var(--surface-hover)]");
-    expect(todoTile.className).toContain("bg-[var(--surface-hover)]");
+    expect(doneTile.className).toContain("bg-[#000000]");
+    expect(todoTile.className).toContain("bg-[#000000]");
+    expect(doneTile.className).toContain("border-[var(--border)]");
+    expect(todoTile.className).toContain("border-[var(--border)]");
     expect(screen.getByText(/Skipped/)).toBeTruthy();
     expect(screen.getByRole("button", { name: `Reset ${title} progress` })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Reset DSA progress" })).toBeNull();

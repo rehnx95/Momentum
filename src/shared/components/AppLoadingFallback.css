@@ -5,6 +5,7 @@
 }
 :root[data-theme="light"] .sk-root {
   --sk-card: #fff;
+  --sk-difficulty-card: var(--page);
 }
 .sk-fullscreen {
   min-height: 100vh;
@@ -195,7 +196,12 @@
   gap: 1.25rem;
 }
 .sk-tracker-main { display: grid; min-width: 0; align-content: start; gap: 0.75rem; }
-.sk-tracker-side { display: none; position: sticky; top: calc(var(--header-h, 60px) + 1rem); }
+.sk-tracker-side {
+  position: static;
+  order: -1;
+  width: 100%;
+  max-width: 28rem;
+}
 .sk-tracker-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; }
 .sk-tracker-title { width: 8rem; height: 2rem; }
 .sk-tracker-count { width: 6rem; height: 1rem; }
@@ -220,9 +226,6 @@
 .sk-filter-group .sk-bar:last-child { width: 6.5rem; }
 .sk-expand { width: 9rem; height: 0.8rem; }
 
-.sk-mobile-summary { display: grid; gap: 0.5rem; padding: 0.75rem; border-radius: 0.75rem; }
-.sk-percent-sm { width: 3rem; height: 1.6rem; }
-
 .sk-step-list { display: grid; gap: 0.375rem; }
 .sk-step-row {
   display: grid;
@@ -243,24 +246,80 @@
 }
 
 .sk-side-card { display: grid; gap: 0.5rem; padding: 0.75rem; border-radius: 1rem; }
-.sk-percent-lg { width: 5.5rem; height: 2.5rem; }
-.sk-side-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  justify-items: center;
-  gap: 0.5rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--border);
+.sk-reset { width: 1.25rem; height: 1.25rem; border-radius: 0.4rem; }
+.sk-dsa-progress { display: flex; height: 148px; gap: 0.5rem; }
+.sk-progress-gauge {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: var(--sk-card);
 }
-.sk-side-stats > div { display: grid; justify-items: center; gap: 0.35rem; }
-.sk-stat-number { width: 2.4rem; height: 1.2rem; }
-.sk-stat-label { width: 3rem; height: 0.6rem; }
-.sk-reset { height: 1.9rem; border: 1px solid var(--border); border-radius: 0.4rem; }
+.sk-gauge-chart {
+  position: relative;
+  width: 100%;
+  max-width: 160px;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+.sk-gauge-crop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 113%;
+  height: 113%;
+  transform: translate(-50%, -44%);
+}
+.sk-gauge-svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: transparent; }
+.sk-gauge-overlay { position: absolute; inset: 0; }
+.sk-gauge-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  transform: translate(-50%, -50%);
+}
+.sk-gauge-value { width: 2.4rem; height: 1.6rem; border-radius: 0.5rem; }
+.sk-gauge-caption { width: 2.8rem; height: 0.55rem; }
+.sk-gauge-skipped {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  width: 3.2rem;
+  height: 0.7rem;
+  transform: translateX(-50%);
+}
+.sk-difficulty-tiles { display: flex; width: 90px; flex: none; flex-direction: column; gap: 0.5rem; }
+.sk-difficulty-box {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--sk-difficulty-card, var(--sk-card));
+}
+.sk-difficulty-label { width: 2.6rem; height: 0.55rem; }
+.sk-difficulty-count { width: 1.8rem; height: 0.55rem; }
 
-@media (min-width: 1100px) {
+@media (min-width: 1024px) {
   .sk-tracker { grid-template-columns: minmax(0, 1fr) 20rem; }
-  .sk-tracker-side { display: block; }
-  .sk-mobile-summary { display: none; }
+  .sk-tracker-side {
+    position: sticky;
+    top: calc(var(--header-h, 60px) + 1rem);
+    order: 0;
+    width: auto;
+    max-width: none;
+  }
 }
 @media (max-width: 767px) {
   .sk-tracker-search { width: 100%; }

@@ -1153,15 +1153,11 @@
 
 @media (max-width: 630px) {
   .daily-log-page-shell .daily-slot-list {
-    grid-template-columns: repeat(2, minmax(10.75rem, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 480px) {
-  .daily-log-page-shell .daily-slot-list {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .daily-log-page-shell .full-log-table {
     padding-inline: 0.45rem;
   }

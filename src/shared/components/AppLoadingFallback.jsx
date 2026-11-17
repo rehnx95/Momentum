@@ -95,23 +95,6 @@ function TrackerSkeleton() {
           <Bar className="sk-expand" />
         </div>
 
-        {/* Replaces the side panel below 1100px, like the real page */}
-        <section className="sk-card sk-mobile-summary">
-          <div className="sk-row-between">
-            <div className="sk-stack">
-              <Bar className="sk-label-sm" />
-              <Bar className="sk-text-sm" />
-            </div>
-            <Bar className="sk-percent-sm" />
-          </div>
-          <Bar className="sk-progress" />
-          <div className="sk-row-between">
-            <Bar className="sk-text-xs" />
-            <Bar className="sk-text-xs" />
-            <Bar className="sk-text-xs" />
-          </div>
-        </section>
-
         <div className="sk-step-list">
           {times(9, (i) => (
             <div className="sk-card sk-step-row" key={i}>
@@ -126,19 +109,59 @@ function TrackerSkeleton() {
 
       <aside className="sk-tracker-side">
         <section className="sk-card sk-side-card">
-          <Bar className="sk-label-sm" />
-          <Bar className="sk-percent-lg" />
-          <Bar className="sk-text-sm" />
-          <Bar className="sk-progress sk-progress-lg" />
-          <div className="sk-side-stats">
-            {times(3, (i) => (
-              <div key={i}>
-                <Bar className="sk-stat-number" />
-                <Bar className="sk-stat-label" />
-              </div>
-            ))}
+          <div className="sk-row-between">
+            <Bar className="sk-label-sm" />
+            <Bar className="sk-reset" />
           </div>
-          <Bar className="sk-reset" />
+          <div className="sk-dsa-progress">
+            <div className="sk-progress-gauge">
+              <div className="sk-gauge-chart">
+                <div className="sk-gauge-crop">
+                  <svg viewBox="0 0 100 100" className="sk-gauge-svg" aria-hidden="true">
+                    <defs>
+                      <clipPath id="tracker-skeleton-gauge-mask">
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M21.3622 21.3622C5.54592 37.1784 5.54592 62.8216 21.3622 78.6378C21.9479 79.2236 21.9479 80.1734 21.3622 80.7591C20.7764 81.3449 19.8266 81.3449 19.2408 80.7591C2.25303 63.7713 2.25303 36.2287 19.2408 19.2409C36.2286 2.25305 63.7713 2.25305 80.7591 19.2409C97.7469 36.2287 97.7469 63.7713 80.7591 80.7591C80.1733 81.3449 79.2236 81.3449 78.6378 80.7591C78.052 80.1734 78.052 79.2236 78.6378 78.6378C94.454 62.8216 94.454 37.1784 78.6378 21.3622C62.8216 5.54594 37.1784 5.54594 21.3622 21.3622Z"
+                        />
+                      </clipPath>
+                    </defs>
+                    <g clipPath="url(#tracker-skeleton-gauge-mask)">
+                      <g transform="rotate(225 50 50)">
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="42"
+                          fill="transparent"
+                          stroke="var(--border)"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeDasharray="186.2 77.69"
+                          strokeDashoffset="66"
+                        />
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+                <div className="sk-gauge-overlay">
+                  <div className="sk-gauge-center">
+                    <Bar className="sk-gauge-value" />
+                    <Bar className="sk-gauge-caption" />
+                  </div>
+                  <Bar className="sk-gauge-skipped" />
+                </div>
+              </div>
+            </div>
+            <div className="sk-difficulty-tiles">
+              {times(3, (i) => (
+                <div className="sk-difficulty-box" key={i}>
+                  <Bar className="sk-difficulty-label" />
+                  <Bar className="sk-difficulty-count" />
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
       </aside>
     </div>
