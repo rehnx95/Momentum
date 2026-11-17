@@ -109,7 +109,7 @@ export default function useProblemTree({ data, progress, getState, update, enabl
     (id) => {
       const problem = problemMap.get(id);
       if (!problem) return "todo";
-      return getState(id, problem.defaultSkip);
+      return getState(id);
     },
     [getState, problemMap],
   );
@@ -165,7 +165,7 @@ export default function useProblemTree({ data, progress, getState, update, enabl
         const subsections = step.subsections
           .map((subsection) => {
             const problems = subsection.problems.filter((problem) => {
-              const state = getState(problem.id, problem.defaultSkip);
+              const state = getState(problem.id);
               return (
                 (!query || problem.title.toLowerCase().includes(query)) &&
                 (!hideSkipped || state !== "skipped") &&

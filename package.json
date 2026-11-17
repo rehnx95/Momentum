@@ -12,7 +12,9 @@
     "test": "vitest run --maxWorkers=1 --minWorkers=1",
     "lint": "eslint . --ext .js,.jsx,.cjs",
     "preview": "vite preview",
-    "convert-sheet": "node scripts/convert-sheet.cjs"
+    "convert-sheet": "node scripts/convert-sheet.cjs",
+    "create-links": "node scripts/create_link.js",
+    "verify-links": "node scripts/verify_links.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

@@ -8,7 +8,7 @@ export const sampleSheetTemplate = `Step 1 — Arrays
 
 1.2 — Two Pointers
 4. Valid Palindrome (LC 125)
-5. 3Sum (LC 15) (Skip)
+5. 3Sum (LC 15)
 
 Step 2 — Dynamic Programming
 2.1 — Basic Problems
@@ -91,7 +91,6 @@ export function parseSheet(raw) {
       id: `s${currentStepNum}-${currentSubId}-p${match[1]}`,
       title: cleanTitle(match[2]),
       lc: extractLC(match[2]),
-      defaultSkip: /\(Skip\)/i.test(match[2]),
     });
     lastProblemNum = Number.parseInt(match[1], 10);
   }

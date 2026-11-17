@@ -23,9 +23,7 @@ export default function useProfileMetrics({
           (problem) => progress[`${idPrefix}${problem.id}`] === "done",
         ).length;
         const skipped = problems.filter(
-          (problem) =>
-            progress[`${idPrefix}${problem.id}`] === "skipped" ||
-            (!progress[`${idPrefix}${problem.id}`] && problem.defaultSkip),
+          (problem) => progress[`${idPrefix}${problem.id}`] === "skipped",
         ).length;
         return {
           id: sheet.id,

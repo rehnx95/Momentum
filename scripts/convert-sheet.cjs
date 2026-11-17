@@ -31,10 +31,6 @@ function parseSheet(sourceFile) {
     return match ? parseInt(match[1], 10) : null;
   }
 
-  function isSkip(text) {
-    return /\(Skip\)/i.test(text);
-  }
-
   function cleanTitle(text) {
     return text
       .replace(/\s*\(LC\s+\d+\)\s*/g, "")
@@ -110,7 +106,6 @@ function parseSheet(sourceFile) {
       id: `s${currentStepNum}-${currentSubId}-p${pm[1]}`,
       title: cleanTitle(pm[2]),
       lc: extractLC(pm[2]),
-      defaultSkip: isSkip(pm[2]),
     });
     lastProblemNum = parseInt(pm[1], 10);
   }
@@ -226,27 +221,24 @@ async function main(sourceName = process.argv[2]) {
     throw new Error(`No steps or problems were found in ${filename}; check the source format.`);
   }
   let problemsCount = 0;
-  let skipCount = 0;
   let implicitCount = 0;
 
   for (const step of data.steps) {
     for (const sub of step.subsections) {
       problemsCount += sub.problems.length;
-      skipCount += sub.problems.filter((p) => p.defaultSkip).length;
       if (sub.implicit) implicitCount++;
     }
   }
 
   console.log(`Steps: ${data.steps.length}`);
   console.log(`Problems: ${problemsCount}`);
-  console.log(`Default Skip: ${skipCount}`);
   console.log(`Implicit subsections (steps with no N.M header): ${implicitCount}`);
 
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   fs.writeFileSync(outputFile, JSON.stringify(data, null, 2), "utf8");
   console.log(`\nWritten to ${outputFile}`);
 
-  return { stepsCount: data.steps.length, problemsCount, skipCount, outputFile };
+  return { stepsCount: data.steps.length, problemsCount, outputFile };
 }
 
 if (require.main === module) {

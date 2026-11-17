@@ -10,7 +10,7 @@ const data = {
       subsections: [
         {
           id: "subsection-1",
-          problems: [{ id: "problem-1", title: "Problem 1", defaultSkip: false }],
+          problems: [{ id: "problem-1", title: "Problem 1" }],
         },
       ],
     },
@@ -47,7 +47,7 @@ describe("useProblemTree", () => {
     });
 
     expect(result.totalProblems).toBe(1);
-    expect(getState).toHaveBeenCalledWith("problem-1", false);
+    expect(getState).toHaveBeenCalledWith("problem-1");
     await act(async () => renderer.unmount());
   });
 });

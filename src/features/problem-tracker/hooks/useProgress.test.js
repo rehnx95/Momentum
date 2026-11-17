@@ -80,7 +80,7 @@ describe("useProgress", () => {
                 updated_at: "2025-03-14T23:00:00.000Z",
               },
               {
-                problem_id: "default-skip-1",
+                problem_id: "problem-3",
                 state: "todo",
                 completed_on: null,
                 updated_at: "2025-03-15T12:00:00.000Z",
@@ -123,7 +123,7 @@ describe("useProgress", () => {
     });
 
     expect(hookResult.progress["problem-1"]).toBe("done");
-    expect(hookResult.getState("default-skip-1", true)).toBe("todo");
+    expect(hookResult.getState("problem-3")).toBe("todo");
     expect(hookResult.activityLog["2025-03-14"]).toBe(2);
     expect(hookResult.completedOn["problem-1"]).toBe("2025-03-14");
     expect(progressStateFilterMock).toHaveBeenCalledWith("state", ["todo", "done", "skipped"]);

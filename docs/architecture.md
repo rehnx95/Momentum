@@ -121,17 +121,17 @@ per-user copies without overwriting existing copies. The selected track is
 stored in browser storage.
 
 Users may upload `.txt` tracks up to 2 MB. `parseSheet` validates and
-normalizes steps, subsections, problem names, external problem numbers, and
-default-skip markers before storing the sheet in `user_sheets`. The frontend
-namespaces problem IDs by track so identical source IDs from different tracks
-do not collide. Sheet deletion uses the ownership-checking
+normalizes steps, subsections, problem names, and external problem numbers
+before storing the sheet in `user_sheets`. Problems start as `todo`; users
+mark them done or skipped in the tracker. The frontend namespaces problem IDs
+by track so identical source IDs from different tracks do not collide. Sheet
+deletion uses the ownership-checking
 `delete_user_sheet` RPC and removes related progress safely.
 
 Problem states are `todo`, `done`, and `skipped`. A missing progress row means
-`todo`, unless the track defines that problem as skipped by default. `useProgress`
-loads account-owned rows, applies state changes optimistically, and serializes
-database writes. It also maintains a per-user browser cache; this is a
-performance layer, not a durable offline write queue.
+`todo`. `useProgress` loads account-owned rows, applies state changes
+optimistically, and serializes database writes. It also maintains a per-user
+browser cache; this is a performance layer, not a durable offline write queue.
 
 The `progress` table is the source for solved states and completion dates.
 A PostgreSQL trigger updates `activity_log` in the same transaction when

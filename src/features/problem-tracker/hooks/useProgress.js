@@ -303,14 +303,7 @@ export function useProgress(user) {
     [user, replaceActivity, replaceCompletedAt, replaceCompletedOn, replaceProgress, save],
   );
 
-  const getState = useCallback(
-    (id, defaultSkip) => {
-      if (progress[id]) return progress[id];
-      if (defaultSkip) return "skipped";
-      return "todo";
-    },
-    [progress],
-  );
+  const getState = useCallback((id) => progress[id] || "todo", [progress]);
 
   const reset = useCallback(
     async (problemIds, { persist = true } = {}) => {
