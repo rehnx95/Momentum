@@ -28,7 +28,7 @@ Step 1 — Learn the Basics
 20. Factorial of a Given Number
 21. GCD or HCF
 22. LCM of Two Numbers
-23. Armstrong Numbers
+23. Armstrong Number (LC 1134)
 24. Perfect Number (LC 507)
 25. Print all Divisors
 26. Check for Prime
@@ -122,7 +122,7 @@ Step 4 — Binary Search 1D and 2D and Search Space
 
 4.1 — BS on 1D Arrays
 101. Binary Search (LC 704)
-102. Search Insert Position (LC 35)
+102. Implement Lower Bound (LC 35)
 103. Find First and Last Position of Element in Sorted Array (LC 744)
 104. Search Insert Position (LC 35)
 105. Floor and Ceil in Sorted Array
@@ -229,7 +229,7 @@ Step 6 — Linked List
 6.4 — Medium Problems of DLL
 195. Delete all Occurrences of a Key in DLL
 196. Find Pairs with Given Sum in DLL
-197. Remove Duplicates from Sorted DLL
+197. Remove Duplicates from Sorted DLL (LC 83)
 6.5 — Hard Problems of LL
 198. Reverse Nodes in k-Group (LC 25)
 199. Rotate List (LC 61)
@@ -556,7 +556,7 @@ Step 16 — Dynamic Programming
 467. Rod Cutting Problem
 16.4 — DP on Strings
 468. Longest Common Subsequence (LC 1143)
-469. Print Longest Common Subsequence
+469. Print Longest Common Subsequence (LC 1143)
 470. Maximum Length of Repeated Subarray (LC 718)
 471. Longest Palindromic Subsequence (LC 516)
 472. Palindromic Substrings (LC 647)
@@ -567,7 +567,7 @@ Step 16 — Dynamic Programming
 477. Edit Distance (LC 72)
 478. Wildcard Matching (LC 44)
 479. Word Break (LC 139)
-480. Count Palindromic Subsequences
+480. Count Palindromic Subsequences (LC 730)
 16.5 — DP on Stocks
 481. Best Time to Buy and Sell Stock (LC 121)
 482. Best Time to Buy and Sell Stock II (LC 122)

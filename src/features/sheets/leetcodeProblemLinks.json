@@ -227,6 +227,10 @@
     "url": "https://leetcode.com/problems/search-in-rotated-sorted-array-ii/",
     "difficulty": "Medium"
   },
+  "83": {
+    "url": "https://leetcode.com/problems/remove-duplicates-from-sorted-list/",
+    "difficulty": "Easy"
+  },
   "84": {
     "url": "https://leetcode.com/problems/largest-rectangle-in-histogram/",
     "difficulty": "Hard"
@@ -823,6 +827,10 @@
     "url": "https://leetcode.com/problems/minimum-window-subsequence/",
     "difficulty": "Hard"
   },
+  "730": {
+    "url": "https://leetcode.com/problems/count-different-palindromic-subsequences/",
+    "difficulty": "Hard"
+  },
   "733": {
     "url": "https://leetcode.com/problems/flood-fill/",
     "difficulty": "Easy"
@@ -962,6 +970,10 @@
   "1092": {
     "url": "https://leetcode.com/problems/shortest-common-supersequence/",
     "difficulty": "Hard"
+  },
+  "1134": {
+    "url": "https://leetcode.com/problems/armstrong-number/",
+    "difficulty": "Easy"
   },
   "1143": {
     "url": "https://leetcode.com/problems/longest-common-subsequence/",
