@@ -283,7 +283,12 @@ export default function useAuthentication() {
   };
 
   const handlePasswordSignIn = async (identifier, password) => {
-    if (!hasSupabaseConfiguration()) return false;
+    if (!hasSupabaseConfiguration()) {
+      setAuthError(
+        "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY, then redeploy the app.",
+      );
+      return false;
+    }
     setIsSigningIn(true);
     setAuthAction("password");
     setAuthError("");

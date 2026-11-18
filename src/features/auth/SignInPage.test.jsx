@@ -9,7 +9,7 @@ afterEach(cleanup);
 describe("UnauthenticatedView", () => {
   it("signs in with a username and password", async () => {
     const onPasswordSignIn = vi.fn().mockResolvedValue(true);
-    render(
+    const { container } = render(
       <UnauthenticatedView
         onSignIn={vi.fn()}
         onPasswordSignIn={onPasswordSignIn}
@@ -25,7 +25,7 @@ describe("UnauthenticatedView", () => {
     fireEvent.change(screen.getByLabelText("Password"), {
       target: { value: "password123" },
     });
-    fireEvent.submit(screen.getByLabelText("Password").closest("form"));
+    fireEvent.click(container.querySelector(".auth-credential-submit"));
 
     await waitFor(() => expect(onPasswordSignIn).toHaveBeenCalledWith("rehan", "password123"));
   });

@@ -164,6 +164,20 @@ describe("useAuthentication", () => {
     });
   });
 
+  it("reports missing Supabase configuration when email sign-in is attempted", async () => {
+    vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "");
+    const { result } = renderHook(() => useAuthentication());
+
+    await act(async () => {
+      expect(await result.current.handlePasswordSignIn("test@example.com", "password123")).toBe(
+        false,
+      );
+    });
+
+    expect(result.current.authError).toContain("VITE_SUPABASE_PUBLISHABLE_KEY");
+    expect(authMocks.signInWithPassword).not.toHaveBeenCalled();
+  });
+
   it("signs in with a username through the server and sets the returned session", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
