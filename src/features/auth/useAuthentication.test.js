@@ -7,6 +7,8 @@ const authMocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   from: vi.fn(),
   onAuthStateChange: vi.fn(),
+  setSession: vi.fn(),
+  signInWithPassword: vi.fn(),
   authCallback: null,
 }));
 
@@ -15,6 +17,8 @@ vi.mock("../../shared/lib/supabase", () => ({
     auth: {
       getSession: authMocks.getSession,
       onAuthStateChange: authMocks.onAuthStateChange,
+      setSession: authMocks.setSession,
+      signInWithPassword: authMocks.signInWithPassword,
     },
     from: authMocks.from,
   },
@@ -41,6 +45,9 @@ describe("useAuthentication", () => {
     authMocks.getSession.mockReset();
     authMocks.onAuthStateChange.mockReset();
     authMocks.from.mockReset();
+    authMocks.setSession.mockReset();
+    authMocks.signInWithPassword.mockReset();
+    authMocks.signInWithPassword.mockResolvedValue({ error: null });
     authMocks.onAuthStateChange.mockImplementation((callback) => {
       authMocks.authCallback = callback;
       return { data: { subscription: { unsubscribe: vi.fn() } } };
@@ -55,6 +62,7 @@ describe("useAuthentication", () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
@@ -139,5 +147,96 @@ describe("useAuthentication", () => {
     expect(result.current.appState).toBe(AppState.UNAUTHENTICATED);
     expect(result.current.user).toBeNull();
     expect(localStorage.getItem("momentum:account-cache")).toBeNull();
+  });
+
+  it("signs in with an email and password through Supabase Auth", async () => {
+    const { result } = renderHook(() => useAuthentication());
+
+    await act(async () => {
+      expect(await result.current.handlePasswordSignIn("test@example.com", "password123")).toBe(
+        true,
+      );
+    });
+
+    expect(authMocks.signInWithPassword).toHaveBeenCalledWith({
+      email: "test@example.com",
+      password: "password123",
+    });
+  });
+
+  it("signs in with a username through the server and sets the returned session", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        session: { access_token: "access-token", refresh_token: "refresh-token" },
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    authMocks.setSession.mockResolvedValue({ error: null });
+    const { result } = renderHook(() => useAuthentication());
+
+    await act(async () => {
+      expect(await result.current.handlePasswordSignIn("rehan", "password123")).toBe(true);
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/auth/username-login",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ username: "rehan", password: "password123" }),
+      }),
+    );
+    expect(authMocks.setSession).toHaveBeenCalledWith({
+      access_token: "access-token",
+      refresh_token: "refresh-token",
+    });
+  });
+
+  it("creates an account and establishes the returned session", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        session: { access_token: "access-token", refresh_token: "refresh-token" },
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    authMocks.setSession.mockResolvedValue({ error: null });
+    const { result } = renderHook(() => useAuthentication());
+
+    await act(async () => {
+      expect(await result.current.handleSignUp("test@example.com", "password123")).toBe(true);
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/auth/sign-up",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ email: "test@example.com", password: "password123" }),
+      }),
+    );
+    expect(authMocks.setSession).toHaveBeenCalledWith({
+      access_token: "access-token",
+      refresh_token: "refresh-token",
+    });
+  });
+
+  it("explains when the Vercel sign-up API is unavailable under Vite", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        json: async () => {
+          throw new Error("Unexpected token '<'");
+        },
+      }),
+    );
+    const { result } = renderHook(() => useAuthentication());
+
+    await act(async () => {
+      expect(await result.current.handleSignUp("test@example.com", "password123")).toBeNull();
+    });
+
+    expect(result.current.authError).toContain("npx vercel dev");
+    expect(result.current.authError).toContain("SUPABASE_SERVICE_ROLE_KEY");
   });
 });

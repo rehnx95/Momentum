@@ -75,6 +75,54 @@ function MobileNavSkeleton({ active }) {
   );
 }
 
+function AuthSkeleton() {
+  return (
+    <div className="sk-root sk-auth sk-fullscreen" role="status" aria-label="Loading sign-in screen">
+      <main className="sk-auth-page" aria-hidden="true">
+        <div className="sk-auth-card">
+          <div className="sk-auth-brand">
+            <span className="sk-auth-brand-icon">
+              <Activity size={16} strokeWidth={2.25} />
+            </span>
+            <span>Momentum</span>
+          </div>
+          <Bar className="sk-auth-title" />
+          <div className="sk-auth-description">
+            <Bar />
+            <Bar />
+          </div>
+          <div className="sk-auth-tabs">
+            <Bar className="is-active" />
+            <Bar />
+          </div>
+          <div className="sk-auth-google">
+            <Bar className="sk-auth-google-icon" />
+            <Bar className="sk-auth-google-label" />
+          </div>
+          <div className="sk-auth-divider">
+            <span />
+            <Bar />
+            <span />
+          </div>
+          <div className="sk-auth-form">
+            {times(2, (i) => (
+              <div className="sk-auth-field" key={i}>
+                <Bar className="sk-auth-label" />
+                <Bar className="sk-auth-input" />
+              </div>
+            ))}
+            <Bar className="sk-auth-submit" />
+          </div>
+          <div className="sk-auth-footer">
+            <Bar />
+            <Bar />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
 /* ---------- Tracker ---------- */
 
 function TrackerSkeleton() {
@@ -494,7 +542,9 @@ function PeopleSkeleton() {
 
 /* ---------- Entry ---------- */
 
-export default function AppLoadingFallback({ fullScreen = true }) {
+export default function AppLoadingFallback({ fullScreen = true, auth = false }) {
+  if (auth) return <AuthSkeleton />;
+
   const pathname = typeof window === "undefined" ? "/" : window.location.pathname;
   const variant = getVariant(pathname);
   const active = ACTIVE_NAV[variant];

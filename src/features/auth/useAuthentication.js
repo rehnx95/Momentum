@@ -106,6 +106,7 @@ export default function useAuthentication() {
   const [profile, setProfile] = useState(cachedAccount?.profile || null);
   const [authError, setAuthError] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [authAction, setAuthAction] = useState(null);
   const [authRetryCount, setAuthRetryCount] = useState(0);
   const authEventOccurred = useRef(false);
   const loadedProfileUserId = useRef(null);
@@ -257,6 +258,7 @@ export default function useAuthentication() {
   const handleSignIn = async () => {
     if (!hasSupabaseConfiguration()) return;
     setIsSigningIn(true);
+    setAuthAction("google");
     setAuthError("");
     try {
       preconnectBackend();
@@ -276,6 +278,109 @@ export default function useAuthentication() {
         "Google sign-in could not be started. Check the Google provider settings in Supabase and try again.",
       );
       setIsSigningIn(false);
+      setAuthAction(null);
+    }
+  };
+
+  const handlePasswordSignIn = async (identifier, password) => {
+    if (!hasSupabaseConfiguration()) return false;
+    setIsSigningIn(true);
+    setAuthAction("password");
+    setAuthError("");
+    try {
+      preconnectBackend();
+      const { supabase } = await loadSupabaseModule();
+      if (!supabase) throw new Error("Supabase is not configured.");
+
+      if (identifier.includes("@")) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: identifier,
+          password,
+        });
+        if (error) throw error;
+      } else {
+        const response = await fetch("/api/auth/username-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: identifier, password }),
+        });
+        let result;
+        try {
+          result = await response.json();
+        } catch {
+          throw new Error(
+            "Username sign-in API is unavailable. Run `npx vercel dev` locally and configure SUPABASE_SERVICE_ROLE_KEY.",
+          );
+        }
+        if (!response.ok) {
+          setAuthError(result.error || "Could not sign in. Please try again.");
+          return false;
+        }
+        if (!result.session?.access_token || !result.session?.refresh_token) {
+          throw new Error("Username sign-in returned an invalid session.");
+        }
+
+        const { error } = await supabase.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token,
+        });
+        if (error) throw error;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Password sign-in failed:", error);
+      setAuthError(error.message || "Could not sign in. Please try again.");
+      return false;
+    } finally {
+      setIsSigningIn(false);
+      setAuthAction(null);
+    }
+  };
+
+  const handleSignUp = async (email, password) => {
+    if (!hasSupabaseConfiguration()) return null;
+    setIsSigningIn(true);
+    setAuthAction("sign-up");
+    setAuthError("");
+    try {
+      preconnectBackend();
+      const { supabase } = await loadSupabaseModule();
+      if (!supabase) throw new Error("Supabase is not configured.");
+      const response = await fetch("/api/auth/sign-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        throw new Error(
+          "Email sign-up API is unavailable. Run `npx vercel dev` locally and configure SUPABASE_SERVICE_ROLE_KEY.",
+        );
+      }
+      if (!response.ok) {
+        setAuthError(result.error || "Could not create the account. Please try again.");
+        return null;
+      }
+      if (!result.session?.access_token || !result.session?.refresh_token) {
+        throw new Error("Email sign-up returned an invalid session.");
+      }
+
+      const { error } = await supabase.auth.setSession({
+        access_token: result.session.access_token,
+        refresh_token: result.session.refresh_token,
+      });
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Email sign-up failed:", error);
+      setAuthError(error.message || "Could not create your account. Please try again.");
+      return null;
+    } finally {
+      setIsSigningIn(false);
+      setAuthAction(null);
     }
   };
 
@@ -298,11 +403,16 @@ export default function useAuthentication() {
     setAuthError("");
     setAuthRetryCount((current) => current + 1);
   }, []);
+  const clearAuthError = useCallback(() => setAuthError(""), []);
 
   return {
     appState,
+    authAction,
     authError,
+    clearAuthError,
     handleSignIn,
+    handlePasswordSignIn,
+    handleSignUp,
     handleSignOut,
     isSigningIn,
     profile,

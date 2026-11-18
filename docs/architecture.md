@@ -33,10 +33,10 @@ user context to Supabase; it does not use a service-role key.
 | Component | Responsibility |
 | --- | --- |
 | React app | Screens, interaction state, client-side validation, and feature-level data requests |
-| Supabase Auth | Google OAuth, session restoration, and authenticated identity |
+| Supabase Auth | Google OAuth, email/password sign-up and sign-in, session restoration, and authenticated identity |
 | Supabase Data API | Authenticated database queries and RPC calls |
 | PostgreSQL | Account-owned records, RLS, triggers, and curated profile operations |
-| Vercel | Static app delivery, SPA rewrites, and `api/search.js` |
+| Vercel | Static app delivery, SPA rewrites, and server-side account creation and username login |
 | Browser storage | Theme, view preferences, selected track, and account-scoped caches |
 
 ## 2. Application composition
@@ -46,8 +46,13 @@ user context to Supabase; it does not use a service-role key.
 `src/main.jsx` mounts the app under React Strict Mode and an error boundary,
 loads the global style layers, and starts route-based preloading.
 `src/App.jsx` lazy-loads the sign-in, onboarding, and authenticated
-experiences. `useAuthentication` owns session restoration, Google sign-in,
-profile lookup, sign-out, and the top-level app state:
+experiences. `useAuthentication` owns session restoration, Google and
+email/password sign-in, sign-up, profile lookup, sign-out, and the top-level app
+state. Email sign-up uses the server-side `api/auth/sign-up.js` route to create
+an already-confirmed account and return a session immediately. Username sign-in
+resolves a profile to its email in `api/auth/username-login.js` and returns a
+session only after password authentication succeeds; it never exposes an email
+lookup to unauthenticated clients.
 
 ```text
 LOADING -> UNAUTHENTICATED
@@ -77,6 +82,8 @@ accounts also clears it.
 | `/people` | Username search | Sign-in required |
 | `/user/:username`, `/u/:username` | Curated public profile | Sign-in required |
 | `/api/search?q=<prefix>` | Username-search function | Valid bearer token required |
+| `/api/auth/sign-up` | Email/password account creation | Email and password required |
+| `/api/auth/username-login` | Username/password sign-in | Username and password required |
 
 The Vercel rewrite serves `index.html` for client-side paths; `/api/search` is
 provided by the serverless function.
@@ -282,13 +289,16 @@ use `npx vercel dev` instead of Vite alone.
 For a new project:
 
 1. Apply every SQL migration in `supabase/migrations/` in filename order.
-2. Enable Google in Supabase Auth and configure the Google OAuth callback URL
-   shown by Supabase in the Google provider settings.
+2. Enable Google and Email in Supabase Auth and configure the Google OAuth
+   callback URL shown by Supabase in the Google provider settings.
 3. Set the Supabase Auth Site URL to the intended app origin and add local,
    production, and intended Vercel Preview origins to the allowed redirect
    URLs.
 4. Configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` for the
-   local app and the Vercel project.
+   local app and the Vercel project. Configure `SUPABASE_SERVICE_ROLE_KEY` as
+   a server-only Vercel environment variable for account creation and username
+   sign-in. Never expose the service-role key to browser code or use a `VITE_`
+   prefix.
 
 For an existing database, apply only migrations that have not already been
 applied. Migrations are append-only schema history; do not edit or replay a
@@ -312,9 +322,12 @@ and pull requests. There is no end-to-end browser-test command configured.
 
 Vercel builds with `npm run build` and serves `dist/`. `vercel.json` rewrites
 client-side routes to `index.html` and gives versioned assets immutable cache
-headers. The `/api/search` function also needs the two Supabase environment
-variables above. After changing environment values, redeploy so the built
-assets and function receive them.
+headers. The `/api/search` function needs the two public Supabase environment
+variables above; `/api/auth/sign-up` and `/api/auth/username-login` additionally need the server-only
+`SUPABASE_SERVICE_ROLE_KEY`. Set the service-role key only in Vercel's server
+environment and in an untracked local environment file when running
+`vercel dev`. Never expose it to browser code. After changing environment
+values, redeploy so the built assets and functions receive them.
 
 The current deployment is [momentum-rehnx.vercel.app](https://momentum-rehnx.vercel.app/).
 
@@ -353,6 +366,7 @@ They do not use a service-role key or a separate database.
 | --- | --- |
 | Supabase is not configured | Set both Vite variables in `.env` and restart the dev server. |
 | Google sign-in fails | Check the Supabase provider, Google callback URL, Site URL, and allowed redirects. |
+| Email sign-up or username sign-in fails | Set `SUPABASE_SERVICE_ROLE_KEY` for the Vercel API and use `npx vercel dev` locally. |
 | Profile or sheet setup fails | Confirm all required migrations were applied and inspect the Supabase error. |
 | Progress does not sync | Check the visible sync error, network request, and RLS policies. Optimistic changes are not an offline queue. |
 | Daily Log cannot load or save | Check the daily-log migrations, owner policy, date, and database error. |

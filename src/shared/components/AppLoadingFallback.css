@@ -49,6 +49,77 @@
 .sk-grow {
   flex: 1;
 }
+
+/* Authentication */
+.sk-auth-page {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100svh;
+  place-items: center;
+  padding: var(--space-6);
+}
+.sk-auth-card {
+  width: min(100%, 22.5rem);
+  padding: var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--page);
+}
+.sk-auth-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+.sk-auth-brand-icon {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.45rem;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.sk-auth-title { width: 14rem; height: 1.65rem; margin-bottom: 0.35rem; }
+.sk-auth-description { display: grid; gap: 0.35rem; margin-bottom: var(--space-4); }
+.sk-auth-description .sk-bar { width: 100%; height: 0.65rem; }
+.sk-auth-description .sk-bar:last-child { width: 78%; }
+.sk-auth-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  padding: var(--space-1);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+.sk-auth-tabs .sk-bar { height: 2rem; }
+.sk-auth-google {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+.sk-auth-google-icon { width: 1rem; height: 1rem; border-radius: var(--radius-full); }
+.sk-auth-google-label { width: 10rem; height: 0.75rem; }
+.sk-auth-divider { display: flex; align-items: center; gap: var(--space-3); margin: 0.9rem 0 0.75rem; }
+.sk-auth-divider span { height: 1px; flex: 1; background: var(--border); }
+.sk-auth-divider .sk-bar { width: 1.25rem; height: 0.65rem; }
+.sk-auth-form { display: grid; gap: 0.875rem; }
+.sk-auth-field { display: grid; gap: 0.35rem; }
+.sk-auth-label { width: 6rem; height: 0.65rem; }
+.sk-auth-input { height: 2.8rem; border: 1px solid var(--border); border-radius: 0.7rem; }
+.sk-auth-submit { height: 2.8rem; margin-top: 0.1rem; }
+.sk-auth-footer { display: flex; justify-content: center; gap: var(--space-2); margin-top: 0.85rem; }
+.sk-auth-footer .sk-bar { width: 6rem; height: 0.7rem; }
+.sk-auth-footer .sk-bar:last-child { width: 7rem; }
+
 .sk-row-between {
   display: flex;
   align-items: center;

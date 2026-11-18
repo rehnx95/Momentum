@@ -84,13 +84,16 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your-key
 ```
 
 Open the Vite URL printed in the terminal (normally `http://localhost:5173`).
-Apply the SQL migrations in `supabase/migrations/`, enable Google as a Supabase
-Auth provider, and configure its callback and allowed redirect URLs. The
+Apply the SQL migrations in `supabase/migrations/`, enable Google and Email as
+Supabase Auth providers, and configure the Google callback and allowed redirect
+URLs. Set `SUPABASE_SERVICE_ROLE_KEY` in Vercel for account creation and
+username sign-in; keep it server-side and never expose it with a `VITE_` prefix. The
 [architecture guide](./docs/architecture.md#local-development-and-deployment)
 has the complete setup and deployment steps.
 
-Vite serves the frontend, but not Vercel's `/api/search` function. To exercise
-username search locally, run the app with `npx vercel dev`.
+Vite serves the frontend, but not the Vercel APIs. To exercise account creation,
+username sign-in, or username search locally, set `SUPABASE_SERVICE_ROLE_KEY` in your local
+environment and run the app with `npx vercel dev`.
 
 ## Commands
 
@@ -133,7 +136,7 @@ history rows; it leaves the profile and learning tracks intact.
 ## Project structure
 
 ```text
-api/                      Authenticated username-search function
+api/                      Username search and password sign-in functions
 docs/
   architecture.md         System design, data flows, security, and operations
   screenshots/            Product screenshots

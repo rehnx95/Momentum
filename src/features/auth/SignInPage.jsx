@@ -1,6 +1,36 @@
-import { ChevronRight, Activity } from "lucide-react";
+import { Activity } from "lucide-react";
+import { useState } from "react";
 
-export default function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
+export default function UnauthenticatedView({
+  onSignIn,
+  onPasswordSignIn,
+  onSignUp,
+  onClearError,
+  isSigningIn,
+  authAction,
+  error,
+}) {
+  const [mode, setMode] = useState("sign-in");
+  const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const switchMode = (nextMode) => {
+    setMode(nextMode);
+    setPassword("");
+    onClearError?.();
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (mode === "sign-in") {
+      await onPasswordSignIn(identifier.trim(), password);
+      return;
+    }
+
+    await onSignUp(email.trim(), password);
+  };
+
   return (
     <div className="auth-shell min-h-screen bg-page text-text font-sans">
       <div className="auth-layout auth-layout-simple">
@@ -8,7 +38,7 @@ export default function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
           <div className="auth-panel">
             <div className="auth-simple-brand">
               <div className="brand-mark">
-                <Activity size={21} strokeWidth={2.25} className="text-onAccent" />
+                <Activity size={16} strokeWidth={2.25} className="text-onAccent" />
               </div>
               <span>Momentum</span>
             </div>
@@ -17,14 +47,90 @@ export default function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
               Bring your learning, routines, and daily progress together in one place.
             </p>
             {error && (
-              <p
-                role="alert"
-                className="mb-5 rounded-xl border border-border-strong bg-rowHover p-3 text-sm text-muted"
-              >
+              <p role="alert" className="auth-error-message">
                 {error}
               </p>
             )}
-            <button onClick={onSignIn} disabled={isSigningIn} className="google-signin-button">
+            <div className="auth-mode-tabs" role="group" aria-label="Account access">
+              <button
+                type="button"
+                aria-pressed={mode === "sign-in"}
+                className={mode === "sign-in" ? "is-active" : ""}
+                disabled={isSigningIn}
+                onClick={() => switchMode("sign-in")}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                aria-pressed={mode === "sign-up"}
+                className={mode === "sign-up" ? "is-active" : ""}
+                disabled={isSigningIn}
+                onClick={() => switchMode("sign-up")}
+              >
+                Create account
+              </button>
+            </div>
+            <form className="auth-credential-form" onSubmit={handleSubmit}>
+              {mode === "sign-in" ? (
+                <div className="auth-form-field">
+                  <label htmlFor="auth-identifier">Email or username</label>
+                  <input
+                    id="auth-identifier"
+                    type="text"
+                    autoComplete="username"
+                    placeholder="you@example.com"
+                    value={identifier}
+                    onChange={(event) => setIdentifier(event.target.value)}
+                    required
+                  />
+                </div>
+              ) : (
+                <div className="auth-form-field">
+                  <label htmlFor="auth-email">Email</label>
+                  <input
+                    id="auth-email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    required
+                  />
+                </div>
+              )}
+              <div className="auth-form-field">
+                <label htmlFor="auth-password">Password</label>
+                <input
+                  id="auth-password"
+                  type="password"
+                  autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
+                  placeholder="••••••••"
+                  minLength={mode === "sign-up" ? 6 : undefined}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                />
+              </div>
+              <button type="submit" disabled={isSigningIn} className="auth-credential-submit">
+                {authAction === (mode === "sign-in" ? "password" : "sign-up")
+                  ? mode === "sign-in"
+                    ? "Signing in…"
+                    : "Creating account…"
+                  : mode === "sign-in"
+                    ? "Sign in"
+                    : "Create account"}
+              </button>
+            </form>
+            <div className="auth-divider">
+              <span>OR</span>
+            </div>
+            <button
+              type="button"
+              onClick={onSignIn}
+              disabled={isSigningIn}
+              className="google-signin-button"
+            >
               <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
                 <path
                   fill="#4285F4"
@@ -43,13 +149,17 @@ export default function UnauthenticatedView({ onSignIn, isSigningIn, error }) {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              {isSigningIn ? "Connecting to Google…" : "Continue with Google"}
-              {!isSigningIn && <ChevronRight size={17} />}
+              {authAction === "google" ? "Connecting to Google…" : "Continue with Google"}
             </button>
-            <div className="auth-divider">
-              <span>SECURE SIGN IN</span>
-            </div>
-            <p className="auth-legal">Your sheets and progress sync to your account.</p>
+            <p className="auth-mode-switch">
+              {mode === "sign-in" ? "New to Momentum?" : "Already have an account?"}{" "}
+              <button
+                type="button"
+                onClick={() => switchMode(mode === "sign-in" ? "sign-up" : "sign-in")}
+              >
+                {mode === "sign-in" ? "Create an account" : "Sign in"}
+              </button>
+            </p>
           </div>
         </section>
       </div>

@@ -9,6 +9,21 @@ import AppLoadingFallback from "./AppLoadingFallback";
 afterEach(cleanup);
 
 describe("AppLoadingFallback tracker", () => {
+  it("uses the authentication skeleton while the session is loading", () => {
+    const previousPath = window.location.pathname;
+    window.history.replaceState({}, "", "/profile");
+
+    try {
+      const { container } = render(<AppLoadingFallback auth />);
+
+      expect(container.querySelector(".sk-auth-card")).not.toBeNull();
+      expect(container.querySelector(".sk-profile")).toBeNull();
+      expect(container.querySelectorAll(".sk-auth-input")).toHaveLength(2);
+    } finally {
+      window.history.replaceState({}, "", previousPath);
+    }
+  });
+
   it("uses placeholders instead of difficulty and solved labels", () => {
     const { container } = render(<AppLoadingFallback />);
     const progressCard = container.querySelector(".sk-side-card");

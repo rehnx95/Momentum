@@ -32,8 +32,12 @@ try {
 function App() {
   const {
     appState,
+    authAction,
     authError,
+    clearAuthError,
     handleSignIn,
+    handlePasswordSignIn,
+    handleSignUp,
     handleSignOut,
     isSigningIn,
     profile,
@@ -58,9 +62,13 @@ function App() {
 
   if (appState === AppState.UNAUTHENTICATED) {
     return (
-      <Suspense fallback={<AppLoadingFallback />}>
+      <Suspense fallback={<AppLoadingFallback auth />}>
         <UnauthenticatedView
           onSignIn={handleSignIn}
+          onPasswordSignIn={handlePasswordSignIn}
+          onSignUp={handleSignUp}
+          onClearError={clearAuthError}
+          authAction={authAction}
           isSigningIn={isSigningIn}
           error={authError}
         />
@@ -70,7 +78,7 @@ function App() {
 
   if (appState === AppState.ONBOARDING && user) {
     return (
-      <Suspense fallback={<AppLoadingFallback />}>
+      <Suspense fallback={<AppLoadingFallback auth />}>
         <OnboardingPage
           user={user}
           profile={profile}
@@ -88,7 +96,7 @@ function App() {
   if (appState === AppState.LOADING) {
     return (
       <>
-        <AppLoadingFallback />
+        <AppLoadingFallback auth />
         {authError && (
           <div
             role="alert"
