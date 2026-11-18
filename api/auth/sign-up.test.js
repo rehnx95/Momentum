@@ -71,4 +71,39 @@ describe("email sign-up API", () => {
     expect(response.statusCode).toBe(201);
     expect(response.body.session.access_token).toBe("access");
   });
+
+  it("explains when an account already exists for the email", async () => {
+    supabaseMocks.adminCreateUser.mockResolvedValue({
+      error: { code: "email_exists", status: 422 },
+    });
+    const response = createResponse();
+
+    await handler(
+      { method: "POST", body: { email: "rehan@example.com", password: "password123" } },
+      response,
+    );
+
+    expect(response.statusCode).toBe(409);
+    expect(response.body.error).toContain("already exists");
+    expect(supabaseMocks.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it("logs safe diagnostics for unexpected Supabase errors", async () => {
+    supabaseMocks.adminCreateUser.mockResolvedValue({
+      error: { code: "bad_jwt", status: 401 },
+    });
+    const logError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const response = createResponse();
+
+    await handler(
+      { method: "POST", body: { email: "rehan@example.com", password: "password123" } },
+      response,
+    );
+
+    expect(response.statusCode).toBe(500);
+    expect(logError).toHaveBeenCalledWith("Supabase account creation failed:", {
+      code: "bad_jwt",
+      status: 401,
+    });
+  });
 });

@@ -46,8 +46,31 @@ export default async function handler(req, res) {
       email_confirm: true,
     });
     if (createError) {
-      return res.status(400).json({
-        error: "Could not create the account. Check your email and password, or sign in instead.",
+      if (["email_exists", "user_already_exists"].includes(createError.code)) {
+        return res.status(409).json({
+          error: "An account with this email already exists. Sign in instead.",
+        });
+      }
+      if (["weak_password", "password_too_short"].includes(createError.code)) {
+        return res.status(400).json({
+          error: "Your password does not meet the requirements. Choose a stronger password.",
+        });
+      }
+      if (createError.code === "invalid_email") {
+        return res.status(400).json({ error: "Enter a valid email address." });
+      }
+      if (["email_provider_disabled", "signup_disabled"].includes(createError.code)) {
+        return res.status(400).json({
+          error: "Email sign-up is disabled for this project. Please contact support.",
+        });
+      }
+
+      console.error("Supabase account creation failed:", {
+        code: createError.code,
+        status: createError.status,
+      });
+      return res.status(500).json({
+        error: "Account creation is temporarily unavailable. Please try again later.",
       });
     }
 
