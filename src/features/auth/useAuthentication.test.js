@@ -149,6 +149,39 @@ describe("useAuthentication", () => {
     expect(localStorage.getItem("momentum:account-cache")).toBeNull();
   });
 
+  it("reloads the profile when signing back into the same account", async () => {
+    const user = { id: cachedProfile.id, email: "test@example.com" };
+    localStorage.setItem(
+      "momentum:account-cache",
+      JSON.stringify({ user, profile: cachedProfile }),
+    );
+    authMocks.getSession.mockResolvedValue({
+      data: { session: { user } },
+      error: null,
+    });
+    authMocks.signInWithPassword.mockResolvedValue({
+      data: { user },
+      error: null,
+    });
+
+    const { result } = renderHook(() => useAuthentication());
+    await waitFor(() => expect(result.current.appState).toBe(AppState.AUTHENTICATED));
+
+    await act(async () => {
+      authMocks.authCallback("SIGNED_OUT", null);
+    });
+    expect(result.current.appState).toBe(AppState.UNAUTHENTICATED);
+
+    await act(async () => {
+      expect(await result.current.handlePasswordSignIn("test@example.com", "password123")).toBe(
+        true,
+      );
+    });
+
+    await waitFor(() => expect(result.current.appState).toBe(AppState.AUTHENTICATED));
+    expect(result.current.user).toEqual(user);
+  });
+
   it("updates the app after sign-in when no session existed on page load", async () => {
     const user = { id: cachedProfile.id, email: "test@example.com" };
     const incompleteProfile = { ...cachedProfile, onboarding_completed: false };

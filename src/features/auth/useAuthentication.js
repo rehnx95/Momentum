@@ -161,6 +161,7 @@ export default function useAuthentication() {
           if (event !== "SIGNED_OUT") return;
           authEventOccurred.current = true;
           setAuthError("");
+          loadedProfileUserId.current = null;
           setUser(null);
           clearAppScopedStorage();
           localStorage.removeItem(ACCOUNT_CACHE_KEY);
@@ -180,6 +181,7 @@ export default function useAuthentication() {
         setAuthError("");
         setUser(session?.user ?? null);
         if (!session) {
+          loadedProfileUserId.current = null;
           clearAppScopedStorage();
           localStorage.removeItem(ACCOUNT_CACHE_KEY);
           setProfile(null);
@@ -401,9 +403,13 @@ export default function useAuthentication() {
       if (!supabase) return;
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      loadedProfileUserId.current = null;
       clearAppScopedStorage();
       localStorage.removeItem(ACCOUNT_CACHE_KEY);
       previousUserId.current = null;
+      setUser(null);
+      setProfile(null);
+      setAppState(AppState.UNAUTHENTICATED);
     } catch (error) {
       console.error("Sign out error:", error);
       setAuthError("Could not sign out. Please try again.");
