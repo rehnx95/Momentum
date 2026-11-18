@@ -125,28 +125,35 @@ describe("useAuthentication", () => {
   });
 
   it("clears the cached account after an explicit sign-out event", async () => {
-    localStorage.setItem(
-      "momentum:account-cache",
-      JSON.stringify({
-        user: { id: cachedProfile.id, email: "test@example.com" },
-        profile: cachedProfile,
-      }),
-    );
-    authMocks.getSession.mockResolvedValue({
-      data: { session: { user: { id: cachedProfile.id, email: "test@example.com" } } },
-      error: null,
-    });
+    const previousPath = window.location.pathname;
+    window.history.replaceState({}, "", "/profile/edit");
+    try {
+      localStorage.setItem(
+        "momentum:account-cache",
+        JSON.stringify({
+          user: { id: cachedProfile.id, email: "test@example.com" },
+          profile: cachedProfile,
+        }),
+      );
+      authMocks.getSession.mockResolvedValue({
+        data: { session: { user: { id: cachedProfile.id, email: "test@example.com" } } },
+        error: null,
+      });
 
-    const { result } = renderHook(() => useAuthentication());
-    await waitFor(() => expect(authMocks.authCallback).toEqual(expect.any(Function)));
+      const { result } = renderHook(() => useAuthentication());
+      await waitFor(() => expect(authMocks.authCallback).toEqual(expect.any(Function)));
 
-    await act(async () => {
-      authMocks.authCallback("SIGNED_OUT", null);
-    });
+      await act(async () => {
+        authMocks.authCallback("SIGNED_OUT", null);
+      });
 
-    expect(result.current.appState).toBe(AppState.UNAUTHENTICATED);
-    expect(result.current.user).toBeNull();
-    expect(localStorage.getItem("momentum:account-cache")).toBeNull();
+      expect(result.current.appState).toBe(AppState.UNAUTHENTICATED);
+      expect(result.current.user).toBeNull();
+      expect(localStorage.getItem("momentum:account-cache")).toBeNull();
+      expect(window.location.pathname).toBe("/");
+    } finally {
+      window.history.replaceState({}, "", previousPath);
+    }
   });
 
   it("reloads the profile when signing back into the same account", async () => {
@@ -180,6 +187,27 @@ describe("useAuthentication", () => {
 
     await waitFor(() => expect(result.current.appState).toBe(AppState.AUTHENTICATED));
     expect(result.current.user).toEqual(user);
+  });
+
+  it("keeps the loaded page when Supabase repeats SIGNED_IN for the same user", async () => {
+    const user = { id: cachedProfile.id, email: "test@example.com" };
+    localStorage.setItem(
+      "momentum:account-cache",
+      JSON.stringify({ user, profile: cachedProfile }),
+    );
+    authMocks.getSession.mockResolvedValue({
+      data: { session: { user } },
+      error: null,
+    });
+
+    const { result } = renderHook(() => useAuthentication());
+    await waitFor(() => expect(result.current.appState).toBe(AppState.AUTHENTICATED));
+
+    await act(async () => {
+      authMocks.authCallback("SIGNED_IN", { user });
+    });
+
+    expect(result.current.appState).toBe(AppState.AUTHENTICATED);
   });
 
   it("updates the app after sign-in when no session existed on page load", async () => {

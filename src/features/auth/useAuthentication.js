@@ -58,6 +58,12 @@ function clearAppScopedStorage() {
   }
 }
 
+function resetToTrackerRoute() {
+  if (window.location.pathname !== "/") {
+    window.history.replaceState({}, "", "/");
+  }
+}
+
 function fetchProfile(userId) {
   const existingRequest = profileRequests.get(userId);
   if (existingRequest) return existingRequest;
@@ -154,7 +160,9 @@ export default function useAuthentication() {
           if (session?.user) {
             authEventOccurred.current = true;
             setAuthError("");
-            setAppState(AppState.LOADING);
+            if (loadedProfileUserId.current !== session.user.id) {
+              setAppState(AppState.LOADING);
+            }
             setUser(session.user);
             return;
           }
@@ -162,6 +170,7 @@ export default function useAuthentication() {
           authEventOccurred.current = true;
           setAuthError("");
           loadedProfileUserId.current = null;
+          resetToTrackerRoute();
           setUser(null);
           clearAppScopedStorage();
           localStorage.removeItem(ACCOUNT_CACHE_KEY);
@@ -404,6 +413,7 @@ export default function useAuthentication() {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       loadedProfileUserId.current = null;
+      resetToTrackerRoute();
       clearAppScopedStorage();
       localStorage.removeItem(ACCOUNT_CACHE_KEY);
       previousUserId.current = null;
