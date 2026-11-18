@@ -1,7 +1,7 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { writeUserDataCache } from "../../../shared/lib/userDataCache";
+import { readUserDataCache, writeUserDataCache } from "../../../shared/lib/userDataCache";
 import { useProgress } from "./useProgress";
 
 const fromMock = vi.hoisted(() => vi.fn());
@@ -61,6 +61,8 @@ describe("useProgress", () => {
     installBrowserStubs();
     fromMock.mockReset();
     progressStateFilterMock.mockReset();
+    vi.mocked(readUserDataCache).mockReset();
+    vi.mocked(readUserDataCache).mockReturnValue(null);
     fromMock.mockImplementation((table) => {
       if (table === "progress") {
         return {
@@ -128,6 +130,39 @@ describe("useProgress", () => {
     expect(hookResult.activityLog["2025-03-14"]).toBe(2);
     expect(hookResult.completedOn["problem-1"]).toBe("2025-03-14");
     expect(progressStateFilterMock).toHaveBeenCalledWith("state", ["todo", "done", "skipped"]);
+  });
+
+  it("renders a valid cached progress snapshot before the network refresh", async () => {
+    const cachedData = {
+      progress: { "problem-1": "done" },
+      activityLog: { "2025-03-14": 1 },
+      completedOn: { "problem-1": "2025-03-14" },
+      completedAt: { "problem-1": "2025-03-14T12:00:00.000Z" },
+    };
+    vi.mocked(readUserDataCache).mockReturnValue(cachedData);
+    let firstRender;
+    let hookResult;
+    const user = { id: "user-1" };
+
+    function HookHarness() {
+      hookResult = useProgress(user);
+      React.useLayoutEffect(() => {
+        firstRender = {
+          loading: hookResult.loading,
+          progress: hookResult.progress,
+        };
+      }, []);
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(firstRender.loading).toBe(false);
+    expect(firstRender.progress).toEqual(cachedData.progress);
   });
 
   it("does not issue a separate activity-log write when progress changes", async () => {

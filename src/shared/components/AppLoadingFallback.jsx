@@ -123,6 +123,45 @@ function AuthSkeleton() {
   );
 }
 
+function SetupSkeleton() {
+  return (
+    <div
+      className="sk-root sk-auth sk-setup sk-fullscreen"
+      role="status"
+      aria-label="Loading profile setup"
+    >
+      <main className="sk-auth-page" aria-hidden="true">
+        <div className="sk-auth-card">
+          <div className="sk-auth-brand">
+            <span className="sk-auth-brand-icon">
+              <Activity size={16} strokeWidth={2.25} />
+            </span>
+            <span>Momentum</span>
+          </div>
+          <Bar className="sk-auth-title" />
+          <div className="sk-auth-description">
+            <Bar />
+            <Bar />
+          </div>
+          <div className="sk-auth-form">
+            {times(2, (i) => (
+              <div className="sk-auth-field" key={i}>
+                <Bar className="sk-auth-label" />
+                <Bar className="sk-auth-input" />
+                {i === 1 && <Bar className="sk-setup-username-status" />}
+              </div>
+            ))}
+            <Bar className="sk-auth-submit" />
+          </div>
+          <div className="sk-setup-footer">
+            <Bar />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
 /* ---------- Tracker ---------- */
 
 function TrackerSkeleton() {
@@ -510,12 +549,16 @@ function SettingsSkeleton() {
   return (
     <div className="sk-settings">
       <Bar className="sk-back" />
-      <Bar className="sk-settings-title" />
+      <div className="sk-settings-intro">
+        <Bar className="sk-settings-title" />
+        <Bar className="sk-settings-description" />
+      </div>
       <section className="sk-card sk-form">
         {times(2, (i) => (
           <div className="sk-field" key={i}>
-            <Bar className="sk-label" />
+            <Bar className={`sk-label${i === 0 ? " sk-name-label" : ""}`} />
             <Bar className="sk-input" />
+            {i === 1 && <Bar className="sk-settings-help" />}
           </div>
         ))}
         <Bar className="sk-submit" />
@@ -542,8 +585,9 @@ function PeopleSkeleton() {
 
 /* ---------- Entry ---------- */
 
-export default function AppLoadingFallback({ fullScreen = true, auth = false }) {
+export default function AppLoadingFallback({ fullScreen = true, auth = false, setup = false }) {
   if (auth) return <AuthSkeleton />;
+  if (setup) return <SetupSkeleton />;
 
   const pathname = typeof window === "undefined" ? "/" : window.location.pathname;
   const variant = getVariant(pathname);

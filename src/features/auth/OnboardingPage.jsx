@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../shared/lib/supabase";
-import MomentumBrand from "../../shared/components/MomentumBrand";
-import Tooltip from "../../shared/components/Tooltip";
-import { User, LogOut, CircleCheck, CircleX } from "lucide-react";
+import { Activity, CircleCheck, CircleX, LogOut, User } from "lucide-react";
 
 const USERNAME_MAX_LENGTH = 20;
 
@@ -137,194 +135,143 @@ export default function OnboardingPage({ user, profile, onGoToDashboard, onCompl
   };
 
   return (
-    <div className="profile-settings-shell onboarding-page min-h-screen bg-page text-text font-sans flex flex-col">
-      {/* Header */}
-      <header className="dashboard-header backdrop-blur-xl border-b border-subtle">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <MomentumBrand onNavigate={onGoToDashboard} subtitle="" />
-          </div>
-          <Tooltip label="Sign out of your account">
+    <div className="auth-shell min-h-screen bg-page text-text font-sans">
+      <div className="auth-layout auth-layout-simple">
+        <section className="auth-panel-wrap" aria-labelledby="onboarding-title">
+          <div className="auth-panel onboarding-panel onboarding-auth-panel">
             <button
-              onClick={onSignOut}
-              className="text-muted hover:text-text flex items-center gap-2 text-sm"
+              type="button"
+              className="auth-simple-brand onboarding-brand-button"
+              onClick={onGoToDashboard}
+              aria-label="Momentum - go to dashboard"
             >
-              <LogOut size={14} />
-              Sign out
+              <span className="brand-mark">
+                <Activity size={16} strokeWidth={2.25} className="text-onAccent" />
+              </span>
+              <span>Momentum</span>
             </button>
-          </Tooltip>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="onboarding-main mx-auto flex w-full max-w-3xl flex-1 items-center px-4 md:px-6">
-        <div
-          className="onboarding-panel w-full rounded-2xl border p-6 md:p-8"
-          aria-labelledby="onboarding-title"
-        >
-          <div className="onboarding-intro">
-            <h1 id="onboarding-title">Welcome to Momentum</h1>
-            <p id="onboarding-description">
+            <h1 id="onboarding-title" className="auth-simple-title">
+              Welcome to Momentum
+            </h1>
+            <p id="onboarding-description" className="auth-panel-description">
               Set up your profile to make Momentum yours. Keep your learning, routines, and daily
               progress moving forward.
             </p>
-          </div>
 
-          {errors.submit && (
-            <div className="bg-rowHover border border-border-strong rounded-lg p-3 mb-6 text-muted text-sm">
-              {errors.submit}
-            </div>
-          )}
-
-          <form
-            onSubmit={handleSubmit}
-            className="onboarding-form"
-            aria-describedby="onboarding-description"
-          >
-            {/* Name Field */}
-            <div>
-              <label
-                htmlFor="onboarding-name"
-                className="block text-sm font-medium text-text mb-2"
-              >
-                Full Name <span className="text-muted">*</span>
-              </label>
-              <div className="relative">
-                <User
-                  size={20}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
-                  aria-hidden="true"
-                />
-                <input
-                  id="onboarding-name"
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="John Doe"
-                  aria-invalid={Boolean(errors.name)}
-                  aria-describedby={errors.name ? "onboarding-name-error" : undefined}
-                  className="w-full pl-10 pr-4 py-3 bg-page border border-subtle rounded-lg text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                />
-              </div>
-              {errors.name && (
-                <p id="onboarding-name-error" className="text-muted text-sm mt-1">
-                  {errors.name}
-                </p>
-              )}
-            </div>
-
-            {/* Username Field */}
-            <div>
-              <label
-                htmlFor="onboarding-username"
-                className="block text-sm font-medium text-text mb-2"
-              >
-                Username (Handle) <span className="text-muted">*</span>
-              </label>
-              <div className="onboarding-username-field">
-                <User
-                  size={20}
-                  className="onboarding-username-icon absolute left-3 top-1/2 -translate-y-1/2 text-muted"
-                  aria-hidden="true"
-                />
-                <input
-                  id="onboarding-username"
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  placeholder="johndoe"
-                  maxLength={USERNAME_MAX_LENGTH}
-                  aria-invalid={Boolean(errors.username) || usernameAvailable === false}
-                  aria-describedby="onboarding-username-status"
-                  className={`onboarding-username-input w-full pr-4 py-3 rounded-lg text-text placeholder:text-muted focus:outline-none focus:ring-2 transition-all ${
-                    usernameAvailable === true && !errors.username
-                      ? "is-available"
-                      : usernameAvailable === false || errors.username
-                        ? "is-taken"
-                        : ""
-                  }`}
-                />
-              </div>
-              <p
-                id="onboarding-username-status"
-                className={`onboarding-username-status${usernameAvailable === true && !errors.username ? " is-available" : ""}${usernameAvailable === false || errors.username ? " is-taken" : ""}`}
-                aria-live="polite"
-                role={errors.username ? "alert" : undefined}
-              >
-                {errors.username ? (
-                  <>
-                    <CircleX size={16} aria-hidden="true" />
-                    <span>{errors.username}</span>
-                  </>
-                ) : usernameAvailable === true ? (
-                  <>
-                    <CircleCheck size={16} aria-hidden="true" />
-                    <span>Username is available</span>
-                  </>
-                ) : usernameAvailable === false ? (
-                  <>
-                    <CircleX size={16} aria-hidden="true" />
-                    <span>{validationMessage}</span>
-                  </>
-                ) : (
-                  validationMessage
-                )}
+            {errors.submit && (
+              <p role="alert" className="auth-error-message">
+                {errors.submit}
               </p>
-            </div>
+            )}
 
-            {/* Submit Button */}
-            <div className="onboarding-submit">
+            <form
+              onSubmit={handleSubmit}
+              className="onboarding-form"
+              aria-describedby="onboarding-description"
+            >
+              <div className="auth-form-field">
+                <label htmlFor="onboarding-name">
+                  Full Name <span className="text-muted">*</span>
+                </label>
+                <div className="relative">
+                  <User
+                    size={18}
+                    className="onboarding-field-icon absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+                    aria-hidden="true"
+                  />
+                  <input
+                    id="onboarding-name"
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="John Doe"
+                    aria-invalid={Boolean(errors.name)}
+                    aria-describedby={errors.name ? "onboarding-name-error" : undefined}
+                    className="onboarding-profile-input"
+                  />
+                </div>
+                {errors.name && (
+                  <p id="onboarding-name-error" className="text-muted text-sm">
+                    {errors.name}
+                  </p>
+                )}
+              </div>
+
+              <div className="auth-form-field">
+                <label htmlFor="onboarding-username">
+                  Username (Handle) <span className="text-muted">*</span>
+                </label>
+                <div className="onboarding-username-field">
+                  <User
+                    size={18}
+                    className="onboarding-username-icon absolute top-1/2 -translate-y-1/2"
+                    aria-hidden="true"
+                  />
+                  <input
+                    id="onboarding-username"
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    placeholder="johndoe"
+                    maxLength={USERNAME_MAX_LENGTH}
+                    aria-invalid={Boolean(errors.username) || usernameAvailable === false}
+                    aria-describedby="onboarding-username-status"
+                    className={`onboarding-username-input${
+                      usernameAvailable === true && !errors.username
+                        ? " is-available"
+                        : usernameAvailable === false || errors.username
+                          ? " is-taken"
+                          : ""
+                    }`}
+                  />
+                </div>
+                <p
+                  id="onboarding-username-status"
+                  className={`onboarding-username-status${usernameAvailable === true && !errors.username ? " is-available" : ""}${usernameAvailable === false || errors.username ? " is-taken" : ""}`}
+                  aria-live="polite"
+                  role={errors.username ? "alert" : undefined}
+                >
+                  {errors.username ? (
+                    <>
+                      <CircleX size={16} aria-hidden="true" />
+                      <span>{errors.username}</span>
+                    </>
+                  ) : usernameAvailable === true ? (
+                    <>
+                      <CircleCheck size={16} aria-hidden="true" />
+                      <span>Username is available</span>
+                    </>
+                  ) : usernameAvailable === false ? (
+                    <>
+                      <CircleX size={16} aria-hidden="true" />
+                      <span>{validationMessage}</span>
+                    </>
+                  ) : (
+                    validationMessage
+                  )}
+                </p>
+              </div>
+
               <button
                 type="submit"
                 disabled={isLoading || usernameAvailable === false}
-                className="onboarding-submit-button w-full flex items-center justify-center gap-2 px-4 py-4 bg-accent hover:bg-accentHover disabled:bg-subtle disabled:text-muted disabled:cursor-not-allowed text-onAccent font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-page"
+                className="auth-credential-submit onboarding-auth-submit"
               >
-                {isLoading ? (
-                  <>
-                    <svg
-                      className="animate-spin h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    <span>Creating Profile...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Get started</span>
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                  </>
-                )}
+                {isLoading ? "Creating profile..." : "Get started"}
               </button>
-            </div>
-          </form>
-        </div>
-      </main>
+            </form>
+
+            <p className="auth-mode-switch">
+              <button type="button" className="onboarding-signout" onClick={onSignOut}>
+                <LogOut size={14} aria-hidden="true" />
+                Sign out
+              </button>
+            </p>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

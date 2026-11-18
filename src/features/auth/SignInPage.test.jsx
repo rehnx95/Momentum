@@ -9,11 +9,13 @@ afterEach(cleanup);
 describe("UnauthenticatedView", () => {
   it("signs in with a username and password", async () => {
     const onPasswordSignIn = vi.fn().mockResolvedValue(true);
+    const onPrepareApp = vi.fn();
     const { container } = render(
       <UnauthenticatedView
         onSignIn={vi.fn()}
         onPasswordSignIn={onPasswordSignIn}
         onSignUp={vi.fn()}
+        onPrepareApp={onPrepareApp}
         onClearError={vi.fn()}
         isSigningIn={false}
       />,
@@ -28,6 +30,25 @@ describe("UnauthenticatedView", () => {
     fireEvent.click(container.querySelector(".auth-credential-submit"));
 
     await waitFor(() => expect(onPasswordSignIn).toHaveBeenCalledWith("rehan", "password123"));
+    expect(onPrepareApp).toHaveBeenCalledOnce();
+  });
+
+  it("preloads the authenticated app before starting Google sign-in", () => {
+    const calls = [];
+    render(
+      <UnauthenticatedView
+        onSignIn={() => calls.push("google")}
+        onPasswordSignIn={vi.fn()}
+        onSignUp={vi.fn()}
+        onPrepareApp={() => calls.push("prepare")}
+        onClearError={vi.fn()}
+        isSigningIn={false}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue with Google" }));
+
+    expect(calls).toEqual(["prepare", "google"]);
   });
 
   it("creates an account with email and password", async () => {

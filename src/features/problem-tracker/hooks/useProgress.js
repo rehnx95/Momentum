@@ -7,16 +7,40 @@ function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+function readCachedProgress(userId) {
+  if (!userId) return null;
+  const cached = readUserDataCache(userId, "progress");
+  return isRecord(cached?.progress) &&
+    isRecord(cached?.activityLog) &&
+    isRecord(cached?.completedOn) &&
+    isRecord(cached?.completedAt)
+    ? cached
+    : null;
+}
+
 export function useProgress(user) {
-  const [progress, setProgress] = useState({});
+  const userId = user?.id;
+  const [initialCache] = useState(() => ({
+    userId,
+    data: readCachedProgress(userId),
+  }));
+  const cachedForCurrentUser =
+    initialCache.userId === userId ? initialCache.data : null;
+  const [progress, setProgress] = useState(() => cachedForCurrentUser?.progress || {});
   const progressRef = useRef(progress);
-  const completedOnRef = useRef({});
-  const [completedOn, setCompletedOn] = useState({});
-  const completedAtRef = useRef({});
-  const [completedAt, setCompletedAt] = useState({});
-  const [activityLog, setActivityLog] = useState({});
+  const completedOnRef = useRef(cachedForCurrentUser?.completedOn || {});
+  const [completedOn, setCompletedOn] = useState(
+    () => cachedForCurrentUser?.completedOn || {},
+  );
+  const completedAtRef = useRef(cachedForCurrentUser?.completedAt || {});
+  const [completedAt, setCompletedAt] = useState(
+    () => cachedForCurrentUser?.completedAt || {},
+  );
+  const [activityLog, setActivityLog] = useState(
+    () => cachedForCurrentUser?.activityLog || {},
+  );
   const activityRef = useRef(activityLog);
-  const [loading, setLoading] = useState(Boolean(user));
+  const [loading, setLoading] = useState(Boolean(user) && !cachedForCurrentUser);
   const [error, setError] = useState("");
   const [theme, setTheme] = useState(() => {
     try {
@@ -87,7 +111,7 @@ export function useProgress(user) {
   );
 
   useEffect(() => {
-    if (!user || !supabase) {
+    if (!userId || !supabase) {
       replaceProgress({});
       replaceActivity({});
       replaceCompletedOn({});
@@ -97,13 +121,9 @@ export function useProgress(user) {
     }
 
     let active = true;
-    const cached = readUserDataCache(user.id, "progress");
-    const hasCachedData = Boolean(
-      isRecord(cached?.progress) &&
-      isRecord(cached?.activityLog) &&
-      isRecord(cached?.completedOn) &&
-      isRecord(cached?.completedAt),
-    );
+    const cached =
+      initialCache.userId === userId ? initialCache.data : readCachedProgress(userId);
+    const hasCachedData = Boolean(cached);
     setError("");
     replaceProgress(hasCachedData ? cached.progress : {});
     replaceActivity(hasCachedData ? cached.activityLog : {});
@@ -114,7 +134,7 @@ export function useProgress(user) {
     supabase
       .from("progress")
       .select("problem_id, state, completed_on, updated_at")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .in("state", ["todo", "done", "skipped"])
       .then((progressResult) => {
         if (progressResult.error) throw progressResult.error;
@@ -145,7 +165,7 @@ export function useProgress(user) {
         replaceActivity(activityMap);
         replaceCompletedOn(completedOnMap);
         replaceCompletedAt(completedAtMap);
-        cacheProgress(user.id, progressMap, activityMap, completedOnMap, completedAtMap);
+        cacheProgress(userId, progressMap, activityMap, completedOnMap, completedAtMap);
       })
       .catch((loadError) => {
         if (!active) return;
@@ -162,7 +182,8 @@ export function useProgress(user) {
       active = false;
     };
   }, [
-    user,
+    userId,
+    initialCache,
     cacheProgress,
     replaceActivity,
     replaceCompletedAt,

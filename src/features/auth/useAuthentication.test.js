@@ -135,6 +135,8 @@ describe("useAuthentication", () => {
           profile: cachedProfile,
         }),
       );
+      localStorage.setItem(`momentum:builtins:${cachedProfile.id}`, "manifest-v1");
+      localStorage.setItem(`momentum:user-data:${cachedProfile.id}:progress`, "{}");
       authMocks.getSession.mockResolvedValue({
         data: { session: { user: { id: cachedProfile.id, email: "test@example.com" } } },
         error: null,
@@ -150,6 +152,8 @@ describe("useAuthentication", () => {
       expect(result.current.appState).toBe(AppState.UNAUTHENTICATED);
       expect(result.current.user).toBeNull();
       expect(localStorage.getItem("momentum:account-cache")).toBeNull();
+      expect(localStorage.getItem(`momentum:builtins:${cachedProfile.id}`)).toBe("manifest-v1");
+      expect(localStorage.getItem(`momentum:user-data:${cachedProfile.id}:progress`)).toBeNull();
       expect(window.location.pathname).toBe("/");
     } finally {
       window.history.replaceState({}, "", previousPath);
@@ -208,6 +212,44 @@ describe("useAuthentication", () => {
     });
 
     expect(result.current.appState).toBe(AppState.AUTHENTICATED);
+  });
+
+  it("keeps the cached app visible while the same account profile refreshes", async () => {
+    const user = { id: cachedProfile.id, email: "test@example.com" };
+    let finishProfileRequest;
+    const profileRequest = new Promise((resolve) => {
+      finishProfileRequest = resolve;
+    });
+    const profileQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockReturnValue(profileRequest),
+    };
+    localStorage.setItem(
+      "momentum:account-cache",
+      JSON.stringify({ user, profile: cachedProfile }),
+    );
+    authMocks.getSession.mockResolvedValue({
+      data: { session: { user } },
+      error: null,
+    });
+    authMocks.from.mockReturnValue(profileQuery);
+
+    const { result } = renderHook(() => useAuthentication());
+    await waitFor(() => expect(authMocks.authCallback).toEqual(expect.any(Function)));
+    await waitFor(() => expect(profileQuery.maybeSingle).toHaveBeenCalledOnce());
+
+    await act(async () => {
+      authMocks.authCallback("SIGNED_IN", { user });
+    });
+
+    expect(result.current.appState).toBe(AppState.AUTHENTICATED);
+
+    await act(async () => {
+      finishProfileRequest({ data: cachedProfile, error: null });
+      await profileRequest;
+    });
+    await waitFor(() => expect(result.current.appState).toBe(AppState.AUTHENTICATED));
   });
 
   it("updates the app after sign-in when no session existed on page load", async () => {

@@ -48,7 +48,8 @@ function clearAppScopedStorage() {
     const keysToRemove = [];
     for (let index = 0; index < localStorage.length; index += 1) {
       const key = localStorage.key(index);
-      if (key && key.startsWith("momentum:")) {
+      // These versioned markers avoid repeating built-in sheet bootstrap RPCs.
+      if (key && key.startsWith("momentum:") && !key.startsWith("momentum:builtins:")) {
         keysToRemove.push(key);
       }
     }
@@ -160,7 +161,13 @@ export default function useAuthentication() {
           if (session?.user) {
             authEventOccurred.current = true;
             setAuthError("");
-            if (loadedProfileUserId.current !== session.user.id) {
+            const hasCachedProfileForSession =
+              cachedAccount?.user.id === session.user.id &&
+              cachedAccount.profile.id === session.user.id;
+            if (
+              loadedProfileUserId.current !== session.user.id &&
+              !hasCachedProfileForSession
+            ) {
               setAppState(AppState.LOADING);
             }
             setUser(session.user);

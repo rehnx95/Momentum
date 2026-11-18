@@ -215,6 +215,17 @@
   opacity: 0.75;
 }
 
+.auth-form-field input:autofill,
+.auth-form-field input:-webkit-autofill,
+.auth-form-field input:-webkit-autofill:hover,
+.auth-form-field input:-webkit-autofill:focus {
+  background-color: var(--page) !important;
+  box-shadow: 0 0 0 1000px var(--page) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--page) inset !important;
+  -webkit-text-fill-color: var(--text) !important;
+  caret-color: var(--text);
+}
+
 .auth-form-field input:focus-visible {
   border-color: var(--border-subtle);
   outline: none;
@@ -482,4 +493,81 @@
 }
 :root[data-theme="light"] .google-signin-button:hover:not(:disabled) {
   border-color: #a3a3a3;
+}
+
+.onboarding-brand-button {
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.onboarding-brand-button:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 3px;
+}
+
+.onboarding-auth-panel .onboarding-form {
+  gap: 0.875rem;
+}
+
+.onboarding-auth-panel .auth-form-field {
+  gap: 0.35rem;
+}
+
+.onboarding-auth-panel .auth-form-field label {
+  display: block;
+  margin: 0;
+}
+
+.onboarding-auth-panel .auth-form-field input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.8rem;
+  padding: 0 0.75rem 0 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: var(--page) !important;
+  color: var(--text);
+  font-size: var(--font-size-sm);
+}
+
+.onboarding-auth-panel .auth-form-field input:focus-visible {
+  border-color: var(--border-subtle) !important;
+  outline: none;
+  box-shadow: none;
+}
+
+.onboarding-field-icon {
+  left: 0.75rem;
+  pointer-events: none;
+}
+
+.onboarding-auth-panel .auth-form-field input.onboarding-username-input {
+  min-height: 2.8rem;
+  padding-left: 2.5rem;
+  font-size: var(--font-size-sm);
+}
+
+.onboarding-auth-panel .auth-form-field input.onboarding-username-input:focus-visible {
+  border-color: var(--border-subtle) !important;
+  box-shadow: none;
+}
+
+.onboarding-auth-panel .onboarding-username-status {
+  min-height: 1.5rem;
+  margin: 0.35rem 0 0;
+  font-size: var(--font-size-xs);
+}
+
+.onboarding-auth-submit {
+  margin-top: 0.1rem;
+}
+
+.onboarding-signout {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }

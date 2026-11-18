@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useCallback, useEffect } from "react";
 import useAuthentication, { AppState } from "./features/auth/useAuthentication";
 import AppLoadingFallback from "./shared/components/AppLoadingFallback";
 
@@ -30,6 +30,11 @@ try {
 }
 
 function App() {
+  const prepareAuthenticatedApp = useCallback(() => {
+    loadAuthenticatedApp().catch((error) => {
+      console.warn("Could not preload the authenticated app:", error);
+    });
+  }, []);
   const {
     appState,
     authAction,
@@ -50,15 +55,13 @@ function App() {
 
   useEffect(() => {
     if (!userId) return;
-    loadAuthenticatedApp().catch((error) => {
-      console.warn("Could not preload the authenticated app:", error);
-    });
+    prepareAuthenticatedApp();
     const preload = preloadCurrentPage(window.location.pathname);
     if (!preload) return;
     void preload.catch((error) => {
       console.warn("Could not preload the current page:", error);
     });
-  }, [userId]);
+  }, [prepareAuthenticatedApp, userId]);
 
   if (appState === AppState.UNAUTHENTICATED) {
     return (
@@ -67,6 +70,7 @@ function App() {
           onSignIn={handleSignIn}
           onPasswordSignIn={handlePasswordSignIn}
           onSignUp={handleSignUp}
+          onPrepareApp={prepareAuthenticatedApp}
           onClearError={clearAuthError}
           authAction={authAction}
           isSigningIn={isSigningIn}
@@ -78,7 +82,7 @@ function App() {
 
   if (appState === AppState.ONBOARDING && user) {
     return (
-      <Suspense fallback={<AppLoadingFallback auth />}>
+      <Suspense fallback={<AppLoadingFallback setup />}>
         <OnboardingPage
           user={user}
           profile={profile}
@@ -96,7 +100,7 @@ function App() {
   if (appState === AppState.LOADING) {
     return (
       <>
-        <AppLoadingFallback auth />
+        <AppLoadingFallback />
         {authError && (
           <div
             role="alert"

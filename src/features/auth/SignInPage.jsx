@@ -5,6 +5,7 @@ export default function UnauthenticatedView({
   onSignIn,
   onPasswordSignIn,
   onSignUp,
+  onPrepareApp,
   onClearError,
   isSigningIn,
   authAction,
@@ -23,12 +24,18 @@ export default function UnauthenticatedView({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    onPrepareApp?.();
     if (mode === "sign-in") {
       await onPasswordSignIn(identifier.trim(), password);
       return;
     }
 
     await onSignUp(email.trim(), password);
+  };
+
+  const handleGoogleSignIn = () => {
+    onPrepareApp?.();
+    onSignIn();
   };
 
   return (
@@ -127,7 +134,7 @@ export default function UnauthenticatedView({
             </div>
             <button
               type="button"
-              onClick={onSignIn}
+              onClick={handleGoogleSignIn}
               disabled={isSigningIn}
               className="google-signin-button"
             >

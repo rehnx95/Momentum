@@ -119,6 +119,9 @@
 .sk-auth-footer { display: flex; justify-content: center; gap: var(--space-2); margin-top: 0.85rem; }
 .sk-auth-footer .sk-bar { width: 6rem; height: 0.7rem; }
 .sk-auth-footer .sk-bar:last-child { width: 7rem; }
+.sk-setup-username-status { width: 12rem; height: 0.7rem; margin-top: var(--space-1); }
+.sk-setup-footer { display: flex; justify-content: center; margin-top: 0.85rem; }
+.sk-setup-footer .sk-bar { width: 5rem; height: 0.7rem; }
 
 .sk-row-between {
   display: flex;
@@ -725,13 +728,17 @@
 }
 
 /* ===== Settings and People ===== */
-.sk-settings { display: grid; max-width: 34rem; margin-inline: auto; gap: var(--space-4); }
-.sk-back { width: 9.5rem; height: var(--button-height-md); border-radius: var(--radius-sm); }
+.sk-settings { display: grid; max-width: 34rem; margin-inline: 0; gap: var(--space-4); }
+.sk-back { width: 5.5rem; height: var(--button-height-md); border-radius: var(--radius-sm); }
+.sk-settings-intro { display: grid; gap: var(--space-2); }
 .sk-settings-title { width: 8rem; height: 1.7rem; }
+.sk-settings-description { width: min(100%, 22rem); height: 0.75rem; }
 .sk-form { display: grid; gap: var(--space-4); padding: var(--space-4); border-radius: var(--radius-md); }
 .sk-field { display: grid; gap: var(--space-2); }
 .sk-label { width: 4rem; height: 0.85rem; }
+.sk-name-label { width: 3rem; }
 .sk-input { height: 2.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.sk-settings-help { width: 12rem; height: 0.65rem; margin-top: var(--space-1); }
 .sk-submit { height: 2.75rem; border-radius: var(--radius-sm); }
 @media (min-width: 768px) {
   .sk-form { padding: var(--space-5); }

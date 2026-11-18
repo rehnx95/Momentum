@@ -34,7 +34,7 @@ describe("OnboardingPage", () => {
     supabaseMocks.rpc.mockResolvedValue({ data: true, error: null });
     const onComplete = vi.fn();
 
-    render(
+    const { container } = render(
       <OnboardingPage
         user={{ id: "user-1", user_metadata: {} }}
         profile={{
@@ -49,6 +49,9 @@ describe("OnboardingPage", () => {
       />,
     );
 
+    expect(container.querySelector(".onboarding-auth-panel")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Momentum - go to dashboard" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Sign out" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Welcome to Momentum", level: 1 })).toBeTruthy();
     expect(screen.getByLabelText(/Full Name/)).toBeTruthy();
     expect(screen.getByLabelText(/Username \(Handle\)/)).toBeTruthy();

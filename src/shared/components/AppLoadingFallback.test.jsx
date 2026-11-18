@@ -24,6 +24,16 @@ describe("AppLoadingFallback tracker", () => {
     }
   });
 
+  it("uses the profile setup card layout while onboarding loads", () => {
+    const { container } = render(<AppLoadingFallback setup />);
+
+    expect(container.querySelector(".sk-setup .sk-auth-card")).not.toBeNull();
+    expect(container.querySelectorAll(".sk-setup .sk-auth-input")).toHaveLength(2);
+    expect(container.querySelector(".sk-setup-username-status")).not.toBeNull();
+    expect(container.querySelector(".sk-setup .sk-auth-tabs")).toBeNull();
+    expect(container.querySelector(".sk-setup .sk-auth-google")).toBeNull();
+  });
+
   it("uses placeholders instead of difficulty and solved labels", () => {
     const { container } = render(<AppLoadingFallback />);
     const progressCard = container.querySelector(".sk-side-card");
@@ -46,6 +56,24 @@ describe("AppLoadingFallback tracker", () => {
       );
       expect(container.querySelector(".sk-heat-months").children).toHaveLength(heat.columns);
       expect(container.querySelectorAll(".sk-sheet-actions .sk-bar")).toHaveLength(4);
+    } finally {
+      window.history.replaceState({}, "", previousPath);
+    }
+  });
+
+  it("matches the profile edit skeleton to the real form layout", () => {
+    const previousPath = window.location.pathname;
+    window.history.replaceState({}, "", "/profile/edit");
+
+    try {
+      const { container } = render(<AppLoadingFallback />);
+      const settings = container.querySelector(".sk-settings");
+
+      expect(settings.querySelector(".sk-back")).not.toBeNull();
+      expect(settings.querySelector(".sk-settings-description")).not.toBeNull();
+      expect(settings.querySelectorAll(".sk-field")).toHaveLength(2);
+      expect(settings.querySelector(".sk-settings-help")).not.toBeNull();
+      expect(settings.querySelector(".sk-submit")).not.toBeNull();
     } finally {
       window.history.replaceState({}, "", previousPath);
     }
