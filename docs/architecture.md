@@ -1,58 +1,78 @@
 # Momentum architecture
 
-This guide describes the application as it is implemented: where its
-responsibilities live, how data moves through the system, and how to develop,
-configure, and deploy it. The React source and timestamped SQL migrations are
-the implementation references; update this guide when those boundaries change.
+Momentum is a browser-based React single-page application for learning tracks, daily time tracking, and progress insights. Supabase provides identity and PostgreSQL. Vercel serves the static build and runs three small serverless functions. The React source and the timestamped SQL migrations are the implementation references; this guide explains how they fit together.
 
-## 1. System at a glance
-
-Momentum is a browser-based React single-page application. Supabase provides
-identity and PostgreSQL access. Vercel serves the built application and runs
-the authenticated username-search endpoint.
+## 1. System overview
 
 ```mermaid
 flowchart LR
-  user[Signed-in user] --> browser
-  browser["React 18 application<br/>Vite-built static assets"]
-  browser -->|OAuth and session| auth["Supabase Auth"]
-  browser -->|User-scoped queries and RPCs| data["Supabase Data API"]
-  data --> db["PostgreSQL<br/>RLS, triggers, and SQL functions"]
-  browser -->|Bearer token| search["Vercel /api/search"]
-  search -->|Validate token and call RPC| data
-  hosting["Vercel static hosting"] --> browser
+  user[Signed-in user] --> app["React 18 SPA (Vite build)"]
+  app -->|OAuth, password, session| auth[Supabase Auth]
+  app -->|RLS-scoped queries and RPCs| data[Supabase Data API]
+  data --> db["PostgreSQL: RLS, triggers, SQL functions"]
+  app -->|Bearer token| api["Vercel functions: /api/search, /api/auth/*"]
+  api -->|User token or service role, server-side only| data
+  app <--> sw["Service worker + IndexedDB outbox"]
 ```
-
-The browser never connects directly to PostgreSQL. Supabase's Data API is the
-database boundary: row-level security (RLS) protects owner data, and
-purpose-built SQL functions provide the cross-user operations used by search
-and public profiles. The browser uses only the Supabase publishable key. The
-search function validates the caller's access token and forwards that same
-user context to Supabase; it does not use a service-role key.
 
 | Component | Responsibility |
 | --- | --- |
-| React app | Screens, interaction state, client-side validation, and feature-level data requests |
-| Supabase Auth | Google OAuth, email/password sign-up and sign-in, session restoration, and authenticated identity |
-| Supabase Data API | Authenticated database queries and RPC calls |
-| PostgreSQL | Account-owned records, RLS, triggers, and curated profile operations |
-| Vercel | Static app delivery, SPA rewrites, and server-side account creation and username login |
-| Browser storage | Theme, view preferences, account-scoped caches, and the per-user offline mutation outbox |
+| React app | Screens, interaction state, client validation, feature data access |
+| Supabase Auth | Google OAuth, email/password, session restore |
+| Supabase Data API | Authenticated queries and RPC calls (the only database boundary) |
+| PostgreSQL | Owned records, RLS, triggers, curated cross-user SQL functions |
+| Vercel static hosting | Built assets, SPA rewrites, cache headers |
+| Vercel functions | User search, email sign-up, username sign-in |
+| Browser storage | Theme, view preferences, account-scoped caches, offline mutation outbox |
+| Service worker | App-shell precache, offline navigation, push and sync hooks |
 
-## 2. Application composition
+The browser never connects to PostgreSQL directly and only holds the Supabase URL and publishable key. The service-role key exists only in Vercel's server environment, and only the two auth functions use it.
 
-### Startup and authentication
+## 2. Technology
 
-`src/main.jsx` mounts the app under React Strict Mode and an error boundary,
-loads the global style layers, and starts route-based preloading.
-`src/App.jsx` lazy-loads the sign-in, onboarding, and authenticated
-experiences. `useAuthentication` owns session restoration, Google and
-email/password sign-in, sign-up, profile lookup, sign-out, and the top-level app
-state. Email sign-up uses the server-side `api/auth/sign-up.js` route to create
-an already-confirmed account and return a session immediately. Username sign-in
-resolves a profile to its email in `api/auth/username-login.js` and returns a
-session only after password authentication succeeds; it never exposes an email
-lookup to unauthenticated clients.
+| Layer | Choice |
+| --- | --- |
+| UI | React 18, JavaScript (ES modules), Tailwind CSS 3 plus component-scoped CSS, Lucide icons |
+| Build | Vite 5 (emits `manifest.json` for service-worker precaching) |
+| Backend | Supabase (Auth, PostgREST, PostgreSQL) |
+| Hosting | Vercel (static output in `dist/`, serverless functions in `api/`) |
+| Quality | Vitest, Testing Library, react-test-renderer, ESLint, Prettier (with SQL plugin), GitHub Actions |
+| Runtime | Node.js 22 or newer |
+
+## 3. Repository layout
+
+```text
+api/                 Vercel functions: search, auth/sign-up, auth/username-login
+docs/                Architecture, screenshots
+public/              Manifest, service worker, icons, assetlinks
+scripts/             Track conversion and LeetCode link tooling
+source/              Editable text sources for built-in tracks
+src/
+  features/
+    activity/        Heatmap, sleep/activity chart, summaries
+    auth/            Sign-in, onboarding, session lifecycle
+    daily-log/       Day editor, Full Log, Trends, timers, persistence
+    dashboard/       Signed-in composition, navigation, tracker screen
+    people/          Username search and public profiles
+    problem-tracker/ Problem tree, filters, progress persistence
+    profile/         Owner profile, metrics, backup, settings
+    sheets/          Built-in and uploaded tracks
+    testing/         Test-mode sample-data tools
+  pwa/               Launch, share, file, sync, push integration
+  shared/            Reusable UI, Supabase client, caches, offline sync, utilities
+  styles/            Tokens, layout, themes, responsive layers
+supabase/migrations/ Ordered schema, policy, and function history
+```
+
+Feature behavior lives in `src/features/<feature>/`. Code moves to `src/shared/` only when more than one feature uses it. Global CSS import order in `src/main.jsx` is part of the cascade and must be preserved.
+
+## 4. Application composition
+
+### 4.1 Startup and authentication
+
+`main.jsx` mounts the app under `React.StrictMode` and an error boundary, loads the global style layers, registers the production service worker, and starts route-based preloading. `App.jsx` lazy-loads sign-in, onboarding, and the authenticated experience.
+
+`useAuthentication` owns session restore, Google sign-in, email/password sign-in, username sign-in, sign-up, profile lookup, and sign-out:
 
 ```text
 LOADING -> UNAUTHENTICATED
@@ -60,350 +80,171 @@ LOADING -> UNAUTHENTICATED
         -> AUTHENTICATED
 ```
 
-A cached account and its cached data can render while Supabase validates the
-session and refreshes server data. Progress loads in parallel with built-in
-sheet setup. Transient session or profile lookup failures preserve the signed-in
-state and expose retry instead of sending users to sign-in. A confirmed missing
-session or explicit sign-out clears Momentum-owned caches; the user-scoped
-offline mutation outbox is preserved so queued changes can sync when that
-account signs in again. Switching accounts clears caches but retains the
-outbox, whose entries are isolated by user ID.
+- A cached account (`momentum:account-cache`) lets the shell render while Supabase validates the session and refreshes the profile.
+- Transient session or profile failures keep the signed-in state and offer retry.
+- A confirmed missing session or explicit sign-out clears Momentum-owned caches and the account cache.
+- Account switches clear caches too. The offline outbox and built-in sync markers are kept, because outbox entries are user-scoped and must still sync.
+- Email sign-up (`/api/auth/sign-up`) creates a confirmed account and returns a session. Username sign-in (`/api/auth/username-login`) resolves username to email server-side and returns a session only after password authentication succeeds. Both return generic errors that do not reveal whether an account exists.
 
-The production service worker precaches the app shell and Tracker/Daily Log
-assets. It caches same-origin app assets and navigation responses only; Supabase
-and other API requests remain network-only. Offline use requires a prior online
-sign-in on the same device so the account session and data caches are available.
+### 4.2 Routing
 
-### Authenticated screen selection
+The app uses the History API and a `popstate` listener instead of a router library (`useAuthenticatedNavigation`). Vercel rewrites client paths to `index.html`.
 
-`AuthenticatedApp` composes feature hooks and builds the context passed to
-`AuthenticatedScreens`. The application uses the browser History API and a
-`popstate` listener rather than a routing library.
-
-| Path | Screen | Access |
-| --- | --- | --- |
-| `/` | Sign-in, onboarding, or Tracker, depending on auth state | Tracker requires sign-in |
-| `/profile` | Owner profile and progress | Sign-in required |
-| `/profile/edit` | Name and username settings | Sign-in required |
-| `/daily-log` | Daily Log, Full Log, and Trends | Sign-in required |
-| `/people` | Username search | Sign-in required |
-| `/user/:username`, `/u/:username` | Curated public profile | Sign-in required |
-| `/api/search?q=<prefix>` | Username-search function | Valid bearer token required |
-| `/api/auth/sign-up` | Email/password account creation | Email and password required |
-| `/api/auth/username-login` | Username/password sign-in | Username and password required |
-
-The Vercel rewrite serves `index.html` for client-side paths; `/api/search` is
-provided by the serverless function.
-
-### Feature ownership
-
-```text
-src/
-  App.jsx                         Auth state -> auth or signed-in app
-  main.jsx                        React root, error boundary, global styles
-  features/
-    auth/                         Sign-in, onboarding, session lifecycle
-    dashboard/                    Signed-in app composition and navigation
-    sheets/                       Built-in copies, upload parser, sheet selection
-    problem-tracker/              Problem tree, filters, progress persistence
-    daily-log/                    Day editor, Full Log, Trends, history, timers
-    activity/                     Activity heatmap and sleep/study charts
-    profile/                      Owner profile, metrics, progress backup
-    people/                       Search and public profile loading
-    testing/                      Test-mode-only sample-data tools
-  shared/
-    components/                   Header, dialogs, loading, menus, reusable UI
-    lib/                           Supabase client, preload helpers, browser cache
-    utils/                         Shared date and time logic
-  styles/                          Global tokens, layout, theme, responsiveness
-api/search.js                      Authenticated Vercel search function
-source/                            Editable text for built-in tracks
-supabase/migrations/               Database schema, policies, and functions
-```
-
-Feature-specific behavior stays with its feature. Shared code belongs in
-`src/shared/` only when it is used across features. Component styles are kept
-near components where practical; global CSS import order in `src/main.jsx`
-matters to the cascade.
-
-## 3. Feature and data flows
-
-### Learning tracks and problem progress
-
-Built-in track sources are plain text files in `source/`. The
-`convert-sheet` script parses one source into JSON under
-`src/features/sheets/data/`. At runtime, `bootstrapBuiltInSheets` submits
-versioned built-in templates to `ensure_builtin_sheet_copies`, which creates
-per-user copies without overwriting existing copies. Follow-up bootstrap RPCs
-synchronize supported titles and LeetCode IDs on existing copies by stable
-problem ID. These metadata updates preserve problem progress and other saved
-sheet data. New accounts receive the current bundled template. The selected
-track is stored in browser storage.
-
-Users may upload `.txt` tracks up to 2 MB. `parseSheet` validates and
-normalizes steps, subsections, problem names, and external problem numbers
-before storing the sheet in `user_sheets`. Problems start as `todo`; users
-mark them done or skipped in the tracker. The frontend namespaces problem IDs
-by track so identical source IDs from different tracks do not collide. Sheet
-deletion uses the ownership-checking
-`delete_user_sheet` RPC and removes related progress safely.
-
-Problem states are `todo`, `done`, and `skipped`. A missing progress row means
-`todo`. `useProgress` loads account-owned rows, applies state changes
-optimistically, and persists them to the per-user cache and offline outbox
-before attempting Supabase writes. Pending progress operations replay
-idempotently after reconnecting; reset operations are ordered with later
-changes.
-
-The `progress` table is the source for solved states and completion dates.
-A PostgreSQL trigger updates `activity_log` in the same transaction when
-progress rows are inserted, changed, or deleted. Owner profile streaks and
-heatmap data are derived from solved-progress activity.
-
-### Daily Log, Full Log, and Trends
-
-`useDailyLog` composes editing, persistence, history, timer, and activity-color
-hooks. A daily record is keyed by user and local calendar date. It stores
-sleep/wake times and `custom_tasks`, where each activity has its timed slots.
-
-```text
-Edit a day
-  -> validate time intervals
-  -> update view state and account/date cache
-  -> debounce autosave
-  -> persist a per-user outbox mutation
-  -> compare remote updated_at when syncing
-  -> upsert only if the saved version still matches
-```
-
-Autosave is delayed until edits settle. Before an upsert, persistence compares
-the row's current `updated_at` to the version originally loaded. If another
-session has changed the day, the app preserves the local edit and reports a
-conflict rather than silently overwriting it. Timer segments use stable IDs so
-they can be replayed without duplication. Pending edits are flushed before
-changing dates or clearing history. Running timers are stored per account and
-split at local midnight. Full Log and Trends can show cached history, but only
-history loaded on this device is available offline.
-
-IndexedDB stores queued mutations, with localStorage as a fallback. The sync
-queue is isolated by user ID and is retried when connectivity returns or the
-app becomes visible. Changes made while offline are not guaranteed to sync
-after the browser is closed; authentication, account setup, profile search,
-sheet management, and other cloud-backed features still require a connection.
-
-Full Log history loads on demand in pages of ten records, using an extra row
-to detect older history. A short-lived account-scoped cache avoids repeating
-recent reads. Trends loads a bounded recent window. Full Log derives untracked
-time from the portion of a 24-hour day not covered by activity or sleep; that
-value is calculated for display and is not stored separately. Sleep intervals
-that span midnight are assigned to the date on which the user wakes.
-
-Activity colors are assigned per account and normalized activity name in
-`activity_color_assignments`. SQL functions allocate and update colors;
-database triggers assign colors for saved activity and remove assignments
-when no saved log uses them. Daily Log, Full Log, and Trends use the same
-mapping.
-
-### Profiles and people
-
-The owner profile combines identity, per-track completion summaries, streaks,
-recent accepted problems, and activity visualizations. Profile metrics are
-derived in `useProfileMetrics`; progress export/import is handled by
-`useProgressBackup`.
-
-People search calls `GET /api/search?q=<prefix>`. The function accepts a
-3–48 character alphanumeric/hyphen prefix, requires a valid bearer token,
-calls `search_public_profiles` with the caller's token, and returns at most
-five `{ username, name }` matches. Responses use `private, no-store` caching.
-
-Public profiles are visible to signed-in Momentum users, not anonymous
-visitors. The app retrieves profile summaries and activity through
-purpose-built RPCs instead of allowing broad reads from `profiles`,
-`progress`, or `daily_logs`. **The current public profile includes the
-account email address** through `get_public_profile_email`; it is not private
-from other signed-in users. The profile RPCs also expose selected progress,
-sheet summaries, recent accepted items, and activity aggregates, but not raw
-uploaded sheet JSON or detailed Daily Log records.
-
-Progress exports contain saved `done` and `skipped` states for a selected
-track. Imports validate the file and match problems by namespaced ID, local
-ID/title, or an unambiguous normalized title; unmatched and ambiguous records
-are not applied.
-
-## 4. Data ownership and persistence
-
-Timestamped files in `supabase/migrations/` define schema changes, indexes,
-policies, triggers, and RPCs. The migrations are authoritative for exact SQL
-signatures.
-
-| Table | Contents and ownership |
+| Path | Screen |
 | --- | --- |
-| `profiles` | Account identity and onboarding state; keyed to `auth.users` |
-| `user_sheets` | Built-in personal copies and user-uploaded track JSON |
-| `user_deleted_builtin_sheets` | Tombstones that keep deleted built-in copies from being recreated |
-| `progress` | Per-user problem state and completion timestamps |
-| `activity_log` | Per-user activity counts by date, maintained from solved progress |
-| `daily_logs` | Per-user date, sleep/wake times, and activity/task slots |
-| `activity_color_assignments` | Per-user normalized activity name and selected color |
-| `user_settings` | Legacy account settings table; active UI preferences are browser-local |
+| `/` | Tracker |
+| `/daily-log` | Daily Log, Full Log, Trends |
+| `/people` | Username search |
+| `/user/:username`, `/u/:username` | Public profile |
+| `/profile` | Owner profile |
+| `/profile/edit` | Name and username settings |
+| `/api/search?q=` | Username search function |
+| `/api/auth/sign-up`, `/api/auth/username-login` | Account creation and username sign-in |
 
-Account-owned records use user IDs and cascading foreign keys. Indexes support
-owner/date history, progress lookup, built-in copy uniqueness, and username
-search. Data may also be cached in browser storage using account-scoped
-Momentum keys. Caches are cleared on sign-out and account switches; they do
-not synchronize between devices and do not guarantee writes while offline.
+All app screens require sign-in. `AuthenticatedApp` composes the feature hooks and passes one context object to `AuthenticatedScreens`, which selects the screen. Heavy hooks take an `enabled` flag so inactive screens do no work.
 
-## 5. Security and privacy boundaries
+## 5. Features and data flows
 
-- RLS protects account-owned records using the authenticated user identity.
-- The frontend contains only `VITE_SUPABASE_URL` and the publishable key.
-  Never place a service-role key or other secret in browser code or a
-  `VITE_` variable.
-- Cross-user operations use SQL functions with explicit return shapes and
-  grants. Keep the public profile and search functions narrowly scoped.
-- Public profiles are authenticated-only, but currently expose the account
-  email address as described above. Treat email as visible to other signed-in
-  users unless the RPC and UI are changed.
-- The search endpoint validates the bearer token and invokes its RPC with that
-  token; it does not bypass RLS with a privileged key.
-- Detailed daily activity records and raw uploaded track contents are not
-  included in the public profile response.
-- Local test-data tools require Vite development mode, the `test` mode, and
-  `VITE_ENABLE_SAMPLE_DATA_TOOLS=true`. They verify the signed-in user and
-  write through RLS. Use a dedicated test account.
+### 5.1 Learning tracks and progress
 
-Important RPCs include `is_username_available`,
-`search_public_profiles`, `get_public_profile`,
-`get_public_profile_email`, `get_public_activity`,
-`ensure_builtin_sheet_copies`, `delete_user_sheet`,
-`sync_builtin_sheet_problem_titles`, `sync_builtin_sheet_problem_links`,
-`get_or_assign_activity_color`, and `set_activity_color`.
+- **Sources.** Built-in tracks are plain text in `source/`. `convert-sheet` parses one into JSON under `src/features/sheets/data/`. For DSA, `create-links` generates LeetCode links and difficulty maps and `verify-links` audits them against LeetCode.
+- **Per-user copies.** On first load per manifest version, `bootstrapBuiltInSheets` calls `ensure_builtin_sheet_copies`, then `sync_builtin_sheet_problem_titles` and `sync_builtin_sheet_problem_links`. Copies are stored in `user_sheets` with a `builtin_template_id`. Syncs match problems by stable ID and never touch progress. A completion marker per user avoids repeating the work.
+- **Deletion.** Deleting a built-in copy records a tombstone in `user_deleted_builtin_sheets` so it is not recreated. `delete_user_sheet` removes the sheet and its progress. `restore_builtin_dsa_sheet` reinstates the DSA copy and resets its progress.
+- **Uploads.** Users can upload `.txt` tracks up to 2 MB. `parseSheet` validates and normalizes steps, subsections, titles, and `(LC n)` numbers before the sheet is saved to `user_sheets`.
+- **Progress.** States are `todo`, `done`, and `skipped`; a missing row means `todo`. Progress IDs are namespaced by sheet (`custom-<uuid>::<problemId>`).
+  - `useProgress` applies changes optimistically, writes the cache and the offline outbox, then syncs.
+  - Writes are serialized through a queue.
+  - Completion dates (`completed_on`, `updated_at`) are stored per solved problem.
+- **Activity counts.** A database trigger maintains `activity_log` in the same transaction as progress changes. Streaks and heatmaps derive from solved progress.
+- **Backup.** Export writes `done` and `skipped` states per sheet. Import matches by namespaced ID, local ID plus title, or an unambiguous normalized title; unmatched and ambiguous records are ignored.
 
-## Local development and deployment
+### 5.2 Daily Log, Full Log, Trends
 
-### Prerequisites and environment
+`useDailyLog` composes persistence, history, timer, activity, and color hooks. A day is keyed by `(user_id, date)` in `daily_logs` and stores `sleep_time`, `wake_time`, and `custom_tasks` (activities with timed slots). Built-in sheets appear as activities with ID `sheet:<id>` and display the current sheet title.
 
-Use Node.js 20 (the version used by CI), npm, and a Supabase project.
-Configure the frontend and Vercel function with:
+```text
+Edit -> validate intervals -> update state and per-day cache
+     -> debounce autosave (300 ms) -> queue outbox mutation
+     -> compare remote updated_at -> upsert only if version matches
+```
+
+- **Validation** blocks malformed or inverted slots, incomplete sleep, and days over 24 hours. Overlaps are warnings shown beside the affected slots.
+- **Conflicts.** If the cloud copy changed since it was loaded, the local edit is preserved and the user chooses "Use cloud copy" or "Replace cloud with my copy".
+- **Save status** is separate from validation. A visible Save now / Retry save action is offered when a save is pending or failed. Pending saves flush before date changes, view changes, and when the page is hidden.
+- **Timers** are stored per account, survive reloads, and split at local midnight. Each segment carries a stable `timerId` so replays never duplicate time.
+- **Full Log** loads history in pages of ten (one extra row detects older history). Each day shows a share-of-time bar for activities, sleep, and untracked time; untracked time is derived from the uncovered part of 24 hours and is never stored. Sleep that crosses midnight is attributed to the wake date.
+- **Trends** loads a bounded recent window and shows charts (7 or 30 days depending on width), averages, and weekly totals of where time went.
+- **Colors.** `activity_color_assignments` maps a normalized activity name to a palette color or custom hex per user. SQL functions allocate colors, triggers assign them on save and remove unused ones, and Day, Full Log, and Trends share one mapping. Sleep has a fixed color.
+
+### 5.3 Profiles and people
+
+- The owner profile combines identity, per-sheet completion, streaks, recent accepted problems, a yearly heatmap, and backup controls (`useProfileMetrics`, `useProgressBackup`).
+- Search calls `GET /api/search?q=<prefix>`. The function checks the prefix (3 to 48 letters, digits, hyphens), requires a bearer token, validates it, calls `search_public_profiles` in that user's context, and returns at most five `{ username, name }` results with `private, no-store` caching.
+- Public profiles are visible to signed-in users only. They use purpose-built RPCs (`get_public_profile`, `get_public_activity`, `get_public_profile_email`) rather than broad table reads. They expose solved and skipped counts, sheet summaries, recent accepted items, streaks, activity aggregates, and the account email. Raw uploaded sheet JSON and detailed Daily Log records are never exposed.
+- The client caches public profiles for 60 seconds (20 entries) and refreshes the heatmap every 15 seconds while visible.
+
+### 5.4 Usernames
+
+Usernames are 3 to 20 characters: lowercase letters, numbers, and hyphens. Uniqueness is case-insensitive (`profiles_username_lower_unique`). `is_username_available` supports live checks, and a trigger rejects over-length usernames. New accounts get a generated username (7-character prefix, hyphen, 12 ID characters) until onboarding replaces it.
+
+## 6. Offline and PWA
+
+- **Outbox.** Offline-capable writes go through `offlineMutationStore` (IndexedDB, with `localStorage` fallback) and are replayed by `offlineSync`. Entries are keyed `userId:type:entityId` and replayed idempotently. Types: `progress`, `daily-log`, `daily-log-slot`, `activity-color`, `delete-daily-logs`.
+- **Sync triggers.** Sync runs on reconnect, when the tab becomes visible, after local writes, and from the header's "Sync now" action. `OfflineSyncStatus` shows connection state and pending counts. Daily-log syncs return conflicts instead of overwriting.
+- **Service worker.** `sw.js` precaches the app shell and the Tracker and Daily Log chunks from `manifest.json`. Navigation is network-first with a cached-shell fallback, and `/assets/` is cache-first. Same-origin only; `/api/` and Supabase requests are never cached. Offline use requires a prior online sign-in on the same device.
+- **Install surface.** The manifest declares shortcuts, a share target, a `.txt` file handler, and a `web+momentum` protocol handler; `pwaIntegration` consumes them. Push and background-sync handlers exist in the worker and the client helper, but push needs a sender you provide. `.well-known/assetlinks.json` supports the Android wrapper.
+- **Not guaranteed.** Edits made offline are not guaranteed to survive if the browser clears storage. Sign-in, search, sheet management, and public profiles need a connection.
+
+## 7. Data model
+
+Migrations in `supabase/migrations/` are authoritative for exact SQL.
+
+| Table | Contents |
+| --- | --- |
+| `profiles` | Identity, username, onboarding state (keyed to `auth.users`) |
+| `user_sheets` | Per-user built-in copies and uploaded tracks (JSON) |
+| `user_deleted_builtin_sheets` | Tombstones for deleted built-in copies |
+| `progress` | Per-problem state and completion dates |
+| `activity_log` | Per-date solved counts, trigger-maintained |
+| `daily_logs` | Per-date sleep, wake, activity slots, `updated_at` |
+| `activity_color_assignments` | Per-user activity-name to color |
+| `user_settings` | Legacy; UI preferences are browser-local |
+
+Key functions: `is_username_available`, `search_public_profiles`, `get_public_profile`, `get_public_profile_email`, `get_public_activity`, `ensure_builtin_sheet_copies`, `restore_builtin_dsa_sheet`, `delete_user_sheet`, `sync_builtin_sheet_problem_titles`, `sync_builtin_sheet_problem_links`, `get_or_assign_activity_color`, `set_activity_color`.
+
+Key triggers: signup profile creation, progress to `activity_log` sync, daily-log color assign and cleanup, username length enforcement.
+
+Account-owned rows use user IDs with cascading foreign keys. Indexes cover owner and date history, progress lookup, built-in copy uniqueness, and username prefix search.
+
+## 8. Security and privacy
+
+- RLS protects every owned table using the authenticated user's ID.
+- Cross-user reads happen only through SQL functions with explicit return shapes, `SECURITY DEFINER`, a fixed `search_path`, and grants restricted to `authenticated`.
+- The frontend contains only `VITE_SUPABASE_URL` and the publishable key. The service-role key is server-only and never uses a `VITE_` prefix.
+- `/api/search` forwards the caller's token and never uses a privileged key.
+- Auth endpoints return generic credential errors and are `no-store`.
+- **Disclosure:** public profiles include the account email address, visible to any signed-in user. Treat this as intentional product behavior; changing it means changing `get_public_profile_email`, the profile hook, and the UI together.
+- Test-data tools require Vite dev mode, `test` mode, and `VITE_ENABLE_SAMPLE_DATA_TOOLS=true`. They verify the signed-in user and write through RLS, so use a dedicated test account.
+
+## 9. Local development and deployment
+
+**Setup**
+
+```powershell
+Copy-Item .env.example .env
+npm ci
+npm run dev        # Vite on :5173
+```
 
 ```dotenv
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your-key
+SUPABASE_SERVICE_ROLE_KEY=      # server-only, never VITE_-prefixed
 ```
 
-These are public client settings, not secrets. Copy `.env.example` to `.env`,
-fill in the project values, and run:
+**Supabase**
 
-```powershell
-npm ci
-npm run dev
-```
+1. Apply every migration in filename order. Never edit an applied migration; add a new timestamped one.
+2. Enable Google and Email providers; set the Site URL and allowed redirect URLs (local, production, preview).
+3. Use `npx vercel dev` instead of `npm run dev` to exercise the API functions locally.
 
-Vite serves on port `5173` by default. To exercise the Vercel function locally,
-use `npx vercel dev` instead of Vite alone.
+**Commands**
 
-### Supabase setup
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` / `dev:test` | Dev server / test-mode server on :5174 |
+| `npm run build` / `preview` | Production bundle / serve it |
+| `npm test` / `npm run lint` / `npm run format` | Vitest / ESLint / Prettier |
+| `npm run convert-sheet -- <name>` | Build a track's JSON from `source/` |
+| `npm run create-links` / `verify-links` | Generate / audit DSA LeetCode data |
 
-For a new project:
+**CI.** GitHub Actions runs lint, tests, and build on every push and pull request. There is no end-to-end browser suite.
 
-1. Apply every SQL migration in `supabase/migrations/` in filename order.
-2. Enable Google and Email in Supabase Auth and configure the Google OAuth
-   callback URL shown by Supabase in the Google provider settings.
-3. Set the Supabase Auth Site URL to the intended app origin and add local,
-   production, and intended Vercel Preview origins to the allowed redirect
-   URLs.
-4. Configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` for the
-   local app and the Vercel project. Configure `SUPABASE_SERVICE_ROLE_KEY` as
-   a server-only Vercel environment variable for account creation and username
-   sign-in. Never expose the service-role key to browser code or use a `VITE_`
-   prefix.
+**Deploy.** Vercel runs `npm run build` and serves `dist/`. `vercel.json` rewrites client routes, makes hashed assets immutable, and sets no-cache on the shell, `sw.js`, and the manifest. Set the two public variables for all functions and `SUPABASE_SERVICE_ROLE_KEY` as a server-only variable, then redeploy after changing environment values.
 
-For an existing database, apply only migrations that have not already been
-applied. Migrations are append-only schema history; do not edit or replay a
-migration on a shared database. Reuse an existing Supabase project when its
-accounts and data must be retained.
+**Built-in track changes.** Edit `source/`, regenerate JSON (and links for DSA), run tests and build, and ship a migration only if existing copies need new metadata. Apply migrations before the matching frontend. Existing users receive updated titles and LeetCode IDs on next sign-in with progress intact.
 
-### Build, tests, and CI
+## 10. Testing and troubleshooting
 
-```powershell
-npm test
-npm run lint
-npm run build
-npm run preview
-```
-
-Vitest runs the unit and component tests in jsdom. ESLint checks JavaScript
-and JSX. GitHub Actions runs lint, tests, and a production build on pushes
-and pull requests. There is no end-to-end browser-test command configured.
-
-### Deploy to Vercel
-
-Vercel builds with `npm run build` and serves `dist/`. `vercel.json` rewrites
-client-side routes to `index.html` and gives versioned assets immutable cache
-headers. The build also emits `manifest.json`, which the service worker uses to
-precache the offline app assets. The `/api/search` function needs the two public
-Supabase environment variables above; `/api/auth/sign-up` and
-`/api/auth/username-login` additionally need the server-only
-`SUPABASE_SERVICE_ROLE_KEY`. Set the service-role key only in Vercel's server
-environment and in an untracked local environment file when running
-`vercel dev`. Never expose it to browser code. After changing environment
-values, redeploy so the built assets and functions receive them.
-
-The current deployment is [momentum-rehnx.vercel.app](https://momentum-rehnx.vercel.app/).
-
-### Built-in track maintenance
-
-1. Edit a source in `source/`, such as `source/dsa.txt`.
-2. Convert it, for example: `npm run convert-sheet -- dsa`.
-3. Review the generated JSON in `src/features/sheets/data/` and run the
-   relevant tests and build.
-4. If the change adds or updates metadata on existing built-in copies, include
-   the corresponding bootstrap RPC and timestamped SQL migration. Apply all
-   unapplied migrations before deploying the matching frontend.
-
-Existing users keep their built-in copies and progress. Bootstrap synchronizes
-supported titles and LeetCode IDs by stable problem ID while preserving
-progress and other saved sheet data. The sync applies on the next successful
-authenticated bootstrap.
-
-### Local sample-data workflow
-
-Sample-data controls are enabled only when all of the following are true:
-
-- The app is running in Vite development mode.
-- The Vite mode is `test` (`npm run dev:test`).
-- `.env.test.local` sets `VITE_ENABLE_SAMPLE_DATA_TOOLS=true`.
-
-`.env.test.local` inherits the Supabase URL and publishable key from `.env`.
-Use a dedicated second account and verify its email before seeding. The tools
-write and remove `daily_logs`, `progress`, and `activity_log` rows for the
-currently signed-in account; they leave profile and sheet records in place.
-They do not use a service-role key or a separate database.
-
-## 7. Troubleshooting
+Vitest runs unit and component tests in jsdom (single worker). Coverage centers on time and interval logic, persistence and conflict handling, offline sync, caches, authentication, the problem tree, charts, and key components.
 
 | Symptom | Check |
 | --- | --- |
-| Supabase is not configured | Set both Vite variables in `.env` and restart the dev server. |
-| Google sign-in fails | Check the Supabase provider, Google callback URL, Site URL, and allowed redirects. |
-| Email sign-up or username sign-in fails | Set `SUPABASE_SERVICE_ROLE_KEY` for the Vercel API and use `npx vercel dev` locally. |
-| Profile or sheet setup fails | Confirm all required migrations were applied and inspect the Supabase error. |
-| Progress does not sync | Check the visible sync status, retry sync, network request, and RLS policies. |
-| Daily Log cannot load or save | Check the daily-log migrations, owner policy, date, and database error. |
-| Username search fails | Use `npx vercel dev` locally and check function environment, bearer token, prefix, and RPC grants. |
-| A deep link fails after refresh | Confirm Vercel's SPA rewrite and `/api/search` function are deployed. |
-| An existing user sees a stale built-in title or LeetCode link | Deploy the matching frontend and apply its metadata-sync migrations; the next successful authenticated bootstrap updates matching problem IDs without changing progress. |
+| "Supabase is not configured" | Both Vite variables set; restart dev server |
+| Google sign-in fails | Provider, callback URL, Site URL, redirect list |
+| Email sign-up or username sign-in fails | `SUPABASE_SERVICE_ROLE_KEY`; use `vercel dev` locally |
+| Profile or sheet setup fails | All migrations applied; inspect the Supabase error |
+| Progress or Daily Log not syncing | Sync status icon, retry, network tab, RLS policies |
+| Username search fails | `vercel dev`, bearer token, prefix length, RPC grants |
+| Deep link 404 after refresh | Vercel rewrite and function deployed |
+| Stale track title or LeetCode link | Deploy matching frontend and migrations, then sign in again |
+| Stale app after deploy | Service worker updates on next load; a one-time chunk reload is automatic |
 
-## 8. Maintenance rules
+## 11. Maintenance rules
 
-- Keep feature behavior with its owning feature; share only genuinely common
-  code through `src/shared/`.
-- Preserve account boundaries in both client queries and database policies.
-- Keep public RPC return values and grants reviewed against the current
-  profile disclosure policy, especially the public email field.
-- Keep account caches and durable queued mutations separate; queued writes must
-  remain user-scoped and safe to replay.
-- Add timestamped migrations for database changes; never mutate an already
-  applied migration.
-- Preserve browser-storage key compatibility unless a migration is planned.
-- Preserve global stylesheet import order when changing the cascade.
+- Keep feature behavior in its feature; share only genuinely common code.
+- Preserve account boundaries in client queries and database policies alike.
+- Review public RPC return shapes and grants against the disclosure policy in section 8.
+- Keep caches (disposable) separate from the outbox (durable, user-scoped, replay-safe).
+- Preserve browser-storage key names unless a migration path exists.
+- Preserve global stylesheet import order.
