@@ -1,5 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import AppDialog from "../../shared/components/AppDialog";
+import OfflineSyncStatus from "../../shared/components/OfflineSyncStatus";
+import useOfflineSync from "../../shared/hooks/useOfflineSync";
 import { getLocalDateKey } from "../../shared/utils/date";
 import { useProgress } from "../problem-tracker/hooks/useProgress";
 import useProfileMetrics from "../profile/hooks/useProfileMetrics";
@@ -22,6 +24,7 @@ export default function AuthenticatedApp({
   onSignOut,
 }) {
   const [dialog, setDialog] = useState(null);
+  const offlineSync = useOfflineSync(user?.id);
   const dialogResolver = useRef(null);
   const showNotice = useCallback((message, title = "Momentum") => {
     setDialog({ type: "notice", title, message });
@@ -309,5 +312,10 @@ export default function AuthenticatedApp({
     yearlyActiveDays,
   };
 
-  return <AuthenticatedScreens context={screenContext} />;
+  return (
+    <>
+      <OfflineSyncStatus {...offlineSync} onRetry={() => void offlineSync.retrySync()} />
+      <AuthenticatedScreens context={screenContext} />
+    </>
+  );
 }

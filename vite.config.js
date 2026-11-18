@@ -8,6 +8,7 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, ".kilo/worktrees/**"],
   },
   build: {
+    manifest: "manifest.json",
     target: "es2020",
     rollupOptions: {
       output: {

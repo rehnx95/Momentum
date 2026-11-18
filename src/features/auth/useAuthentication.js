@@ -48,8 +48,10 @@ function clearAppScopedStorage() {
     const keysToRemove = [];
     for (let index = 0; index < localStorage.length; index += 1) {
       const key = localStorage.key(index);
-      // These versioned markers avoid repeating built-in sheet bootstrap RPCs.
-      if (key && key.startsWith("momentum:") && !key.startsWith("momentum:builtins:")) {
+      // These records must survive account cleanup so queued edits can sync after sign-in.
+      const isDurableOfflineQueue = key === "momentum:offline-mutations";
+      const isBuiltInSyncMarker = key?.startsWith("momentum:builtins:");
+      if (key && key.startsWith("momentum:") && !isBuiltInSyncMarker && !isDurableOfflineQueue) {
         keysToRemove.push(key);
       }
     }

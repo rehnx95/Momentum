@@ -3,6 +3,8 @@ import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import useDailyLogTimer from "./useDailyLogTimer";
 import { timerStorageKey } from "../lib/dailyLogModel";
+import { getLocalDateKey } from "../../../shared/utils/date";
+import { getOfflineMutations } from "../../../shared/lib/offlineMutationStore";
 
 function installBrowserStubs() {
   const store = new Map();
@@ -42,6 +44,10 @@ function installBrowserStubs() {
     },
     configurable: true,
   });
+  Object.defineProperty(globalThis, "navigator", {
+    value: { onLine: true },
+    configurable: true,
+  });
 }
 
 vi.mock("../../../shared/lib/supabase", () => ({
@@ -58,6 +64,8 @@ describe("useDailyLogTimer", () => {
     delete globalThis.localStorage;
     delete globalThis.window;
     delete globalThis.document;
+    delete globalThis.navigator;
+    vi.useRealTimers();
   });
 
   it("starts and stops a timer without leaving a stale running state", async () => {
@@ -103,5 +111,53 @@ describe("useDailyLogTimer", () => {
     expect(hookResult.runningTimer).toBeNull();
     expect(localStorage.getItem(timerStorageKey("user-1"))).toBeNull();
     expect(saveLogRef.current).toHaveBeenCalled();
+  });
+
+  it("queues a timer segment from the previous day while offline", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2025, 2, 15, 0, 30));
+    globalThis.navigator.onLine = false;
+    const now = new Date();
+    const previousDay = new Date(2025, 2, 14, 23, 30);
+    const dateKey = getLocalDateKey(now);
+    const timer = {
+      activityId: "task-1",
+      activityName: "Reading",
+      color: "#3b82f6",
+      startedAt: previousDay.toISOString(),
+    };
+    localStorage.setItem(timerStorageKey("user-offline"), JSON.stringify(timer));
+    const setLog = vi.fn();
+    const saveLogRef = { current: vi.fn().mockResolvedValue(true) };
+    let hookResult;
+
+    function HookHarness() {
+      hookResult = useDailyLogTimer({
+        userId: "user-offline",
+        dateRef: { current: dateKey },
+        logRef: { current: { date: dateKey, sleep_time: "", wake_time: "", custom_tasks: [] } },
+        setLog,
+        saveLogRef,
+        flushPendingSave: vi.fn().mockResolvedValue(true),
+        setMessage: vi.fn(),
+      });
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+    });
+    await act(async () => {
+      expect(await hookResult.stopTimer()).toBe(true);
+    });
+
+    const pending = await getOfflineMutations("user-offline");
+    expect(pending).toHaveLength(1);
+    expect(pending[0]).toMatchObject({
+      type: "daily-log-slot",
+      payload: { date: getLocalDateKey(previousDay), task: { id: "task-1" } },
+    });
+    expect(saveLogRef.current).toHaveBeenCalledOnce();
+    expect(localStorage.getItem(timerStorageKey("user-offline"))).toBeNull();
   });
 });

@@ -2,6 +2,8 @@ import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readUserDataCache, writeUserDataCache } from "../../../shared/lib/userDataCache";
+import { getOfflineMutations } from "../../../shared/lib/offlineMutationStore";
+import { syncOfflineMutations } from "../../../shared/lib/offlineSync";
 import { useProgress } from "./useProgress";
 
 const fromMock = vi.hoisted(() => vi.fn());
@@ -43,6 +45,10 @@ function installBrowserStubs() {
         removeAttribute: vi.fn(),
       },
     },
+    configurable: true,
+  });
+  Object.defineProperty(globalThis, "navigator", {
+    value: { onLine: true },
     configurable: true,
   });
 }
@@ -108,6 +114,7 @@ describe("useProgress", () => {
     delete globalThis.localStorage;
     delete globalThis.window;
     delete globalThis.document;
+    delete globalThis.navigator;
   });
 
   it("derives activity metrics from solved progress dates", async () => {
@@ -206,6 +213,53 @@ describe("useProgress", () => {
     expect(progressUpsert).toHaveBeenCalledOnce();
     expect(activityWrite).not.toHaveBeenCalled();
     expect(fromMock).not.toHaveBeenCalledWith("activity_log");
+  });
+
+  it("keeps progress edits offline and replays them after reconnecting", async () => {
+    const progressUpsert = vi.fn().mockResolvedValue({ error: null });
+    fromMock.mockImplementation((table) => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockResolvedValue({ data: [], error: null }),
+      upsert: table === "progress" ? progressUpsert : vi.fn(),
+    }));
+    globalThis.navigator.onLine = false;
+
+    let hookResult;
+    function HookHarness() {
+      hookResult = useProgress({ id: "offline-user" });
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    await act(async () => {
+      await hookResult.update("problem-offline", "done");
+    });
+
+    expect(hookResult.progress["problem-offline"]).toBe("done");
+    expect(progressUpsert).not.toHaveBeenCalled();
+    expect(await getOfflineMutations("offline-user")).toHaveLength(1);
+
+    globalThis.navigator.onLine = true;
+    await act(async () => {
+      await syncOfflineMutations("offline-user");
+    });
+
+    expect(progressUpsert).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          problem_id: "problem-offline",
+          state: "done",
+          user_id: "offline-user",
+        }),
+      ],
+      { onConflict: "user_id,problem_id" },
+    );
+    expect(await getOfflineMutations("offline-user")).toHaveLength(0);
   });
 
   it("caches local-only progress resets without changing other sheet progress", async () => {

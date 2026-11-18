@@ -28,9 +28,43 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+      <meta name="theme-color" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Momentum" />
   </head>
   <body class="bg-page text-text">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+      <!-- momentum-pwa:begin -->
+    <script>
+      (function () {
+        // File handler: the OS opens a .txt track with Momentum
+        if ('launchQueue' in window) {
+          window.launchQueue.setConsumer(async function (params) {
+            if (!params.files || !params.files.length) return;
+            var files = [];
+            for (var i = 0; i < params.files.length; i++) files.push(await params.files[i].getFile());
+            window.__momentumLaunchFiles = files; // read this if the app mounts after launch
+            window.dispatchEvent(new CustomEvent('momentum:files', { detail: files }));
+          });
+        }
+
+        if (!('serviceWorker' in navigator)) return;
+        var host = location.hostname;
+        if (host === 'localhost' || host === '127.0.0.1') return; // keep dev HMR clean
+
+        // Periodic sync works with whoever registered the worker
+        navigator.serviceWorker.ready.then(function (reg) {
+          if (!('periodicSync' in reg) || !navigator.permissions) return;
+          navigator.permissions.query({ name: 'periodic-background-sync' }).then(function (status) {
+            if (status.state === 'granted') {
+              reg.periodicSync.register('momentum-refresh', { minInterval: 24 * 60 * 60 * 1000 }).catch(function () {});
+            }
+          }).catch(function () {});
+        });
+      })();
+    </script>
+    <!-- momentum-pwa:end -->
   </body>
 </html>

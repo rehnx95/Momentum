@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../../../shared/lib/supabase";
 import { readUserDataCache, writeUserDataCache } from "../../../shared/lib/userDataCache";
+import { getOfflineMutations } from "../../../shared/lib/offlineMutationStore";
+import { queueOfflineMutation, syncOfflineMutations } from "../../../shared/lib/offlineSync";
 import { getLocalDateKey } from "../../../shared/utils/date";
 
 function isRecord(value) {
@@ -24,21 +26,14 @@ export function useProgress(user) {
     userId,
     data: readCachedProgress(userId),
   }));
-  const cachedForCurrentUser =
-    initialCache.userId === userId ? initialCache.data : null;
+  const cachedForCurrentUser = initialCache.userId === userId ? initialCache.data : null;
   const [progress, setProgress] = useState(() => cachedForCurrentUser?.progress || {});
   const progressRef = useRef(progress);
   const completedOnRef = useRef(cachedForCurrentUser?.completedOn || {});
-  const [completedOn, setCompletedOn] = useState(
-    () => cachedForCurrentUser?.completedOn || {},
-  );
+  const [completedOn, setCompletedOn] = useState(() => cachedForCurrentUser?.completedOn || {});
   const completedAtRef = useRef(cachedForCurrentUser?.completedAt || {});
-  const [completedAt, setCompletedAt] = useState(
-    () => cachedForCurrentUser?.completedAt || {},
-  );
-  const [activityLog, setActivityLog] = useState(
-    () => cachedForCurrentUser?.activityLog || {},
-  );
+  const [completedAt, setCompletedAt] = useState(() => cachedForCurrentUser?.completedAt || {});
+  const [activityLog, setActivityLog] = useState(() => cachedForCurrentUser?.activityLog || {});
   const activityRef = useRef(activityLog);
   const [loading, setLoading] = useState(Boolean(user) && !cachedForCurrentUser);
   const [error, setError] = useState("");
@@ -83,23 +78,40 @@ export function useProgress(user) {
   }, []);
 
   const save = useCallback(
-    (operation) => {
-      const write = writeQueue.current.then(async () => {
-        await operation();
-        if (user?.id) {
-          cacheProgress(
-            user.id,
-            progressRef.current,
-            activityRef.current,
-            completedOnRef.current,
-            completedAtRef.current,
-          );
+    (mutations) => {
+      const runSave = async () => {
+        if (!user?.id) return false;
+        cacheProgress(
+          user.id,
+          progressRef.current,
+          activityRef.current,
+          completedOnRef.current,
+          completedAtRef.current,
+        );
+        for (const mutation of mutations) {
+          await queueOfflineMutation({ userId: user.id, ...mutation });
         }
-      });
+        const syncResult = await syncOfflineMutations(user.id);
+        const mutationKeys = new Set(
+          mutations.map(({ type, entityId }) => `${user.id}:${type}:${entityId}`),
+        );
+        const failure = syncResult.failures.find(
+          (item) => mutationKeys.has(item.key) && !item.retryable,
+        );
+        if (failure) {
+          setError(
+            `Your progress is saved on this device but could not sync: ${failure.message}${failure.code ? ` ${failure.code}` : ""}`,
+          );
+        } else {
+          setError("");
+        }
+        return !failure;
+      };
+      const write = writeQueue.current.then(runSave, runSave);
       writeQueue.current = write.catch((saveError) => {
-        console.error("Failed to save user data to Supabase:", saveError);
+        console.error("Failed to save user data locally:", saveError);
         setError(
-          "Some changes could not be saved. Check your connection and reload to sync your account.",
+          "Some changes could not be saved on this device. Check your available storage and try again.",
         );
       });
       return write.then(
@@ -121,8 +133,7 @@ export function useProgress(user) {
     }
 
     let active = true;
-    const cached =
-      initialCache.userId === userId ? initialCache.data : readCachedProgress(userId);
+    const cached = initialCache.userId === userId ? initialCache.data : readCachedProgress(userId);
     const hasCachedData = Boolean(cached);
     setError("");
     replaceProgress(hasCachedData ? cached.progress : {});
@@ -131,19 +142,22 @@ export function useProgress(user) {
     replaceCompletedAt(hasCachedData ? cached.completedAt : {});
     setLoading(!hasCachedData);
 
-    supabase
-      .from("progress")
-      .select("problem_id, state, completed_on, updated_at")
-      .eq("user_id", userId)
-      .in("state", ["todo", "done", "skipped"])
-      .then((progressResult) => {
+    const loadProgress = async () => {
+      try {
+        if (typeof navigator === "undefined" || navigator.onLine !== false) {
+          await syncOfflineMutations(userId);
+        }
+        const progressResult = await supabase
+          .from("progress")
+          .select("problem_id, state, completed_on, updated_at")
+          .eq("user_id", userId)
+          .in("state", ["todo", "done", "skipped"]);
         if (progressResult.error) throw progressResult.error;
         if (!active) return;
 
         const progressMap = {};
         const completedOnMap = {};
         const completedAtMap = {};
-        const activityMap = {};
         for (const item of progressResult.data) {
           progressMap[item.problem_id] = item.state;
           if (item.state === "done" && item.completed_on) {
@@ -152,31 +166,64 @@ export function useProgress(user) {
           if (item.state === "done" && item.updated_at) {
             completedAtMap[item.problem_id] = item.updated_at;
           }
-          if (item.state === "done") {
-            const timestamp = Date.parse(item.updated_at);
-            const activityDate =
-              item.completed_on ||
-              (Number.isFinite(timestamp) ? new Date(timestamp).toISOString().slice(0, 10) : null);
-            if (activityDate) activityMap[activityDate] = (activityMap[activityDate] || 0) + 1;
+        }
+
+        const pendingMutations = await getOfflineMutations(userId);
+        for (const mutation of pendingMutations) {
+          if (mutation.type !== "progress") continue;
+          const { operation, problemId, rows } = mutation.payload;
+          if (operation === "clear") {
+            Object.keys(progressMap).forEach((id) => delete progressMap[id]);
+            Object.keys(completedOnMap).forEach((id) => delete completedOnMap[id]);
+            Object.keys(completedAtMap).forEach((id) => delete completedAtMap[id]);
+          } else if (operation === "delete") {
+            delete progressMap[problemId];
+            delete completedOnMap[problemId];
+            delete completedAtMap[problemId];
+          } else if (operation === "upsert") {
+            for (const row of rows) {
+              progressMap[row.problem_id] = row.state;
+              if (row.state === "done" && row.completed_on) {
+                completedOnMap[row.problem_id] = row.completed_on;
+              } else {
+                delete completedOnMap[row.problem_id];
+              }
+              if (row.state === "done" && row.updated_at) {
+                completedAtMap[row.problem_id] = row.updated_at;
+              } else {
+                delete completedAtMap[row.problem_id];
+              }
+            }
           }
         }
 
+        const activityMap = {};
+        for (const [problemId, state] of Object.entries(progressMap)) {
+          if (state !== "done") continue;
+          const timestamp = Date.parse(completedAtMap[problemId]);
+          const activityDate =
+            completedOnMap[problemId] ||
+            (Number.isFinite(timestamp) ? new Date(timestamp).toISOString().slice(0, 10) : null);
+          if (activityDate) activityMap[activityDate] = (activityMap[activityDate] || 0) + 1;
+        }
         replaceProgress(progressMap);
         replaceActivity(activityMap);
         replaceCompletedOn(completedOnMap);
         replaceCompletedAt(completedAtMap);
         cacheProgress(userId, progressMap, activityMap, completedOnMap, completedAtMap);
-      })
-      .catch((loadError) => {
+      } catch (loadError) {
         if (!active) return;
         console.error("Failed to load user data from Supabase:", loadError);
         setError(
-          "Could not load your saved progress. Check your Supabase database setup and reload.",
+          typeof navigator !== "undefined" && navigator.onLine === false
+            ? "Offline. Showing your saved progress; new changes will sync when connected."
+            : "Could not load your saved progress. Check your Supabase database setup and reload.",
         );
-      })
-      .finally(() => {
+      } finally {
         if (active) setLoading(false);
-      });
+      }
+    };
+    void loadProgress();
 
     return () => {
       active = false;
@@ -246,19 +293,24 @@ export function useProgress(user) {
         replaceActivity(nextActivity);
       }
 
-      await save(async () => {
-        const { error: progressError } = await supabase.from("progress").upsert(
-          {
-            user_id: user.id,
-            problem_id: id,
-            state,
-            completed_on: state === "done" ? nextCompletedOn[id] : null,
-            updated_at: state === "done" ? nextCompletedAt[id] : now,
+      await save([
+        {
+          type: "progress",
+          entityId: id,
+          payload: {
+            operation: "upsert",
+            rows: [
+              {
+                user_id: user.id,
+                problem_id: id,
+                state,
+                completed_on: state === "done" ? nextCompletedOn[id] : null,
+                updated_at: state === "done" ? nextCompletedAt[id] : now,
+              },
+            ],
           },
-          { onConflict: "user_id,problem_id" },
-        );
-        if (progressError) throw progressError;
-      });
+        },
+      ]);
     },
     [user, replaceActivity, replaceCompletedAt, replaceCompletedOn, replaceProgress, save],
   );
@@ -312,14 +364,13 @@ export function useProgress(user) {
         replaceActivity(nextActivity);
       }
 
-      return save(async () => {
-        if (entries.length > 0) {
-          const { error: progressError } = await supabase
-            .from("progress")
-            .upsert(entries, { onConflict: "user_id,problem_id" });
-          if (progressError) throw progressError;
-        }
-      });
+      return save(
+        entries.map((entry) => ({
+          type: "progress",
+          entityId: entry.problem_id,
+          payload: { operation: "upsert", rows: [entry] },
+        })),
+      );
     },
     [user, replaceActivity, replaceCompletedAt, replaceCompletedOn, replaceProgress, save],
   );
@@ -377,14 +428,13 @@ export function useProgress(user) {
           return;
         }
 
-        await save(async () => {
-          const { error: progressError } = await supabase
-            .from("progress")
-            .delete()
-            .eq("user_id", user.id)
-            .in("problem_id", idsToReset);
-          if (progressError) throw progressError;
-        });
+        await save(
+          idsToReset.map((problemId) => ({
+            type: "progress",
+            entityId: problemId,
+            payload: { operation: "delete", problemId },
+          })),
+        );
         return;
       }
 
@@ -393,13 +443,13 @@ export function useProgress(user) {
       replaceCompletedOn({});
       replaceCompletedAt({});
 
-      await save(async () => {
-        const { error: progressError } = await supabase
-          .from("progress")
-          .delete()
-          .match({ user_id: user.id });
-        if (progressError) throw progressError;
-      });
+      await save([
+        {
+          type: "progress",
+          entityId: "all",
+          payload: { operation: "clear" },
+        },
+      ]);
     },
     [
       user,

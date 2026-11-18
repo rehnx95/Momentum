@@ -19,6 +19,81 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "productivity",
+    "education",
+    "lifestyle"
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "launch_handler": {
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "shortcuts": [
+    {
+      "name": "Daily Log",
+      "short_name": "Daily Log",
+      "description": "Record today's sleep and activity",
+      "url": "/?shortcut=daily-log"
+    },
+    {
+      "name": "Learning Tracks",
+      "short_name": "Tracks",
+      "description": "Open your learning tracks",
+      "url": "/?shortcut=tracks"
+    },
+    {
+      "name": "Progress",
+      "short_name": "Progress",
+      "description": "See streaks and analytics",
+      "url": "/?shortcut=progress"
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "share_title",
+      "text": "share_text",
+      "url": "share_url"
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "/?source=file",
+      "accept": {
+        "text/plain": [
+          ".txt"
+        ]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+momentum",
+      "url": "/?protocol=%s"
     }
   ]
 }

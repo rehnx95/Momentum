@@ -112,27 +112,35 @@ export default function useDailyLog(user, activityLog = {}) {
     updateSlot,
   } = useDailyLogActivities(logRef, setLog, assignActivityColor);
 
-  const { autosaveTimer, flushPendingSave, saveLog, saveLogRef, saveQueueRef, saving } =
-    useDailyLogPersistence({
-      date,
-      dateRef,
-      dirty,
-      loadFailed,
-      loadRequest,
-      loading,
-      log,
-      logRef,
-      savedSnapshotRef,
-      setLoadFailed,
-      setLoading,
-      setLog,
-      setMessage,
-      setSavedSnapshot,
-      setStatus,
-      userId: user.id,
-      savedUpdatedAtRef,
-      validationErrors: validation.errors,
-    });
+  const {
+    autosaveTimer,
+    flushPendingSave,
+    overwriteConflict,
+    reloadConflict,
+    saveLog,
+    saveLogRef,
+    saveQueueRef,
+    saving,
+  } = useDailyLogPersistence({
+    date,
+    dateRef,
+    dirty,
+    loadFailed,
+    loadRequest,
+    loading,
+    log,
+    logRef,
+    savedSnapshotRef,
+    setLoadFailed,
+    setLoading,
+    setLog,
+    setMessage,
+    setSavedSnapshot,
+    setStatus,
+    userId: user.id,
+    savedUpdatedAtRef,
+    validationErrors: validation.errors,
+  });
 
   const { quickAdd, runningTimer, startTimer, stopTimer, timerNow } = useDailyLogTimer({
     userId: user.id,
@@ -210,8 +218,13 @@ export default function useDailyLog(user, activityLog = {}) {
     setSavedSnapshot(snapshot);
     setDailyLogCache(user.id, dateRef.current, clearedLog);
     setLoadRequest((current) => current + 1);
-    setStatus("Saved");
-    setMessage("All saved Daily Log entries for your account were cleared.");
+    const online = typeof navigator === "undefined" || navigator.onLine !== false;
+    setStatus(online ? "Saved" : "Saved on this device");
+    setMessage(
+      online
+        ? "All saved Daily Log entries for your account were cleared."
+        : "Daily Log history was cleared on this device and will sync when connected.",
+    );
     return true;
   }, [autosaveTimer, clearHistory, saveQueueRef, setLog, user.id]);
 
@@ -255,6 +268,8 @@ export default function useDailyLog(user, activityLog = {}) {
     renameCustomTask,
     setActivityColor,
     saveLog,
+    overwriteConflict,
+    reloadConflict,
     loadOlderLogs,
     clearAllLogs,
     startTimer,

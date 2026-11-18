@@ -3,19 +3,30 @@ import { supabase } from "../../../shared/lib/supabase";
 import {
   getDailyLogCache,
   invalidateDailyLogHistoryCache,
-  invalidateFullLogCache,
   setDailyLogCache,
+  updateFullLogCacheEntry,
 } from "../lib/dailyLogHistoryCache";
-import { normalizeLog } from "../lib/dailyLogModel";
+import { queueOfflineMutation, syncOfflineMutations } from "../../../shared/lib/offlineSync";
+import {
+  getOfflineMutations,
+  removeOfflineMutation,
+} from "../../../shared/lib/offlineMutationStore";
+import { emptyLog, normalizeLog } from "../lib/dailyLogModel";
 import { validateDay } from "../../../shared/utils/time";
 
-function sameTimestamp(first, second) {
-  const firstTime = Date.parse(first);
-  const secondTime = Date.parse(second);
-  if (Number.isFinite(firstTime) && Number.isFinite(secondTime)) {
-    return firstTime === secondTime;
-  }
-  return first === second;
+function buildDailyLogRow(userId, date, draft, updatedAt) {
+  return {
+    user_id: userId,
+    date,
+    sleep_time: draft.sleep_time || null,
+    wake_time: draft.wake_time || null,
+    dsa_slots: [],
+    backend_slots: [],
+    custom_tasks: draft.custom_tasks,
+    dsa_hours: null,
+    backend_hours: null,
+    updated_at: updatedAt,
+  };
 }
 
 export default function useDailyLogPersistence({
@@ -64,57 +75,53 @@ export default function useDailyLogPersistence({
           setStatus("Saving…");
           setMessage("");
         }
-        const { data: existingLog, error: existingError } = await supabase
-          .from("daily_logs")
-          .select("updated_at")
-          .eq("user_id", userId)
-          .eq("date", nextDate)
-          .maybeSingle();
-        if (existingError) throw existingError;
-
-        const savedAt = savedUpdatedAtRef.current;
-        const remoteAt = existingLog?.updated_at;
-        const hasConflict = savedAt
-          ? !remoteAt || !sameTimestamp(savedAt, remoteAt)
-          : Boolean(remoteAt);
-        if (hasConflict) {
-          if (nextDate === dateRef.current) {
-            setStatus("This day changed elsewhere");
-            setMessage("This day changed elsewhere. Reload the date to keep the latest version.");
-          }
-          return false;
-        }
-
         const updatedAt = new Date().toISOString();
-        const { error } = await supabase.from("daily_logs").upsert(
-          {
-            user_id: userId,
-            date: nextDate,
-            sleep_time: nextDraft.sleep_time || null,
-            wake_time: nextDraft.wake_time || null,
-            dsa_slots: [],
-            backend_slots: [],
-            custom_tasks: nextDraft.custom_tasks,
-            dsa_hours: null,
-            backend_hours: null,
-            updated_at: updatedAt,
-          },
-          { onConflict: "user_id,date" },
-        );
-        if (error) throw error;
+        const row = buildDailyLogRow(userId, nextDate, nextDraft, updatedAt);
+        const mutation = await queueOfflineMutation({
+          userId,
+          type: "daily-log",
+          entityId: nextDate,
+          payload: { row, draft: nextDraft, expectedUpdatedAt: savedUpdatedAtRef.current },
+        });
         invalidateDailyLogHistoryCache(userId);
-        invalidateFullLogCache(userId);
         const normalizedLog = normalizeLog(nextDraft, nextDate);
         normalizedLog.updated_at = updatedAt;
         setDailyLogCache(userId, nextDate, normalizedLog);
+        updateFullLogCacheEntry(userId, normalizedLog);
         if (nextDate === dateRef.current) {
           savedSnapshotRef.current = snapshot;
-          savedUpdatedAtRef.current = updatedAt;
           setSavedSnapshot(snapshot);
-          setStatus("Saved");
-          setMessage("");
         }
-        return true;
+
+        const syncResult = await syncOfflineMutations(userId);
+        const conflict = syncResult.conflicts.some((item) => item.key === mutation.key);
+        const synced = syncResult.syncedKeys.includes(mutation.key);
+        const failure = syncResult.failures.find((item) => item.key === mutation.key);
+        if (nextDate === dateRef.current) {
+          if (conflict) {
+            setStatus("This day changed elsewhere");
+            setMessage(
+              "Your edits are preserved on this device, but this day also changed in the cloud.",
+            );
+          } else if (synced) {
+            savedUpdatedAtRef.current = updatedAt;
+            setStatus("Saved");
+            setMessage("");
+          } else if (failure && !failure.retryable) {
+            setStatus("Could not save");
+            setMessage(
+              `Could not sync this daily log: ${failure.message}${failure.code ? ` ${failure.code}` : ""}`,
+            );
+          } else {
+            setStatus("Saved on this device");
+            setMessage(
+              failure
+                ? `Saved locally; sync could not complete: ${failure.message}`
+                : "Saved locally. Changes will sync when your connection returns.",
+            );
+          }
+        }
+        return !conflict && !(failure && !failure.retryable);
       };
       const runSave = async () => {
         try {
@@ -157,21 +164,239 @@ export default function useDailyLogPersistence({
   const saveLogRef = useRef(saveLog);
   saveLogRef.current = saveLog;
 
+  const reloadConflict = useCallback(async () => {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      setMessage("Reconnect to load the cloud copy. Your local edits are preserved.");
+      return false;
+    }
+
+    const targetDate = dateRef.current;
+    try {
+      const { data, error } = await supabase
+        .from("daily_logs")
+        .select("date, sleep_time, wake_time, custom_tasks, updated_at")
+        .eq("user_id", userId)
+        .eq("date", targetDate)
+        .maybeSingle();
+      if (error) throw error;
+
+      const pending = (await getOfflineMutations(userId)).find(
+        (mutation) => mutation.type === "daily-log" && mutation.entityId === targetDate,
+      );
+      if (pending && !(await removeOfflineMutation(pending.key, pending.updatedAt))) {
+        setMessage("Your local edits changed while resolving this conflict. Try again.");
+        return false;
+      }
+
+      const nextLog = normalizeLog(data, targetDate);
+      nextLog.updated_at = data?.updated_at ?? null;
+      const snapshot = JSON.stringify(nextLog);
+      setDailyLogCache(userId, targetDate, nextLog);
+      updateFullLogCacheEntry(userId, nextLog);
+      invalidateDailyLogHistoryCache(userId);
+      savedSnapshotRef.current = snapshot;
+      savedUpdatedAtRef.current = data?.updated_at ?? null;
+      setSavedSnapshot(snapshot);
+      setLog(nextLog);
+      setStatus("Saved");
+      setMessage("Loaded the latest cloud copy. Your offline edits were discarded.");
+      setLoadFailed(false);
+      return true;
+    } catch (error) {
+      console.error("Could not reload the cloud Daily Log:", error);
+      setMessage(`Could not load the cloud copy: ${error?.message || "Please retry."}`);
+      return false;
+    }
+  }, [
+    dateRef,
+    savedSnapshotRef,
+    savedUpdatedAtRef,
+    setLoadFailed,
+    setLog,
+    setMessage,
+    setSavedSnapshot,
+    setStatus,
+    userId,
+  ]);
+
+  const overwriteConflict = useCallback(async () => {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      setMessage("Reconnect before replacing the cloud copy. Your local edits are preserved.");
+      return false;
+    }
+
+    const targetDate = dateRef.current;
+    const draft = logRef.current;
+    if (validateDay(draft).errors.length) {
+      setStatus("Fix errors to save");
+      setMessage("");
+      return false;
+    }
+
+    try {
+      const { data: existingLog, error: existingError } = await supabase
+        .from("daily_logs")
+        .select("updated_at")
+        .eq("user_id", userId)
+        .eq("date", targetDate)
+        .maybeSingle();
+      if (existingError) throw existingError;
+
+      const updatedAt = new Date().toISOString();
+      const snapshot = JSON.stringify(draft);
+      const row = buildDailyLogRow(userId, targetDate, draft, updatedAt);
+      const mutation = await queueOfflineMutation({
+        userId,
+        type: "daily-log",
+        entityId: targetDate,
+        payload: {
+          row,
+          draft,
+          expectedUpdatedAt: existingLog?.updated_at ?? null,
+        },
+      });
+      const normalizedLog = normalizeLog(draft, targetDate);
+      normalizedLog.updated_at = updatedAt;
+      setDailyLogCache(userId, targetDate, normalizedLog);
+      updateFullLogCacheEntry(userId, normalizedLog);
+      invalidateDailyLogHistoryCache(userId);
+      savedSnapshotRef.current = snapshot;
+      savedUpdatedAtRef.current = existingLog?.updated_at ?? null;
+      setSavedSnapshot(snapshot);
+
+      const syncResult = await syncOfflineMutations(userId);
+      const conflict = syncResult.conflicts.some((item) => item.key === mutation.key);
+      const failure = syncResult.failures.find((item) => item.key === mutation.key);
+      if (conflict) {
+        setStatus("This day changed elsewhere");
+        setMessage("The cloud copy changed again. Review the conflict and retry.");
+        return false;
+      }
+      if (failure && !failure.retryable) {
+        setStatus("Could not save");
+        setMessage(`Could not replace the cloud copy: ${failure.message}`);
+        return false;
+      }
+      if (syncResult.syncedKeys.includes(mutation.key)) {
+        savedUpdatedAtRef.current = updatedAt;
+        setStatus("Saved");
+        setMessage("Your copy replaced the cloud version.");
+      } else {
+        setStatus("Saved on this device");
+        setMessage("Your copy is saved here and will sync when possible.");
+      }
+      return true;
+    } catch (error) {
+      console.error("Could not replace the cloud Daily Log:", error);
+      setStatus("Could not save");
+      setMessage(`Could not replace the cloud copy: ${error?.message || "Please retry."}`);
+      return false;
+    }
+  }, [
+    dateRef,
+    logRef,
+    savedSnapshotRef,
+    savedUpdatedAtRef,
+    setMessage,
+    setSavedSnapshot,
+    setStatus,
+    userId,
+  ]);
+
+  useEffect(() => {
+    const handleOfflineSync = (event) => {
+      if (event.detail?.userId !== userId) return;
+      const mutationKey = `${userId}:daily-log:${dateRef.current}`;
+      if (event.detail.conflicts.some((item) => item.key === mutationKey)) {
+        setStatus("This day changed elsewhere");
+        setMessage(
+          "Your edits are preserved on this device, but this day also changed in the cloud.",
+        );
+        return;
+      }
+      if (!event.detail.syncedKeys.includes(mutationKey)) return;
+      const cachedLog = getDailyLogCache(userId, dateRef.current);
+      savedUpdatedAtRef.current = cachedLog?.updated_at ?? null;
+      if (JSON.stringify(logRef.current) === savedSnapshotRef.current) {
+        setStatus("Saved");
+        setMessage("");
+      }
+    };
+
+    if (typeof window.addEventListener !== "function") return undefined;
+    window.addEventListener("momentum:offline-sync", handleOfflineSync);
+    return () => window.removeEventListener("momentum:offline-sync", handleOfflineSync);
+  }, [dateRef, logRef, savedSnapshotRef, savedUpdatedAtRef, setMessage, setStatus, userId]);
+
   useEffect(() => {
     let active = true;
     const cachedLog = getDailyLogCache(userId, date);
-    setLoading(!cachedLog);
+    const online = typeof navigator === "undefined" || navigator.onLine !== false;
+    setLoading(!cachedLog && online);
     setLoadFailed(false);
     setStatus("");
     if (!cachedLog) setMessage("");
     const snapshotAtRequestStart = savedSnapshotRef.current;
-    supabase
-      .from("daily_logs")
-      .select("date, sleep_time, wake_time, custom_tasks, updated_at")
-      .eq("user_id", userId)
-      .eq("date", date)
-      .maybeSingle()
-      .then(({ data, error }) => {
+    const loadLog = async () => {
+      try {
+        let syncResult = null;
+        if (online) {
+          try {
+            syncResult = await syncOfflineMutations(userId);
+          } catch (error) {
+            console.error("Could not sync pending Daily Log changes:", error);
+          }
+        }
+        const pending = (await getOfflineMutations(userId)).find(
+          (mutation) => mutation.type === "daily-log" && mutation.entityId === date,
+        );
+        if (!active || savedSnapshotRef.current !== snapshotAtRequestStart) return;
+
+        if (pending) {
+          const nextLog = pending.payload.draft || normalizeLog(pending.payload.row, date);
+          const snapshot = JSON.stringify(nextLog);
+          const conflict = syncResult?.conflicts.some((item) => item.key === pending.key);
+          setDailyLogCache(userId, date, {
+            ...normalizeLog(nextLog, date),
+            updated_at: pending.payload.row.updated_at,
+          });
+          savedSnapshotRef.current = snapshot;
+          savedUpdatedAtRef.current = pending.payload.expectedUpdatedAt ?? null;
+          setSavedSnapshot(snapshot);
+          setLog(nextLog);
+          setLoadFailed(false);
+          setStatus(conflict ? "This day changed elsewhere" : "Saved on this device");
+          setMessage(
+            conflict
+              ? "Your edits are preserved on this device, but this day also changed in the cloud."
+              : "Showing edits saved on this device. They will sync when possible.",
+          );
+          return;
+        }
+
+        if (!online) {
+          const nextLog = cachedLog ? normalizeLog(cachedLog, date) : emptyLog(date);
+          const snapshot = JSON.stringify(nextLog);
+          savedSnapshotRef.current = snapshot;
+          savedUpdatedAtRef.current = cachedLog?.updated_at ?? null;
+          setSavedSnapshot(snapshot);
+          setLog(nextLog);
+          setLoadFailed(false);
+          setStatus("Offline");
+          setMessage(
+            cachedLog
+              ? "Showing your saved copy. Changes will sync when your connection returns."
+              : "Starting a new Daily Log on this device. It will sync when your connection returns.",
+          );
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("daily_logs")
+          .select("date, sleep_time, wake_time, custom_tasks, updated_at")
+          .eq("user_id", userId)
+          .eq("date", date)
+          .maybeSingle();
         if (!active) return;
         if (error) throw error;
         if (savedSnapshotRef.current !== snapshotAtRequestStart) return;
@@ -190,22 +415,36 @@ export default function useDailyLogPersistence({
         setLog(nextLog);
         setStatus("Saved");
         setLoadFailed(false);
-      })
-      .catch((error) => {
+      } catch (error) {
         if (!active) return;
         console.error("Failed to load daily log:", error);
         if (!cachedLog) {
-          setLoadFailed(true);
-          setStatus("Could not load");
-          setMessage("Could not load this daily log.");
+          if (typeof navigator !== "undefined" && navigator.onLine === false) {
+            const nextLog = emptyLog(date);
+            const snapshot = JSON.stringify(nextLog);
+            savedSnapshotRef.current = snapshot;
+            savedUpdatedAtRef.current = null;
+            setSavedSnapshot(snapshot);
+            setLog(nextLog);
+            setLoadFailed(false);
+            setStatus("Offline");
+            setMessage(
+              "Starting a new Daily Log on this device. It will sync when your connection returns.",
+            );
+          } else {
+            setLoadFailed(true);
+            setStatus("Could not load");
+            setMessage("Could not load this daily log.");
+          }
         } else {
           setStatus("Offline");
           setMessage("Showing your saved copy; the latest Daily Log could not be fetched.");
         }
-      })
-      .finally(() => {
+      } finally {
         if (active) setLoading(false);
-      });
+      }
+    };
+    void loadLog();
     return () => {
       active = false;
     };
@@ -262,6 +501,8 @@ export default function useDailyLogPersistence({
   return {
     autosaveTimer,
     flushPendingSave,
+    overwriteConflict,
+    reloadConflict,
     saveLog,
     saveLogRef,
     saveQueueRef,

@@ -1,8 +1,48 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "../../../shared/lib/supabase";
-import { invalidateDailyLogHistoryCache, setDailyLogCache } from "../lib/dailyLogHistoryCache";
+import {
+  getDailyLogCache,
+  invalidateDailyLogHistoryCache,
+  setDailyLogCache,
+  updateFullLogCacheEntry,
+} from "../lib/dailyLogHistoryCache";
 import { splitIntervalByDay, validateDay } from "../../../shared/utils/time";
 import { normalizeLog, timerStorageGet, timerStorageKey } from "../lib/dailyLogModel";
+import { queueOfflineMutation, syncOfflineMutations } from "../../../shared/lib/offlineSync";
+
+function addTimerSegment(log, task, slot) {
+  const existingTask = log.custom_tasks.find((item) => item.id === task.id);
+  return {
+    ...log,
+    custom_tasks: existingTask
+      ? log.custom_tasks.map((item) =>
+          item.id === task.id &&
+          !item.slots.some((existingSlot) => existingSlot.timerId === slot.timerId)
+            ? { ...item, slots: [...item.slots, slot] }
+            : item,
+        )
+      : [...log.custom_tasks, { ...task, slots: [slot] }],
+  };
+}
+
+async function saveTimerSegmentOffline(userId, date, task, slot) {
+  const mutation = await queueOfflineMutation({
+    userId,
+    type: "daily-log-slot",
+    entityId: `${date}:${task.id}:${slot.timerId}`,
+    payload: { date, task, slot },
+  });
+  const result = await syncOfflineMutations(userId);
+  const failure = result.failures.find((item) => item.key === mutation.key && !item.retryable);
+  if (failure) throw new Error(failure.message);
+
+  if (!result.syncedKeys.includes(mutation.key)) {
+    const previous = normalizeLog(getDailyLogCache(userId, date), date);
+    const nextLog = addTimerSegment(previous, task, slot);
+    setDailyLogCache(userId, date, nextLog);
+    updateFullLogCacheEntry(userId, nextLog);
+  }
+  invalidateDailyLogHistoryCache(userId);
+}
 
 export default function useDailyLogTimer({
   userId,
@@ -43,12 +83,7 @@ export default function useDailyLogTimer({
   const stopTimer = useCallback(async () => {
     if (!runningTimer) return false;
     if (!(await flushPendingSave())) return false;
-    if (
-      assignActivityColor &&
-      !(await assignActivityColor(runningTimer.activityName || "Activity"))
-    ) {
-      return false;
-    }
+    if (assignActivityColor) await assignActivityColor(runningTimer.activityName || "Activity");
     try {
       const segments = splitIntervalByDay(new Date(runningTimer.startedAt), new Date()).map(
         (segment) => ({
@@ -59,84 +94,21 @@ export default function useDailyLogTimer({
       const currentDate = dateRef.current;
       for (const segment of segments) {
         const id = runningTimer.activityId;
+        const task = {
+          id,
+          name: runningTimer.activityName,
+          color: runningTimer.color,
+        };
         if (segment.date === currentDate) {
-          setLog((current) => {
-            const exists = current.custom_tasks.some((task) => task.id === id);
-            return {
-              ...current,
-              custom_tasks: exists
-                ? current.custom_tasks.map((task) =>
-                    task.id === id
-                      ? {
-                          ...task,
-                          slots: task.slots.some((slot) => slot.timerId === segment.slot.timerId)
-                            ? task.slots
-                            : [...task.slots, segment.slot],
-                        }
-                      : task,
-                  )
-                : [
-                    ...current.custom_tasks,
-                    {
-                      id,
-                      name: runningTimer.activityName,
-                      color: runningTimer.color,
-                      slots: [segment.slot],
-                    },
-                  ],
-            };
-          });
+          setLog((current) => addTimerSegment(current, task, segment.slot));
           continue;
         }
-        const { data, error } = await supabase
-          .from("daily_logs")
-          .select("date, sleep_time, wake_time, custom_tasks")
-          .eq("user_id", userId)
-          .eq("date", segment.date)
-          .maybeSingle();
-        if (error) throw error;
-        const previous = normalizeLog(data, segment.date);
-        const exists = previous.custom_tasks.some((task) => task.id === id);
-        previous.custom_tasks = exists
-          ? previous.custom_tasks.map((task) =>
-              task.id === id
-                ? {
-                    ...task,
-                    slots: task.slots.some((slot) => slot.timerId === segment.slot.timerId)
-                      ? task.slots
-                      : [...task.slots, segment.slot],
-                  }
-                : task,
-            )
-          : [
-              ...previous.custom_tasks,
-              {
-                id,
-                name: runningTimer.activityName,
-                color: runningTimer.color,
-                slots: [segment.slot],
-              },
-            ];
-        if (validateDay(previous).errors.length) {
+        const previous = normalizeLog(getDailyLogCache(userId, segment.date), segment.date);
+        const nextLog = addTimerSegment(previous, task, segment.slot);
+        if (validateDay(nextLog).errors.length) {
           throw new Error(`The existing ${segment.date} log has validation errors.`);
         }
-        const { error: saveError } = await supabase.from("daily_logs").upsert(
-          {
-            user_id: userId,
-            date: segment.date,
-            sleep_time: previous.sleep_time || null,
-            wake_time: previous.wake_time || null,
-            dsa_slots: [],
-            backend_slots: [],
-            custom_tasks: previous.custom_tasks,
-            dsa_hours: null,
-            backend_hours: null,
-          },
-          { onConflict: "user_id,date" },
-        );
-        if (saveError) throw saveError;
-        invalidateDailyLogHistoryCache(userId);
-        setDailyLogCache(userId, segment.date, previous);
+        await saveTimerSegmentOffline(userId, segment.date, task, segment.slot);
       }
       if (segments.some((segment) => segment.date === currentDate)) {
         const savedCurrentDate = await saveLogRef.current(logRef.current, currentDate);
@@ -182,67 +154,20 @@ export default function useDailyLogTimer({
       }));
       const currentDate = dateRef.current;
       if (!(await flushPendingSave())) return false;
-      if (assignActivityColor && !(await assignActivityColor(activityName))) return false;
+      if (assignActivityColor) await assignActivityColor(activityName);
       try {
         for (const segment of segments) {
+          const task = { id: activityId, name: activityName, color };
           if (segment.date === currentDate) {
-            setLog((current) => {
-              const exists = current.custom_tasks.some((task) => task.id === activityId);
-              return {
-                ...current,
-                custom_tasks: exists
-                  ? current.custom_tasks.map((task) =>
-                      task.id === activityId && !task.slots.some((slot) => slot.timerId === id)
-                        ? { ...task, slots: [...task.slots, segment.slot] }
-                        : task,
-                    )
-                  : [
-                      ...current.custom_tasks,
-                      { id: activityId, name: activityName, color, slots: [segment.slot] },
-                    ],
-              };
-            });
+            setLog((current) => addTimerSegment(current, task, segment.slot));
             continue;
           }
-          const { data, error } = await supabase
-            .from("daily_logs")
-            .select("date, sleep_time, wake_time, custom_tasks")
-            .eq("user_id", userId)
-            .eq("date", segment.date)
-            .maybeSingle();
-          if (error) throw error;
-          const previous = normalizeLog(data, segment.date);
-          const exists = previous.custom_tasks.some((task) => task.id === activityId);
-          previous.custom_tasks = exists
-            ? previous.custom_tasks.map((task) =>
-                task.id === activityId && !task.slots.some((slot) => slot.timerId === id)
-                  ? { ...task, slots: [...task.slots, segment.slot] }
-                  : task,
-              )
-            : [
-                ...previous.custom_tasks,
-                { id: activityId, name: activityName, color, slots: [segment.slot] },
-              ];
-          if (validateDay(previous).errors.length) {
+          const previous = normalizeLog(getDailyLogCache(userId, segment.date), segment.date);
+          const nextLog = addTimerSegment(previous, task, segment.slot);
+          if (validateDay(nextLog).errors.length) {
             throw new Error(`The existing ${segment.date} log has validation errors.`);
           }
-          const { error: saveError } = await supabase.from("daily_logs").upsert(
-            {
-              user_id: userId,
-              date: segment.date,
-              sleep_time: previous.sleep_time || null,
-              wake_time: previous.wake_time || null,
-              dsa_slots: [],
-              backend_slots: [],
-              custom_tasks: previous.custom_tasks,
-              dsa_hours: null,
-              backend_hours: null,
-            },
-            { onConflict: "user_id,date" },
-          );
-          if (saveError) throw saveError;
-          invalidateDailyLogHistoryCache(userId);
-          setDailyLogCache(userId, segment.date, previous);
+          await saveTimerSegmentOffline(userId, segment.date, task, segment.slot);
         }
         return true;
       } catch (error) {

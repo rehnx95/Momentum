@@ -40,6 +40,17 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
     !daily.loadFailed &&
     daily.status !== "This day changed elsewhere" &&
     daily.validation.errors.length === 0;
+  const confirmOverwrite = async () => {
+    if (
+      !(await askConfirmation(
+        "Replace the cloud copy of this day with your saved copy?",
+        "Keep my Daily Log edits?",
+      ))
+    ) {
+      return;
+    }
+    await daily.overwriteConflict();
+  };
   const showSaveStatus = daily.status || daily.message || daily.dirty;
   const statusLabel =
     daily.status === "Saved"
@@ -76,6 +87,20 @@ export default function DailyTracker({ user, sheets, activityLog, askConfirmatio
               <span className="daily-save-message" role="alert" aria-live="assertive">
                 {daily.message}
               </span>
+            )}
+            {daily.status === "This day changed elsewhere" && (
+              <div
+                className="daily-conflict-actions"
+                role="group"
+                aria-label="Resolve Daily Log conflict"
+              >
+                <button type="button" onClick={() => void daily.reloadConflict()}>
+                  Use cloud copy
+                </button>
+                <button type="button" onClick={() => void confirmOverwrite()}>
+                  Replace cloud with my copy
+                </button>
+              </div>
             )}
           </div>
           <p className="daily-toolbar-subtitle">{subtitle}</p>

@@ -137,7 +137,7 @@ export default function useDailyLogActivities(logRef, setLog, assignActivityColo
     async (taskId, name) => {
       const trimmed = name.trim();
       if (!trimmed) return false;
-      if (assignActivityColor && !(await assignActivityColor(trimmed))) return false;
+      if (assignActivityColor) await assignActivityColor(trimmed);
       setLog((current) => ({
         ...current,
         custom_tasks: current.custom_tasks.map((task) =>

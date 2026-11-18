@@ -137,6 +137,17 @@ describe("useAuthentication", () => {
       );
       localStorage.setItem(`momentum:builtins:${cachedProfile.id}`, "manifest-v1");
       localStorage.setItem(`momentum:user-data:${cachedProfile.id}:progress`, "{}");
+      const offlineQueue = JSON.stringify([
+        {
+          key: `${cachedProfile.id}:progress:problem-1`,
+          userId: cachedProfile.id,
+          type: "progress",
+          entityId: "problem-1",
+          payload: { operation: "delete", problemId: "problem-1" },
+          updatedAt: 1,
+        },
+      ]);
+      localStorage.setItem("momentum:offline-mutations", offlineQueue);
       authMocks.getSession.mockResolvedValue({
         data: { session: { user: { id: cachedProfile.id, email: "test@example.com" } } },
         error: null,
@@ -154,6 +165,7 @@ describe("useAuthentication", () => {
       expect(localStorage.getItem("momentum:account-cache")).toBeNull();
       expect(localStorage.getItem(`momentum:builtins:${cachedProfile.id}`)).toBe("manifest-v1");
       expect(localStorage.getItem(`momentum:user-data:${cachedProfile.id}:progress`)).toBeNull();
+      expect(localStorage.getItem("momentum:offline-mutations")).toBe(offlineQueue);
       expect(window.location.pathname).toBe("/");
     } finally {
       window.history.replaceState({}, "", previousPath);

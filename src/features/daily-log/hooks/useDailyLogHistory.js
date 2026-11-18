@@ -7,6 +7,8 @@ import {
   setFullLogCache,
 } from "../lib/dailyLogHistoryCache";
 import { getLocalDateKey } from "../../../shared/utils/date";
+import { removeOfflineMutations } from "../../../shared/lib/offlineMutationStore";
+import { queueOfflineMutation, syncOfflineMutations } from "../../../shared/lib/offlineSync";
 
 const PAGE_SIZE = 10;
 const FULL_LOG_CACHE_DURATION = 60_000;
@@ -156,12 +158,26 @@ export default function useDailyLogHistory(userId, viewMode, setMessage) {
       try {
         await waitForPendingSave();
         logsRequestRef.current += 1;
-        const { error } = await supabase.from("daily_logs").delete().eq("user_id", userId);
-        if (error) throw error;
+        await removeOfflineMutations(userId, ["daily-log", "daily-log-slot"]);
+        const mutation = await queueOfflineMutation({
+          userId,
+          type: "delete-daily-logs",
+          entityId: "all",
+          payload: {},
+        });
+        const syncResult = await syncOfflineMutations(userId);
+        const failure = syncResult.failures.find(
+          (item) => item.key === mutation.key && !item.retryable,
+        );
         clearDailyLogCaches(userId);
         setAllLogs([]);
         setHasOlderLogs(false);
         invalidateFullLogCache(userId);
+        if (failure) {
+          setMessage(
+            `Daily Log history was cleared on this device but could not sync: ${failure.message}`,
+          );
+        }
         return true;
       } catch (error) {
         console.error("Failed to clear this user's daily logs:", error);

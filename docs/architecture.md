@@ -37,7 +37,7 @@ user context to Supabase; it does not use a service-role key.
 | Supabase Data API | Authenticated database queries and RPC calls |
 | PostgreSQL | Account-owned records, RLS, triggers, and curated profile operations |
 | Vercel | Static app delivery, SPA rewrites, and server-side account creation and username login |
-| Browser storage | Theme, view preferences, selected track, and account-scoped caches |
+| Browser storage | Theme, view preferences, account-scoped caches, and the per-user offline mutation outbox |
 
 ## 2. Application composition
 
@@ -64,8 +64,15 @@ A cached account and its cached data can render while Supabase validates the
 session and refreshes server data. Progress loads in parallel with built-in
 sheet setup. Transient session or profile lookup failures preserve the signed-in
 state and expose retry instead of sending users to sign-in. A confirmed missing
-session or explicit sign-out clears Momentum-owned local storage; switching
-accounts also clears it.
+session or explicit sign-out clears Momentum-owned caches; the user-scoped
+offline mutation outbox is preserved so queued changes can sync when that
+account signs in again. Switching accounts clears caches but retains the
+outbox, whose entries are isolated by user ID.
+
+The production service worker precaches the app shell and Tracker/Daily Log
+assets. It caches same-origin app assets and navigation responses only; Supabase
+and other API requests remain network-only. Offline use requires a prior online
+sign-in on the same device so the account session and data caches are available.
 
 ### Authenticated screen selection
 
@@ -143,8 +150,10 @@ deletion uses the ownership-checking
 
 Problem states are `todo`, `done`, and `skipped`. A missing progress row means
 `todo`. `useProgress` loads account-owned rows, applies state changes
-optimistically, and serializes database writes. It also maintains a per-user
-browser cache; this is a performance layer, not a durable offline write queue.
+optimistically, and persists them to the per-user cache and offline outbox
+before attempting Supabase writes. Pending progress operations replay
+idempotently after reconnecting; reset operations are ordered with later
+changes.
 
 The `progress` table is the source for solved states and completion dates.
 A PostgreSQL trigger updates `activity_log` in the same transaction when
@@ -162,16 +171,25 @@ Edit a day
   -> validate time intervals
   -> update view state and account/date cache
   -> debounce autosave
-  -> serialize pending writes
-  -> compare remote updated_at
+  -> persist a per-user outbox mutation
+  -> compare remote updated_at when syncing
   -> upsert only if the saved version still matches
 ```
 
 Autosave is delayed until edits settle. Before an upsert, persistence compares
 the row's current `updated_at` to the version originally loaded. If another
-session has changed the day, the app reports a conflict rather than silently
-overwriting it. Pending edits are flushed before changing dates or clearing
-history. Running timers are stored per account and split at local midnight.
+session has changed the day, the app preserves the local edit and reports a
+conflict rather than silently overwriting it. Timer segments use stable IDs so
+they can be replayed without duplication. Pending edits are flushed before
+changing dates or clearing history. Running timers are stored per account and
+split at local midnight. Full Log and Trends can show cached history, but only
+history loaded on this device is available offline.
+
+IndexedDB stores queued mutations, with localStorage as a fallback. The sync
+queue is isolated by user ID and is retried when connectivity returns or the
+app becomes visible. Changes made while offline are not guaranteed to sync
+after the browser is closed; authentication, account setup, profile search,
+sheet management, and other cloud-backed features still require a connection.
 
 Full Log history loads on demand in pages of ten records, using an extra row
 to detect older history. A short-lived account-scoped cache avoids repeating
@@ -322,8 +340,10 @@ and pull requests. There is no end-to-end browser-test command configured.
 
 Vercel builds with `npm run build` and serves `dist/`. `vercel.json` rewrites
 client-side routes to `index.html` and gives versioned assets immutable cache
-headers. The `/api/search` function needs the two public Supabase environment
-variables above; `/api/auth/sign-up` and `/api/auth/username-login` additionally need the server-only
+headers. The build also emits `manifest.json`, which the service worker uses to
+precache the offline app assets. The `/api/search` function needs the two public
+Supabase environment variables above; `/api/auth/sign-up` and
+`/api/auth/username-login` additionally need the server-only
 `SUPABASE_SERVICE_ROLE_KEY`. Set the service-role key only in Vercel's server
 environment and in an untracked local environment file when running
 `vercel dev`. Never expose it to browser code. After changing environment
@@ -368,7 +388,7 @@ They do not use a service-role key or a separate database.
 | Google sign-in fails | Check the Supabase provider, Google callback URL, Site URL, and allowed redirects. |
 | Email sign-up or username sign-in fails | Set `SUPABASE_SERVICE_ROLE_KEY` for the Vercel API and use `npx vercel dev` locally. |
 | Profile or sheet setup fails | Confirm all required migrations were applied and inspect the Supabase error. |
-| Progress does not sync | Check the visible sync error, network request, and RLS policies. Optimistic changes are not an offline queue. |
+| Progress does not sync | Check the visible sync status, retry sync, network request, and RLS policies. |
 | Daily Log cannot load or save | Check the daily-log migrations, owner policy, date, and database error. |
 | Username search fails | Use `npx vercel dev` locally and check function environment, bearer token, prefix, and RPC grants. |
 | A deep link fails after refresh | Confirm Vercel's SPA rewrite and `/api/search` function are deployed. |
@@ -381,7 +401,8 @@ They do not use a service-role key or a separate database.
 - Preserve account boundaries in both client queries and database policies.
 - Keep public RPC return values and grants reviewed against the current
   profile disclosure policy, especially the public email field.
-- Treat caches as a performance layer, not as offline synchronization.
+- Keep account caches and durable queued mutations separate; queued writes must
+  remain user-scoped and safe to replay.
 - Add timestamped migrations for database changes; never mutate an already
   applied migration.
 - Preserve browser-storage key compatibility unless a migration is planned.

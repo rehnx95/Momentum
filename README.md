@@ -14,9 +14,11 @@ log activities and sleep, then review your history and habits over time.
 
 - **Learn with structure.** Track problems through `To do`, `Done`, and
   `Skipped` states. Start with the built-in DSA and Backend tracks or upload
-  your own text-based track.
-- **Record your day.** Log timed activities and sleep. Daily Log autosaves;
-  Full Log and Trends help you review past days.
+  your own text-based track. Tracker changes can be saved offline and synced
+  when the connection returns.
+- **Record your day.** Log timed activities and sleep. Daily Log autosaves and
+  can keep edits made offline on this device until the connection returns;
+  previously loaded history remains available from its cache.
 - **See your progress.** Use completion totals, streaks, recent accepted
   problems, activity heatmaps, and sleep/study summaries.
 - **Share a profile.** Find other Momentum users by username and open their

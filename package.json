@@ -36,6 +36,7 @@
     "prettier": "^3.10.1",
     "prettier-plugin-sql": "^0.20.0",
     "react-test-renderer": "^18.3.1",
+    "sharp": "^0.35.5",
     "tailwindcss": "^3.4.14",
     "vite": "^5.4.11",
     "vitest": "^2.1.9"

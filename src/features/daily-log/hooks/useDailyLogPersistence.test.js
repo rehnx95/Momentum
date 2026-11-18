@@ -1,6 +1,8 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getOfflineMutations } from "../../../shared/lib/offlineMutationStore";
+import { syncOfflineMutations } from "../../../shared/lib/offlineSync";
 import useDailyLogPersistence from "./useDailyLogPersistence";
 
 const fromMock = vi.hoisted(() => vi.fn());
@@ -43,6 +45,10 @@ function installBrowserStubs() {
     },
     configurable: true,
   });
+  Object.defineProperty(globalThis, "navigator", {
+    value: { onLine: true },
+    configurable: true,
+  });
 }
 
 vi.mock("../../../shared/lib/supabase", () => ({
@@ -75,6 +81,7 @@ describe("useDailyLogPersistence", () => {
     delete globalThis.localStorage;
     delete globalThis.window;
     delete globalThis.document;
+    delete globalThis.navigator;
   });
 
   it("loads the saved daily log and restores the latest snapshot", async () => {
@@ -414,5 +421,180 @@ describe("useDailyLogPersistence", () => {
 
     expect(result).toBe(false);
     expect(setMessage).toHaveBeenCalledWith(expect.stringContaining("42501"));
+  });
+
+  it("saves a Daily Log locally offline and syncs it after reconnecting", async () => {
+    const date = "2025-03-14";
+    const baseLog = {
+      date,
+      sleep_time: "",
+      wake_time: "",
+      dsa_slots: [],
+      backend_slots: [],
+      custom_tasks: [],
+    };
+    const upsert = vi.fn().mockResolvedValue({ error: null });
+    fromMock.mockImplementation(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+      upsert,
+    }));
+    globalThis.navigator.onLine = false;
+
+    const logRef = { current: baseLog };
+    const savedSnapshotRef = { current: JSON.stringify(baseLog) };
+    const savedUpdatedAtRef = { current: null };
+    let hookResult;
+    function HookHarness() {
+      hookResult = useDailyLogPersistence({
+        date,
+        dateRef: { current: date },
+        dirty: false,
+        loadFailed: false,
+        loadRequest: 0,
+        loading: false,
+        log: logRef.current,
+        logRef,
+        savedSnapshotRef,
+        savedUpdatedAtRef,
+        setLoadFailed: vi.fn(),
+        setLoading: vi.fn(),
+        setLog: vi.fn(),
+        setMessage: vi.fn(),
+        setSavedSnapshot: vi.fn(),
+        setStatus: vi.fn(),
+        userId: "offline-user",
+        validationErrors: [],
+      });
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    let saveResult;
+    await act(async () => {
+      saveResult = await hookResult.saveLog(
+        {
+          ...baseLog,
+          custom_tasks: [
+            { id: "reading", name: "Reading", slots: [{ start: "09:00", end: "10:00" }] },
+          ],
+        },
+        date,
+      );
+    });
+
+    expect(saveResult).toBe(true);
+    expect(upsert).not.toHaveBeenCalled();
+    expect(await getOfflineMutations("offline-user")).toHaveLength(1);
+
+    globalThis.navigator.onLine = true;
+    await act(async () => {
+      await syncOfflineMutations("offline-user");
+    });
+
+    expect(upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        date,
+        user_id: "offline-user",
+        custom_tasks: [expect.objectContaining({ id: "reading" })],
+      }),
+      { onConflict: "user_id,date" },
+    );
+    expect(await getOfflineMutations("offline-user")).toHaveLength(0);
+  });
+
+  it("lets the user explicitly replace a newer cloud copy with preserved edits", async () => {
+    const date = "2025-03-14";
+    const remoteUpdatedAt = "2025-03-14T12:00:00.000Z";
+    const baseLog = {
+      date,
+      sleep_time: "",
+      wake_time: "",
+      dsa_slots: [],
+      backend_slots: [],
+      custom_tasks: [],
+    };
+    const upsert = vi.fn().mockResolvedValue({ error: null });
+    const maybeSingle = vi
+      .fn()
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValue({ data: { updated_at: remoteUpdatedAt }, error: null });
+    fromMock.mockImplementation(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle,
+      upsert,
+    }));
+
+    const logRef = { current: baseLog };
+    const savedSnapshotRef = { current: JSON.stringify(baseLog) };
+    const savedUpdatedAtRef = { current: null };
+    const setStatus = vi.fn();
+    const setMessage = vi.fn();
+    let hookResult;
+    function HookHarness() {
+      hookResult = useDailyLogPersistence({
+        date,
+        dateRef: { current: date },
+        dirty: false,
+        loadFailed: false,
+        loadRequest: 0,
+        loading: false,
+        log: logRef.current,
+        logRef,
+        savedSnapshotRef,
+        savedUpdatedAtRef,
+        setLoadFailed: vi.fn(),
+        setLoading: vi.fn(),
+        setLog: vi.fn(),
+        setMessage,
+        setSavedSnapshot: vi.fn(),
+        setStatus,
+        userId: "conflict-user",
+        validationErrors: [],
+      });
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    const draft = {
+      ...baseLog,
+      custom_tasks: [
+        { id: "local-task", name: "Local work", slots: [{ start: "09:00", end: "10:00" }] },
+      ],
+    };
+    logRef.current = draft;
+    let saveResult;
+    await act(async () => {
+      saveResult = await hookResult.saveLog(draft, date);
+    });
+    expect(saveResult).toBe(false);
+    expect(setStatus).toHaveBeenCalledWith("This day changed elsewhere");
+
+    let overwriteResult;
+    await act(async () => {
+      overwriteResult = await hookResult.overwriteConflict();
+    });
+
+    expect(overwriteResult).toBe(true);
+    expect(upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ custom_tasks: [expect.objectContaining({ id: "local-task" })] }),
+      { onConflict: "user_id,date" },
+    );
+    expect(await getOfflineMutations("conflict-user")).toHaveLength(0);
+    expect(savedUpdatedAtRef.current).toEqual(expect.any(String));
   });
 });

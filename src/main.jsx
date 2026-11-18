@@ -20,6 +20,8 @@ import "./styles/responsive/tracker.css";
 import "./styles/responsive/profile.css";
 import App from "./App";
 import { preloadForPath } from "./shared/lib/preload";
+import { initPwaIntegration } from "./pwa/pwaIntegration";
+initPwaIntegration();
 
 function RevealScrollbarsWhileScrolling() {
   React.useEffect(() => {
@@ -110,6 +112,14 @@ window.addEventListener("vite:preloadError", (event) => {
 });
 
 preloadForPath(window.location.pathname);
+
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((error) => {
+      console.error("Could not register offline app support:", error);
+    });
+  });
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

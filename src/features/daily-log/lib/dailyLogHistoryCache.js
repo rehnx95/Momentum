@@ -107,3 +107,19 @@ export function invalidateFullLogCache(userId) {
     console.warn("Could not invalidate cached Full Log history:", error);
   }
 }
+
+export function updateFullLogCacheEntry(userId, log) {
+  const cached = getFullLogCache(userId);
+  if (!cached) return false;
+  const row = {
+    date: log.date,
+    sleep_time: log.sleep_time || null,
+    wake_time: log.wake_time || null,
+    custom_tasks: Array.isArray(log.custom_tasks) ? log.custom_tasks : [],
+  };
+  const logs = [...cached.logs.filter((entry) => entry.date !== log.date), row].sort((a, b) =>
+    b.date.localeCompare(a.date),
+  );
+  setFullLogCache(userId, logs, cached.hasOlderLogs);
+  return true;
+}
