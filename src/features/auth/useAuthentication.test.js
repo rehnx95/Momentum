@@ -149,6 +149,31 @@ describe("useAuthentication", () => {
     expect(localStorage.getItem("momentum:account-cache")).toBeNull();
   });
 
+  it("updates the app after sign-in when no session existed on page load", async () => {
+    const user = { id: cachedProfile.id, email: "test@example.com" };
+    const incompleteProfile = { ...cachedProfile, onboarding_completed: false };
+    authMocks.getSession.mockResolvedValue({
+      data: { session: null },
+      error: null,
+    });
+    authMocks.from.mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: incompleteProfile, error: null }),
+    });
+
+    const { result } = renderHook(() => useAuthentication());
+    await waitFor(() => expect(authMocks.authCallback).toEqual(expect.any(Function)));
+
+    await act(async () => {
+      authMocks.authCallback("SIGNED_IN", { user });
+    });
+
+    await waitFor(() => expect(result.current.appState).toBe(AppState.ONBOARDING));
+    expect(result.current.user.id).toBe(user.id);
+    expect(result.current.profile).toEqual(incompleteProfile);
+  });
+
   it("signs in with an email and password through Supabase Auth", async () => {
     const { result } = renderHook(() => useAuthentication());
 

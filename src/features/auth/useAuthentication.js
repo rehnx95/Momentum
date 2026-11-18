@@ -136,11 +136,6 @@ export default function useAuthentication() {
       return undefined;
     }
 
-    if (!cachedAccount && !hasStoredSession()) {
-      setAppState(AppState.UNAUTHENTICATED);
-      return undefined;
-    }
-
     preconnectBackend();
     let active = true;
     let subscription;
