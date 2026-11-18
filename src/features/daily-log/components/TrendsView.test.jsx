@@ -14,6 +14,47 @@ function dateOffsetKey(offset) {
 }
 
 describe("TrendsView", () => {
+  it("includes sleep and untracked time in the weekly totals", () => {
+    const daily = {
+      allLogs: [
+        {
+          date: getLocalDateKey(),
+          sleep_time: "23:00",
+          wake_time: "06:00",
+          custom_tasks: [
+            {
+              id: "reading",
+              name: "Reading",
+              slots: [{ start: "09:00", end: "10:30" }],
+            },
+          ],
+        },
+      ],
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      hasOlderLogs: false,
+      loadOlderLogs: vi.fn(),
+    };
+    const { container } = render(<TrendsView daily={daily} />);
+    const sleepLabel = screen.getByText("Sleep", {
+      selector: ".trends-time-label span:last-child",
+    });
+    const sleepRow = sleepLabel.closest(".trends-time-row");
+
+    expect(container.querySelector(".trends-time-total").textContent).toBe("24h total");
+    expect(sleepRow.querySelector(".trends-time-percentage").textContent).toBe("29%");
+    expect(sleepRow.querySelector("strong").textContent).toBe("7h");
+    expect(
+      screen.getByText("Reading", { selector: ".trends-time-label span:last-child" }),
+    ).toBeTruthy();
+    const untrackedLabel = screen.getByText("Untracked", {
+      selector: ".trends-time-label span:last-child",
+    });
+    const untrackedRow = untrackedLabel.closest(".trends-time-row");
+    expect(untrackedRow.querySelector(".trends-time-percentage").textContent).toBe("65%");
+    expect(untrackedRow.querySelector("strong").textContent).toBe("15h 30m");
+  });
+
   it("uses the original chart modes and only offers timed activities", () => {
     const daily = {
       allLogs: [
@@ -186,9 +227,7 @@ describe("TrendsView", () => {
       hasOlderLogs: false,
       loadOlderLogs: vi.fn(),
     };
-    const { container } = render(
-      <TrendsView daily={daily} sheets={[{ id: "sheet-1", title: "Algorithms" }]} />,
-    );
+    render(<TrendsView daily={daily} sheets={[{ id: "sheet-1", title: "Algorithms" }]} />);
     const chartSelect = screen.getByRole("combobox", { name: "Chart activity" });
 
     fireEvent.click(chartSelect);
@@ -198,10 +237,10 @@ describe("TrendsView", () => {
     fireEvent.click(chartOptions.getByRole("option", { name: "Algorithms" }));
 
     expect(screen.getByRole("img", { name: /Algorithms hours/ })).toBeTruthy();
-    expect(
-      screen.getByText("Algorithms", { selector: ".trends-time-label span:last-child" }),
-    ).toBeTruthy();
-    expect(container.querySelector(".trends-time-label").textContent).toContain("Algorithms");
+    const algorithmLabel = screen.getByText("Algorithms", {
+      selector: ".trends-time-label span:last-child",
+    });
+    expect(algorithmLabel.closest(".trends-time-label").textContent).toContain("Algorithms");
   });
 
   it("limits the chart to the latest seven days on narrow screens", () => {

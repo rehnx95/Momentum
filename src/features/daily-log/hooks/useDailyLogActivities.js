@@ -85,7 +85,7 @@ export default function useDailyLogActivities(logRef, setLog, assignActivityColo
     async (name) => {
       const trimmed = name.trim();
       if (!trimmed) return null;
-      if (assignActivityColor) await assignActivityColor(trimmed);
+      if (assignActivityColor) void assignActivityColor(trimmed);
       const task = {
         id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`,
         name: trimmed,
@@ -107,7 +107,7 @@ export default function useDailyLogActivities(logRef, setLog, assignActivityColo
         addSlot(id);
         return true;
       }
-      if (assignActivityColor) await assignActivityColor(sheet.title);
+      if (assignActivityColor) void assignActivityColor(sheet.title);
       const task = {
         id,
         sheetId: sheet.id,
@@ -137,7 +137,7 @@ export default function useDailyLogActivities(logRef, setLog, assignActivityColo
     async (taskId, name) => {
       const trimmed = name.trim();
       if (!trimmed) return false;
-      if (assignActivityColor) await assignActivityColor(trimmed);
+      if (assignActivityColor) void assignActivityColor(trimmed);
       setLog((current) => ({
         ...current,
         custom_tasks: current.custom_tasks.map((task) =>

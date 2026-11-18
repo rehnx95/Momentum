@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Palette, Plus, Square, Trash2 } from "lucide-react";
 import Tooltip from "../../../shared/components/Tooltip";
+import { formatDuration, getSlotDurationMinutes } from "../../../shared/utils/time";
 import SlotRow from "./SlotRow";
 import { ACTIVITY_COLOR_PALETTE, isActivityColorValue } from "../lib/activityColor";
 
@@ -35,6 +36,7 @@ export default function ActivityCard({
   allowRemoveActivity = true,
   allowRemoveSlot = true,
   startInputRef,
+  quickAddRequest = 0,
 }) {
   const cardRef = useRef(null);
   const colorToggleRef = useRef(null);
@@ -44,6 +46,11 @@ export default function ActivityCard({
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [customColor, setCustomColor] = useState("");
   const visibleSlots = slots.map((slot, index) => ({ slot, index }));
+  const totalSlotMinutes = slots.reduce(
+    (total, slot) => total + (getSlotDurationMinutes(slot) || 0),
+    0,
+  );
+  const totalSlotDuration = totalSlotMinutes > 0 ? formatDuration(totalSlotMinutes) : "";
   const timerRunningHere = runningTimer?.activityId === activityId;
 
   useEffect(() => {
@@ -56,6 +63,12 @@ export default function ActivityCard({
     }
     previousSlotCount.current = slots.length;
   }, [activityId, slots.length]);
+
+  useEffect(() => {
+    if (quickAddRequest) {
+      cardRef.current?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+    }
+  }, [quickAddRequest]);
 
   useEffect(() => {
     if (!colorPickerOpen) return undefined;
@@ -76,6 +89,8 @@ export default function ActivityCard({
 
   useEffect(() => {
     const discardUnfilledSlots = (event) => {
+      if (event.target?.closest?.(".quick-log-card")) return;
+
       const clickedAction = event.target?.closest?.(
         ".activity-add-slot, .activity-delete, .activity-color-toggle, .activity-color-picker",
       );
@@ -160,8 +175,16 @@ export default function ActivityCard({
           ))}
         </div>
       )}
-      {(allowAddSlot || allowRemoveActivity || timerRunningHere) && (
+      {(allowAddSlot || allowRemoveActivity || timerRunningHere || totalSlotDuration) && (
         <div className="activity-card-actions">
+          {totalSlotDuration && (
+            <span
+              className="activity-total-duration"
+              aria-label={`${activityName} total time: ${totalSlotDuration}`}
+            >
+              {totalSlotDuration}
+            </span>
+          )}
           {onSetActivityColor && (
             <Tooltip label="Choose activity color">
               <button

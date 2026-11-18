@@ -62,7 +62,7 @@ async function syncProgressMutation(mutation) {
   throw new Error(`Unknown progress operation: ${operation}`);
 }
 
-async function syncDailyLogMutation(mutation) {
+async function syncDailyLogMutation(mutation, previousLocalUpdatedAt) {
   const { row, expectedUpdatedAt } = mutation.payload;
   const { data: existingLog, error: existingError } = await supabase
     .from("daily_logs")
@@ -75,9 +75,11 @@ async function syncDailyLogMutation(mutation) {
   const remoteUpdatedAt = existingLog?.updated_at ?? null;
   if (sameTimestamp(remoteUpdatedAt, row.updated_at)) return { alreadySynced: true };
 
+  const followsLocalUpdate = sameTimestamp(remoteUpdatedAt, previousLocalUpdatedAt);
   const hasConflict = expectedUpdatedAt
-    ? !remoteUpdatedAt || !sameTimestamp(expectedUpdatedAt, remoteUpdatedAt)
-    : Boolean(remoteUpdatedAt);
+    ? !remoteUpdatedAt ||
+      (!sameTimestamp(expectedUpdatedAt, remoteUpdatedAt) && !followsLocalUpdate)
+    : Boolean(remoteUpdatedAt && !followsLocalUpdate);
   if (hasConflict) return { conflict: true };
 
   const { error } = await supabase.from("daily_logs").upsert(row, { onConflict: "user_id,date" });
@@ -153,9 +155,11 @@ async function syncDailyLogSlotMutation(mutation) {
   return {};
 }
 
-async function applyMutation(mutation) {
+async function applyMutation(mutation, recentDailyLogVersions) {
   if (mutation.type === "progress") return syncProgressMutation(mutation);
-  if (mutation.type === "daily-log") return syncDailyLogMutation(mutation);
+  if (mutation.type === "daily-log") {
+    return syncDailyLogMutation(mutation, recentDailyLogVersions.get(mutation.entityId));
+  }
   if (mutation.type === "daily-log-slot") return syncDailyLogSlotMutation(mutation);
   if (mutation.type === "activity-color") {
     const { activityName, color } = mutation.payload;
@@ -209,6 +213,7 @@ export async function syncOfflineMutations(userId) {
       failures: [],
       offline: !isOnline(),
     };
+    const recentDailyLogVersions = new Map();
     if (result.offline) {
       result.pending = (await getOfflineMutations(userId)).length;
       notifySyncResult(userId, result);
@@ -222,7 +227,7 @@ export async function syncOfflineMutations(userId) {
       let retryableFailure = false;
       for (const mutation of mutations) {
         try {
-          const applyResult = await applyMutation(mutation);
+          const applyResult = await applyMutation(mutation, recentDailyLogVersions);
           if (applyResult?.conflict) {
             result.conflicts.push({
               key: mutation.key,
@@ -230,6 +235,9 @@ export async function syncOfflineMutations(userId) {
               entityId: mutation.entityId,
             });
             continue;
+          }
+          if (mutation.type === "daily-log") {
+            recentDailyLogVersions.set(mutation.entityId, mutation.payload.row.updated_at);
           }
           const removed = await removeOfflineMutation(mutation.key, mutation.updatedAt);
           result.synced += 1;

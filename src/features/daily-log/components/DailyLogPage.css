@@ -191,6 +191,7 @@
   align-items: center;
   margin: 0;
   padding: var(--space-1) 0 var(--space-3);
+  border-bottom: 1px solid var(--border);
 }
 
 .daily-log-page-shell .daily-entry-heading h3 {
@@ -454,8 +455,8 @@
 .daily-log-page-shell .activity-card-actions .activity-delete,
 .daily-log-page-shell .activity-card-actions .activity-color-toggle {
   display: grid;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
   place-items: center;
   border: 0;
   border-radius: var(--radius-sm);

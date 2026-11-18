@@ -248,15 +248,30 @@ export default function TrendsView({ daily, sheets = [] }) {
       return date;
     });
     const totals = new Map();
-    dates.forEach((date) => {
-      activityEntries(logsByDate.get(dateKey(date)), sheets).forEach(({ name, minutes }) => {
-        const key = name.toLowerCase();
-        const existing = totals.get(key);
-        totals.set(key, {
-          name,
-          minutes: (existing?.minutes || 0) + minutes,
-        });
+    const addTotal = (key, name, minutes) => {
+      if (minutes <= 0) return;
+      const existing = totals.get(key);
+      totals.set(key, {
+        name,
+        minutes: (existing?.minutes || 0) + minutes,
       });
+    };
+    dates.forEach((date) => {
+      const log = logsByDate.get(dateKey(date));
+      const activities = activityEntries(log, sheets);
+      activities.forEach(({ name, minutes }) => {
+        addTotal(name.toLowerCase(), name, minutes);
+      });
+      const sleepMinutes = getSleepMinutes(log);
+      addTotal("sleep", "Sleep", sleepMinutes);
+      if (log) {
+        const activeMinutes = activities.reduce((total, activity) => total + activity.minutes, 0);
+        addTotal(
+          "untracked",
+          "Untracked",
+          Math.max(0, 24 * 60 - activeMinutes - sleepMinutes),
+        );
+      }
     });
 
     const totalMinutes = [...totals.values()].reduce(
@@ -275,7 +290,10 @@ export default function TrendsView({ daily, sheets = [] }) {
           value: formatDuration(minutes),
           minutes,
           percentage: totalMinutes ? Math.round((minutes / totalMinutes) * 100) : 0,
-          color: getActivityColor(name, daily.activityColors),
+          color:
+            name === "Untracked"
+              ? "var(--border-strong)"
+              : getActivityColor(name, daily.activityColors),
         })),
     };
   }, [allLogs, daily.activityColors, sheets, todayKey, weekOffset]);

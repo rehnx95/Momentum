@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useCallback, useRef, useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { validateDay } from "../../../shared/utils/time";
 import DayView from "./DayView";
+import useDailyLogActivities from "../hooks/useDailyLogActivities";
 
 function createDaily(tasks = []) {
   const log = {
@@ -79,6 +81,27 @@ describe("DayView activity entry", () => {
       screen.getByRole("button", { name: "Add slot to Reading" }).closest(".activity-card-actions"),
     ).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Options for Reading/ })).toBeNull();
+  });
+
+  it("shows the combined duration of an activity's valid slots beside its color picker", () => {
+    const task = {
+      id: "reading-1",
+      name: "Reading",
+      slots: [
+        { start: "09:00", end: "10:00" },
+        { start: "10:30", end: "12:00" },
+        { start: "", end: "" },
+      ],
+    };
+    render(<DayView daily={createDaily([task])} sheets={[]} askConfirmation={vi.fn()} />);
+
+    const duration = screen.getByText("2h 30m", { selector: ".activity-total-duration" });
+    const actions = duration.closest(".activity-card-actions");
+    const colorPicker = screen.getByRole("button", { name: "Choose color for Reading" });
+    expect(
+      duration.compareDocumentPosition(colorPicker) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(actions).toBe(colorPicker.closest(".activity-card-actions"));
   });
 
   it("saves palette and custom hex colors for an activity", async () => {
@@ -214,6 +237,80 @@ describe("DayView activity entry", () => {
     fireEvent.click(screen.getByRole("button", { name: "DSA" }));
 
     expect(daily.addSheetActivity).toHaveBeenCalledWith(sheet);
+  });
+
+  it("allows Quick Log built-in sheets while the uncached day is loading", () => {
+    const daily = createDaily();
+    daily.loading = true;
+    const sheet = { id: "sheet-1", title: "Algorithms" };
+    render(<DayView daily={daily} sheets={[sheet]} askConfirmation={vi.fn()} />);
+
+    const sheetButton = screen.getByRole("button", { name: "Algorithms" });
+    expect(sheetButton.disabled).toBe(false);
+    fireEvent.click(sheetButton);
+
+    expect(daily.addSheetActivity).toHaveBeenCalledWith(sheet);
+  });
+
+  it.each([
+    { id: "dsa", title: "DSA" },
+    { id: "backend", title: "Backend" },
+  ])("adds $title from Quick Log and brings its activity into view", async (sheet) => {
+    const scrollIntoView = vi.fn();
+    const previousScrollIntoView = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "scrollIntoView",
+    );
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: scrollIntoView,
+    });
+
+    function InteractiveDay() {
+      const [log, setLogState] = useState({
+        date: "2026-11-14",
+        sleep_time: "",
+        wake_time: "",
+        custom_tasks: [],
+      });
+      const logRef = useRef(log);
+      const setLog = useCallback((update) => {
+        setLogState((current) => {
+          const next = typeof update === "function" ? update(current) : update;
+          logRef.current = next;
+          return next;
+        });
+      }, []);
+      const actions = useDailyLogActivities(logRef, setLog);
+      const daily = {
+        ...createDaily(log.custom_tasks),
+        loading: true,
+        log,
+        activeCustomTasks: log.custom_tasks,
+        addSheetActivity: actions.addSheetActivity,
+        addSlot: actions.addSlot,
+        discardEmptySlot: actions.discardEmptySlot,
+      };
+
+      return <DayView daily={daily} sheets={[sheet]} askConfirmation={vi.fn()} />;
+    }
+
+    try {
+      render(<InteractiveDay />);
+      fireEvent.click(screen.getByRole("button", { name: sheet.title }));
+
+      await waitFor(() => {
+        expect(screen.getByText(sheet.title, { selector: ".activity-card-name" })).toBeTruthy();
+      });
+      expect(screen.getByRole("button", { name: `Add slot to ${sheet.title}` })).toBeTruthy();
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "center" });
+    } finally {
+      if (previousScrollIntoView) {
+        Object.defineProperty(HTMLElement.prototype, "scrollIntoView", previousScrollIntoView);
+      } else {
+        delete HTMLElement.prototype.scrollIntoView;
+      }
+    }
   });
 
   it("marks the activity slot and sleep range that actually overlap", () => {

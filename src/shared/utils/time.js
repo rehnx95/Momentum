@@ -205,21 +205,7 @@ export function validateDay(log) {
         }
         return;
       }
-      if (slot?.endDayOffset === 1 && end === 0) {
-        const duration = 1440 - start;
-        totalMinutes += duration;
-        if (duration > 8 * 60) {
-          warnings.push({
-            code: "long-slot",
-            activity,
-            activityKey: key,
-            activityId: id,
-            slotIndex,
-            message: `${activity} slot ${slotIndex + 1} is longer than 8 hours.`,
-          });
-        }
-        return;
-      }
+ 
       if (end <= start) {
         errors.push({
           code: "invalid-slot-order",
@@ -233,16 +219,7 @@ export function validateDay(log) {
       }
       const duration = end - start;
       totalMinutes += duration;
-      if (duration > 8 * 60) {
-        warnings.push({
-          code: "long-slot",
-          activity,
-          activityKey: key,
-          activityId: id,
-          slotIndex,
-          message: `${activity} slot ${slotIndex + 1} is longer than 8 hours.`,
-        });
-      }
+     
     });
   });
 

@@ -5,6 +5,8 @@ import {
   getSlotDurationMinutes,
   getSleepMinutes,
   getStudyMinutes,
+  intervalsFor,
+  sleepIntervalsFor,
   slotMinutes,
   splitIntervalByDay,
   toMinutes,
@@ -17,6 +19,7 @@ describe("time helpers", () => {
     expect(toMinutes("23:59")).toBe(1439);
     expect(toMinutes("24:00")).toBeNull();
     expect(toMinutes("1:00")).toBeNull();
+    expect(toMinutes(null)).toBeNull();
   });
 
   it("computes overnight durations only when wrapping is enabled", () => {
@@ -47,6 +50,7 @@ describe("time helpers", () => {
     expect(formatDuration(157)).toBe("2h 37m");
     expect(formatDuration(120)).toBe("2h");
     expect(formatDuration(37)).toBe("37m");
+    expect(formatDuration(-5)).toBe("0m");
   });
 
   it("calculates sleep and study minutes from daily log entries", () => {
@@ -75,8 +79,8 @@ describe("time helpers", () => {
 
   it("splits timer intervals at midnight without losing minutes", () => {
     const segments = splitIntervalByDay(
-      new Date(2026, 10, 8, 23, 30),
-      new Date(2026, 10, 9, 0, 30),
+      new Date(2026, 10, 8, 23, 30, 15),
+      new Date(2026, 10, 9, 0, 29, 10),
     );
     expect(segments).toEqual([
       {
@@ -90,14 +94,30 @@ describe("time helpers", () => {
     ]);
   });
 
-  it("accepts a timer slot that spans a full midnight-to-midnight day", () => {
+  it("builds minute intervals for regular, midnight-offset, wrapping, and sleep slots", () => {
+    expect(intervalsFor({ start: "23:30", end: "00:00", endDayOffset: 1 }, false)).toEqual([,
+    ]);
+    expect(intervalsFor({ start: "23:00", end: "01:00" }, true)).toEqual([,
+ ,
+    ]);
+    expect(sleepIntervalsFor("23:00", "06:30")).toEqual([[0, 390]]);
+    expect(sleepIntervalsFor("01:00", "07:00")).toEqual([[60, 420]]);
+  });
+
+  it("rejects equal start and end times in validateDay even with endDayOffset", () => {
     const result = validateDay({
       dsa_slots: [{ start: "00:00", end: "00:00", endDayOffset: 1 }],
       backend_slots: [],
       custom_tasks: [],
     });
-    expect(result.errors).toHaveLength(0);
-    expect(result.totalMinutes).toBe(1440);
+    expect(result.errors).toEqual([
+      expect.objectContaining({
+        code: "invalid-slot-order",
+        activityKey: "dsa",
+        slotIndex: 0,
+      }),
+    ]);
+    expect(result.totalMinutes).toBe(0);
   });
 
   it("detects overlaps within and across activities", () => {
@@ -109,9 +129,8 @@ describe("time helpers", () => {
       Backend: [{ start: "12:30", end: "14:00" }],
     });
     expect(overlaps).toHaveLength(2);
-    expect(overlaps.map(({ slotIndexA, slotIndexB }) => [slotIndexA, slotIndexB])).toEqual([
-      [0, 1],
-      [1, 0],
+    expect(overlaps.map(({ slotIndexA, slotIndexB }) => [slotIndexA, slotIndexB])).toEqual([,
+ ,
     ]);
   });
 
@@ -120,12 +139,11 @@ describe("time helpers", () => {
       Overnight: [{ start: "23:00", end: "01:00", wrap: true }],
       Early: [{ start: "00:30", end: "02:00", wrap: true }],
     });
-
     expect(overlaps).toHaveLength(1);
     expect(overlaps[0].overlapRanges).toEqual([[30, 60]]);
   });
 
-  it("flags invalid ordering and totals beyond one day", () => {
+  it("flags invalid ordering, sleep errors, and totals beyond one day", () => {
     const invalid = validateDay({
       dsa_slots: [{ start: "12:34", end: "01:11" }],
       backend_slots: [],
@@ -134,10 +152,23 @@ describe("time helpers", () => {
     expect(invalid.errors.some((error) => error.code === "invalid-slot-order")).toBe(true);
     expect(invalid.totalMinutes).toBe(0);
     expect(invalid.errors[0]).toMatchObject({
+      activity: "DSA",
       activityKey: "dsa",
       activityId: null,
       slotIndex: 0,
       message: "DSA slot 1 must end after it starts.",
+    });
+
+    const missingWake = validateDay({ sleep_time: "22:00", wake_time: "" });
+    expect(missingWake.errors).toContainEqual({
+      code: "incomplete-sleep",
+      message: "Enter both sleep and wake times.",
+    });
+
+    const sameSleepWake = validateDay({ sleep_time: "06:00", wake_time: "06:00" });
+    expect(sameSleepWake.errors).toContainEqual({
+      code: "invalid-sleep",
+      message: "Sleep and wake times must differ.",
     });
 
     const tooLong = validateDay({
@@ -156,10 +187,10 @@ describe("time helpers", () => {
       backend_slots: [],
       custom_tasks: [],
     });
-
     expect(result.errors).toEqual([
       expect.objectContaining({
         code: "invalid-time",
+        activity: "DSA",
         activityKey: "dsa",
         slotIndex: 0,
         message: "Enter a valid start and end time for DSA slot 1.",
@@ -167,7 +198,7 @@ describe("time helpers", () => {
     ]);
   });
 
-  it("allows exactly 24 hours and reports long or overlapping study slots", () => {
+  it("allows exactly 24 hours and reports overlapping study and post-midnight sleep slots", () => {
     const result = validateDay({
       sleep_time: "23:00",
       wake_time: "06:00",
@@ -177,16 +208,33 @@ describe("time helpers", () => {
     });
     expect(result.errors).toHaveLength(0);
     expect(result.totalMinutes).toBe(1440);
-    expect(result.warnings.some((warning) => warning.code === "long-slot")).toBe(true);
-    expect(result.warnings.some((warning) => warning.code === "overlap")).toBe(true);
-    expect(result.warnings.find((warning) => warning.code === "overlap")).toMatchObject({
+    expect(result.warnings).toHaveLength(1);
+    expect(result.warnings[0]).toMatchObject({
+      code: "overlap",
       activityKeyA: "dsa",
       activityKeyB: "backend",
+      activityA: "DSA",
+      activityB: "Backend",
       slots: [
-        { activityKey: "dsa", slotIndex: 0 },
-        { activityKey: "backend", slotIndex: 0 },
+        { activityKey: "dsa", activity: "DSA", slotIndex: 0 },
+        { activityKey: "backend", activity: "Backend", slotIndex: 0 },
       ],
       message: "DSA slot 1 overlaps Backend slot 1.",
+    });
+
+    const sleepClash = validateDay({
+      sleep_time: "23:00",
+      wake_time: "07:00",
+      dsa_slots: [{ start: "06:30", end: "08:00" }],
+      backend_slots: [{ start: "23:15", end: "23:45" }],
+      custom_tasks: [],
+    });
+    expect(sleepClash.warnings).toHaveLength(1);
+    expect(sleepClash.warnings[0]).toMatchObject({
+      code: "overlap",
+      activityKeyA: "dsa",
+      activityKeyB: "sleep",
+      message: "DSA slot 1 overlaps Sleep slot 1.",
     });
   });
 });

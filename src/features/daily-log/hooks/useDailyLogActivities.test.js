@@ -62,6 +62,34 @@ describe("useDailyLogActivities", () => {
     act(() => renderer.unmount());
   });
 
+  it("adds an activity immediately without waiting for color assignment", async () => {
+    let resolveColor;
+    const assignActivityColor = vi.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveColor = resolve;
+        }),
+    );
+    const { activities, logRef, renderer } = renderActivities(
+      { custom_tasks: [] },
+      assignActivityColor,
+    );
+    let task;
+
+    await act(async () => {
+      task = await activities.addCustomTask("Focus");
+    });
+
+    expect(task.name).toBe("Focus");
+    expect(logRef.current.custom_tasks).toEqual([task]);
+    expect(assignActivityColor).toHaveBeenCalledWith("Focus");
+    await act(async () => {
+      resolveColor("sand");
+      await Promise.resolve();
+    });
+    act(() => renderer.unmount());
+  });
+
   it("restores empty built-in activities and adds slots when selected again", async () => {
     const { activities, logRef, renderer } = renderActivities({
       custom_tasks: [
@@ -122,6 +150,42 @@ describe("useDailyLogActivities", () => {
         slots: [{ start: "", end: "" }],
       },
     ]);
+    act(() => renderer.unmount());
+  });
+
+  it("adds a built-in sheet immediately without waiting for color assignment", async () => {
+    let resolveColor;
+    const assignActivityColor = vi.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveColor = resolve;
+        }),
+    );
+    const { activities, logRef, renderer } = renderActivities(
+      { custom_tasks: [] },
+      assignActivityColor,
+    );
+    const sheet = { id: "sheet-3", title: "Algorithms" };
+    let result;
+
+    await act(async () => {
+      result = await activities.addSheetActivity(sheet);
+    });
+
+    expect(result).toBe(true);
+    expect(logRef.current.custom_tasks).toEqual([
+      {
+        id: "sheet:sheet-3",
+        sheetId: "sheet-3",
+        name: "Algorithms",
+        slots: [{ start: "", end: "" }],
+      },
+    ]);
+    expect(assignActivityColor).toHaveBeenCalledWith("Algorithms");
+    await act(async () => {
+      resolveColor("sand");
+      await Promise.resolve();
+    });
     act(() => renderer.unmount());
   });
 

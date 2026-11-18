@@ -70,6 +70,7 @@ function getSleepFeedback(validation) {
 
 export default function DayView({ daily, sheets = [], askConfirmation }) {
   const [quickActivityName, setQuickActivityName] = useState("");
+  const [quickAddTarget, setQuickAddTarget] = useState({ id: null, request: 0 });
   const activities = useMemo(
     () =>
       daily.activeCustomTasks
@@ -81,7 +82,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
         .filter((task) => task.slots.length > 0),
     [daily.activeCustomTasks, daily.log.custom_tasks, sheets],
   );
-  const entryDisabled = daily.loading || daily.loadFailed;
+  const entryDisabled = daily.loadFailed;
   const totalLoggedMinutes = activities.reduce(
     (total, activity) => total + activityTotal(activity.slots),
     0,
@@ -96,7 +97,15 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
     (error) => !error.activityKey && !["incomplete-sleep", "invalid-sleep"].includes(error.code),
   );
 
-  const addQuickActivity = async (event) => {
+  const addQuickSheet = (sheet) => {
+    void daily.addSheetActivity(sheet);
+    setQuickAddTarget((current) => ({
+      id: `sheet:${sheet.id}`,
+      request: current.request + 1,
+    }));
+  };
+
+  const addQuickActivity = (event) => {
     event.preventDefault();
     const name = quickActivityName.trim();
     if (!name) return;
@@ -106,13 +115,11 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
     if (existing) daily.addSlot(existing.id);
     else {
       const sheet = findSheetByTitle(name, sheets);
-      if (sheet) await daily.addSheetActivity(sheet);
-      else if (!(await daily.addCustomTask(name))) return;
+      if (sheet) addQuickSheet(sheet);
+      else void daily.addCustomTask(name);
     }
     setQuickActivityName("");
   };
-
-  const addQuickSheet = (sheet) => daily.addSheetActivity(sheet);
 
   const removeActivity = async (activity) => {
     const message = `Remove "${activity.name}" and its slots from this day?`;
@@ -186,6 +193,9 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                   key={`${daily.date}-${activity.id}`}
                   activityId={activity.id}
                   activityName={activity.name}
+                  quickAddRequest={
+                    activity.id === quickAddTarget.id ? quickAddTarget.request : 0
+                  }
                   activityDescription={
                     [activity.description, activity.details].find(
                       (value) => typeof value === "string" && value.trim(),
@@ -262,7 +272,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                   type="button"
                   key={sheet.id}
                   className="tag-chip"
-                  onClick={() => void addQuickSheet(sheet)}
+                  onClick={() => addQuickSheet(sheet)}
                   disabled={entryDisabled}
                 >
                   {sheet.title}

@@ -12,6 +12,7 @@ import {
   removeOfflineMutation,
 } from "../../../shared/lib/offlineMutationStore";
 import { emptyLog, normalizeLog } from "../lib/dailyLogModel";
+import { isSheetActivity, normalizeActivityName } from "../lib/activityName";
 import { validateDay } from "../../../shared/utils/time";
 
 function buildDailyLogRow(userId, date, draft, updatedAt) {
@@ -26,6 +27,47 @@ function buildDailyLogRow(userId, date, draft, updatedAt) {
     dsa_hours: null,
     backend_hours: null,
     updated_at: updatedAt,
+  };
+}
+
+function sameActivity(first, second) {
+  if (first.id === second.id) return true;
+  const firstIsSheet = isSheetActivity(first);
+  if (firstIsSheet !== isSheetActivity(second)) return false;
+  if (!firstIsSheet) {
+    return normalizeActivityName(first.name) === normalizeActivityName(second.name);
+  }
+  const getSheetId = (task) =>
+    String(task.sheetId ?? task.sheet_id ?? String(task.id || "").replace(/^sheet:/, ""));
+  return getSheetId(first) === getSheetId(second);
+}
+
+function mergeUncachedLogDraft(remoteLog, localLog, baselineLog) {
+  const customTasks = [...remoteLog.custom_tasks];
+  localLog.custom_tasks.forEach((localTask) => {
+    const baselineTask = baselineLog.custom_tasks.find((task) => sameActivity(task, localTask));
+    if (baselineTask && JSON.stringify(baselineTask) === JSON.stringify(localTask)) return;
+
+    const existingIndex = customTasks.findIndex((task) => sameActivity(task, localTask));
+    if (existingIndex < 0) {
+      customTasks.push(localTask);
+      return;
+    }
+
+    const remoteTask = customTasks[existingIndex];
+    customTasks[existingIndex] = {
+      ...remoteTask,
+      slots: [...(remoteTask.slots || []), ...(localTask.slots || [])],
+    };
+  });
+
+  return {
+    ...remoteLog,
+    sleep_time:
+      localLog.sleep_time !== baselineLog.sleep_time ? localLog.sleep_time : remoteLog.sleep_time,
+    wake_time:
+      localLog.wake_time !== baselineLog.wake_time ? localLog.wake_time : remoteLog.wake_time,
+    custom_tasks: customTasks,
   };
 }
 
@@ -91,33 +133,50 @@ export default function useDailyLogPersistence({
         if (nextDate === dateRef.current) {
           savedSnapshotRef.current = snapshot;
           setSavedSnapshot(snapshot);
+          setStatus("Saved");
+          setMessage("");
         }
 
-        const syncResult = await syncOfflineMutations(userId);
-        const conflict = syncResult.conflicts.some((item) => item.key === mutation.key);
-        const synced = syncResult.syncedKeys.includes(mutation.key);
-        const failure = syncResult.failures.find((item) => item.key === mutation.key);
-        if (nextDate === dateRef.current) {
-          if (conflict) {
-            setStatus("This day changed elsewhere");
-            setMessage(
-              "Your edits are preserved on this device, but this day also changed in the cloud.",
+        void syncOfflineMutations(userId)
+          .then((syncResult) => {
+            if (nextDate !== dateRef.current) return;
+            if (syncResult.conflicts.some((item) => item.key === mutation.key)) {
+              setStatus("This day changed elsewhere");
+              setMessage(
+                "Your edits are preserved on this device, but this day also changed in the cloud.",
+              );
+              return;
+            }
+            const failure = syncResult.failures.find(
+              (item) => item.key === mutation.key && !item.retryable,
             );
-          } else if (synced) {
-            savedUpdatedAtRef.current = updatedAt;
-            setStatus("Saved");
-            setMessage("");
-          } else if (failure && !failure.retryable) {
-            setStatus("Could not save");
-            setMessage(
-              `Could not sync this daily log: ${failure.message}${failure.code ? ` ${failure.code}` : ""}`,
-            );
-          } else {
-            setStatus("");
-            setMessage("");
-          }
-        }
-        return !conflict && !(failure && !failure.retryable);
+            if (failure) {
+              setStatus("Could not save");
+              setMessage(
+                `Could not sync this daily log: ${failure.message}${failure.code ? ` ${failure.code}` : ""}`,
+              );
+              return;
+            }
+            if (syncResult.syncedKeys.includes(mutation.key)) {
+              savedUpdatedAtRef.current = updatedAt;
+              setStatus("Saved");
+              setMessage("");
+            }
+          })
+          .catch((error) => {
+            console.error("Could not sync pending Daily Log changes:", error);
+            if (nextDate === dateRef.current) {
+              const details =
+                error && typeof error === "object"
+                  ? [error.message, error.code]
+                      .filter((value) => typeof value === "string")
+                      .join(" ")
+                  : "";
+              setStatus("Saved");
+              setMessage(`Could not sync this daily log.${details ? ` ${details}` : ""}`);
+            }
+          });
+        return true;
       };
       const runSave = async () => {
         try {
@@ -308,6 +367,16 @@ export default function useDailyLogPersistence({
         );
         return;
       }
+      const failure = (event.detail.failures || []).find(
+        (item) => item.key === mutationKey && !item.retryable,
+      );
+      if (failure) {
+        setStatus("Could not save");
+        setMessage(
+          `Could not sync this daily log: ${failure.message}${failure.code ? ` ${failure.code}` : ""}`,
+        );
+        return;
+      }
       if (!event.detail.syncedKeys.includes(mutationKey)) return;
       const cachedLog = getDailyLogCache(userId, dateRef.current);
       savedUpdatedAtRef.current = cachedLog?.updated_at ?? null;
@@ -333,14 +402,12 @@ export default function useDailyLogPersistence({
     const snapshotAtRequestStart = savedSnapshotRef.current;
     const loadLog = async () => {
       try {
-        let syncResult = null;
-        if (online) {
-          try {
-            syncResult = await syncOfflineMutations(userId);
-          } catch (error) {
-            console.error("Could not sync pending Daily Log changes:", error);
-          }
-        }
+        const syncPromise = online
+          ? syncOfflineMutations(userId).catch((error) => {
+              console.error("Could not sync pending Daily Log changes:", error);
+              return null;
+            })
+          : null;
         const pending = (await getOfflineMutations(userId)).find(
           (mutation) => mutation.type === "daily-log" && mutation.entityId === date,
         );
@@ -348,8 +415,12 @@ export default function useDailyLogPersistence({
 
         if (pending) {
           const nextLog = pending.payload.draft || normalizeLog(pending.payload.row, date);
+          const baselineLog = cachedLog ? normalizeLog(cachedLog, date) : emptyLog(date);
+          const hasUnsavedChanges =
+            logRef.current.date === date &&
+            JSON.stringify(logRef.current) !==
+              (snapshotAtRequestStart || JSON.stringify(baselineLog));
           const snapshot = JSON.stringify(nextLog);
-          const conflict = syncResult?.conflicts.some((item) => item.key === pending.key);
           setDailyLogCache(userId, date, {
             ...normalizeLog(nextLog, date),
             updated_at: pending.payload.row.updated_at,
@@ -357,24 +428,46 @@ export default function useDailyLogPersistence({
           savedSnapshotRef.current = snapshot;
           savedUpdatedAtRef.current = pending.payload.expectedUpdatedAt ?? null;
           setSavedSnapshot(snapshot);
-          setLog(nextLog);
+          let logToShow = nextLog;
+          if (hasUnsavedChanges) {
+            logToShow =
+              snapshotAtRequestStart === null
+                ? mergeUncachedLogDraft(nextLog, logRef.current, emptyLog(date))
+                : logRef.current;
+          }
+          setLog(logToShow);
           setLoadFailed(false);
-          setStatus(conflict ? "This day changed elsewhere" : "");
-          setMessage(
-            conflict
-              ? "Your edits are preserved on this device, but this day also changed in the cloud."
-              : "",
-          );
+          setStatus("");
+          setMessage("");
+          setLoading(false);
+          if (syncPromise) {
+            void syncPromise.then((syncResult) => {
+              if (!active || dateRef.current !== date || !syncResult) return;
+              if (syncResult.conflicts.some((item) => item.key === pending.key)) {
+                setStatus("This day changed elsewhere");
+                setMessage(
+                  "Your edits are preserved on this device, but this day also changed in the cloud.",
+                );
+              } else if (syncResult.syncedKeys.includes(pending.key)) {
+                savedUpdatedAtRef.current = pending.payload.row.updated_at;
+                setStatus("Saved");
+              }
+            });
+          }
           return;
         }
 
         if (!online) {
           const nextLog = cachedLog ? normalizeLog(cachedLog, date) : emptyLog(date);
+          const hasUnsavedChanges =
+            logRef.current.date === date &&
+            JSON.stringify(logRef.current) !==
+              (snapshotAtRequestStart || JSON.stringify(emptyLog(date)));
           const snapshot = JSON.stringify(nextLog);
           savedSnapshotRef.current = snapshot;
           savedUpdatedAtRef.current = cachedLog?.updated_at ?? null;
           setSavedSnapshot(snapshot);
-          setLog(nextLog);
+          setLog(hasUnsavedChanges ? logRef.current : nextLog);
           setLoadFailed(false);
           setStatus("");
           setMessage("");
@@ -391,18 +484,23 @@ export default function useDailyLogPersistence({
         if (error) throw error;
         if (savedSnapshotRef.current !== snapshotAtRequestStart) return;
         const nextLog = normalizeLog(data, date);
+        nextLog.updated_at = data?.updated_at ?? null;
+        const baselineLog = emptyLog(date);
         const hasUnsavedChanges =
           logRef.current.date === date &&
-          savedSnapshotRef.current !== null &&
-          JSON.stringify(logRef.current) !== savedSnapshotRef.current;
-        if (hasUnsavedChanges) return;
-        nextLog.updated_at = data?.updated_at ?? null;
+          JSON.stringify(logRef.current) !==
+            (snapshotAtRequestStart || JSON.stringify(baselineLog));
+        if (hasUnsavedChanges && snapshotAtRequestStart !== null) return;
         const snapshot = JSON.stringify(nextLog);
         setDailyLogCache(userId, date, nextLog);
         savedSnapshotRef.current = snapshot;
         savedUpdatedAtRef.current = data?.updated_at ?? null;
         setSavedSnapshot(snapshot);
-        setLog(nextLog);
+        setLog(
+          hasUnsavedChanges
+            ? mergeUncachedLogDraft(nextLog, logRef.current, baselineLog)
+            : nextLog,
+        );
         setStatus("Saved");
         setLoadFailed(false);
       } catch (error) {
@@ -443,6 +541,7 @@ export default function useDailyLogPersistence({
     };
   }, [
     date,
+    dateRef,
     loadRequest,
     logRef,
     savedSnapshotRef,
@@ -466,7 +565,7 @@ export default function useDailyLogPersistence({
     setStatus("Saving soon…");
     autosaveTimer.current = window.setTimeout(() => {
       saveLogRef.current(logRef.current, dateRef.current);
-    }, 800);
+    }, 300);
     return () => window.clearTimeout(autosaveTimer.current);
   }, [dateRef, dirty, loadFailed, loading, log, logRef, setMessage, setStatus, validationErrors]);
 
