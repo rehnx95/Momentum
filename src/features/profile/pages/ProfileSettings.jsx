@@ -220,11 +220,6 @@ function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
                         This is your current username.
                       </p>
                     )}
-                    {usernameAvailability === "error" && (
-                      <p role="alert" className="text-xs text-danger">
-                        Could not check username availability. You can still try saving.
-                      </p>
-                    )}
                   </div>
                 )}
               </div>
