@@ -62,6 +62,7 @@ function Tooltip({ children, label, className = "", portal = false }) {
       className={`app-tooltip-anchor ${className}`.trim()}
       onMouseEnter={portal ? () => setIsVisible(true) : undefined}
       onMouseLeave={portal ? () => setIsVisible(false) : undefined}
+      onClick={portal ? () => setIsVisible(false) : undefined}
       onFocus={
         portal
           ? (event) => {

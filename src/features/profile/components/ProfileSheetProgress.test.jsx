@@ -36,6 +36,12 @@ describe("ProfileSheetProgress", () => {
       [...document.body.querySelectorAll('[role="tooltip"]')].map((tooltip) => tooltip.textContent),
     ).toEqual(["Export progress", "Import progress", "Restore DSA", "Reset all progress"]);
 
+    const exportTooltip = document.body.querySelector('[role="tooltip"]');
+    fireEvent.mouseEnter(buttons[0]);
+    expect(exportTooltip.classList.contains("app-tooltip-visible")).toBe(true);
+    fireEvent.click(buttons[0]);
+    expect(exportTooltip.classList.contains("app-tooltip-visible")).toBe(false);
+
     fireEvent.click(buttons[2]);
     expect(onRestoreDsa).toHaveBeenCalledOnce();
 
