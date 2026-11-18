@@ -113,12 +113,8 @@ export default function useDailyLogPersistence({
               `Could not sync this daily log: ${failure.message}${failure.code ? ` ${failure.code}` : ""}`,
             );
           } else {
-            setStatus("Saved on this device");
-            setMessage(
-              failure
-                ? `Saved locally; sync could not complete: ${failure.message}`
-                : "Saved locally. Changes will sync when your connection returns.",
-            );
+            setStatus("");
+            setMessage("");
           }
         }
         return !conflict && !(failure && !failure.retryable);
@@ -166,7 +162,6 @@ export default function useDailyLogPersistence({
 
   const reloadConflict = useCallback(async () => {
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
-      setMessage("Reconnect to load the cloud copy. Your local edits are preserved.");
       return false;
     }
 
@@ -221,7 +216,6 @@ export default function useDailyLogPersistence({
 
   const overwriteConflict = useCallback(async () => {
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
-      setMessage("Reconnect before replacing the cloud copy. Your local edits are preserved.");
       return false;
     }
 
@@ -282,8 +276,8 @@ export default function useDailyLogPersistence({
         setStatus("Saved");
         setMessage("Your copy replaced the cloud version.");
       } else {
-        setStatus("Saved on this device");
-        setMessage("Your copy is saved here and will sync when possible.");
+        setStatus("");
+        setMessage("");
       }
       return true;
     } catch (error) {
@@ -365,11 +359,11 @@ export default function useDailyLogPersistence({
           setSavedSnapshot(snapshot);
           setLog(nextLog);
           setLoadFailed(false);
-          setStatus(conflict ? "This day changed elsewhere" : "Saved on this device");
+          setStatus(conflict ? "This day changed elsewhere" : "");
           setMessage(
             conflict
               ? "Your edits are preserved on this device, but this day also changed in the cloud."
-              : "Showing edits saved on this device. They will sync when possible.",
+              : "",
           );
           return;
         }
@@ -382,12 +376,8 @@ export default function useDailyLogPersistence({
           setSavedSnapshot(snapshot);
           setLog(nextLog);
           setLoadFailed(false);
-          setStatus("Offline");
-          setMessage(
-            cachedLog
-              ? "Showing your saved copy. Changes will sync when your connection returns."
-              : "Starting a new Daily Log on this device. It will sync when your connection returns.",
-          );
+          setStatus("");
+          setMessage("");
           return;
         }
 
@@ -427,18 +417,21 @@ export default function useDailyLogPersistence({
             setSavedSnapshot(snapshot);
             setLog(nextLog);
             setLoadFailed(false);
-            setStatus("Offline");
-            setMessage(
-              "Starting a new Daily Log on this device. It will sync when your connection returns.",
-            );
+            setStatus("");
+            setMessage("");
           } else {
             setLoadFailed(true);
             setStatus("Could not load");
             setMessage("Could not load this daily log.");
           }
         } else {
-          setStatus("Offline");
-          setMessage("Showing your saved copy; the latest Daily Log could not be fetched.");
+          if (typeof navigator !== "undefined" && navigator.onLine === false) {
+            setStatus("");
+            setMessage("");
+          } else {
+            setStatus("Could not load");
+            setMessage("Could not load the latest Daily Log. Showing your saved copy.");
+          }
         }
       } finally {
         if (active) setLoading(false);

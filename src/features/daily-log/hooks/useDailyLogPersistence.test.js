@@ -445,6 +445,8 @@ describe("useDailyLogPersistence", () => {
     const logRef = { current: baseLog };
     const savedSnapshotRef = { current: JSON.stringify(baseLog) };
     const savedUpdatedAtRef = { current: null };
+    const setMessage = vi.fn();
+    const setStatus = vi.fn();
     let hookResult;
     function HookHarness() {
       hookResult = useDailyLogPersistence({
@@ -461,9 +463,9 @@ describe("useDailyLogPersistence", () => {
         setLoadFailed: vi.fn(),
         setLoading: vi.fn(),
         setLog: vi.fn(),
-        setMessage: vi.fn(),
+        setMessage,
         setSavedSnapshot: vi.fn(),
-        setStatus: vi.fn(),
+        setStatus,
         userId: "offline-user",
         validationErrors: [],
       });
@@ -493,6 +495,8 @@ describe("useDailyLogPersistence", () => {
     expect(saveResult).toBe(true);
     expect(upsert).not.toHaveBeenCalled();
     expect(await getOfflineMutations("offline-user")).toHaveLength(1);
+    expect(setStatus).toHaveBeenLastCalledWith("");
+    expect(setMessage).toHaveBeenLastCalledWith("");
 
     globalThis.navigator.onLine = true;
     await act(async () => {

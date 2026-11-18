@@ -1,5 +1,6 @@
 import { ClipboardList, LayoutList, LogOut, Moon, Sun, User, Users } from "lucide-react";
 import MomentumBrand from "./MomentumBrand";
+import OfflineSyncStatus from "./OfflineSyncStatus";
 import Tooltip from "./Tooltip";
 import { preloadForPath } from "../lib/preload";
 
@@ -17,6 +18,7 @@ export default function AppHeader({
   setTheme,
   onSignOut,
   testDataTools,
+  offlineSync,
 }) {
   return (
     <header className="app-header">
@@ -40,6 +42,15 @@ export default function AppHeader({
         </nav>
         <div className="app-header-actions">
           {testDataTools}
+          {offlineSync && (
+            <OfflineSyncStatus
+              online={offlineSync.online}
+              pendingCount={offlineSync.pendingCount}
+              syncing={offlineSync.syncing}
+              message={offlineSync.message}
+              onRetry={() => void offlineSync.retrySync()}
+            />
+          )}
           <button
             type="button"
             className="icon-btn"

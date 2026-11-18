@@ -1,6 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import AppDialog from "../../shared/components/AppDialog";
-import OfflineSyncStatus from "../../shared/components/OfflineSyncStatus";
 import useOfflineSync from "../../shared/hooks/useOfflineSync";
 import { getLocalDateKey } from "../../shared/utils/date";
 import { useProgress } from "../problem-tracker/hooks/useProgress";
@@ -194,6 +193,7 @@ export default function AuthenticatedApp({
     setTheme,
     onSignOut,
     testDataTools,
+    offlineSync,
   };
 
   const openProfileSettings = () => {
@@ -312,10 +312,5 @@ export default function AuthenticatedApp({
     yearlyActiveDays,
   };
 
-  return (
-    <>
-      <OfflineSyncStatus {...offlineSync} onRetry={() => void offlineSync.retrySync()} />
-      <AuthenticatedScreens context={screenContext} />
-    </>
-  );
+  return <AuthenticatedScreens context={screenContext} />;
 }

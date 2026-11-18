@@ -9,8 +9,15 @@ export const AppState = {
 };
 
 const ACCOUNT_CACHE_KEY = "momentum:account-cache";
+const PROFILE_LOAD_ERROR =
+  "Could not load your profile. Check the Supabase database setup and try again.";
+const OFFLINE_PROFILE_MESSAGE = "You're offline. Reconnect to load your profile.";
 const profileRequests = new Map();
 let supabaseModulePromise;
+
+function isBrowserOffline() {
+  return typeof navigator !== "undefined" && navigator.onLine === false;
+}
 
 function hasSupabaseConfiguration() {
   return Boolean(
@@ -117,10 +124,22 @@ export default function useAuthentication() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authAction, setAuthAction] = useState(null);
   const [authRetryCount, setAuthRetryCount] = useState(0);
+  const [isOnline, setIsOnline] = useState(() => !isBrowserOffline());
   const authEventOccurred = useRef(false);
   const loadedProfileUserId = useRef(null);
   const userId = user?.id;
   const hasCachedProfile = profile?.id === userId;
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     const oauthError = new URLSearchParams(window.location.search).get("error");
@@ -229,8 +248,18 @@ export default function useAuthentication() {
     ) {
       return undefined;
     }
+    if (!isOnline) {
+      setAuthError((current) => {
+        if (hasCachedProfile) {
+          return current === PROFILE_LOAD_ERROR ? "" : current;
+        }
+        return OFFLINE_PROFILE_MESSAGE;
+      });
+      return undefined;
+    }
 
     let active = true;
+    setAuthError((current) => (current === OFFLINE_PROFILE_MESSAGE ? "" : current));
     if (!hasCachedProfile) setAppState(AppState.LOADING);
     fetchProfile(userId)
       .then(({ data: profileData, error }) => {
@@ -246,15 +275,22 @@ export default function useAuthentication() {
       .catch((error) => {
         if (!active) return;
         console.error("Failed to fetch profile:", error);
-        setAuthError(
-          "Could not load your profile. Check the Supabase database setup and try again.",
-        );
+        if (isBrowserOffline()) {
+          setAuthError((current) => {
+            if (hasCachedProfile) {
+              return current === PROFILE_LOAD_ERROR ? "" : current;
+            }
+            return OFFLINE_PROFILE_MESSAGE;
+          });
+          return;
+        }
+        setAuthError(PROFILE_LOAD_ERROR);
       });
 
     return () => {
       active = false;
     };
-  }, [authRetryCount, userId, hasCachedProfile]);
+  }, [authRetryCount, isOnline, userId, hasCachedProfile]);
 
   useEffect(() => {
     if (!user || profile?.id !== user.id) return;

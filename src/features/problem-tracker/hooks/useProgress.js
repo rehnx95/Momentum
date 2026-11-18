@@ -216,7 +216,9 @@ export function useProgress(user) {
         console.error("Failed to load user data from Supabase:", loadError);
         setError(
           typeof navigator !== "undefined" && navigator.onLine === false
-            ? "Offline. Showing your saved progress; new changes will sync when connected."
+            ? hasCachedData
+              ? ""
+              : "Offline. No saved progress is available on this device yet."
             : "Could not load your saved progress. Check your Supabase database setup and reload.",
         );
       } finally {

@@ -124,6 +124,33 @@ describe("useAuthentication", () => {
     expect(result.current.retryAuthentication).toEqual(expect.any(Function));
   });
 
+  it("uses the cached profile offline and retries loading it when connectivity returns", async () => {
+    const user = { id: cachedProfile.id, email: "test@example.com" };
+    localStorage.setItem(
+      "momentum:account-cache",
+      JSON.stringify({ user, profile: cachedProfile }),
+    );
+    authMocks.getSession.mockResolvedValue({
+      data: { session: { user } },
+      error: null,
+    });
+    vi.stubGlobal("navigator", { onLine: false });
+
+    const { result } = renderHook(() => useAuthentication());
+
+    await waitFor(() => expect(result.current.appState).toBe(AppState.AUTHENTICATED));
+    expect(result.current.authError).toBe("");
+    expect(authMocks.from).not.toHaveBeenCalled();
+
+    await act(async () => {
+      navigator.onLine = true;
+      window.dispatchEvent(new Event("online"));
+    });
+
+    await waitFor(() => expect(authMocks.from).toHaveBeenCalledTimes(1));
+    expect(result.current.authError).toBe("");
+  });
+
   it("clears the cached account after an explicit sign-out event", async () => {
     const previousPath = window.location.pathname;
     window.history.replaceState({}, "", "/profile/edit");

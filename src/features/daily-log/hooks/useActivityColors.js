@@ -27,6 +27,15 @@ function writeColorCache(userId, colors) {
   }
 }
 
+function mergePendingColors(colors, mutations) {
+  for (const mutation of mutations) {
+    if (mutation.type === "activity-color") {
+      colors[getActivityKey(mutation.payload.activityName)] = mutation.payload.color;
+    }
+  }
+  return colors;
+}
+
 export default function useActivityColors(userId, onError) {
   const [activityColors, setActivityColors] = useState(() => readColorCache(userId));
 
@@ -43,6 +52,11 @@ export default function useActivityColors(userId, onError) {
   );
 
   const refresh = useCallback(async () => {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      const cachedColors = readColorCache(userId);
+      return mergePendingColors(cachedColors, await getOfflineMutations(userId));
+    }
+
     await syncOfflineMutations(userId);
     const { data, error } = await supabase
       .from("activity_color_assignments")
@@ -50,15 +64,10 @@ export default function useActivityColors(userId, onError) {
       .eq("user_id", userId);
     if (error) throw error;
 
-    const colors = Object.fromEntries(
-      (data || []).map(({ activity_key, color }) => [activity_key, color]),
+    const colors = mergePendingColors(
+      Object.fromEntries((data || []).map(({ activity_key, color }) => [activity_key, color])),
+      await getOfflineMutations(userId),
     );
-    const pendingMutations = await getOfflineMutations(userId);
-    for (const mutation of pendingMutations) {
-      if (mutation.type === "activity-color") {
-        colors[getActivityKey(mutation.payload.activityName)] = mutation.payload.color;
-      }
-    }
     writeColorCache(userId, colors);
     return colors;
   }, [userId]);
@@ -66,16 +75,23 @@ export default function useActivityColors(userId, onError) {
   useEffect(() => {
     let active = true;
     setActivityColors(readColorCache(userId));
-    refresh()
-      .then((colors) => {
-        if (active) setActivityColors(colors);
-      })
-      .catch((error) => {
-        if (active) reportError("Could not load activity colors:", error);
-      });
+    const loadColors = () => {
+      refresh()
+        .then((colors) => {
+          if (active) setActivityColors(colors);
+        })
+        .catch((error) => {
+          if (active && !(typeof navigator !== "undefined" && navigator.onLine === false)) {
+            reportError("Could not load activity colors:", error);
+          }
+        });
+    };
+    loadColors();
+    window.addEventListener("online", loadColors);
 
     return () => {
       active = false;
+      window.removeEventListener("online", loadColors);
     };
   }, [refresh, reportError, userId]);
 

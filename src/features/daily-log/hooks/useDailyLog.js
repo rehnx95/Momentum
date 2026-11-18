@@ -219,12 +219,8 @@ export default function useDailyLog(user, activityLog = {}) {
     setDailyLogCache(user.id, dateRef.current, clearedLog);
     setLoadRequest((current) => current + 1);
     const online = typeof navigator === "undefined" || navigator.onLine !== false;
-    setStatus(online ? "Saved" : "Saved on this device");
-    setMessage(
-      online
-        ? "All saved Daily Log entries for your account were cleared."
-        : "Daily Log history was cleared on this device and will sync when connected.",
-    );
+    setStatus(online ? "Saved" : "");
+    setMessage(online ? "All saved Daily Log entries for your account were cleared." : "");
     return true;
   }, [autosaveTimer, clearHistory, saveQueueRef, setLog, user.id]);
 
