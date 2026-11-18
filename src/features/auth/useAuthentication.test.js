@@ -175,6 +175,11 @@ describe("useAuthentication", () => {
   });
 
   it("signs in with an email and password through Supabase Auth", async () => {
+    const user = { id: cachedProfile.id, email: "test@example.com" };
+    authMocks.signInWithPassword.mockResolvedValue({
+      data: { user },
+      error: null,
+    });
     const { result } = renderHook(() => useAuthentication());
 
     await act(async () => {
@@ -187,6 +192,8 @@ describe("useAuthentication", () => {
       email: "test@example.com",
       password: "password123",
     });
+    await waitFor(() => expect(result.current.appState).toBe(AppState.AUTHENTICATED));
+    expect(result.current.user).toEqual(user);
   });
 
   it("reports missing Supabase configuration when email sign-in is attempted", async () => {
@@ -211,7 +218,8 @@ describe("useAuthentication", () => {
       }),
     });
     vi.stubGlobal("fetch", fetchMock);
-    authMocks.setSession.mockResolvedValue({ error: null });
+    const user = { id: cachedProfile.id, email: "test@example.com" };
+    authMocks.setSession.mockResolvedValue({ data: { user }, error: null });
     const { result } = renderHook(() => useAuthentication());
 
     await act(async () => {
@@ -229,6 +237,8 @@ describe("useAuthentication", () => {
       access_token: "access-token",
       refresh_token: "refresh-token",
     });
+    await waitFor(() => expect(result.current.appState).toBe(AppState.AUTHENTICATED));
+    expect(result.current.user).toEqual(user);
   });
 
   it("creates an account and establishes the returned session", async () => {
@@ -239,7 +249,8 @@ describe("useAuthentication", () => {
       }),
     });
     vi.stubGlobal("fetch", fetchMock);
-    authMocks.setSession.mockResolvedValue({ error: null });
+    const user = { id: cachedProfile.id, email: "test@example.com" };
+    authMocks.setSession.mockResolvedValue({ data: { user }, error: null });
     const { result } = renderHook(() => useAuthentication());
 
     await act(async () => {
@@ -257,6 +268,8 @@ describe("useAuthentication", () => {
       access_token: "access-token",
       refresh_token: "refresh-token",
     });
+    await waitFor(() => expect(result.current.appState).toBe(AppState.AUTHENTICATED));
+    expect(result.current.user).toEqual(user);
   });
 
   it("explains when the Vercel sign-up API is unavailable under Vite", async () => {

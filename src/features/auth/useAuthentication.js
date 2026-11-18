@@ -154,6 +154,7 @@ export default function useAuthentication() {
           if (session?.user) {
             authEventOccurred.current = true;
             setAuthError("");
+            setAppState(AppState.LOADING);
             setUser(session.user);
             return;
           }
@@ -293,11 +294,14 @@ export default function useAuthentication() {
       if (!supabase) throw new Error("Supabase is not configured.");
 
       if (identifier.includes("@")) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: identifier,
           password,
         });
         if (error) throw error;
+        if (!data.user) throw new Error("Sign-in did not return an authenticated user.");
+        setAppState(AppState.LOADING);
+        setUser(data.user);
       } else {
         const response = await fetch("/api/auth/username-login", {
           method: "POST",
@@ -320,11 +324,14 @@ export default function useAuthentication() {
           throw new Error("Username sign-in returned an invalid session.");
         }
 
-        const { error } = await supabase.auth.setSession({
+        const { data, error } = await supabase.auth.setSession({
           access_token: result.session.access_token,
           refresh_token: result.session.refresh_token,
         });
         if (error) throw error;
+        if (!data.user) throw new Error("Sign-in did not return an authenticated user.");
+        setAppState(AppState.LOADING);
+        setUser(data.user);
       }
 
       return true;
@@ -368,11 +375,14 @@ export default function useAuthentication() {
         throw new Error("Email sign-up returned an invalid session.");
       }
 
-      const { error } = await supabase.auth.setSession({
+      const { data, error } = await supabase.auth.setSession({
         access_token: result.session.access_token,
         refresh_token: result.session.refresh_token,
       });
       if (error) throw error;
+      if (!data.user) throw new Error("Sign-up did not return an authenticated user.");
+      setAppState(AppState.LOADING);
+      setUser(data.user);
       return true;
     } catch (error) {
       console.error("Email sign-up failed:", error);
