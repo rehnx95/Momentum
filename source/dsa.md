@@ -126,8 +126,8 @@ Striver's A2Z DSA Sheet — LeetCode Edition
 
 ### 4.1 — BS on 1D Arrays
 - 101. [Binary Search](https://leetcode.com/problems/binary-search/) [Easy]
-- 102. [Implement Lower Bound](https://leetcode.com/problems/search-insert-position/) [Easy] ↪ LC 35
-- 103. [Find First and Last Position of Element in Sorted Array](https://leetcode.com/problems/find-smallest-letter-greater-than-target/) [Easy] ↪ LC 744
+- 102. Implement Lower Bound [Easy]
+- 103. [Implement Upper Bound](https://leetcode.com/problems/find-smallest-letter-greater-than-target/) [Easy] ↪ LC 744
 - 104. [Search Insert Position](https://leetcode.com/problems/search-insert-position/) [Easy]
 - 105. Floor and Ceil in Sorted Array [Easy]
 - 106. [Find First and Last Position of Element in Sorted Array](https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/) [Medium]
@@ -620,4 +620,3 @@ Striver's A2Z DSA Sheet — LeetCode Edition
 - 516. [Shortest Palindrome](https://leetcode.com/problems/shortest-palindrome/) [Hard]
 - 517. [Longest Happy Prefix](https://leetcode.com/problems/longest-happy-prefix/) [Hard]
 - 518. [String to Integer (atoi)](https://leetcode.com/problems/string-to-integer-atoi/) [Medium]
-

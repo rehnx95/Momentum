@@ -600,11 +600,11 @@
             {
               "id": "s4-4.1-p102",
               "title": "Implement Lower Bound",
-              "lc": 35
+              "lc": null
             },
             {
               "id": "s4-4.1-p103",
-              "title": "Find First and Last Position of Element in Sorted Array",
+              "title": "Implement Upper Bound",
               "lc": 744
             },
             {
