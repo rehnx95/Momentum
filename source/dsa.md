@@ -127,7 +127,7 @@ Striver's A2Z DSA Sheet — LeetCode Edition
 ### 4.1 — BS on 1D Arrays
 - 101. [Binary Search](https://leetcode.com/problems/binary-search/) [Easy]
 - 102. Implement Lower Bound [Easy]
-- 103. [Implement Upper Bound](https://leetcode.com/problems/find-smallest-letter-greater-than-target/) [Easy] ↪ LC 744
+- 103. [Implement Upper Bound] [Easy]
 - 104. [Search Insert Position](https://leetcode.com/problems/search-insert-position/) [Easy]
 - 105. Floor and Ceil in Sorted Array [Easy]
 - 106. [Find First and Last Position of Element in Sorted Array](https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/) [Medium]

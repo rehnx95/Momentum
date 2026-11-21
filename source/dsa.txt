@@ -123,7 +123,7 @@ Step 4 — Binary Search 1D and 2D and Search Space
 4.1 — BS on 1D Arrays
 101. Binary Search (LC 704)
 102. Implement Lower Bound
-103. Implement Upper Bound (LC 744)
+103. Implement Upper Bound
 104. Search Insert Position (LC 35)
 105. Floor and Ceil in Sorted Array
 106. Find First and Last Position of Element in Sorted Array (LC 34)
