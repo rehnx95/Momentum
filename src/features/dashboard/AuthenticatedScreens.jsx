@@ -2,6 +2,10 @@ import { lazy, Suspense, useEffect } from "react";
 import AppHeader from "../../shared/components/AppHeader";
 import AppLoadingFallback from "../../shared/components/AppLoadingFallback";
 import TrackerDashboard from "./TrackerDashboard";
+import "../../styles/dashboard.css";
+import "../../styles/tracker-layout.css";
+import "../../styles/responsive/dashboard.css";
+import "../../styles/responsive/tracker.css";
 
 const PeopleSearchPage = lazy(() => import("../people/PeopleSearchPage"));
 const PublicProfilePage = lazy(() => import("../people/PublicProfilePage"));

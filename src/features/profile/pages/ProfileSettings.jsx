@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { supabase } from "../../../shared/lib/supabase";
+import "../../../styles/profile.css";
+import "../../../styles/own-profile-layout.css";
+import "../../../styles/responsive/profile.css";
+
 function ProfileSettings({ userId, profile, onBack, onSaved, header }) {
   const [form, setForm] = useState({
     name: profile?.name || "",

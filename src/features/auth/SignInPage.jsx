@@ -1,5 +1,8 @@
 import { Activity } from "lucide-react";
 import { useState } from "react";
+import "../../styles/auth.css";
+import "../../styles/auth-showcase.css";
+import "../../styles/responsive/auth.css";
 
 export default function UnauthenticatedView({
   onSignIn,

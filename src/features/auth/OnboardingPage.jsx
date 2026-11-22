@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../shared/lib/supabase";
 import { Activity, CircleCheck, CircleX, LogOut, User } from "lucide-react";
+import "../../styles/auth.css";
+import "../../styles/auth-showcase.css";
+import "../../styles/responsive/auth.css";
 
 const USERNAME_MAX_LENGTH = 20;
 

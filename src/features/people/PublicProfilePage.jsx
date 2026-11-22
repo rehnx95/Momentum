@@ -6,6 +6,11 @@ import StatStrip from "../../shared/components/StatStrip";
 import ActivityHeatmap from "../activity/components/ActivityHeatmap";
 import { buildHeatmap } from "../activity/utils/heatmap";
 import ProfileSheetProgress from "../profile/components/ProfileSheetProgress";
+import "../../styles/profile.css";
+import "../../styles/profile-layout.css";
+import "../../styles/public-profile-layout.css";
+import "../../styles/own-profile-layout.css";
+import "../../styles/responsive/profile.css";
 
 const EMPTY_ACTIVITY = {};
 const EMPTY_SHEETS = [];

@@ -5,6 +5,10 @@ import StatStrip from "../../../shared/components/StatStrip";
 import ActivityHeatmap from "../../activity/components/ActivityHeatmap";
 import ProfileSheetProgress from "../components/ProfileSheetProgress";
 import RecentAcceptedProblems from "../components/RecentAcceptedProblems";
+import "../../../styles/profile.css";
+import "../../../styles/profile-layout.css";
+import "../../../styles/own-profile-layout.css";
+import "../../../styles/responsive/profile.css";
 
 export default function ProfilePage({ context }) {
   const {
