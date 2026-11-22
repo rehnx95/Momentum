@@ -76,18 +76,14 @@ export default function usePublicProfile(username) {
 
     const loadProfile = async () => {
       try {
-        const [{ data: profileRows, error: profileError }, { data: emailRows, error: emailError }] =
-          await Promise.all([
-            supabase.rpc("get_public_profile", {
-              requested_username: username,
-              requested_today: getLocalDateKey(new Date()),
-            }),
-            supabase.rpc("get_public_profile_email", {
-              requested_username: username,
-            }),
-          ]);
+        const { data: profileRows, error: profileError } = await supabase.rpc(
+          "get_public_profile",
+          {
+            requested_username: username,
+            requested_today: getLocalDateKey(new Date()),
+          },
+        );
         if (profileError) throw profileError;
-        if (emailError) throw emailError;
         if (!active) return;
         const profileData = profileRows?.[0];
         if (!profileData) {
@@ -95,19 +91,15 @@ export default function usePublicProfile(username) {
           setError("This profile could not be found.");
           return;
         }
-        const profileWithEmail = {
-          ...profileData,
-          email: emailRows?.[0]?.email || "",
-        };
         profileCache.current.set(username, {
-          profile: profileWithEmail,
+          profile: profileData,
           loadedAt: Date.now(),
         });
         if (profileCache.current.size > 20) {
           const oldestUsername = profileCache.current.keys().next().value;
           profileCache.current.delete(oldestUsername);
         }
-        setProfile(profileWithEmail);
+        setProfile(profileData);
         setError("");
       } catch (requestError) {
         if (!active) return;

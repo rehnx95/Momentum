@@ -647,6 +647,10 @@
     "url": "https://leetcode.com/problems/plus-one-linked-list/",
     "difficulty": "Medium"
   },
+  "378": {
+    "url": "https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/",
+    "difficulty": "Medium"
+  },
   "402": {
     "url": "https://leetcode.com/problems/remove-k-digits/",
     "difficulty": "Medium"
@@ -842,10 +846,6 @@
   "743": {
     "url": "https://leetcode.com/problems/network-delay-time/",
     "difficulty": "Medium"
-  },
-  "744": {
-    "url": "https://leetcode.com/problems/find-smallest-letter-greater-than-target/",
-    "difficulty": "Easy"
   },
   "774": {
     "url": "https://leetcode.com/problems/minimize-max-distance-to-gas-station/",

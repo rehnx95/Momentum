@@ -160,4 +160,50 @@ describe("useDailyLogTimer", () => {
     expect(saveLogRef.current).toHaveBeenCalledOnce();
     expect(localStorage.getItem(timerStorageKey("user-offline"))).toBeNull();
   });
+
+  it("saves a previous-day segment that ends at midnight", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2025, 2, 15, 0, 30));
+    globalThis.navigator.onLine = false;
+    const previousDay = new Date(2025, 2, 14, 23, 30);
+    const dateKey = getLocalDateKey(new Date());
+    localStorage.setItem(
+      timerStorageKey("user-midnight"),
+      JSON.stringify({
+        activityId: "task-1",
+        activityName: "Reading",
+        color: "#3b82f6",
+        startedAt: previousDay.toISOString(),
+      }),
+    );
+    let hookResult;
+
+    function HookHarness() {
+      hookResult = useDailyLogTimer({
+        userId: "user-midnight",
+        dateRef: { current: dateKey },
+        logRef: { current: { date: dateKey, sleep_time: "", wake_time: "", custom_tasks: [] } },
+        setLog: vi.fn(),
+        saveLogRef: { current: vi.fn().mockResolvedValue(true) },
+        flushPendingSave: vi.fn().mockResolvedValue(true),
+        setMessage: vi.fn(),
+      });
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+    });
+    await act(async () => {
+      expect(await hookResult.stopTimer()).toBe(true);
+    });
+
+    const pending = await getOfflineMutations("user-midnight");
+    expect(pending).toHaveLength(1);
+    expect(pending[0].payload.slot).toMatchObject({
+      start: "23:30",
+      end: "00:00",
+      endDayOffset: 1,
+    });
+  });
 });

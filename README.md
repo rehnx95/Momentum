@@ -15,8 +15,8 @@ connection drops.
 ## What you can do
  
 - **Learn with structure.** Mark problems `To do`, `Done`, or `Skipped`. Start
-  with the built-in **DSA** (518 items, with LeetCode links and difficulty) and
-  **Backend** (84 items) tracks, or upload your own `.txt` track. Search,
+  with the built-in **DSA** (with LeetCode links and difficulty) and
+  **Backend** tracks, or upload your own `.txt` track. Search,
   filter, and expand or collapse groups as you work.
 - **Record your day.** Log timed activities with start/end slots, run a live
   timer, and record sleep. Daily Log autosaves, warns about overlapping or
@@ -29,7 +29,7 @@ connection drops.
   per-track progress.
 - **Share a profile.** Find other Momentum users by username and open their
   profile. Public profiles are visible to signed-in users and include the
-  owner's **email address**, name, username, progress summaries, and activity.
+  owner's name, username, progress summaries, and activity.
 - **Move your progress.** Export and import problem states for a track, reset a
   single track, or restore the original DSA track.
 - **Sign in your way.** Google, email and password, or username and password.
@@ -91,7 +91,7 @@ Fill in `.env`:
 ```dotenv
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your-key
-# Server-side only (Vercel API routes). Never prefix this key with VITE_.
+# Server-side only (Vercel username-login API). Never prefix this key with VITE_.
 SUPABASE_SERVICE_ROLE_KEY=
 ```
  
@@ -99,10 +99,12 @@ Open the URL Vite prints (normally `http://localhost:5173`). Then:
  
 1. Apply every SQL file in `supabase/migrations/` in filename order.
 2. Enable the **Google** and **Email** providers in Supabase Auth and add your
-   local and deployed origins to the allowed redirect URLs.
-Vite serves only the frontend. Email sign-up, username sign-in, and username
-search are Vercel functions, so to use them locally set
-`SUPABASE_SERVICE_ROLE_KEY` and run `npx vercel dev` instead of `npm run dev`.
+   local and deployed origins to the allowed redirect URLs. Enable email
+   confirmations and configure production email delivery before public launch.
+Vite serves only the frontend. Email/password sign-up uses Supabase Auth
+directly. Username sign-in and search need Vercel functions, so run
+`npx vercel dev` locally to use them; only username sign-in needs
+`SUPABASE_SERVICE_ROLE_KEY`.
 The [architecture guide](./docs/architecture.md#9-local-development-and-deployment)
 has the full setup and deployment steps.
  
@@ -118,23 +120,24 @@ has the full setup and deployment steps.
 | `npm run lint` | Check JavaScript and JSX with ESLint |
 | `npm run format` | Format the repository with Prettier |
 | `npm run convert-sheet -- dsa` | Convert `source/dsa.txt` into its bundled JSON track |
-| `npm run create-links` | Regenerate `dsa.md`, LeetCode links, and difficulties from `source/dsa.txt` |
+| `npm run convert-sheets` | Convert every `.txt` track in `source/` into JSON |
+| `npm run create-links` | Refresh DSA LeetCode links and difficulty metadata after DSA changes |
 | `npm run verify-links` | Check every LeetCode link and difficulty against LeetCode and write `link_review.txt` |
  
 ## Built-in tracks
  
-Built-in tracks are plain text in `source/`. Edit a source, regenerate its JSON,
-and commit both:
+Built-in tracks are plain text in `source/`. Edit one or both sources, then run
+one command to regenerate every bundled JSON:
  
 ```powershell
-npm run convert-sheet -- dsa
-npm run create-links     # DSA only: links and difficulty maps
+npm run convert-sheets
+npm run create-links     # DSA only: refresh links and difficulty metadata
 npm run verify-links     # optional: audit the links
 ```
  
-Existing accounts receive updated problem titles and LeetCode IDs on their next
-sign-in, matched by stable problem ID, and their saved progress is preserved.
-Apply the matching Supabase migrations when you ship a metadata change. See
+The converter keeps existing IDs matched to LeetCode problem IDs (or titles for
+unlinked items), so reordering source rows does not move saved progress. Commit
+the updated JSON with its source. See
 
 ## Install as an app
  
@@ -163,7 +166,7 @@ leaves its profile and tracks intact.
 ## Project structure
  
 ```text
-api/                       Vercel functions: username search, sign-up, username sign-in
+api/                       Vercel functions: username search and username sign-in
 docs/
   architecture.md          System design, data flows, security, and operations
   screenshots/             Product screenshots

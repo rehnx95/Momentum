@@ -8,9 +8,80 @@ const OUTPUT_DIR = path.join(__dirname, "../src/features/sheets/data");
 // Set to null so the UI can simply skip rendering a subsection heading.
 const IMPLICIT_SUB_TITLE = null;
 
-function parseSheet(sourceFile) {
-  const raw = fs.readFileSync(sourceFile, "utf8").replace(/\r\n/g, "\n");
+function normalizeIdentity(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
 
+function slug(value) {
+  return normalizeIdentity(value).replace(/\s+/g, "-");
+}
+
+function flattenProblems(sheet) {
+  return (sheet?.steps || []).flatMap((step) =>
+    (step.subsections || []).flatMap((subsection) =>
+      (subsection.problems || []).map((problem) => ({
+        ...problem,
+        sourceProblem: problem,
+        stepTitle: step.title,
+        subsectionTitle: subsection.title || "",
+      })),
+    ),
+  );
+}
+
+function assignStableProblemIds(steps, previousSheet) {
+  const previousProblems = flattenProblems(previousSheet).filter(
+    (problem) => typeof problem.id === "string",
+  );
+  const usedIds = new Set();
+  const allProblems = flattenProblems({ steps });
+
+  for (const problem of allProblems) {
+    const titleKey = normalizeIdentity(problem.title);
+    const stepKey = normalizeIdentity(problem.stepTitle);
+    const subsectionKey = normalizeIdentity(problem.subsectionTitle);
+    const availablePrevious = previousProblems.filter((previous) => !usedIds.has(previous.id));
+    const sameLeetCodeProblem =
+      problem.lc === null
+        ? []
+        : availablePrevious.filter((previous) => previous.lc === problem.lc);
+    const identityMatches = sameLeetCodeProblem.length
+      ? sameLeetCodeProblem
+      : availablePrevious.filter((previous) => normalizeIdentity(previous.title) === titleKey);
+    const candidates = identityMatches
+      .map((previous, index) => ({
+        previous,
+        index,
+        score:
+          (normalizeIdentity(previous.title) === titleKey ? 8 : 0) +
+          (normalizeIdentity(previous.stepTitle) === stepKey ? 4 : 0) +
+          (normalizeIdentity(previous.subsectionTitle) === subsectionKey ? 4 : 0),
+      }))
+      .sort((first, second) => second.score - first.score || first.index - second.index);
+
+    const baseId = `${problem.lc === null ? "topic" : `lc-${problem.lc}`}-${slug(problem.title) || "item"}`;
+    const contextId = [slug(problem.stepTitle), slug(problem.subsectionTitle)]
+      .filter(Boolean)
+      .join("-");
+    let id = candidates[0]?.previous.id || (contextId ? `${baseId}-${contextId}` : baseId);
+    let suffix = 2;
+    const originalId = id;
+    while (usedIds.has(id)) {
+      id = `${originalId}-${suffix}`;
+      suffix += 1;
+    }
+
+    problem.sourceProblem.id = id;
+    usedIds.add(id);
+  }
+}
+
+function parseSheetContent(source, previousSheet = null) {
+  const raw = source.replace(/\r\n/g, "\n");
   // Pre-process: if a Step header or "N.M — Title" header got glued onto the end
   // of the previous line (e.g. "...(LC 127)Step 15 — Graphs"), break it onto its own line.
   const content = raw
@@ -103,7 +174,7 @@ function parseSheet(sourceFile) {
     const sub = ensureSubsection();
     if (!sub) return;
     sub.problems.push({
-      id: `s${currentStepNum}-${currentSubId}-p${pm[1]}`,
+      id: "",
       title: cleanTitle(pm[2]),
       lc: extractLC(pm[2]),
     });
@@ -162,7 +233,12 @@ function parseSheet(sourceFile) {
     }
   }
 
+  assignStableProblemIds(steps, previousSheet);
   return { steps };
+}
+
+function parseSheet(sourceFile, previousSheet = null) {
+  return parseSheetContent(fs.readFileSync(sourceFile, "utf8"), previousSheet);
 }
 
 function listSourceFiles() {
@@ -198,11 +274,7 @@ async function chooseSourceFile() {
   }
 }
 
-async function main(sourceName = process.argv[2]) {
-  const selectedName = sourceName || (await chooseSourceFile());
-  const filename = selectedName.toLowerCase().endsWith(".txt")
-    ? selectedName
-    : `${selectedName}.txt`;
+async function convertSourceFile(filename) {
   if (path.basename(filename) !== filename || !listSourceFiles().includes(filename)) {
     throw new Error(`Choose a .txt file from ${SOURCE_DIR}`);
   }
@@ -211,7 +283,11 @@ async function main(sourceName = process.argv[2]) {
   const outputName = filename.replace(/\.txt$/i, "");
   const outputFile = path.join(OUTPUT_DIR, `${outputName}.json`);
   console.log(`Parsing ${filename}...`);
-  const data = parseSheet(sourceFile);
+  let previousSheet = null;
+  if (fs.existsSync(outputFile)) {
+    previousSheet = JSON.parse(fs.readFileSync(outputFile, "utf8"));
+  }
+  const data = parseSheet(sourceFile, previousSheet);
   if (
     data.steps.length === 0 ||
     data.steps.every((step) =>
@@ -241,6 +317,24 @@ async function main(sourceName = process.argv[2]) {
   return { stepsCount: data.steps.length, problemsCount, outputFile };
 }
 
+async function main(sourceName = process.argv[2]) {
+  if (sourceName === "--all") {
+    const files = listSourceFiles();
+    if (files.length === 0) throw new Error(`No .txt source files found in ${SOURCE_DIR}`);
+    const results = [];
+    for (const filename of files) {
+      results.push(await convertSourceFile(filename));
+    }
+    return results;
+  }
+
+  const selectedName = sourceName || (await chooseSourceFile());
+  const filename = selectedName.toLowerCase().endsWith(".txt")
+    ? selectedName
+    : `${selectedName}.txt`;
+  return convertSourceFile(filename);
+}
+
 if (require.main === module) {
   main().catch((error) => {
     console.error(`\nConversion failed: ${error.message}`);
@@ -248,4 +342,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { parseSheet, main };
+module.exports = { parseSheet, parseSheetContent, main };

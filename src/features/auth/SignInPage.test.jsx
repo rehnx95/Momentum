@@ -75,6 +75,31 @@ describe("UnauthenticatedView", () => {
     await waitFor(() => expect(onSignUp).toHaveBeenCalledWith("rehan@example.com", "password123"));
   });
 
+  it("shows a confirmation message when email verification is required", async () => {
+    render(
+      <UnauthenticatedView
+        onSignIn={vi.fn()}
+        onPasswordSignIn={vi.fn()}
+        onSignUp={vi.fn().mockResolvedValue("confirmation-required")}
+        onClearError={vi.fn()}
+        isSigningIn={false}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Create an account" }));
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "rehan@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Password"), {
+      target: { value: "password123" },
+    });
+    fireEvent.submit(screen.getByLabelText("Password").closest("form"));
+
+    expect((await screen.findByRole("status")).textContent).toContain(
+      "Check your email for a confirmation link",
+    );
+  });
+
   it("switches modes from the segmented control", () => {
     const onClearError = vi.fn();
     render(

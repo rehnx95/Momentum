@@ -1,14 +1,21 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 vi.mock("../../../shared/lib/supabase", () => ({
   supabase: { rpc: vi.fn() },
 }));
 
 import { supabase } from "../../../shared/lib/supabase";
-import leetcodeProblemLinks from "../leetcodeProblemLinks.json";
 import { bootstrapBuiltInSheets, loadBuiltInSheet } from "./bootstrapBuiltInSheets";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const { parseSheet } = require("../../../../scripts/convert-sheet.cjs");
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 
 describe("bootstrapBuiltInSheets", () => {
   beforeEach(() => {
@@ -16,7 +23,7 @@ describe("bootstrapBuiltInSheets", () => {
     vi.mocked(supabase.rpc).mockResolvedValue({ error: null });
   });
 
-  it("synchronizes canonical problem titles after ensuring built-in copies", async () => {
+  it("synchronizes complete canonical tracks after ensuring built-in copies", async () => {
     await expect(bootstrapBuiltInSheets("user-1")).resolves.toBe("dsa");
 
     expect(supabase.rpc).toHaveBeenNthCalledWith(
@@ -26,59 +33,21 @@ describe("bootstrapBuiltInSheets", () => {
     );
     expect(supabase.rpc).toHaveBeenNthCalledWith(
       2,
-      "sync_builtin_sheet_problem_titles",
-      expect.objectContaining({ requested_sheets: expect.any(Array) }),
-    );
-    expect(supabase.rpc).toHaveBeenNthCalledWith(
-      3,
-      "sync_builtin_sheet_problem_links",
+      "sync_builtin_sheet_data",
       expect.objectContaining({ requested_sheets: expect.any(Array) }),
     );
     const ensuredSheets = vi.mocked(supabase.rpc).mock.calls[0][1].requested_sheets;
     const synchronizedSheets = vi.mocked(supabase.rpc).mock.calls[1][1].requested_sheets;
-    const linkedSheets = vi.mocked(supabase.rpc).mock.calls[2][1].requested_sheets;
     expect(synchronizedSheets).toEqual(ensuredSheets);
-    expect(linkedSheets).toEqual(ensuredSheets);
   });
 
-  it("loads the canonical DSA template for restoration", async () => {
-    const sheet = await loadBuiltInSheet("dsa");
-    const problems = sheet.sheet.steps.flatMap((step) =>
-      step.subsections.flatMap((subsection) => subsection.problems),
-    );
+  it.each(["dsa", "backend"])("keeps the %s JSON in sync with its text source", async (id) => {
+    const sheet = await loadBuiltInSheet(id);
+    const sourceFile = path.join(repositoryRoot, "source", `${id}.txt`);
 
-    expect(sheet.id).toBe("dsa");
-    expect(sheet.title).toBe("DSA");
+    expect(sheet.id).toBe(id);
     expect(sheet.sheet.steps.length).toBeGreaterThan(0);
-    expect(problems.find((problem) => problem.id === "s1-1.3-p23")).toMatchObject({
-      title: "Armstrong Number",
-      lc: 1134,
-    });
-    expect(problems.find((problem) => problem.id === "s4-4.1-p102")).toMatchObject({
-      title: "Implement Lower Bound",
-      lc: 35,
-    });
-    expect(problems.find((problem) => problem.id === "s6-6.4-p197")).toMatchObject({
-      title: "Remove Duplicates from Sorted DLL",
-      lc: 83,
-    });
-    expect(problems.find((problem) => problem.id === "s16-16.4-p469")).toMatchObject({
-      title: "Print Longest Common Subsequence",
-      lc: 1143,
-    });
-    expect(problems.find((problem) => problem.id === "s16-16.4-p480")).toMatchObject({
-      title: "Count Palindromic Subsequences",
-      lc: 730,
-    });
-    expect(leetcodeProblemLinks[1134]).toEqual({
-      url: "https://leetcode.com/problems/armstrong-number/",
-      difficulty: "Easy",
-    });
-    expect(leetcodeProblemLinks[83].url).toBe(
-      "https://leetcode.com/problems/remove-duplicates-from-sorted-list/",
-    );
-    expect(leetcodeProblemLinks[730].url).toBe(
-      "https://leetcode.com/problems/count-different-palindromic-subsequences/",
-    );
+    expect(parseSheet(sourceFile, sheet.sheet)).toEqual(sheet.sheet);
+    expect(fs.existsSync(sourceFile)).toBe(true);
   });
 });

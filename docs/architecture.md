@@ -1,6 +1,6 @@
 # Momentum architecture
 
-Momentum is a browser-based React single-page application for learning tracks, daily time tracking, and progress insights. Supabase provides identity and PostgreSQL. Vercel serves the static build and runs three small serverless functions. The React source and the timestamped SQL migrations are the implementation references; this guide explains how they fit together.
+Momentum is a browser-based React single-page application for learning tracks, daily time tracking, and progress insights. Supabase provides identity and PostgreSQL. Vercel serves the static build and runs two small serverless functions. The React source and the timestamped SQL migrations are the implementation references; this guide explains how they fit together.
 
 ## 1. System overview
 
@@ -22,11 +22,11 @@ flowchart LR
 | Supabase Data API | Authenticated queries and RPC calls (the only database boundary) |
 | PostgreSQL | Owned records, RLS, triggers, curated cross-user SQL functions |
 | Vercel static hosting | Built assets, SPA rewrites, cache headers |
-| Vercel functions | User search, email sign-up, username sign-in |
+| Vercel functions | User search and username sign-in |
 | Browser storage | Theme, view preferences, account-scoped caches, offline mutation outbox |
 | Service worker | App-shell precache, offline navigation, push and sync hooks |
 
-The browser never connects to PostgreSQL directly and only holds the Supabase URL and publishable key. The service-role key exists only in Vercel's server environment, and only the two auth functions use it.
+The browser never connects to PostgreSQL directly and only holds the Supabase URL and publishable key. The service-role key exists only in Vercel's server environment and is used by username sign-in.
 
 ## 2. Technology
 
@@ -42,7 +42,7 @@ The browser never connects to PostgreSQL directly and only holds the Supabase UR
 ## 3. Repository layout
 
 ```text
-api/                 Vercel functions: search, auth/sign-up, auth/username-login
+api/                 Vercel functions: search, auth/username-login
 docs/                Architecture, screenshots
 public/              Manifest, service worker, icons, assetlinks
 scripts/             Track conversion and LeetCode link tooling
@@ -84,7 +84,7 @@ LOADING -> UNAUTHENTICATED
 - Transient session or profile failures keep the signed-in state and offer retry.
 - A confirmed missing session or explicit sign-out clears Momentum-owned caches and the account cache.
 - Account switches clear caches too. The offline outbox and built-in sync markers are kept, because outbox entries are user-scoped and must still sync.
-- Email sign-up (`/api/auth/sign-up`) creates a confirmed account and returns a session. Username sign-in (`/api/auth/username-login`) resolves username to email server-side and returns a session only after password authentication succeeds. Both return generic errors that do not reveal whether an account exists.
+- Email sign-up uses Supabase Auth directly and follows the project's email-confirmation setting. Username sign-in (`/api/auth/username-login`) resolves username to email server-side and returns a session only after password authentication succeeds.
 
 ### 4.2 Routing
 
@@ -99,7 +99,7 @@ The app uses the History API and a `popstate` listener instead of a router libra
 | `/profile` | Owner profile |
 | `/profile/edit` | Name and username settings |
 | `/api/search?q=` | Username search function |
-| `/api/auth/sign-up`, `/api/auth/username-login` | Account creation and username sign-in |
+| `/api/auth/username-login` | Username sign-in |
 
 All app screens require sign-in. `AuthenticatedApp` composes the feature hooks and passes one context object to `AuthenticatedScreens`, which selects the screen. Heavy hooks take an `enabled` flag so inactive screens do no work.
 
@@ -107,8 +107,8 @@ All app screens require sign-in. `AuthenticatedApp` composes the feature hooks a
 
 ### 5.1 Learning tracks and progress
 
-- **Sources.** Built-in tracks are plain text in `source/`. `convert-sheet` parses one into JSON under `src/features/sheets/data/`. For DSA, `create-links` generates LeetCode links and difficulty maps and `verify-links` audits them against LeetCode.
-- **Per-user copies.** On first load per manifest version, `bootstrapBuiltInSheets` calls `ensure_builtin_sheet_copies`, then `sync_builtin_sheet_problem_titles` and `sync_builtin_sheet_problem_links`. Copies are stored in `user_sheets` with a `builtin_template_id`. Syncs match problems by stable ID and never touch progress. A completion marker per user avoids repeating the work.
+- **Sources.** Built-in tracks are plain text in `source/`. `convert-sheets` parses every source into JSON under `src/features/sheets/data/`, preserving IDs by LeetCode number or unlinked title when rows move. For DSA, `create-links` generates LeetCode links and difficulty maps and `verify-links` audits them against LeetCode.
+- **Per-user copies.** On first load per manifest version, `bootstrapBuiltInSheets` calls `ensure_builtin_sheet_copies` and `sync_builtin_sheet_data`. Copies are stored in `user_sheets` with a `builtin_template_id`. The sync updates the full track using stable problem IDs and never touches progress. A completion marker per user avoids repeating the work.
 - **Deletion.** Deleting a built-in copy records a tombstone in `user_deleted_builtin_sheets` so it is not recreated. `delete_user_sheet` removes the sheet and its progress. `restore_builtin_dsa_sheet` reinstates the DSA copy and resets its progress.
 - **Uploads.** Users can upload `.txt` tracks up to 2 MB. `parseSheet` validates and normalizes steps, subsections, titles, and `(LC n)` numbers before the sheet is saved to `user_sheets`.
 - **Progress.** States are `todo`, `done`, and `skipped`; a missing row means `todo`. Progress IDs are namespaced by sheet (`custom-<uuid>::<problemId>`).
@@ -140,7 +140,7 @@ Edit -> validate intervals -> update state and per-day cache
 
 - The owner profile combines identity, per-sheet completion, streaks, recent accepted problems, a yearly heatmap, and backup controls (`useProfileMetrics`, `useProgressBackup`).
 - Search calls `GET /api/search?q=<prefix>`. The function checks the prefix (3 to 48 letters, digits, hyphens), requires a bearer token, validates it, calls `search_public_profiles` in that user's context, and returns at most five `{ username, name }` results with `private, no-store` caching.
-- Public profiles are visible to signed-in users only. They use purpose-built RPCs (`get_public_profile`, `get_public_activity`, `get_public_profile_email`) rather than broad table reads. They expose solved and skipped counts, sheet summaries, recent accepted items, streaks, activity aggregates, and the account email. Raw uploaded sheet JSON and detailed Daily Log records are never exposed.
+- Public profiles are visible to signed-in users only. They use purpose-built RPCs (`get_public_profile`, `get_public_activity`) rather than broad table reads. They expose names, usernames, solved and skipped counts, sheet summaries, recent accepted items, streaks, and activity aggregates. Email addresses, raw uploaded sheet JSON, and detailed Daily Log records are not exposed.
 - The client caches public profiles for 60 seconds (20 entries) and refreshes the heatmap every 15 seconds while visible.
 
 ### 5.4 Usernames
@@ -170,7 +170,7 @@ Migrations in `supabase/migrations/` are authoritative for exact SQL.
 | `activity_color_assignments` | Per-user activity-name to color |
 | `user_settings` | Legacy; UI preferences are browser-local |
 
-Key functions: `is_username_available`, `search_public_profiles`, `get_public_profile`, `get_public_profile_email`, `get_public_activity`, `ensure_builtin_sheet_copies`, `restore_builtin_dsa_sheet`, `delete_user_sheet`, `sync_builtin_sheet_problem_titles`, `sync_builtin_sheet_problem_links`, `get_or_assign_activity_color`, `set_activity_color`.
+Key functions: `is_username_available`, `search_public_profiles`, `get_public_profile`, `get_public_activity`, `ensure_builtin_sheet_copies`, `restore_builtin_dsa_sheet`, `delete_user_sheet`, `sync_builtin_sheet_data`, `get_or_assign_activity_color`, `set_activity_color`.
 
 Key triggers: signup profile creation, progress to `activity_log` sync, daily-log color assign and cleanup, username length enforcement.
 
@@ -183,7 +183,7 @@ Account-owned rows use user IDs with cascading foreign keys. Indexes cover owner
 - The frontend contains only `VITE_SUPABASE_URL` and the publishable key. The service-role key is server-only and never uses a `VITE_` prefix.
 - `/api/search` forwards the caller's token and never uses a privileged key.
 - Auth endpoints return generic credential errors and are `no-store`.
-- **Disclosure:** public profiles include the account email address, visible to any signed-in user. Treat this as intentional product behavior; changing it means changing `get_public_profile_email`, the profile hook, and the UI together.
+- Public profiles do not expose account email addresses.
 - Test-data tools require Vite dev mode, `test` mode, and `VITE_ENABLE_SAMPLE_DATA_TOOLS=true`. They verify the signed-in user and write through RLS, so use a dedicated test account.
 
 ## 9. Local development and deployment
@@ -206,7 +206,8 @@ SUPABASE_SERVICE_ROLE_KEY=      # server-only, never VITE_-prefixed
 
 1. Apply every migration in filename order. Never edit an applied migration; add a new timestamped one.
 2. Enable Google and Email providers; set the Site URL and allowed redirect URLs (local, production, preview).
-3. Use `npx vercel dev` instead of `npm run dev` to exercise the API functions locally.
+3. Enable email confirmations, configure production email delivery, and review Supabase Auth rate limits before opening public sign-up.
+4. Use `npx vercel dev` instead of `npm run dev` to exercise the API functions locally.
 
 **Commands**
 
@@ -216,13 +217,14 @@ SUPABASE_SERVICE_ROLE_KEY=      # server-only, never VITE_-prefixed
 | `npm run build` / `preview` | Production bundle / serve it |
 | `npm test` / `npm run lint` / `npm run format` | Vitest / ESLint / Prettier |
 | `npm run convert-sheet -- <name>` | Build a track's JSON from `source/` |
+| `npm run convert-sheets` | Build JSON for every text source |
 | `npm run create-links` / `verify-links` | Generate / audit DSA LeetCode data |
 
 **CI.** GitHub Actions runs lint, tests, and build on every push and pull request. There is no end-to-end browser suite.
 
 **Deploy.** Vercel runs `npm run build` and serves `dist/`. `vercel.json` rewrites client routes, makes hashed assets immutable, and sets no-cache on the shell, `sw.js`, and the manifest. Set the two public variables for all functions and `SUPABASE_SERVICE_ROLE_KEY` as a server-only variable, then redeploy after changing environment values.
 
-**Built-in track changes.** Edit `source/`, regenerate JSON (and links for DSA), run tests and build, and ship a migration only if existing copies need new metadata. Apply migrations before the matching frontend. Existing users receive updated titles and LeetCode IDs on next sign-in with progress intact.
+**Built-in track changes.** Edit `source/`, run `npm run convert-sheets`, and commit the generated JSON. The converter matches existing items by LeetCode ID or title so row reordering preserves problem IDs and progress. Existing users receive the updated full track on their next sign-in. After DSA changes, run `npm run create-links` to refresh links and difficulty metadata. Apply the `sync_builtin_sheet_data` migration before deploying the frontend.
 
 ## 10. Testing and troubleshooting
 
@@ -232,7 +234,7 @@ Vitest runs unit and component tests in jsdom (single worker). Coverage centers 
 | --- | --- |
 | "Supabase is not configured" | Both Vite variables set; restart dev server |
 | Google sign-in fails | Provider, callback URL, Site URL, redirect list |
-| Email sign-up or username sign-in fails | `SUPABASE_SERVICE_ROLE_KEY`; use `vercel dev` locally |
+| Username sign-in fails | `SUPABASE_SERVICE_ROLE_KEY`; use `vercel dev` locally |
 | Profile or sheet setup fails | All migrations applied; inspect the Supabase error |
 | Progress or Daily Log not syncing | Sync status icon, retry, network tab, RLS policies |
 | Username search fails | `vercel dev`, bearer token, prefix length, RPC grants |

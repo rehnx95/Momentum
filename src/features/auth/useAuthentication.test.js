@@ -7,6 +7,7 @@ const authMocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   from: vi.fn(),
   onAuthStateChange: vi.fn(),
+  signUp: vi.fn(),
   setSession: vi.fn(),
   signInWithPassword: vi.fn(),
   authCallback: null,
@@ -17,6 +18,7 @@ vi.mock("../../shared/lib/supabase", () => ({
     auth: {
       getSession: authMocks.getSession,
       onAuthStateChange: authMocks.onAuthStateChange,
+      signUp: authMocks.signUp,
       setSession: authMocks.setSession,
       signInWithPassword: authMocks.signInWithPassword,
     },
@@ -44,6 +46,7 @@ describe("useAuthentication", () => {
     localStorage.clear();
     authMocks.getSession.mockReset();
     authMocks.onAuthStateChange.mockReset();
+    authMocks.signUp.mockReset();
     authMocks.from.mockReset();
     authMocks.setSession.mockReset();
     authMocks.signInWithPassword.mockReset();
@@ -383,54 +386,55 @@ describe("useAuthentication", () => {
     expect(result.current.user).toEqual(user);
   });
 
-  it("creates an account and establishes the returned session", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        session: { access_token: "access-token", refresh_token: "refresh-token" },
-      }),
-    });
-    vi.stubGlobal("fetch", fetchMock);
+  it("creates an account through Supabase Auth and uses its session", async () => {
     const user = { id: cachedProfile.id, email: "test@example.com" };
-    authMocks.setSession.mockResolvedValue({ data: { user }, error: null });
+    const session = { access_token: "access-token", refresh_token: "refresh-token" };
+    authMocks.signUp.mockResolvedValue({
+      data: { user, session },
+      error: null,
+    });
     const { result } = renderHook(() => useAuthentication());
 
     await act(async () => {
       expect(await result.current.handleSignUp("test@example.com", "password123")).toBe(true);
     });
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/auth/sign-up",
-      expect.objectContaining({
-        method: "POST",
-        body: JSON.stringify({ email: "test@example.com", password: "password123" }),
-      }),
-    );
-    expect(authMocks.setSession).toHaveBeenCalledWith({
-      access_token: "access-token",
-      refresh_token: "refresh-token",
+    expect(authMocks.signUp).toHaveBeenCalledWith({
+      email: "test@example.com",
+      password: "password123",
+      options: { emailRedirectTo: window.location.origin },
     });
     await waitFor(() => expect(result.current.appState).toBe(AppState.AUTHENTICATED));
     expect(result.current.user).toEqual(user);
   });
 
-  it("explains when the Vercel sign-up API is unavailable under Vite", async () => {
+  it("requires email confirmation when Supabase does not return a session", async () => {
+    authMocks.signUp.mockResolvedValue({
+      data: { user: { id: "user-2", email: "test@example.com" }, session: null },
+      error: null,
+    });
+    const { result } = renderHook(() => useAuthentication());
+
+    await act(async () => {
+      expect(await result.current.handleSignUp("test@example.com", "password123")).toBe(
+        "confirmation-required",
+      );
+    });
+    expect(result.current.appState).toBe(AppState.UNAUTHENTICATED);
+  });
+
+  it("surfaces Supabase sign-up errors", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        json: async () => {
-          throw new Error("Unexpected token '<'");
-        },
-      }),
-    );
+    authMocks.signUp.mockResolvedValue({
+      data: { user: null, session: null },
+      error: new Error("Sign-ups are disabled."),
+    });
     const { result } = renderHook(() => useAuthentication());
 
     await act(async () => {
       expect(await result.current.handleSignUp("test@example.com", "password123")).toBeNull();
     });
 
-    expect(result.current.authError).toContain("npx vercel dev");
-    expect(result.current.authError).toContain("SUPABASE_SERVICE_ROLE_KEY");
+    expect(result.current.authError).toContain("Sign-ups are disabled");
   });
 });

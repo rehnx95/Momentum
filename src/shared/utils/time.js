@@ -206,7 +206,9 @@ export function validateDay(log) {
         return;
       }
  
-      if (end <= start) {
+      const endsAtMidnight =
+        slot?.endDayOffset === 1 && end === 0 && start > 0;
+      if (end <= start && !endsAtMidnight) {
         errors.push({
           code: "invalid-slot-order",
           activity,
@@ -217,7 +219,7 @@ export function validateDay(log) {
         });
         return;
       }
-      const duration = end - start;
+      const duration = endsAtMidnight ? 24 * 60 - start : end - start;
       totalMinutes += duration;
      
     });

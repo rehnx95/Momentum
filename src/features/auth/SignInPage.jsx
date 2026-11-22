@@ -15,10 +15,12 @@ export default function UnauthenticatedView({
   const [identifier, setIdentifier] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [notice, setNotice] = useState("");
 
   const switchMode = (nextMode) => {
     setMode(nextMode);
     setPassword("");
+    setNotice("");
     onClearError?.();
   };
 
@@ -30,7 +32,12 @@ export default function UnauthenticatedView({
       return;
     }
 
-    await onSignUp(email.trim(), password);
+    const result = await onSignUp(email.trim(), password);
+    setNotice(
+      result === "confirmation-required"
+        ? "Check your email for a confirmation link before signing in."
+        : "",
+    );
   };
 
   const handleGoogleSignIn = () => {
@@ -56,6 +63,11 @@ export default function UnauthenticatedView({
             {error && (
               <p role="alert" className="auth-error-message">
                 {error}
+              </p>
+            )}
+            {notice && (
+              <p role="status" className="mt-3 text-sm text-success">
+                {notice}
               </p>
             )}
             <div className="auth-mode-tabs" role="group" aria-label="Account access">

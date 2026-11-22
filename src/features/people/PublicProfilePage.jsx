@@ -119,9 +119,6 @@ export default function PublicProfilePage({
                           {profile.name || profile.username}
                         </h1>
                         <p className="mt-1 text-sm text-muted">@{profile.username}</p>
-                        {profile.email && (
-                          <p className="mt-1 break-all text-sm text-muted">{profile.email}</p>
-                        )}
                       </div>
                     </div>
                     <div className="profile-hero-actions flex flex-wrap gap-2">

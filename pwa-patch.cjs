@@ -408,7 +408,7 @@ self.addEventListener('sync', (event) => {
 if (exists('public/sw.js')) {
   // Keep the existing worker (its caching logic is untouched); only append missing event handlers.
   let sw = read('public/sw.js');
-  const stripRe = new RegExp('\\n?' + FEATURES_BEGIN.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&') + '[\\s\\S]*?' + FEATURES_END.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&') + '\\n?');
+  const stripRe = new RegExp('\\n?' + FEATURES_BEGIN.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\S]*?' + FEATURES_END.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\n?');
   sw = sw.replace(stripRe, '\n');
   const block = buildFeatures(sw);
   const next = sw.replace(/\s*$/, '\n') + (block ? '\n' + block : '');

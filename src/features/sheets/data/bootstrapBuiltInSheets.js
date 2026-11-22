@@ -6,7 +6,7 @@ const sheetAssets = import.meta.glob("./*.json", {
   import: "default",
   query: "?url",
 });
-const BUILTIN_SYNC_VERSION = "sheet-metadata-v2";
+const BUILTIN_SYNC_VERSION = "sheet-metadata-v3";
 
 function getSheetManifestVersion() {
   let hash = 2166136261;
@@ -94,14 +94,10 @@ export async function bootstrapBuiltInSheets(userId, isActive = () => true) {
       requested_sheets: requestedSheets,
     });
     if (error) throw error;
-    const { error: syncError } = await supabase.rpc("sync_builtin_sheet_problem_titles", {
+    const { error: syncError } = await supabase.rpc("sync_builtin_sheet_data", {
       requested_sheets: requestedSheets,
     });
     if (syncError) throw syncError;
-    const { error: linkSyncError } = await supabase.rpc("sync_builtin_sheet_problem_links", {
-      requested_sheets: requestedSheets,
-    });
-    if (linkSyncError) throw linkSyncError;
     try {
       localStorage.setItem(bootstrapKey, manifestVersion);
     } catch (error) {

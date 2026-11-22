@@ -95,16 +95,26 @@ describe("time helpers", () => {
   });
 
   it("builds minute intervals for regular, midnight-offset, wrapping, and sleep slots", () => {
-    expect(intervalsFor({ start: "23:30", end: "00:00", endDayOffset: 1 }, false)).toEqual([,
+    expect(intervalsFor({ start: "23:30", end: "00:00", endDayOffset: 1 }, false)).toEqual([
+      [1410, 1440],
     ]);
-    expect(intervalsFor({ start: "23:00", end: "01:00" }, true)).toEqual([,
- ,
+    expect(intervalsFor({ start: "23:00", end: "01:00" }, true)).toEqual([
+      [1380, 1440],
+      [0, 60],
     ]);
     expect(sleepIntervalsFor("23:00", "06:30")).toEqual([[0, 390]]);
     expect(sleepIntervalsFor("01:00", "07:00")).toEqual([[60, 420]]);
   });
 
-  it("rejects equal start and end times in validateDay even with endDayOffset", () => {
+  it("accepts slots ending at midnight but rejects equal start and end times", () => {
+    const overnight = validateDay({
+      dsa_slots: [{ start: "23:30", end: "00:00", endDayOffset: 1 }],
+      backend_slots: [],
+      custom_tasks: [],
+    });
+    expect(overnight.errors).toEqual([]);
+    expect(overnight.totalMinutes).toBe(30);
+
     const result = validateDay({
       dsa_slots: [{ start: "00:00", end: "00:00", endDayOffset: 1 }],
       backend_slots: [],
@@ -129,8 +139,9 @@ describe("time helpers", () => {
       Backend: [{ start: "12:30", end: "14:00" }],
     });
     expect(overlaps).toHaveLength(2);
-    expect(overlaps.map(({ slotIndexA, slotIndexB }) => [slotIndexA, slotIndexB])).toEqual([,
- ,
+    expect(overlaps.map(({ slotIndexA, slotIndexB }) => [slotIndexA, slotIndexB])).toEqual([
+      [0, 1],
+      [1, 0],
     ]);
   });
 

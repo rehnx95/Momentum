@@ -13,6 +13,7 @@
     "lint": "eslint . --ext .js,.jsx,.cjs",
     "preview": "vite preview",
     "convert-sheet": "node scripts/convert-sheet.cjs",
+    "convert-sheets": "node scripts/convert-sheet.cjs --all",
     "create-links": "node scripts/create_link.js",
     "verify-links": "node scripts/verify_links.js"
   },

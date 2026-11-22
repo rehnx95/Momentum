@@ -9,6 +9,7 @@ const SOURCE_MARKDOWN_FILE = path.join(ROOT, "source", "dsa.md");
 const MARKDOWN_FILE = path.join(ROOT, "dsa.md");
 const LINK_MAP_FILE = path.join(ROOT, "src", "features", "sheets", "leetcodeProblemLinks.json");
 const DIFFICULTY_MAP_FILE = path.join(ROOT, "src", "features", "sheets", "dsaProblemDifficulties.json");
+const SHEET_FILE = path.join(ROOT, "src", "features", "sheets", "data", "dsa.json");
 
 function parsePreviousMarkdown(markdown) {
   const rows = new Map();
@@ -41,6 +42,10 @@ async function main() {
   const sourceMetadata = fs.existsSync(SOURCE_MARKDOWN_FILE)
     ? parsePreviousMarkdown(fs.readFileSync(SOURCE_MARKDOWN_FILE, "utf8"))
     : new Map();
+  const sheet = JSON.parse(fs.readFileSync(SHEET_FILE, "utf8"));
+  const sheetProblems = sheet.steps.flatMap((step) =>
+    step.subsections.flatMap((subsection) => subsection.problems),
+  );
   const catalog = await fetchLeetCodeCatalog();
   const links = {};
   const difficulties = {};
@@ -52,6 +57,7 @@ async function main() {
   ];
   let linkedCount = 0;
   let unlinkedCount = 0;
+  let problemIndex = 0;
 
   for (const line of source.split(/\r?\n/)) {
     if (!line.trim()) {
@@ -74,6 +80,11 @@ async function main() {
       if (!output.length || output[output.length - 1] !== line.trim()) output.push(line.trim());
       continue;
     }
+    const problem = sheetProblems[problemIndex];
+    if (!problem) {
+      throw new Error(`The generated DSA JSON is missing source problem ${row.number}.`);
+    }
+    problemIndex += 1;
 
     const prior = previous.get(row.number);
     const reference = sourceMetadata.get(row.number);
@@ -86,6 +97,7 @@ async function main() {
       }
       const url = `https://leetcode.com/problems/${question.titleSlug}/`;
       links[row.leetCodeId] = { url, difficulty: question.difficulty };
+      difficulties[problem.id] = question.difficulty;
       difficulties[row.number] = question.difficulty;
       const premium = question.isPaidOnly ? " 🔒" : "";
       output.push(
@@ -97,10 +109,15 @@ async function main() {
       if (!difficulty) {
         throw new Error(`Problem ${row.number} has no difficulty in source/dsa.md.`);
       }
+      difficulties[problem.id] = difficulty;
       difficulties[row.number] = difficulty;
       output.push(`- ${row.number}. ${row.title} [${difficulty}]${note}`);
       unlinkedCount += 1;
     }
+  }
+
+  if (problemIndex !== sheetProblems.length) {
+    throw new Error("The generated DSA JSON does not match the number of source problems.");
   }
 
   fs.writeFileSync(MARKDOWN_FILE, `${output.join("\n").trimEnd()}\n`, "utf8");
@@ -110,7 +127,7 @@ async function main() {
     `Wrote ${path.relative(ROOT, MARKDOWN_FILE)} with ${linkedCount} LeetCode links and ${unlinkedCount} unlinked items.`,
   );
   console.log(`Updated ${Object.keys(links).length} unique links in ${path.relative(ROOT, LINK_MAP_FILE)}.`);
-  console.log(`Updated ${Object.keys(difficulties).length} problem difficulties in ${path.relative(ROOT, DIFFICULTY_MAP_FILE)}.`);
+  console.log(`Updated ${problemIndex} problem difficulties in ${path.relative(ROOT, DIFFICULTY_MAP_FILE)}.`);
 }
 
 main().catch((error) => {

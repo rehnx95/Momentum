@@ -410,33 +410,15 @@ export default function useAuthentication() {
       preconnectBackend();
       const { supabase } = await loadSupabaseModule();
       if (!supabase) throw new Error("Supabase is not configured.");
-      const response = await fetch("/api/auth/sign-up", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      let result;
-      try {
-        result = await response.json();
-      } catch {
-        throw new Error(
-          "Email sign-up API is unavailable. Run `npx vercel dev` locally and configure SUPABASE_SERVICE_ROLE_KEY.",
-        );
-      }
-      if (!response.ok) {
-        setAuthError(result.error || "Could not create the account. Please try again.");
-        return null;
-      }
-      if (!result.session?.access_token || !result.session?.refresh_token) {
-        throw new Error("Email sign-up returned an invalid session.");
-      }
-
-      const { data, error } = await supabase.auth.setSession({
-        access_token: result.session.access_token,
-        refresh_token: result.session.refresh_token,
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin },
       });
       if (error) throw error;
-      if (!data.user) throw new Error("Sign-up did not return an authenticated user.");
+      if (!data.user) throw new Error("Sign-up did not return a user.");
+      if (!data.session) return "confirmation-required";
+
       setAppState(AppState.LOADING);
       setUser(data.user);
       return true;
