@@ -8,11 +8,11 @@ import FullLog from "./FullLog";
 afterEach(cleanup);
 
 describe("FullLog", () => {
-  it("omits untimed activities and shows all of a blank day as unlogged", () => {
+  it("omits dates with no solved problems, timed activities, or sleep", () => {
     const daily = {
       allLogs: [
         {
-          date: getLocalDateKey(),
+          date: "2025-01-03",
           sleep_time: "",
           wake_time: "",
           custom_tasks: [
@@ -32,9 +32,8 @@ describe("FullLog", () => {
     };
     const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
 
-    const activeTotal = container.querySelector(".full-log-active-total");
-    expect(activeTotal.textContent).toContain("—");
-    expect(activeTotal.getAttribute("aria-label")).toBe("Active not recorded");
+    expect(container.querySelector(".full-log-day")).toBeNull();
+    expect(screen.getByText("No saved daily logs yet.")).toBeTruthy();
 
     const activityFilter = screen.getByRole("combobox", { name: "Filter full log" });
     fireEvent.click(activityFilter);
@@ -43,17 +42,30 @@ describe("FullLog", () => {
         name: "Reading",
       }),
     ).toBeNull();
-    expect(container.querySelector(".full-log-timeline-segment")).toBeNull();
-    expect(container.querySelector(".full-log-timeline-gap").getAttribute("aria-label")).toContain(
-      "Untracked 24h",
+  });
+
+  it("keeps a date with sleep even without activity or solved problems", () => {
+    const daily = {
+      allLogs: [
+        {
+          date: "2025-01-02",
+          sleep_time: "23:00",
+          wake_time: "06:00",
+          custom_tasks: [],
+        },
+      ],
+      problemCounts: {},
+      hasOlderLogs: false,
+      allLogsLoading: false,
+      olderLogsLoading: false,
+      loading: false,
+    };
+    const { container } = render(<FullLog daily={daily} askConfirmation={vi.fn()} />);
+
+    expect(container.querySelectorAll(".full-log-day")).toHaveLength(1);
+    expect(container.querySelector(".full-log-sleep-total").getAttribute("aria-label")).toBe(
+      "Sleep 7h",
     );
-    expect(
-      Number.parseFloat(container.querySelector(".full-log-timeline-gap").style.width),
-    ).toBeCloseTo(100, 1);
-    const unloggedTotal = container.querySelector(".full-log-unlogged-total");
-    expect(unloggedTotal.getAttribute("aria-label")).toBe("Untracked 24h");
-    expect(unloggedTotal.textContent).toContain("24h");
-    expect(unloggedTotal.textContent).not.toContain("%");
   });
 
   it("filters by activities and includes sleep and unlogged options", () => {
@@ -183,7 +195,7 @@ describe("FullLog", () => {
           custom_tasks: [],
         },
       ],
-      problemCounts: {},
+      problemCounts: { [getLocalDateKey()]: 1 },
       hasOlderLogs: false,
       allLogsLoading: false,
       olderLogsLoading: false,
@@ -259,7 +271,7 @@ describe("FullLog", () => {
           custom_tasks: [],
         },
       ],
-      problemCounts: {},
+      problemCounts: { "2025-01-01": 1 },
       hasOlderLogs: false,
       allLogsLoading: false,
       olderLogsLoading: false,
@@ -481,7 +493,7 @@ describe("FullLog", () => {
           custom_tasks: [],
         },
       ],
-      problemCounts: {},
+      problemCounts: { [date]: 1 },
       hasOlderLogs: false,
       allLogsLoading: false,
       olderLogsLoading: false,

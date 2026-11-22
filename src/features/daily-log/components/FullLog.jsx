@@ -92,14 +92,17 @@ export default function FullLog({ daily, sheets = [], toolbarContainer, askConfi
           custom_tasks: [],
         };
         const activities = activityBreakdown(row, sheets);
+        const sleep = sleepTotal(row);
+        const studied = activities.reduce((total, activity) => total + activity.minutes, 0);
         return {
           row,
           activities,
-          sleep: sleepTotal(row),
-          studied: activities.reduce((total, activity) => total + activity.minutes, 0),
+          sleep,
+          studied,
           problems: daily.problemCounts[row.date] || 0,
         };
-      });
+      })
+      .filter(({ sleep, studied, problems }) => sleep > 0 || studied > 0 || problems > 0);
   }, [daily.allLogs, daily.problemCounts, sheets]);
   const activityNames = useMemo(
     () => [
