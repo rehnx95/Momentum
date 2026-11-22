@@ -32,7 +32,7 @@ The browser never connects to PostgreSQL directly and only holds the Supabase UR
 
 | Layer | Choice |
 | --- | --- |
-| UI | React 18, JavaScript (ES modules), Tailwind CSS 3 plus component-scoped CSS, Lucide icons |
+| UI | React 18, JavaScript (ES modules), Tailwind CSS 3 plus shared and feature-specific CSS, Lucide icons |
 | Build | Vite 5 (emits `manifest.json` for service-worker precaching) |
 | Backend | Supabase (Auth, PostgREST, PostgreSQL) |
 | Hosting | Vercel (static output in `dist/`, serverless functions in `api/`) |
@@ -64,13 +64,13 @@ src/
 supabase/migrations/ Ordered schema, policy, and function history
 ```
 
-Feature behavior lives in `src/features/<feature>/`. Code moves to `src/shared/` only when more than one feature uses it. Global CSS import order in `src/main.jsx` is part of the cascade and must be preserved.
+Feature behavior lives in `src/features/<feature>/`. Code moves to `src/shared/` only when more than one feature uses it. Shared shell styles load from `src/main.jsx`; screen-specific styles load with their lazy screens to keep unrelated route CSS out of the initial stylesheet.
 
 ## 4. Application composition
 
 ### 4.1 Startup and authentication
 
-`main.jsx` mounts the app under `React.StrictMode` and an error boundary, loads the global style layers, registers the production service worker, and starts route-based preloading. `App.jsx` lazy-loads sign-in, onboarding, and the authenticated experience.
+`main.jsx` mounts the app under `React.StrictMode` and an error boundary, loads shared shell styles, registers the production service worker, and starts route-based preloading. Feature styles are imported by their screen modules and load with the corresponding lazy chunks. `App.jsx` lazy-loads sign-in, onboarding, and the authenticated experience.
 
 `useAuthentication` owns session restore, Google sign-in, email/password sign-in, username sign-in, sign-up, profile lookup, and sign-out:
 
@@ -249,4 +249,4 @@ Vitest runs unit and component tests in jsdom (single worker). Coverage centers 
 - Review public RPC return shapes and grants against the disclosure policy in section 8.
 - Keep caches (disposable) separate from the outbox (durable, user-scoped, replay-safe).
 - Preserve browser-storage key names unless a migration path exists.
-- Preserve global stylesheet import order.
+- Preserve the shared stylesheet order in `src/main.jsx` and feature-style order where screen styles override shared rules.

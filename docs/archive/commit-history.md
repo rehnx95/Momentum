@@ -2,29 +2,30 @@
 
 **Repository:** [rehnx95/Momentum](https://github.com/rehnx95/Momentum)
 
-**History covered:** `8f28602` (initial app baseline, Oct 19, 2026) through `3d2f71e` (Nov 17, 2026)
+**History covered:** `8f28602` (initial app baseline, Oct 19, 2026) through `852a509` (Nov 22, 2026)
 
-**Commits:** 278, including the initial baseline
+**Commits:** 302, including the initial baseline
 **How to read this:** This is a product and engineering history based on the committed code, migrations, tests, and documentation. Related commits are grouped where they are iterative refinements; the descriptions explain the resulting work rather than restating commit subjects or reproducing patches.
 
 The local Git remote has historically used the name `Track-Sheet`; the product was later rebranded to **Momentum**.
 
 ## Executive summary
 
-The work grew a small React tracker into an account-based learning and personal-progress application. The main changes fall into six connected arcs:
+The work grew a small React tracker into an account-based learning and personal-progress application. The main changes fall into seven connected arcs:
 
 1. **Learning tracker foundation:** Supabase-backed sign-in, user profiles, saved problem progress, multiple learning tracks, import/export, and uploaded custom tracks.
 2. **Sharing and personalization:** searchable public profiles, progress/activity summaries, theme choices, responsive navigation, and reusable UI.
 3. **Daily activity tracking:** a separate Daily Log with sleep and timed activities, then a substantial redesign into an autosaving editor, Full Log history, and Trends.
 4. **Insights and performance:** activity heatmaps, sleep/study charts, cache layers, lazy loading, and more deliberate loading states.
 5. **Architecture and reliability:** a move from a large app component into feature-based modules, SQL migrations for evolving data ownership and reporting, and focused tests around time, persistence, caches, and UI behavior.
-6. **Product polish:** mobile layouts, profile and sign-in refinements, activity colors, clearer save/error feedback, and updated documentation and screenshots.
+6. **Production readiness and performance:** safer signup confirmation, private public-profile responses, reliable built-in track updates, and route-specific CSS loading.
+7. **Product polish:** mobile layouts, profile and sign-in refinements, activity colors, clearer save/error feedback, and updated documentation and screenshots.
 
-The most important turning points were the October account/track foundation, the Nov 3–10 creation and redesign of Daily Log, the Nov 10 feature-based refactor, and the Nov 12–16 reliability and UX work.
+The most important turning points were the October account/track foundation, the Nov 3–10 creation and redesign of Daily Log, the Nov 10 feature-based refactor, and the Nov 18–22 authentication, reliability, and performance work.
 
 ## Activity by day
 
-The history has work on 18 dates. The number of commits reflects the scale of iteration as well as feature count: several dense runs are visual tuning and bug-fix passes rather than separate features.
+The history has work on 21 dates. Commit dates and counts follow GitHub's UTC timestamps. The number of commits reflects the scale of iteration as well as feature count: several dense runs are visual tuning and bug-fix passes rather than separate features.
 
 | Date | Commits | Main focus |
 | --- | ---: | --- |
@@ -45,7 +46,10 @@ The history has work on 18 dates. The number of commits reflects the scale of it
 | Nov 14 | 7 | Daily Log/Full Log/Trends cleanup and refactoring |
 | Nov 15 | 22 | Trends, activity colors, profile, mobile UI, screenshots, and tests |
 | Nov 16 | 12 | Startup/loading, sign-in, accessibility, save recovery, and history docs |
-| Nov 17 | 15 | Built-in track metadata sync, startup reliability, and UI polish |
+| Nov 17 | 18 | Built-in track sync, startup reliability, PWA assets, and documentation |
+| Nov 18 | 16 | Password authentication, performance, save reliability, and profile fixes |
+| Nov 21 | 2 | Built-in DSA and Backend source/data updates |
+| Nov 22 | 3 | Production fixes, source updates, and route-specific CSS loading |
 
 ## Product evolution
 
@@ -247,6 +251,12 @@ This ledger accounts for every commit in the stated range. Commits are grouped b
 - Nov 15 — `49e4b34`, `5bfda0a`, `304f9fd`, `6636618`, `916224e`: update screenshots, improve signed-out and historical-log views, refine Daily Log interactions, and fix validation-message overlap with activity slots while extending tests.
 - Nov 16 — `70926a8`, `571c44b`, `297a2cf`, `ddfec59`, `034f7ce`, `e4204f3`, `ff787ae`, `16b7426`, `1786f2b`, `8f19d08`, `074ef14`, `afe6597`: improve save feedback and loading states, restore/significantly polish sign-in, harden startup behavior, refine activity/profile visuals and accessibility semantics, simplify profile navigation copy, update product docs/history, and add a manual save/retry action.
 - Nov 17 — `7ed2be1`, `0fd3cb0`, `bc9fd68`, `bc39956`, `0d3e8e7`, `893cc76`, `5c18d71`, `fab0b05`, `483c4ac`, `d459cc7`, `1b00004`, `99822e7`, `27a50f0`, `0ca93fd`, `3d2f71e`: add tracker LeetCode links and built-in title/link sync for existing accounts, improve sign-in and deployment loading reliability, refine profile and Daily Log UI, and clean up code/screenshots.
+- Nov 17 — `fa5fd1d`, `364c21e`, `9dc649d`: document built-in track synchronization, add PWA icons and manifest details, and publish the Android asset-links file.
+- Nov 18 — `992d7b2`, `68f17cf`, `dfb3e10`, `1815b89`, `90f284f`, `0600058`, `e862403`, `5f69745`: refine UI and add email/password sign-in with signup validation, confirmation/error feedback, and loading behavior.
+- Nov 18 — `d45be6e`, `8fa8e84`, `cf089eb`, `e1cd8e4`: improve startup and offline/persistence performance, reduce repetitive errors, and speed up Daily Log saves.
+- Nov 18 — `88c840f`, `66bac26`, `91d7562`, `4982a1f`: remove an unused script, update README and architecture, and fix profile settings.
+- Nov 21 — `f0396f9`, `cf1859a`: update the editable source and generated DSA/Backend track data.
+- Nov 22 — `91ba032`, `15c6d7f`, `852a509`: update track sources, fix production-readiness issues (including timer midnight saves, signup confirmation, public-profile privacy, and full built-in data sync), then defer feature CSS into lazy screen chunks.
 
 ## Technical deep dives
 
@@ -254,7 +264,7 @@ This ledger accounts for every commit in the stated range. Commits are grouped b
 
 The October authentication work changes the app's ownership model. Google OAuth supplies the signed-in identity; onboarding/settings collect the app-specific profile identity; progress, tracks, and daily records then belong to that account. The profile schema changes around signup so optional profile details do not have to block account creation.
 
-The people feature develops from a username lookup into a routed profile experience. Search logic is split between the React UI, a Vercel `/api/search` endpoint, and Supabase functions/migrations. The endpoint validates the caller's bearer token and makes the database request in that user's context instead of relying on a service-role key. Follow-up schema changes handle long usernames, indexing/result limits, activity dates, and the fields needed by the profile screen. In the later product documentation, public profiles are visible to signed-in Momentum users and include the profile owner's email address. Subsequent profile simplification removes location and website rather than continuing to collect them.
+The people feature develops from a username lookup into a routed profile experience. Search logic is split between the React UI, a Vercel `/api/search` endpoint, and Supabase functions/migrations. The endpoint validates the caller's bearer token and makes the database request in that user's context instead of relying on a service-role key. Follow-up schema changes handle long usernames, indexing/result limits, activity dates, and the fields needed by the profile screen. Public profiles are visible to signed-in Momentum users but do not expose email addresses; the Nov 22 migration removes the earlier email-returning RPC. Profile simplification also removes location and website rather than continuing to collect them.
 
 The result is a deliberate distinction between **identity** (the authenticated account), **profile** (the app-facing username and presentation), and **activity/progress** (the records used for charts and summaries). Profile and search work across October and November refines that distinction rather than treating a public profile as a copy of the owner's private application state.
 
@@ -268,7 +278,7 @@ The track feature moves through a complete content lifecycle:
 4. Built-in tracks are provisioned as per-user copies, allowing user-specific visibility or removal without mutating the shared source.
 5. Problem progress is namespaced to a selected track, and backup/import/export lets a user carry those states between sessions or copies.
 6. `todo`, `done`, and `skipped` states feed the tracker UI and profile summaries; an absent saved completion remains distinct from an explicitly skipped item. Progress changes are applied optimistically in the UI and writes are serialized so quick successive state changes do not race.
-7. Built-in title and LeetCode ID metadata can be synchronized to existing copies by stable problem ID, while preserving saved progress and other sheet data; new copies use the current bundled template.
+7. The converter preserves problem IDs by LeetCode number or unlinked title. Built-in track updates synchronize the full bundled sheet to existing per-user copies by stable problem ID while preserving saved progress; new copies use the current template.
 
 The sheet-management migrations matter because they encode the distinction between deleting a user's uploaded content, hiding a built-in option, and keeping a personal copy. The UI iterations on the switcher and removal controls are therefore tied to database ownership semantics, not just dropdown styling.
 
@@ -279,10 +289,10 @@ The Daily Log's evolution is the most substantial feature arc in the repository.
 1. An edit updates the visible day and its account/date cache.
 2. Settled edits are autosaved; pending writes are serialized so successive edits do not race each other.
 3. Before replacing a saved day, the persistence layer checks the stored version (`updated_at`) against the version originally loaded. A concurrent change is surfaced as a conflict rather than silently overwritten.
-4. The UI exposes save state separately from validation messages. The latest commit adds a direct save/retry action when a user needs to recover from a pending or failed save.
+4. The UI exposes save state separately from validation messages. Nov 16 adds a direct save/retry action when a user needs to recover from a pending or failed save.
 5. Running timers are account-scoped and split at local midnight so a single active timer does not place all elapsed time on the wrong calendar day.
 
-Full Log and Trends broaden the same data model without changing the editor's purpose. Full Log pages older records and groups them for scanning; its untracked-time summary is derived from the unused part of a 24-hour day rather than persisted as a separate task. Trends uses a bounded recent history for sleep/study charts and derived statistics such as average sleep duration. Sleep spanning midnight is treated according to the wake date. The daily-log refactors and time bug fixes are what make these views consistent with the day editor.
+Full Log and Trends broaden the same data model without changing the editor's purpose. Full Log pages older records and groups them for scanning; its untracked-time summary is derived from the unused part of a 24-hour day rather than persisted as a separate task. Trends uses a bounded recent history for sleep/study charts and derived statistics such as average sleep duration. Sleep spanning midnight is treated according to the wake date. Timer segments split at local midnight and now correctly accept a segment ending at midnight.
 
 ### Heatmap, charts, and activity colors
 
@@ -303,7 +313,7 @@ The performance work is layered rather than one general-purpose cache:
 - Cache invalidation follows writes and account changes; sign-out/account switching clears app-owned cached state.
 - Route-based code splitting and preload adjustments reduce the amount of feature code needed at initial startup.
 
-These are responsiveness techniques, not an offline database. The source of truth remains Supabase, and the save/conflict path is designed separately from read caching. Nov 15–17 loading commits also improve the visual fallback and refresh state, preserve sign-in during session checks, and handle stale deployed chunks so a fast cache hit, session validation, and an actual load failure do not all look like the same indefinite spinner.
+These are responsiveness techniques, not an offline database. The source of truth remains Supabase, and the save/conflict path is designed separately from read caching. Nov 15–17 loading commits also improve the visual fallback and refresh state, preserve sign-in during session checks, and handle stale deployed chunks so a fast cache hit, session validation, and an actual load failure do not all look like the same indefinite spinner. The Nov 18–22 performance work includes offline/save-path refinements and moves auth, dashboard, and profile CSS into the lazy screen chunks that need it, reducing the initial stylesheet without changing screen behavior.
 
 ### Migration ledger
 
@@ -317,6 +327,7 @@ Database migrations track the product's functional milestones. Related files are
 | Nov 3–8 | `20261103000000_daily_logs.sql`, `20261103000001_daily_log_preferences.sql`, `20261108150000_daily_log_sanity.sql` | Persisted daily sleep/activity records, display preference, and daily time sanity checks |
 | Nov 14–15 | `20261114223500_add_public_profile_email.sql`, `20261115001600_remove_profile_location_website.sql`, `20261115003400_sync_activity_log_with_progress.sql`, `20261115010000_activity_color_assignments.sql`, `20261115020000_fix_activity_color_key_ambiguity.sql`, `20261115024000_fix_activity_color_key_ambiguity.sql` | Public profile field changes, progress/activity consistency, and per-account activity color assignment/fixes |
 | Nov 17 | `20261117130500_sync_builtin_sheet_problem_titles.sql`, `20261117150000_sync_builtin_sheet_problem_links.sql` | Synchronize supported titles and LeetCode IDs for existing built-in copies by stable problem ID while preserving progress |
+| Nov 22 | `20261122150000_remove_public_profile_email.sql`, `20261122160000_sync_builtin_sheet_data.sql` | Remove email from public profile responses and synchronize complete built-in sheet data for existing users while preserving progress |
 
 ## Cross-cutting engineering outcomes
 
@@ -334,7 +345,7 @@ The Daily Log grows from a basic activity form into a date-oriented system for t
 
 ### Architecture and user experience
 
-The app moves from a large `App.jsx` toward distinct auth, dashboard, sheet, problem-tracker, daily-log, activity, profile, people, and testing features. Shared UI, storage/cache helpers, and styling live in `src/shared/` and `src/styles/`. Iterative commits add responsive behavior, custom dialogs/tooltips/date/time inputs, loading states, and clear save feedback as feature complexity grows.
+The app moves from a large `App.jsx` toward distinct auth, dashboard, sheet, problem-tracker, daily-log, activity, profile, people, and testing features. Shared UI, storage/cache helpers, and styling live in `src/shared/` and `src/styles/`; route-specific styles load with lazy screens instead of the initial stylesheet. Iterative commits add responsive behavior, custom dialogs/tooltips/date/time inputs, loading states, and clear save feedback as feature complexity grows.
 
 ### Tests and development support
 
@@ -350,4 +361,4 @@ Tests are introduced alongside core time helpers and later cover UI components, 
 
 ## Repository state represented by this report
 
-The endpoint is `3d2f71e` on Nov 17, 2026. At this point the product includes account-backed learning tracks, upload/import/export workflows, searchable public profiles, activity history, Daily Log/Full Log/Trends, sleep/study charts, sample-data tooling, and a feature-based React structure. Built-in track metadata updates can reach existing accounts without replacing their saved progress. The report describes the changes accumulated in the recorded history; it does not claim that every intermediate experiment remained in the final application.
+The endpoint is `852a509` on Nov 22, 2026. At this point the product includes account-backed learning tracks, upload/import/export workflows, searchable public profiles without email disclosure, activity history, Daily Log/Full Log/Trends, sleep/study charts, sample-data tooling, and a feature-based React structure. Built-in track updates reach existing accounts without replacing their saved progress, and route-specific CSS is loaded with its lazy screen. The report describes the changes accumulated in the recorded history; it does not claim that every intermediate experiment remained in the final application.

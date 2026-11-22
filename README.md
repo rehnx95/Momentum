@@ -67,7 +67,7 @@ More views are in [`docs/screenshots/`](./docs/screenshots/).
  
 | Layer | Technologies |
 | --- | --- |
-| Web app | React 18, JavaScript (ES modules), Tailwind CSS, component-scoped CSS |
+| Web app | React 18, JavaScript (ES modules), Tailwind CSS, shared and feature-specific CSS |
 | Build | Vite 5 |
 | Identity and database | Supabase Auth, PostgreSQL, PostgREST, row-level security, SQL functions |
 | Hosting and API | Vercel static hosting and serverless functions |
@@ -137,7 +137,8 @@ npm run verify-links     # optional: audit the links
  
 The converter keeps existing IDs matched to LeetCode problem IDs (or titles for
 unlinked items), so reordering source rows does not move saved progress. Commit
-the updated JSON with its source. See
+the updated JSON with its source. See the [architecture guide](./docs/architecture.md#9-local-development-and-deployment)
+for deployment and existing-user sync details.
 
 ## Install as an app
  
@@ -187,7 +188,7 @@ src/
     testing/               Test-mode sample-data tools
   pwa/                     Install, launch, and sync integration
   shared/                  Reusable UI, Supabase client, caches, offline sync, utilities
-  styles/                  Global tokens, layout, themes, responsive styles
+  styles/                  Shared styles; route-specific styles load with screens
 supabase/migrations/       Ordered PostgreSQL schema, policy, and function changes
 ```
  
