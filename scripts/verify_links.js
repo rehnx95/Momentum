@@ -6,8 +6,7 @@ import { fetchLeetCodeCatalog } from "./leetcode-api.js";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE_FILE = path.join(ROOT, "source", "dsa.txt");
 const MARKDOWN_FILE = path.join(ROOT, "dsa.md");
-const LINK_MAP_FILE = path.join(ROOT, "src", "features", "sheets", "leetcodeProblemLinks.json");
-const DIFFICULTY_MAP_FILE = path.join(ROOT, "src", "features", "sheets", "dsaProblemDifficulties.json");
+const SHEET_FILE = path.join(ROOT, "src", "features", "sheets", "data", "dsa.json");
 const REPORT_FILE = path.join(ROOT, "link_review.txt");
 
 function parseSource(source) {
@@ -48,8 +47,10 @@ function addIssue(issues, rowNumber, message) {
 async function main() {
   const sourceRows = parseSource(fs.readFileSync(SOURCE_FILE, "utf8"));
   const markdownRows = parseMarkdown(fs.readFileSync(MARKDOWN_FILE, "utf8"));
-  const linkMap = JSON.parse(fs.readFileSync(LINK_MAP_FILE, "utf8"));
-  const difficultyMap = JSON.parse(fs.readFileSync(DIFFICULTY_MAP_FILE, "utf8"));
+  const sheet = JSON.parse(fs.readFileSync(SHEET_FILE, "utf8"));
+  const sheetProblems = sheet.steps.flatMap((step) =>
+    step.subsections.flatMap((subsection) => subsection.problems),
+  );
   const catalog = await fetchLeetCodeCatalog();
   const issues = [];
   const report = [
@@ -65,9 +66,13 @@ async function main() {
   if (sourceRows.size !== markdownRows.size) {
     issues.push(`Source has ${sourceRows.size} problem rows; Markdown has ${markdownRows.size}.`);
   }
+  if (sheetProblems.length !== markdownRows.size) {
+    issues.push(`Built-in DSA data has ${sheetProblems.length} problems; Markdown has ${markdownRows.size}.`);
+  }
 
   for (const [number, markdownRow] of markdownRows) {
     const sourceRow = sourceRows.get(number);
+    const sheetProblem = sheetProblems[number - 1];
     if (!sourceRow) {
       addIssue(issues, number, "missing from source/dsa.txt");
       continue;
@@ -77,11 +82,14 @@ async function main() {
     if (sourceRow.title !== markdownRow.title) {
       problems.push("source title differs from Markdown title");
     }
-    if (difficultyMap[number] !== markdownRow.difficulty) {
-      problems.push(`app difficulty is ${difficultyMap[number] ?? "missing"}`);
+    if (sheetProblem?.difficulty !== markdownRow.difficulty) {
+      problems.push(`app difficulty is ${sheetProblem?.difficulty ?? "missing"}`);
     }
 
     if (!markdownRow.url) {
+      if (sheetProblem?.link) {
+        problems.push("built-in data has an unexpected LeetCode link");
+      }
       if (sourceRow.leetCodeId !== null) {
         problems.push(`source has LC ${sourceRow.leetCodeId}, but Markdown has no link`);
       }
@@ -115,11 +123,8 @@ async function main() {
         problems.push(`URL should be ${expectedUrl}`);
       }
 
-      if (linkMap[id]?.url !== expectedUrl) {
-        problems.push(`app link map is missing the URL for LC ${id}`);
-      }
-      if (linkMap[id]?.difficulty !== question.difficulty) {
-        problems.push(`app link map has the wrong difficulty for LC ${id}`);
+      if (sheetProblem?.link?.type !== "leetcode" || sheetProblem?.link?.url !== expectedUrl) {
+        problems.push(`built-in data has the wrong link for LC ${id}`);
       }
     }
 

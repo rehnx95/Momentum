@@ -2,9 +2,16 @@ import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 
 const require = createRequire(import.meta.url);
-const { parseSheetContent } = require("./convert-sheet.cjs");
+const { main, parseSheet, parseSheetContent } = require("./convert-sheet.cjs");
 
 describe("convert-sheet stable problem IDs", () => {
+  it.each(["dsa", "backend"])("keeps the built-in %s sheet out of the generic parser", async (id) => {
+    await expect(main(id)).rejects.toThrow("Choose a .txt file from");
+    expect(() => parseSheet(`source/${id}.txt`)).toThrow(
+      `The built-in "${id}" sheet is managed separately.`,
+    );
+  });
+
   it("keeps IDs with their LeetCode problems when source rows move or titles change", () => {
     const original = parseSheetContent(
       [

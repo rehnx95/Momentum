@@ -6,14 +6,14 @@ export default function ProfileSheetProgress({
   onExport,
   onImport,
   onReset,
-  onRestoreDsa,
-  restoring = false,
+  onRestoreBuiltin,
+  restoringBuiltinSheetId = null,
   restoreDisabled = false,
   importFileInput,
   importProgress,
   headingId = "profile-sheet-progress",
 }) {
-  const showActions = onExport || onImport || onRestoreDsa || onReset;
+  const showActions = onExport || onImport || onRestoreBuiltin || onReset;
 
   return (
     <section
@@ -50,14 +50,21 @@ export default function ProfileSheetProgress({
                 </button>
               </Tooltip>
             )}
-            {onRestoreDsa && (
-              <Tooltip label={restoring ? "Restoring DSA..." : "Restore DSA"} portal>
+            {onRestoreBuiltin && (
+              <Tooltip
+                label={
+                  restoringBuiltinSheetId
+                    ? "Restoring built-in sheet..."
+                    : "Restore built-in sheet"
+                }
+                portal
+              >
                 <button
                   type="button"
                   className="btn-secondary"
-                  onClick={onRestoreDsa}
-                  disabled={restoring || restoreDisabled}
-                  aria-label="Restore DSA"
+                  onClick={onRestoreBuiltin}
+                  disabled={Boolean(restoringBuiltinSheetId) || restoreDisabled}
+                  aria-label="Restore built-in sheet"
                 >
                   <RotateCcw size={14} aria-hidden="true" />
                 </button>

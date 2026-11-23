@@ -1,21 +1,17 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 vi.mock("../../../shared/lib/supabase", () => ({
   supabase: { rpc: vi.fn() },
 }));
 
 import { supabase } from "../../../shared/lib/supabase";
-import { bootstrapBuiltInSheets, loadBuiltInSheet } from "./bootstrapBuiltInSheets";
-import { createRequire } from "node:module";
-
-const require = createRequire(import.meta.url);
-const { parseSheet } = require("../../../../scripts/convert-sheet.cjs");
-const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
+import {
+  bootstrapBuiltInSheets,
+  getBuiltInSheetOptions,
+  loadBuiltInSheet,
+} from "./bootstrapBuiltInSheets";
 
 describe("bootstrapBuiltInSheets", () => {
   beforeEach(() => {
@@ -41,13 +37,66 @@ describe("bootstrapBuiltInSheets", () => {
     expect(synchronizedSheets).toEqual(ensuredSheets);
   });
 
-  it.each(["dsa", "backend"])("keeps the %s JSON in sync with its text source", async (id) => {
+  it.each(["dsa", "backend"])("loads the built-in %s sheet directly", async (id) => {
     const sheet = await loadBuiltInSheet(id);
-    const sourceFile = path.join(repositoryRoot, "source", `${id}.txt`);
 
     expect(sheet.id).toBe(id);
     expect(sheet.sheet.steps.length).toBeGreaterThan(0);
-    expect(parseSheet(sourceFile, sheet.sheet)).toEqual(sheet.sheet);
-    expect(fs.existsSync(sourceFile)).toBe(true);
+  });
+
+  it("registers DSA and Backend as the built-in sheet types", () => {
+    expect(getBuiltInSheetOptions()).toEqual([
+      { id: "dsa", title: "DSA" },
+      { id: "backend", title: "Backend" },
+    ]);
+  });
+
+  it.each(["dsa", "backend"])("uses a consistent metadata schema for %s", async (id) => {
+    const sheet = await loadBuiltInSheet(id);
+    const problems = sheet.sheet.steps.flatMap((step) =>
+      step.subsections.flatMap((subsection) => subsection.problems),
+    );
+    const expectedLinkType = id === "dsa" ? "leetcode" : "youtube";
+
+    expect(
+      problems.every(
+        (problem) =>
+          JSON.stringify(Object.keys(problem).sort()) ===
+          JSON.stringify(["difficulty", "id", "link", "title"]),
+      ),
+    ).toBe(true);
+    let problemNumber = 0;
+    const expectedProblemIds = sheet.sheet.steps.flatMap((step) =>
+      step.subsections.flatMap((subsection) =>
+        subsection.problems.map(() => `${subsection.id}-p${++problemNumber}`),
+      ),
+    );
+    expect(problems.map((problem) => problem.id)).toEqual(expectedProblemIds);
+    expect(new Set(problems.map((problem) => problem.id)).size).toBe(problems.length);
+    expect(
+      problems.every((problem) => ["Easy", "Medium", "Hard"].includes(problem.difficulty)),
+    ).toBe(true);
+    expect(
+      problems.every((problem) => problem.link === null || problem.link.type === expectedLinkType),
+    ).toBe(true);
+  });
+
+  it("includes difficulty for every Backend topic and links all playlist videos", async () => {
+    const backend = await loadBuiltInSheet("backend");
+    const problems = backend.sheet.steps.flatMap((step) =>
+      step.subsections.flatMap((subsection) => subsection.problems),
+    );
+
+    expect(problems).toHaveLength(153);
+    expect(
+      problems.every((problem) => ["Easy", "Medium", "Hard"].includes(problem.difficulty)),
+    ).toBe(true);
+    expect(problems.filter((problem) => problem.link?.type === "youtube")).toHaveLength(31);
+    expect(
+      problems.find((problem) => problem.title === "Roadmap for backend from first principles"),
+    ).toMatchObject({
+      link: { type: "youtube", url: "https://youtu.be/0Rwb4Xmlcwc" },
+      difficulty: "Easy",
+    });
   });
 });

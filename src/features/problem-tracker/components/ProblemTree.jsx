@@ -1,5 +1,4 @@
 import { ChevronDown, ChevronRight, SkipForward } from "lucide-react";
-import leetcodeProblemLinks from "../../sheets/leetcodeProblemLinks.json";
 import Tooltip from "../../../shared/components/Tooltip";
 import { getProblemDifficulty } from "../utils/problemDifficulty";
 
@@ -29,11 +28,23 @@ const difficultyStyles = {
   Hard: "bg-rose-500/10 text-rose-400",
 };
 
-export function ProblemRow({ prob, state, onToggle, onSkip, showDifficulty = false }) {
+function YouTubeIcon() {
+  return (
+    <svg width="18" height="13" viewBox="0 0 18 13" aria-hidden="true">
+      <rect x="0.5" y="0.5" width="17" height="12" rx="3.5" fill="#FF0000" />
+      <path d="M7.25 3.5v6l5-3-5-3Z" fill="#FFFFFF" />
+    </svg>
+  );
+}
+
+export function ProblemRow({ prob, state, onToggle, onSkip, showBuiltinMetadata = false }) {
   const isDone = state === "done";
   const isSkip = state === "skipped";
-  const leetcodeProblem = prob.lc ? leetcodeProblemLinks[prob.lc] : null;
-  const difficulty = showDifficulty ? getProblemDifficulty(prob) : undefined;
+  const link = prob.link;
+  const resourceLabel =
+    link?.type === "youtube" ? "YouTube" : link?.type === "leetcode" ? "LeetCode" : null;
+  const resourceUrl = showBuiltinMetadata && resourceLabel ? link?.url : null;
+  const difficulty = showBuiltinMetadata ? getProblemDifficulty(prob) : undefined;
 
   return (
     <div
@@ -69,7 +80,7 @@ export function ProblemRow({ prob, state, onToggle, onSkip, showDifficulty = fal
 
       <div
         className={`grid flex-shrink-0 items-center gap-x-1 ${
-          showDifficulty ? "grid-cols-[auto_1.25rem_1.25rem]" : "grid-cols-[1.25rem_1.25rem]"
+          showBuiltinMetadata ? "grid-cols-[auto_1.25rem_1.25rem]" : "grid-cols-[1.25rem_1.25rem]"
         }`}
       >
         {difficulty && (
@@ -83,39 +94,43 @@ export function ProblemRow({ prob, state, onToggle, onSkip, showDifficulty = fal
           </button>
         )}
 
-        {leetcodeProblem && (
-          <Tooltip label="Open on LeetCode" portal>
+        {resourceUrl && (
+          <Tooltip label={`Open on ${resourceLabel}`} portal>
             <a
-              href={leetcodeProblem.url}
+              href={resourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`Open ${prob.title} on LeetCode`}
+              aria-label={`Open ${prob.title} on ${resourceLabel}`}
               className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md text-muted transition-colors duration-200 hover:bg-rowHover hover:text-text"
             >
-              <svg
-                width="13"
-                height="15.3"
-                viewBox="0 0 94 111"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  fill="#FFA116"
-                  d="M67.507 83.066a6.367 6.367 0 0 1 9.016.015 6.394 6.394 0 0 1-.015 9.032L65.435 103.17c-10.216 10.2-26.875 10.349-37.263.343-.06-.057-4.685-4.593-19.945-19.556-10.152-9.954-11.163-25.882-1.61-36.11l17.812-19.072c9.481-10.153 26.958-11.263 37.799-2.496l16.177 13.083a6.394 6.394 0 0 1 .956 8.98 6.368 6.368 0 0 1-8.965.958L54.219 36.217c-5.67-4.584-15.587-3.955-20.48 1.284L15.929 56.573c-4.65 4.98-4.141 13.001 1.218 18.256a546172.33 546172.33 0 0 0 19.851 19.465c5.401 5.202 14.134 5.124 19.437-.17l11.073-11.058z"
-                />
-                <path
-                  fill="#B3B3B3"
-                  d="M40.607 72.001c-3.521 0-6.375-2.859-6.375-6.386s2.854-6.386 6.375-6.386h47.018c3.52 0 6.375 2.859 6.375 6.386s-2.854 6.386-6.375 6.386H40.607z"
-                />
-                <path
-                  fill="var(--text)"
-                  d="M49.412 2.023a6.367 6.367 0 0 1 9.011-.3 6.394 6.394 0 0 1 .3 9.027L15.929 56.573c-4.65 4.979-4.141 13 1.218 18.256l19.763 19.38a6.394 6.394 0 0 1 .097 9.031 6.367 6.367 0 0 1-9.016.097L8.227 83.957c-10.152-9.955-11.163-25.883-1.61-36.11L49.413 2.022z"
-                />
-              </svg>
+              {link?.type === "youtube" ? (
+                <YouTubeIcon />
+              ) : (
+                <svg
+                  width="13"
+                  height="15.3"
+                  viewBox="0 0 94 111"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    fill="#FFA116"
+                    d="M67.507 83.066a6.367 6.367 0 0 1 9.016.015 6.394 6.394 0 0 1-.015 9.032L65.435 103.17c-10.216 10.2-26.875 10.349-37.263.343-.06-.057-4.685-4.593-19.945-19.556-10.152-9.954-11.163-25.882-1.61-36.11l17.812-19.072c9.481-10.153 26.958-11.263 37.799-2.496l16.177 13.083a6.394 6.394 0 0 1 .956 8.98 6.368 6.368 0 0 1-8.965.958L54.219 36.217c-5.67-4.584-15.587-3.955-20.48 1.284L15.929 56.573c-4.65 4.98-4.141 13.001 1.218 18.256a546172.33 546172.33 0 0 0 19.851 19.465c5.401 5.202 14.134 5.124 19.437-.17l11.073-11.058z"
+                  />
+                  <path
+                    fill="#B3B3B3"
+                    d="M40.607 72.001c-3.521 0-6.375-2.859-6.375-6.386s2.854-6.386 6.375-6.386h47.018c3.52 0 6.375 2.859 6.375 6.386s-2.854 6.386-6.375 6.386H40.607z"
+                  />
+                  <path
+                    fill="var(--text)"
+                    d="M49.412 2.023a6.367 6.367 0 0 1 9.011-.3 6.394 6.394 0 0 1 .3 9.027L15.929 56.573c-4.65 4.979-4.141 13 1.218 18.256l19.763 19.38a6.394 6.394 0 0 1 .097 9.031 6.367 6.367 0 0 1-9.016.097L8.227 83.957c-10.152-9.955-11.163-25.883-1.61-36.11L49.413 2.022z"
+                  />
+                </svg>
+              )}
             </a>
           </Tooltip>
         )}
-        {!leetcodeProblem && <span aria-hidden="true" />}
+        {!resourceUrl && <span aria-hidden="true" />}
 
         <Tooltip label={isSkip ? "Unskip" : "Skip"} portal>
           <button
@@ -140,7 +155,7 @@ export function SubSectionRow({
   onSkipProb,
   hideSkipped,
   filter,
-  showDifficulty = false,
+  showBuiltinMetadata = false,
 }) {
   const done = sub.problems.filter((p) => progressState(p.id) === "done").length;
   const total = sub.problems.length;
@@ -184,13 +199,11 @@ export function SubSectionRow({
                 state={progressState(p.id)}
                 onToggle={onToggleProb}
                 onSkip={onSkipProb}
-                showDifficulty={showDifficulty}
+                showBuiltinMetadata={showBuiltinMetadata}
               />
             ))
           ) : (
-            <div className="py-4 text-center text-xs text-muted">
-              No problems match the filter
-            </div>
+            <div className="py-4 text-center text-xs text-muted">No problems match the filter</div>
           )}
         </div>
       )}
@@ -209,7 +222,7 @@ export function StepRow({
   onSkipProb,
   hideSkipped,
   filter,
-  showDifficulty = false,
+  showBuiltinMetadata = false,
 }) {
   const done = step.subsections.reduce(
     (sum, s) => sum + s.problems.filter((p) => progressState(p.id) === "done").length,
@@ -228,9 +241,7 @@ export function StepRow({
         <span className="flex h-6 w-6 items-center justify-center">
           {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         </span>
-        <h2 className="min-w-0 text-lg font-semibold leading-snug text-text">
-          {step.title}
-        </h2>
+        <h2 className="min-w-0 text-lg font-semibold leading-snug text-text">{step.title}</h2>
         <div className="hidden md:block">
           <ProgressBar done={done} total={total} />
         </div>
@@ -252,7 +263,7 @@ export function StepRow({
               onSkipProb={onSkipProb}
               hideSkipped={hideSkipped}
               filter={filter}
-              showDifficulty={showDifficulty}
+              showBuiltinMetadata={showBuiltinMetadata}
             />
           ))}
         </div>

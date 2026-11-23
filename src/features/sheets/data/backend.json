@@ -11,42 +11,50 @@
             {
               "id": "s1-1.1-p1",
               "title": "Execution context, call stack",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.1-p2",
               "title": "Closures",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.1-p3",
               "title": "this keyword",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.1-p4",
               "title": "Promises",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.1-p5",
               "title": "async/await and error handling in async code",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.1-p6",
               "title": "Event loop",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.1-p7",
               "title": "Array and object methods, destructuring",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.1-p8",
               "title": "ES Modules vs CommonJS",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             }
           ]
         },
@@ -57,17 +65,20 @@
             {
               "id": "s1-1.2-p9",
               "title": "Types, interfaces, generics, narrowing, utility types",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.2-p10",
               "title": "tsconfig in strict mode",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.2-p11",
               "title": "Running TypeScript: tsx, ts-node, building with tsc",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             }
           ]
         },
@@ -78,37 +89,44 @@
             {
               "id": "s1-1.3-p12",
               "title": "What Node is: V8, libuv",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.3-p13",
               "title": "npm, package.json, semver, lockfiles",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.3-p14",
               "title": "Node event loop phases; timers, process.nextTick, microtasks",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.3-p15",
               "title": "fs, path, process, os modules",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.3-p16",
               "title": "Buffers and streams, including backpressure",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.3-p17",
               "title": "EventEmitter",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.3-p18",
               "title": "worker_threads and child processes (intro)",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             }
           ]
         },
@@ -119,27 +137,32 @@
             {
               "id": "s1-1.4-p19",
               "title": "Git: branches, merges, rebase, resolving conflicts, pull requests",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.4-p20",
               "title": "Terminal and Linux basics: files, permissions, processes, ssh",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.4-p21",
               "title": "Calling APIs with curl and an API client (Postman, Bruno, or HTTPie)",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.4-p22",
               "title": "Debugging with breakpoints and the Node inspector",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s1-1.4-p23",
               "title": "ESLint and Prettier",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             }
           ]
         }
@@ -155,23 +178,39 @@
           "problems": [
             {
               "id": "s2-2.1-p24",
-              "title": "Roadmap for backend from first principles — Video 1",
-              "lc": null
+              "title": "Roadmap for backend from first principles",
+              "difficulty": "Easy",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/0Rwb4Xmlcwc"
+              }
             },
             {
               "id": "s2-2.1-p25",
-              "title": "Walk the path of a true backend engineer — Video 2",
-              "lc": null
+              "title": "Walk the path of a true backend engineer",
+              "difficulty": "Easy",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/3qFjZbFRSAU"
+              }
             },
             {
               "id": "s2-2.1-p26",
-              "title": "What is a backend, how do they work — Video 3",
-              "lc": null
+              "title": "What is a backend, how do they work",
+              "difficulty": "Easy",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/6Ss4dJD9Kzg"
+              }
             },
             {
               "id": "s2-2.1-p27",
-              "title": "Benefits of learning backend engineering — Video 4",
-              "lc": null
+              "title": "Benefits of learning backend engineering",
+              "difficulty": "Easy",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/6fqZs5Z3k9A"
+              }
             }
           ]
         },
@@ -181,18 +220,30 @@
           "problems": [
             {
               "id": "s2-2.2-p28",
-              "title": "Understanding HTTP for backend engineers — Video 5",
-              "lc": null
+              "title": "Understanding HTTP for backend engineers",
+              "difficulty": "Easy",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/a3C1DMswClQ"
+              }
             },
             {
               "id": "s2-2.2-p29",
-              "title": "What is routing in backend — Video 6",
-              "lc": null
+              "title": "What is routing in backend",
+              "difficulty": "Easy",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/SubuU1iOC2s"
+              }
             },
             {
               "id": "s2-2.2-p30",
-              "title": "Serialization and deserialization — Video 7",
-              "lc": null
+              "title": "Serialization and deserialization",
+              "difficulty": "Easy",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/vzg90tY3uM0"
+              }
             }
           ]
         },
@@ -203,22 +254,26 @@
             {
               "id": "s2-2.3-p31",
               "title": "DNS, TCP, the TLS handshake, and HTTP/1.1 vs HTTP/2 vs HTTP/3",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s2-2.3-p32",
               "title": "HTTP methods, status codes, headers, cookies, and caching headers",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s2-2.3-p33",
               "title": "Safe vs idempotent methods",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s2-2.3-p34",
               "title": "REST vs RPC at a glance",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             }
           ]
         }
@@ -236,57 +291,77 @@
             {
               "id": "s3-0-p35",
               "title": "Server with Node's raw http module, no framework",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s3-0-p36",
               "title": "req/res objects, headers, streaming a response",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s3-0-p37",
               "title": "Environment variables: config via .env and process.env, never hardcode credentials",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s3-0-p38",
               "title": "Express setup (or Fastify): app, routes, middleware",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s3-0-p39",
               "title": "CORS: cross-origin fundamentals, preflight (OPTIONS), configuring the cors middleware",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s3-0-p40",
               "title": "Route params, query params, body parsing",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s3-0-p41",
               "title": "Custom and error-handling middleware",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s3-0-p42",
               "title": "express.Router() for modular routes",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s3-0-p43",
               "title": "TypeScript setup for the server",
-              "lc": null
+              "difficulty": "Easy",
+              "link": null
             },
             {
               "id": "s3-0-p44",
               "title": "API docs with OpenAPI/Swagger generated from your routes",
-              "lc": null
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s3-0-p45",
+              "title": "OpenAPI: the universal contract between clients and servers",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/CwKsU84jIWs"
+              }
+            },
+            {
+              "id": "s3-0-p46",
               "title": "Deploy to Render or Railway",
-              "lc": null
+              "difficulty": "Medium",
+              "link": null
             }
           ]
         }
@@ -302,24 +377,40 @@
           "implicit": true,
           "problems": [
             {
-              "id": "s4-0-p46",
-              "title": "Authentication and authorization — Video 8",
-              "lc": null
-            },
-            {
               "id": "s4-0-p47",
-              "title": "Validations and transformations — Video 9",
-              "lc": null
+              "title": "Authentication and authorization",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/A95rliroC8Q"
+              }
             },
             {
               "id": "s4-0-p48",
-              "title": "Controllers, services, repositories — Video 10",
-              "lc": null
+              "title": "Validations and transformations",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/qedj_JjjL-U"
+              }
             },
             {
               "id": "s4-0-p49",
-              "title": "Complete REST API design — Video 11",
-              "lc": null
+              "title": "Controllers, services, repositories, middlewares, and request context",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/hyc-7w3pee8"
+              }
+            },
+            {
+              "id": "s4-0-p50",
+              "title": "Complete REST API design",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/RG6q57DwV8Y"
+              }
             }
           ]
         },
@@ -328,54 +419,73 @@
           "title": "Apply it",
           "problems": [
             {
-              "id": "s4-4.1-p50",
-              "title": "Rebuild the Express app in controller-service-repository layers",
-              "lc": null
-            },
-            {
               "id": "s4-4.1-p51",
-              "title": "Add Zod (or Joi) for validation, with type inference",
-              "lc": null
+              "title": "Rebuild the Express app in controller-service-repository layers",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s4-4.1-p52",
-              "title": "Implement JWT auth by hand once, then use a library",
-              "lc": null
+              "title": "Add Zod (or Joi) for validation, with type inference",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s4-4.1-p53",
-              "title": "Pagination (offset and cursor), filtering, and sorting",
-              "lc": null
+              "title": "Implement JWT auth by hand once, then use a library",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s4-4.1-p54",
-              "title": "One consistent error format and a central error handler",
-              "lc": null
+              "title": "Pagination (offset and cursor), filtering, and sorting",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s4-4.1-p55",
-              "title": "API versioning",
-              "lc": null
+              "title": "One consistent error format and a central error handler",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s4-4.1-p56",
-              "title": "Idempotency keys for unsafe requests such as payments and orders",
-              "lc": null
+              "title": "API versioning",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s4-4.1-p57",
-              "title": "File uploads using presigned URLs (S3-style)",
-              "lc": null
+              "title": "Idempotency keys for unsafe requests such as payments and orders",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s4-4.1-p58",
-              "title": "Webhooks: receiving them and verifying signatures",
-              "lc": null
+              "title": "File uploads using presigned URLs (S3-style)",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s4-4.1-p59",
+              "title": "Webhooks: receiving them and verifying signatures",
+              "difficulty": "Medium",
+              "link": null
+            },
+            {
+              "id": "s4-4.1-p60",
+              "title": "Webhooks: how the server calls you",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/eWM0CVReP04"
+              }
+            },
+            {
+              "id": "s4-4.1-p61",
               "title": "Dependency injection basics",
-              "lc": null
+              "difficulty": "Medium",
+              "link": null
             }
           ]
         }
@@ -383,7 +493,7 @@
     },
     {
       "id": "s5",
-      "title": "Testing",
+      "title": "Testing (Playlist)",
       "subsections": [
         {
           "id": "s5-0",
@@ -391,39 +501,55 @@
           "implicit": true,
           "problems": [
             {
-              "id": "s5-0-p60",
-              "title": "Unit testing business logic with Vitest or Jest",
-              "lc": null
-            },
-            {
-              "id": "s5-0-p61",
-              "title": "Integration testing HTTP routes with Supertest",
-              "lc": null
-            },
-            {
               "id": "s5-0-p62",
-              "title": "Mocking DB calls vs transient test DBs (Docker-driven testing)",
-              "lc": null
+              "title": "Testing for backend engineers: mocks, TDD, and coverage",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/HgVrfHX92y4"
+              }
             },
             {
               "id": "s5-0-p63",
-              "title": "Test data: fixtures and factories",
-              "lc": null
+              "title": "Unit testing business logic with Vitest or Jest",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s5-0-p64",
-              "title": "TDD on one small feature",
-              "lc": null
+              "title": "Integration testing HTTP routes with Supertest",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s5-0-p65",
-              "title": "Coverage reports, and why coverage alone is not quality",
-              "lc": null
+              "title": "Mocking DB calls vs transient test DBs (Docker-driven testing)",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s5-0-p66",
+              "title": "Test data: fixtures and factories",
+              "difficulty": "Medium",
+              "link": null
+            },
+            {
+              "id": "s5-0-p67",
+              "title": "TDD on one small feature",
+              "difficulty": "Medium",
+              "link": null
+            },
+            {
+              "id": "s5-0-p68",
+              "title": "Coverage reports, and why coverage alone is not quality",
+              "difficulty": "Medium",
+              "link": null
+            },
+            {
+              "id": "s5-0-p69",
               "title": "Running tests in CI on every push",
-              "lc": null
+              "difficulty": "Medium",
+              "link": null
             }
           ]
         }
@@ -438,9 +564,13 @@
           "title": "SQL (Playlist)",
           "problems": [
             {
-              "id": "s6-6.1-p67",
-              "title": "Mastering databases with Postgres — Video 12",
-              "lc": null
+              "id": "s6-6.1-p70",
+              "title": "Mastering databases with Postgres",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/F7Vwp2Xo5Do"
+              }
             }
           ]
         },
@@ -449,54 +579,64 @@
           "title": "SQL hands-on",
           "problems": [
             {
-              "id": "s6-6.2-p68",
-              "title": "Raw SQL: SELECT, JOIN, GROUP BY, subqueries, CTEs, window functions",
-              "lc": null
-            },
-            {
-              "id": "s6-6.2-p69",
-              "title": "Schema design: normalization, keys, constraints",
-              "lc": null
-            },
-            {
-              "id": "s6-6.2-p70",
-              "title": "Indexing strategies and query optimization (EXPLAIN ANALYZE)",
-              "lc": null
-            },
-            {
               "id": "s6-6.2-p71",
-              "title": "Prisma or Drizzle: schema design, migrations, relations",
-              "lc": null
+              "title": "Raw SQL: SELECT, JOIN, GROUP BY, subqueries, CTEs, window functions",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s6-6.2-p72",
-              "title": "Database migrations: schema version control, safe CI/CD updates",
-              "lc": null
+              "title": "Schema design: normalization, keys, constraints",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s6-6.2-p73",
-              "title": "Connection pooling: why pool vs single clients (pg-pool, PgBouncer)",
-              "lc": null
+              "title": "Indexing strategies and query optimization (EXPLAIN ANALYZE)",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s6-6.2-p74",
-              "title": "Transactions and ACID at the ORM and query-builder layer; isolation levels, locks, deadlocks",
-              "lc": null
+              "title": "Prisma or Drizzle: schema design, migrations, relations",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s6-6.2-p75",
-              "title": "The N+1 query problem and how to spot it",
-              "lc": null
+              "title": "Database migrations: schema version control, safe CI/CD updates",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s6-6.2-p76",
-              "title": "Backups and restores: test a restore once",
-              "lc": null
+              "title": "Connection pooling: why pool vs single clients (pg-pool, PgBouncer)",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s6-6.2-p77",
+              "title": "Transactions and ACID at the ORM and query-builder layer; isolation levels, locks, deadlocks",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s6-6.2-p78",
+              "title": "The N+1 query problem and how to spot it",
+              "difficulty": "Medium",
+              "link": null
+            },
+            {
+              "id": "s6-6.2-p79",
+              "title": "Backups and restores: test a restore once",
+              "difficulty": "Medium",
+              "link": null
+            },
+            {
+              "id": "s6-6.2-p80",
               "title": "JSONB and Postgres full-text search",
-              "lc": null
+              "difficulty": "Medium",
+              "link": null
             }
           ]
         },
@@ -505,19 +645,22 @@
           "title": "NoSQL (Opt)",
           "problems": [
             {
-              "id": "s6-6.3-p78",
+              "id": "s6-6.3-p81",
               "title": "MongoDB: documents, collections",
-              "lc": null
+              "difficulty": "Medium",
+              "link": null
             },
             {
-              "id": "s6-6.3-p79",
+              "id": "s6-6.3-p82",
               "title": "Mongoose: schemas, models, population",
-              "lc": null
+              "difficulty": "Medium",
+              "link": null
             },
             {
-              "id": "s6-6.3-p80",
+              "id": "s6-6.3-p83",
               "title": "SQL vs NoSQL: when to use which",
-              "lc": null
+              "difficulty": "Medium",
+              "link": null
             }
           ]
         }
@@ -533,39 +676,52 @@
           "implicit": true,
           "problems": [
             {
-              "id": "s7-0-p81",
-              "title": "Caching, the secret behind it all — Video 13",
-              "lc": null
-            },
-            {
-              "id": "s7-0-p82",
-              "title": "Redis in Node, cache-aside pattern (hands-on)",
-              "lc": null
-            },
-            {
-              "id": "s7-0-p83",
-              "title": "Cache invalidation, TTLs, and cache stampedes",
-              "lc": null
-            },
-            {
               "id": "s7-0-p84",
-              "title": "Task queues and background jobs — Video 14",
-              "lc": null
+              "title": "Caching, the secret behind it all",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/estH64OkwxU"
+              }
             },
             {
               "id": "s7-0-p85",
-              "title": "BullMQ on Redis: retries, concurrency limits, delayed jobs (hands-on)",
-              "lc": null
+              "title": "Redis in Node, cache-aside pattern (hands-on)",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s7-0-p86",
-              "title": "Scheduled jobs (cron) and idempotent workers",
-              "lc": null
+              "title": "Cache invalidation, TTLs, and cache stampedes",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s7-0-p87",
+              "title": "Task queues and background jobs",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/r-nQsyguU1Y"
+              }
+            },
+            {
+              "id": "s7-0-p88",
+              "title": "BullMQ on Redis: retries, concurrency limits, delayed jobs (hands-on)",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s7-0-p89",
+              "title": "Scheduled jobs (cron) and idempotent workers",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s7-0-p90",
               "title": "Dead-letter queues for jobs that keep failing",
-              "lc": null
+              "difficulty": "Hard",
+              "link": null
             }
           ]
         }
@@ -581,24 +737,31 @@
           "implicit": true,
           "problems": [
             {
-              "id": "s8-0-p88",
-              "title": "Full text search using Elasticsearch — Video 15",
-              "lc": null
-            },
-            {
-              "id": "s8-0-p89",
-              "title": "Postgres full-text search first, since it covers many real needs",
-              "lc": null
-            },
-            {
-              "id": "s8-0-p90",
-              "title": "One Elasticsearch query from a Node service (Opt)",
-              "lc": null
-            },
-            {
               "id": "s8-0-p91",
+              "title": "Full text search using Elasticsearch",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/7_sovzAhRSM"
+              }
+            },
+            {
+              "id": "s8-0-p92",
+              "title": "Postgres full-text search first, since it covers many real needs",
+              "difficulty": "Medium",
+              "link": null
+            },
+            {
+              "id": "s8-0-p93",
+              "title": "One Elasticsearch query from a Node service (Opt)",
+              "difficulty": "Medium",
+              "link": null
+            },
+            {
+              "id": "s8-0-p94",
               "title": "Vector search with pgvector (Opt)",
-              "lc": null
+              "difficulty": "Medium",
+              "link": null
             }
           ]
         }
@@ -614,64 +777,88 @@
           "implicit": true,
           "problems": [
             {
-              "id": "s9-0-p92",
-              "title": "Error handling and building fault-tolerant systems — Video 16",
-              "lc": null
-            },
-            {
-              "id": "s9-0-p93",
-              "title": "Production-grade configuration management — Video 17",
-              "lc": null
-            },
-            {
-              "id": "s9-0-p94",
-              "title": "Logging, monitoring and observability — Video 18",
-              "lc": null
-            },
-            {
               "id": "s9-0-p95",
-              "title": "Request tracing: AsyncLocalStorage for request IDs across logs",
-              "lc": null
+              "title": "Error handling and building fault-tolerant systems",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/8NaM_9aKS24"
+              }
             },
             {
               "id": "s9-0-p96",
-              "title": "Production logging with Winston or Pino",
-              "lc": null
+              "title": "Production-grade configuration management",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/GR9NtirPXyc"
+              }
             },
             {
               "id": "s9-0-p97",
-              "title": "Metrics: request rate, errors, duration; intro to Prometheus and Grafana",
-              "lc": null
+              "title": "Logging, monitoring and observability",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/5PEuwgLOQQM"
+              }
             },
             {
               "id": "s9-0-p98",
-              "title": "OpenTelemetry traces (Opt)",
-              "lc": null
+              "title": "Request tracing: AsyncLocalStorage for request IDs across logs",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s9-0-p99",
-              "title": "Error tracking with a tool such as Sentry",
-              "lc": null
+              "title": "Production logging with Winston or Pino",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s9-0-p100",
-              "title": "Timeouts, retries with backoff and jitter, and circuit breakers",
-              "lc": null
+              "title": "Metrics: request rate, errors, duration; intro to Prometheus and Grafana",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s9-0-p101",
-              "title": "Graceful shutdown (SIGTERM/SIGINT handling) — Video 19",
-              "lc": null
+              "title": "OpenTelemetry traces (Opt)",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s9-0-p102",
-              "title": "Health check and readiness endpoints (/healthz, /ready)",
-              "lc": null
+              "title": "Error tracking with a tool such as Sentry",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s9-0-p103",
+              "title": "Timeouts, retries with backoff and jitter, and circuit breakers",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s9-0-p104",
+              "title": "Graceful shutdown (SIGTERM/SIGINT handling)",
+              "difficulty": "Hard",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/6rfBgphiCWM"
+              }
+            },
+            {
+              "id": "s9-0-p105",
+              "title": "Health check and readiness endpoints (/healthz, /ready)",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s9-0-p106",
               "title": "SLIs, SLOs, and writing a short postmortem after a failure",
-              "lc": null
+              "difficulty": "Hard",
+              "link": null
             }
           ]
         }
@@ -686,34 +873,43 @@
           "title": "Fundamentals",
           "problems": [
             {
-              "id": "s10-10.1-p104",
-              "title": "Backend security: everything you need — Video 20",
-              "lc": null
-            },
-            {
-              "id": "s10-10.1-p105",
-              "title": "Production hardening: helmet, express-rate-limit, secure cookies",
-              "lc": null
-            },
-            {
-              "id": "s10-10.1-p106",
-              "title": "OWASP Top 10, with one example of each in a test app (injection, XSS, CSRF, SSRF, broken access control)",
-              "lc": null
-            },
-            {
               "id": "s10-10.1-p107",
-              "title": "Secrets: never in git, use secret managers, rotate keys",
-              "lc": null
+              "title": "Backend security: everything you need",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/xB1C1xZZW4k"
+              }
             },
             {
               "id": "s10-10.1-p108",
-              "title": "Dependency and secret scanning in CI",
-              "lc": null
+              "title": "Production hardening: helmet, express-rate-limit, secure cookies",
+              "difficulty": "Hard",
+              "link": null
             },
             {
               "id": "s10-10.1-p109",
+              "title": "OWASP Top 10, with one example of each in a test app (injection, XSS, CSRF, SSRF, broken access control)",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s10-10.1-p110",
+              "title": "Secrets: never in git, use secret managers, rotate keys",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s10-10.1-p111",
+              "title": "Dependency and secret scanning in CI",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s10-10.1-p112",
               "title": "Audit logs and least privilege",
-              "lc": null
+              "difficulty": "Hard",
+              "link": null
             }
           ]
         },
@@ -722,29 +918,34 @@
           "title": "Auth in depth",
           "problems": [
             {
-              "id": "s10-10.2-p110",
-              "title": "Password hashing with bcrypt or argon2",
-              "lc": null
-            },
-            {
-              "id": "s10-10.2-p111",
-              "title": "Sessions vs JWT, refresh tokens, and revocation",
-              "lc": null
-            },
-            {
-              "id": "s10-10.2-p112",
-              "title": "OAuth 2.0 and OIDC (log in with Google or GitHub)",
-              "lc": null
-            },
-            {
               "id": "s10-10.2-p113",
-              "title": "RBAC and resource-level authorization; multi-tenancy basics",
-              "lc": null
+              "title": "Password hashing with bcrypt or argon2",
+              "difficulty": "Hard",
+              "link": null
             },
             {
               "id": "s10-10.2-p114",
+              "title": "Sessions vs JWT, refresh tokens, and revocation",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s10-10.2-p115",
+              "title": "OAuth 2.0 and OIDC (log in with Google or GitHub)",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s10-10.2-p116",
+              "title": "RBAC and resource-level authorization; multi-tenancy basics",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s10-10.2-p117",
               "title": "API keys and service-to-service auth",
-              "lc": null
+              "difficulty": "Hard",
+              "link": null
             }
           ]
         }
@@ -752,7 +953,7 @@
     },
     {
       "id": "s11",
-      "title": "Containers and deployment",
+      "title": "Containers and deployment (Playlist)",
       "subsections": [
         {
           "id": "s11-0",
@@ -760,49 +961,76 @@
           "implicit": true,
           "problems": [
             {
-              "id": "s11-0-p115",
-              "title": "Dockerfile basics, layer optimization, images vs containers",
-              "lc": null
-            },
-            {
-              "id": "s11-0-p116",
-              "title": "Multi-container environments with docker-compose (app + Postgres + Redis)",
-              "lc": null
-            },
-            {
-              "id": "s11-0-p117",
-              "title": "GitHub Actions: lint, type-check, test on every push; deploy on merge",
-              "lc": null
-            },
-            {
               "id": "s11-0-p118",
-              "title": "Environments: dev, staging, production, with config per environment",
-              "lc": null
+              "title": "The Twelve-Factor App",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/2_fcv3-XfN4"
+              }
             },
             {
               "id": "s11-0-p119",
-              "title": "Deployment: Render or Railway first, then a VPS or AWS EC2",
-              "lc": null
+              "title": "DevOps for backend engineers",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/_E8X5RIJfQ4"
+              }
             },
             {
               "id": "s11-0-p120",
-              "title": "Nginx as a reverse proxy; HTTPS with Let's Encrypt",
-              "lc": null
+              "title": "Dockerfile basics, layer optimization, images vs containers",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s11-0-p121",
-              "title": "Zero-downtime deploys and rollbacks",
-              "lc": null
+              "title": "Multi-container environments with docker-compose (app + Postgres + Redis)",
+              "difficulty": "Medium",
+              "link": null
             },
             {
               "id": "s11-0-p122",
-              "title": "Securely managing prod env vars and secrets via secret managers",
-              "lc": null
+              "title": "GitHub Actions: lint, type-check, test on every push; deploy on merge",
+              "difficulty": "Hard",
+              "link": null
             },
             {
               "id": "s11-0-p123",
+              "title": "Environments: dev, staging, production, with config per environment",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s11-0-p124",
+              "title": "Deployment: Render or Railway first, then a VPS or AWS EC2",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s11-0-p125",
+              "title": "Nginx as a reverse proxy; HTTPS with Let's Encrypt",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s11-0-p126",
+              "title": "Zero-downtime deploys and rollbacks",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s11-0-p127",
+              "title": "Securely managing prod env vars and secrets via secret managers",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s11-0-p128",
               "title": "Feature flags (Opt)",
-              "lc": null
+              "difficulty": "Hard",
+              "link": null
             }
           ]
         }
@@ -818,44 +1046,61 @@
           "implicit": true,
           "problems": [
             {
-              "id": "s12-0-p124",
-              "title": "Backend scaling and performance, Part 1 — Video 21.1",
-              "lc": null
-            },
-            {
-              "id": "s12-0-p125",
-              "title": "Backend scaling and performance, Part 2 — Video 21.2",
-              "lc": null
-            },
-            {
-              "id": "s12-0-p126",
-              "title": "Concurrency and parallelism: IO bound vs CPU bound — Video 22",
-              "lc": null
-            },
-            {
-              "id": "s12-0-p127",
-              "title": "Load testing with k6 or autocannon",
-              "lc": null
-            },
-            {
-              "id": "s12-0-p128",
-              "title": "Profiling a slow endpoint (flame graphs)",
-              "lc": null
-            },
-            {
               "id": "s12-0-p129",
-              "title": "Worker threads and clustering in Node",
-              "lc": null
+              "title": "Backend scaling and performance, Part 1",
+              "difficulty": "Hard",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/z7kt_p44rjs"
+              }
             },
             {
               "id": "s12-0-p130",
-              "title": "Backpressure, rate limiting, and queue-based load leveling",
-              "lc": null
+              "title": "Backend scaling and performance, Part 2",
+              "difficulty": "Hard",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/sOhAopEwjH4"
+              }
             },
             {
               "id": "s12-0-p131",
+              "title": "Concurrency and parallelism: IO bound vs CPU bound",
+              "difficulty": "Hard",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/bs9MEYRTA30"
+              }
+            },
+            {
+              "id": "s12-0-p132",
+              "title": "Load testing with k6 or autocannon",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s12-0-p133",
+              "title": "Profiling a slow endpoint (flame graphs)",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s12-0-p134",
+              "title": "Worker threads and clustering in Node",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s12-0-p135",
+              "title": "Backpressure, rate limiting, and queue-based load leveling",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s12-0-p136",
               "title": "CDN and HTTP caching for static and public data",
-              "lc": null
+              "difficulty": "Hard",
+              "link": null
             }
           ]
         }
@@ -863,7 +1108,7 @@
     },
     {
       "id": "s13",
-      "title": "Cloud basics",
+      "title": "Cloud basics (Playlist)",
       "subsections": [
         {
           "id": "s13-0",
@@ -871,34 +1116,58 @@
           "implicit": true,
           "problems": [
             {
-              "id": "s13-0-p132",
-              "title": "One cloud provider done well (AWS, GCP, or Azure)",
-              "lc": null
-            },
-            {
-              "id": "s13-0-p133",
-              "title": "Compute, object storage, a managed database, and networking (VPC) basics",
-              "lc": null
-            },
-            {
-              "id": "s13-0-p134",
-              "title": "IAM: users, roles, and least-privilege policies",
-              "lc": null
-            },
-            {
-              "id": "s13-0-p135",
-              "title": "Managed queues and serverless functions: when they fit",
-              "lc": null
-            },
-            {
-              "id": "s13-0-p136",
-              "title": "Cost awareness: budgets, alerts, and shutting things down",
-              "lc": null
-            },
-            {
               "id": "s13-0-p137",
+              "title": "Object storage, Part 1",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/Ie0TjKI9cDI"
+              }
+            },
+            {
+              "id": "s13-0-p138",
+              "title": "Object storage, Part 2",
+              "difficulty": "Medium",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/iWrVCxexUWY"
+              }
+            },
+            {
+              "id": "s13-0-p139",
+              "title": "One cloud provider done well (AWS, GCP, or Azure)",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s13-0-p140",
+              "title": "Compute, object storage, a managed database, and networking (VPC) basics",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s13-0-p141",
+              "title": "IAM: users, roles, and least-privilege policies",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s13-0-p142",
+              "title": "Managed queues and serverless functions: when they fit",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s13-0-p143",
+              "title": "Cost awareness: budgets, alerts, and shutting things down",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s13-0-p144",
               "title": "Infrastructure as code with Terraform (Opt)",
-              "lc": null
+              "difficulty": "Medium",
+              "link": null
             }
           ]
         }
@@ -914,44 +1183,61 @@
           "implicit": true,
           "problems": [
             {
-              "id": "s14-0-p138",
-              "title": "Load balancers, reverse proxies (Nginx / HAProxy)",
-              "lc": null
-            },
-            {
-              "id": "s14-0-p139",
-              "title": "DB scaling: replication, read replicas, connection concentration, sharding",
-              "lc": null
-            },
-            {
-              "id": "s14-0-p140",
-              "title": "CAP theorem, availability, consistency models",
-              "lc": null
-            },
-            {
-              "id": "s14-0-p141",
-              "title": "Event-driven architectures: Kafka / RabbitMQ at scale (concepts first)",
-              "lc": null
-            },
-            {
-              "id": "s14-0-p142",
-              "title": "Sagas, the outbox pattern, and eventual consistency (Opt)",
-              "lc": null
-            },
-            {
-              "id": "s14-0-p143",
-              "title": "Back-of-the-envelope estimation: requests per second, storage, bandwidth",
-              "lc": null
-            },
-            {
-              "id": "s14-0-p144",
-              "title": "Study resource: Alex Xu's System Design Interview, or ByteByteGo",
-              "lc": null
-            },
-            {
               "id": "s14-0-p145",
+              "title": "Load balancers, reverse proxies (Nginx / HAProxy)",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s14-0-p146",
+              "title": "DB scaling: replication, read replicas, connection concentration, sharding",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s14-0-p147",
+              "title": "CAP theorem, availability, consistency models",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s14-0-p148",
+              "title": "Event-driven architectures: Kafka / RabbitMQ at scale (concepts first)",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s14-0-p149",
+              "title": "Sagas, the outbox pattern, and eventual consistency (Opt)",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s14-0-p150",
+              "title": "Real-time backends",
+              "difficulty": "Hard",
+              "link": {
+                "type": "youtube",
+                "url": "https://youtu.be/wUQryt697cs"
+              }
+            },
+            {
+              "id": "s14-0-p151",
+              "title": "Back-of-the-envelope estimation: requests per second, storage, bandwidth",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s14-0-p152",
+              "title": "Study resource: Alex Xu's System Design Interview, or ByteByteGo",
+              "difficulty": "Hard",
+              "link": null
+            },
+            {
+              "id": "s14-0-p153",
               "title": "Practice designs: URL shortener, rate limiter, chat app, news feed, notification system, file storage",
-              "lc": null
+              "difficulty": "Hard",
+              "link": null
             }
           ]
         }

@@ -7,17 +7,17 @@ import ProfileSheetProgress from "./ProfileSheetProgress";
 afterEach(cleanup);
 
 describe("ProfileSheetProgress", () => {
-  it("renders icon-only actions with tooltips and disables restore while busy", () => {
+  it("opens one built-in restore picker and disables it while restoring", () => {
     const onExport = vi.fn();
     const onImport = vi.fn();
-    const onRestoreDsa = vi.fn();
+    const onRestoreBuiltin = vi.fn();
     const onReset = vi.fn();
     const { rerender } = render(
       <ProfileSheetProgress
         sheets={[]}
         onExport={onExport}
         onImport={onImport}
-        onRestoreDsa={onRestoreDsa}
+        onRestoreBuiltin={onRestoreBuiltin}
         onReset={onReset}
       />,
     );
@@ -26,7 +26,7 @@ describe("ProfileSheetProgress", () => {
     expect(buttons.map((button) => button.getAttribute("aria-label"))).toEqual([
       "Export progress",
       "Import progress",
-      "Restore DSA",
+      "Restore built-in sheet",
       "Reset all progress",
     ]);
     expect(buttons.every((button) => button.querySelectorAll("svg").length === 1)).toBe(true);
@@ -34,7 +34,12 @@ describe("ProfileSheetProgress", () => {
     expect(buttons[1].querySelector("svg").classList.contains("lucide-download")).toBe(true);
     expect(
       [...document.body.querySelectorAll('[role="tooltip"]')].map((tooltip) => tooltip.textContent),
-    ).toEqual(["Export progress", "Import progress", "Restore DSA", "Reset all progress"]);
+    ).toEqual([
+      "Export progress",
+      "Import progress",
+      "Restore built-in sheet",
+      "Reset all progress",
+    ]);
 
     const exportTooltip = document.body.querySelector('[role="tooltip"]');
     fireEvent.mouseEnter(buttons[0]);
@@ -43,9 +48,16 @@ describe("ProfileSheetProgress", () => {
     expect(exportTooltip.classList.contains("app-tooltip-visible")).toBe(false);
 
     fireEvent.click(buttons[2]);
-    expect(onRestoreDsa).toHaveBeenCalledOnce();
+    expect(onRestoreBuiltin).toHaveBeenCalledOnce();
 
-    rerender(<ProfileSheetProgress sheets={[]} onRestoreDsa={onRestoreDsa} restoreDisabled />);
-    expect(screen.getByRole("button", { name: "Restore DSA" }).disabled).toBe(true);
+    rerender(
+      <ProfileSheetProgress
+        sheets={[]}
+        onRestoreBuiltin={onRestoreBuiltin}
+        restoringBuiltinSheetId="backend"
+        restoreDisabled
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Restore built-in sheet" }).disabled).toBe(true);
   });
 });

@@ -49,13 +49,14 @@ export default function AuthenticatedApp({
     customSheetsLoading,
     uploadingSheet,
     deletingSheetId,
-    restoringDsaSheet,
+    builtInSheetOptions,
+    restoringBuiltinSheetId,
     sheetError,
     uploadSheetInput,
     data,
     handleUploadSheet,
     handleRemoveSheet: removeSheet,
-    restoreDsaSheet: restoreSheet,
+    restoreBuiltinSheet: restoreSheet,
     downloadSampleFormat,
   } = useSheetLibrary(user, askConfirmation);
   const {
@@ -115,7 +116,7 @@ export default function AuthenticatedApp({
     enabled: !dailyLogPage && !peopleSearchPage && !selectedPublicUsername && !showProfile,
   });
   const handleRemoveSheet = (sheet) => removeSheet(sheet, reset);
-  const restoreDsaSheet = () => restoreSheet(reset);
+  const restoreBuiltinSheet = (templateId) => restoreSheet(templateId, reset);
   const [todayDateKey, setTodayDateKey] = useState(() => getLocalDateKey(new Date()));
   const {
     clearSearch,
@@ -274,8 +275,9 @@ export default function AuthenticatedApp({
     recentAccepted,
     renderDialog,
     reset,
-    restoreDsaSheet,
-    restoringDsaSheet,
+    builtInSheetOptions,
+    restoreBuiltinSheet,
+    restoringBuiltinSheetId,
     customSheetsLoading,
     progressLoading,
     returnFromPublicProfile,

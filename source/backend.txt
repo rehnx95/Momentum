@@ -59,136 +59,144 @@ Step 3 — Building your first server
 42. express.Router() for modular routes
 43. TypeScript setup for the server
 44. API docs with OpenAPI/Swagger generated from your routes
-45. Deploy to Render or Railway
+45. OpenAPI: the universal contract between clients and servers — Video 28
+46. Deploy to Render or Railway
 
 Step 4 — Core backend architecture (Playlist)
-46. Authentication and authorization — Video 8
-47. Validations and transformations — Video 9
-48. Controllers, services, repositories — Video 10
-49. Complete REST API design — Video 11
+47. Authentication and authorization — Video 8
+48. Validations and transformations — Video 9
+49. Controllers, services, repositories, middlewares, and request context — Video 10
+50. Complete REST API design — Video 11
 
 4.1 — Apply it
-50. Rebuild the Express app in controller-service-repository layers
-51. Add Zod (or Joi) for validation, with type inference
-52. Implement JWT auth by hand once, then use a library
-53. Pagination (offset and cursor), filtering, and sorting
-54. One consistent error format and a central error handler
-55. API versioning
-56. Idempotency keys for unsafe requests such as payments and orders
-57. File uploads using presigned URLs (S3-style)
-58. Webhooks: receiving them and verifying signatures
-59. Dependency injection basics
+51. Rebuild the Express app in controller-service-repository layers
+52. Add Zod (or Joi) for validation, with type inference
+53. Implement JWT auth by hand once, then use a library
+54. Pagination (offset and cursor), filtering, and sorting
+55. One consistent error format and a central error handler
+56. API versioning
+57. Idempotency keys for unsafe requests such as payments and orders
+58. File uploads using presigned URLs (S3-style)
+59. Webhooks: receiving them and verifying signatures
+60. Webhooks: how the server calls you — Video 29
+61. Dependency injection basics
 
-Step 5 — Testing
-60. Unit testing business logic with Vitest or Jest
-61. Integration testing HTTP routes with Supertest
-62. Mocking DB calls vs transient test DBs (Docker-driven testing)
-63. Test data: fixtures and factories
-64. TDD on one small feature
-65. Coverage reports, and why coverage alone is not quality
-66. Running tests in CI on every push
+Step 5 — Testing (Playlist)
+62. Testing for backend engineers: mocks, TDD, and coverage — Video 26
+63. Unit testing business logic with Vitest or Jest
+64. Integration testing HTTP routes with Supertest
+65. Mocking DB calls vs transient test DBs (Docker-driven testing)
+66. Test data: fixtures and factories
+67. TDD on one small feature
+68. Coverage reports, and why coverage alone is not quality
+69. Running tests in CI on every push
 
 Step 6 — Databases
 6.1 — SQL (Playlist)
-67. Mastering databases with Postgres — Video 12
+70. Mastering databases with Postgres — Video 12
 
 6.2 — SQL hands-on
-68. Raw SQL: SELECT, JOIN, GROUP BY, subqueries, CTEs, window functions
-69. Schema design: normalization, keys, constraints
-70. Indexing strategies and query optimization (EXPLAIN ANALYZE)
-71. Prisma or Drizzle: schema design, migrations, relations
-72. Database migrations: schema version control, safe CI/CD updates
-73. Connection pooling: why pool vs single clients (pg-pool, PgBouncer)
-74. Transactions and ACID at the ORM and query-builder layer; isolation levels, locks, deadlocks
-75. The N+1 query problem and how to spot it
-76. Backups and restores: test a restore once
-77. JSONB and Postgres full-text search
+71. Raw SQL: SELECT, JOIN, GROUP BY, subqueries, CTEs, window functions
+72. Schema design: normalization, keys, constraints
+73. Indexing strategies and query optimization (EXPLAIN ANALYZE)
+74. Prisma or Drizzle: schema design, migrations, relations
+75. Database migrations: schema version control, safe CI/CD updates
+76. Connection pooling: why pool vs single clients (pg-pool, PgBouncer)
+77. Transactions and ACID at the ORM and query-builder layer; isolation levels, locks, deadlocks
+78. The N+1 query problem and how to spot it
+79. Backups and restores: test a restore once
+80. JSONB and Postgres full-text search
 
 6.3 — NoSQL (Opt)
-78. MongoDB: documents, collections
-79. Mongoose: schemas, models, population
-80. SQL vs NoSQL: when to use which
+81. MongoDB: documents, collections
+82. Mongoose: schemas, models, population
+83. SQL vs NoSQL: when to use which
 
 Step 7 — Caching and background work (Playlist)
-81. Caching, the secret behind it all — Video 13
-82. Redis in Node, cache-aside pattern (hands-on)
-83. Cache invalidation, TTLs, and cache stampedes
-84. Task queues and background jobs — Video 14
-85. BullMQ on Redis: retries, concurrency limits, delayed jobs (hands-on)
-86. Scheduled jobs (cron) and idempotent workers
-87. Dead-letter queues for jobs that keep failing
+84. Caching, the secret behind it all — Video 13
+85. Redis in Node, cache-aside pattern (hands-on)
+86. Cache invalidation, TTLs, and cache stampedes
+87. Task queues and background jobs — Video 14
+88. BullMQ on Redis: retries, concurrency limits, delayed jobs (hands-on)
+89. Scheduled jobs (cron) and idempotent workers
+90. Dead-letter queues for jobs that keep failing
 
 Step 8 — Search (Playlist)
-88. Full text search using Elasticsearch — Video 15
-89. Postgres full-text search first, since it covers many real needs
-90. One Elasticsearch query from a Node service (Opt)
-91. Vector search with pgvector (Opt)
+91. Full text search using Elasticsearch — Video 15
+92. Postgres full-text search first, since it covers many real needs
+93. One Elasticsearch query from a Node service (Opt)
+94. Vector search with pgvector (Opt)
 
 Step 9 — Reliability engineering (Playlist)
-92. Error handling and building fault-tolerant systems — Video 16
-93. Production-grade configuration management — Video 17
-94. Logging, monitoring and observability — Video 18
-95. Request tracing: AsyncLocalStorage for request IDs across logs
-96. Production logging with Winston or Pino
-97. Metrics: request rate, errors, duration; intro to Prometheus and Grafana
-98. OpenTelemetry traces (Opt)
-99. Error tracking with a tool such as Sentry
-100. Timeouts, retries with backoff and jitter, and circuit breakers
-101. Graceful shutdown (SIGTERM/SIGINT handling) — Video 19
-102. Health check and readiness endpoints (/healthz, /ready)
-103. SLIs, SLOs, and writing a short postmortem after a failure
+95. Error handling and building fault-tolerant systems — Video 16
+96. Production-grade configuration management — Video 17
+97. Logging, monitoring and observability — Video 18
+98. Request tracing: AsyncLocalStorage for request IDs across logs
+99. Production logging with Winston or Pino
+100. Metrics: request rate, errors, duration; intro to Prometheus and Grafana
+101. OpenTelemetry traces (Opt)
+102. Error tracking with a tool such as Sentry
+103. Timeouts, retries with backoff and jitter, and circuit breakers
+104. Graceful shutdown (SIGTERM/SIGINT handling) — Video 19
+105. Health check and readiness endpoints (/healthz, /ready)
+106. SLIs, SLOs, and writing a short postmortem after a failure
 
 Step 10 — Security (Playlist)
 10.1 — Fundamentals
-104. Backend security: everything you need — Video 20
-105. Production hardening: helmet, express-rate-limit, secure cookies
-106. OWASP Top 10, with one example of each in a test app (injection, XSS, CSRF, SSRF, broken access control)
-107. Secrets: never in git, use secret managers, rotate keys
-108. Dependency and secret scanning in CI
-109. Audit logs and least privilege
+107. Backend security: everything you need — Video 20
+108. Production hardening: helmet, express-rate-limit, secure cookies
+109. OWASP Top 10, with one example of each in a test app (injection, XSS, CSRF, SSRF, broken access control)
+110. Secrets: never in git, use secret managers, rotate keys
+111. Dependency and secret scanning in CI
+112. Audit logs and least privilege
 
 10.2 — Auth in depth
-110. Password hashing with bcrypt or argon2
-111. Sessions vs JWT, refresh tokens, and revocation
-112. OAuth 2.0 and OIDC (log in with Google or GitHub)
-113. RBAC and resource-level authorization; multi-tenancy basics
-114. API keys and service-to-service auth
+113. Password hashing with bcrypt or argon2
+114. Sessions vs JWT, refresh tokens, and revocation
+115. OAuth 2.0 and OIDC (log in with Google or GitHub)
+116. RBAC and resource-level authorization; multi-tenancy basics
+117. API keys and service-to-service auth
 
-Step 11 — Containers and deployment
-115. Dockerfile basics, layer optimization, images vs containers
-116. Multi-container environments with docker-compose (app + Postgres + Redis)
-117. GitHub Actions: lint, type-check, test on every push; deploy on merge
-118. Environments: dev, staging, production, with config per environment
-119. Deployment: Render or Railway first, then a VPS or AWS EC2
-120. Nginx as a reverse proxy; HTTPS with Let's Encrypt
-121. Zero-downtime deploys and rollbacks
-122. Securely managing prod env vars and secrets via secret managers
-123. Feature flags (Opt)
+Step 11 — Containers and deployment (Playlist)
+118. The Twelve-Factor App — Video 27
+119. DevOps for backend engineers — Video 30
+120. Dockerfile basics, layer optimization, images vs containers
+121. Multi-container environments with docker-compose (app + Postgres + Redis)
+122. GitHub Actions: lint, type-check, test on every push; deploy on merge
+123. Environments: dev, staging, production, with config per environment
+124. Deployment: Render or Railway first, then a VPS or AWS EC2
+125. Nginx as a reverse proxy; HTTPS with Let's Encrypt
+126. Zero-downtime deploys and rollbacks
+127. Securely managing prod env vars and secrets via secret managers
+128. Feature flags (Opt)
 
 Step 12 — Scaling, performance, concurrency (Playlist)
-124. Backend scaling and performance, Part 1 — Video 21.1
-125. Backend scaling and performance, Part 2 — Video 21.2
-126. Concurrency and parallelism: IO bound vs CPU bound — Video 22
-127. Load testing with k6 or autocannon
-128. Profiling a slow endpoint (flame graphs)
-129. Worker threads and clustering in Node
-130. Backpressure, rate limiting, and queue-based load leveling
-131. CDN and HTTP caching for static and public data
+129. Backend scaling and performance, Part 1 — Video 21.1
+130. Backend scaling and performance, Part 2 — Video 21.2
+131. Concurrency and parallelism: IO bound vs CPU bound — Video 22
+132. Load testing with k6 or autocannon
+133. Profiling a slow endpoint (flame graphs)
+134. Worker threads and clustering in Node
+135. Backpressure, rate limiting, and queue-based load leveling
+136. CDN and HTTP caching for static and public data
 
-Step 13 — Cloud basics
-132. One cloud provider done well (AWS, GCP, or Azure)
-133. Compute, object storage, a managed database, and networking (VPC) basics
-134. IAM: users, roles, and least-privilege policies
-135. Managed queues and serverless functions: when they fit
-136. Cost awareness: budgets, alerts, and shutting things down
-137. Infrastructure as code with Terraform (Opt)
+Step 13 — Cloud basics (Playlist)
+137. Object storage, Part 1 — Video 23
+138. Object storage, Part 2 — Video 24
+139. One cloud provider done well (AWS, GCP, or Azure)
+140. Compute, object storage, a managed database, and networking (VPC) basics
+141. IAM: users, roles, and least-privilege policies
+142. Managed queues and serverless functions: when they fit
+143. Cost awareness: budgets, alerts, and shutting things down
+144. Infrastructure as code with Terraform (Opt)
 
 Step 14 — System design (separate track)
-138. Load balancers, reverse proxies (Nginx / HAProxy)
-139. DB scaling: replication, read replicas, connection concentration, sharding
-140. CAP theorem, availability, consistency models
-141. Event-driven architectures: Kafka / RabbitMQ at scale (concepts first)
-142. Sagas, the outbox pattern, and eventual consistency (Opt)
-143. Back-of-the-envelope estimation: requests per second, storage, bandwidth
-144. Study resource: Alex Xu's System Design Interview, or ByteByteGo
-145. Practice designs: URL shortener, rate limiter, chat app, news feed, notification system, file storage
+145. Load balancers, reverse proxies (Nginx / HAProxy)
+146. DB scaling: replication, read replicas, connection concentration, sharding
+147. CAP theorem, availability, consistency models
+148. Event-driven architectures: Kafka / RabbitMQ at scale (concepts first)
+149. Sagas, the outbox pattern, and eventual consistency (Opt)
+150. Real-time backends — Video 25
+151. Back-of-the-envelope estimation: requests per second, storage, bandwidth
+152. Study resource: Alex Xu's System Design Interview, or ByteByteGo
+153. Practice designs: URL shortener, rate limiter, chat app, news feed, notification system, file storage

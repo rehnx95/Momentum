@@ -7,8 +7,6 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE_FILE = path.join(ROOT, "source", "dsa.txt");
 const SOURCE_MARKDOWN_FILE = path.join(ROOT, "source", "dsa.md");
 const MARKDOWN_FILE = path.join(ROOT, "dsa.md");
-const LINK_MAP_FILE = path.join(ROOT, "src", "features", "sheets", "leetcodeProblemLinks.json");
-const DIFFICULTY_MAP_FILE = path.join(ROOT, "src", "features", "sheets", "dsaProblemDifficulties.json");
 const SHEET_FILE = path.join(ROOT, "src", "features", "sheets", "data", "dsa.json");
 
 function parsePreviousMarkdown(markdown) {
@@ -47,8 +45,6 @@ async function main() {
     step.subsections.flatMap((subsection) => subsection.problems),
   );
   const catalog = await fetchLeetCodeCatalog();
-  const links = {};
-  const difficulties = {};
   const output = [
     "# Striver's A2Z DSA Sheet — LeetCode Edition",
     "",
@@ -96,9 +92,9 @@ async function main() {
         throw new Error(`Problem ${row.number} references unknown LeetCode ID ${row.leetCodeId}.`);
       }
       const url = `https://leetcode.com/problems/${question.titleSlug}/`;
-      links[row.leetCodeId] = { url, difficulty: question.difficulty };
-      difficulties[problem.id] = question.difficulty;
-      difficulties[row.number] = question.difficulty;
+      problem.difficulty = question.difficulty;
+      problem.link = { type: "leetcode", url };
+      delete problem.lc;
       const premium = question.isPaidOnly ? " 🔒" : "";
       output.push(
         `- ${row.number}. [${row.title}](${url}) [${question.difficulty}]${premium}${note}`,
@@ -109,8 +105,9 @@ async function main() {
       if (!difficulty) {
         throw new Error(`Problem ${row.number} has no difficulty in source/dsa.md.`);
       }
-      difficulties[problem.id] = difficulty;
-      difficulties[row.number] = difficulty;
+      problem.difficulty = difficulty;
+      problem.link = null;
+      delete problem.lc;
       output.push(`- ${row.number}. ${row.title} [${difficulty}]${note}`);
       unlinkedCount += 1;
     }
@@ -121,13 +118,11 @@ async function main() {
   }
 
   fs.writeFileSync(MARKDOWN_FILE, `${output.join("\n").trimEnd()}\n`, "utf8");
-  fs.writeFileSync(LINK_MAP_FILE, `${JSON.stringify(links, null, 2)}\n`, "utf8");
-  fs.writeFileSync(DIFFICULTY_MAP_FILE, `${JSON.stringify(difficulties, null, 2)}\n`, "utf8");
+  fs.writeFileSync(SHEET_FILE, `${JSON.stringify(sheet, null, 2)}\n`, "utf8");
   console.log(
     `Wrote ${path.relative(ROOT, MARKDOWN_FILE)} with ${linkedCount} LeetCode links and ${unlinkedCount} unlinked items.`,
   );
-  console.log(`Updated ${Object.keys(links).length} unique links in ${path.relative(ROOT, LINK_MAP_FILE)}.`);
-  console.log(`Updated ${problemIndex} problem difficulties in ${path.relative(ROOT, DIFFICULTY_MAP_FILE)}.`);
+  console.log(`Updated embedded metadata in ${path.relative(ROOT, SHEET_FILE)}.`);
 }
 
 main().catch((error) => {

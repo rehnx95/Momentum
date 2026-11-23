@@ -30,7 +30,6 @@ $$;
 
 CREATE OR REPLACE FUNCTION public.delete_sheet_progress_for_owner (
   target_user_id UUID,
-  template_id TEXT,
   sheet_uuid UUID,
   sheet_json JSONB
 ) RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER
@@ -51,23 +50,6 @@ BEGIN
       COALESCE(subsection.value->'problems', '[]'::JSONB)
     ) AS problem(value)
     WHERE sheet_uuid IS NOT NULL
-      AND problem.value ? 'id'
-    UNION
-    SELECT
-      CASE
-        WHEN template_id = 'dsa' THEN problem.value->>'id'
-        ELSE template_id || '::' || (problem.value->>'id')
-      END AS problem_id
-    FROM jsonb_array_elements(
-      COALESCE(sheet_json->'steps', '[]'::JSONB)
-    ) AS step(value)
-    CROSS JOIN LATERAL jsonb_array_elements(
-      COALESCE(step.value->'subsections', '[]'::JSONB)
-    ) AS subsection(value)
-    CROSS JOIN LATERAL jsonb_array_elements(
-      COALESCE(subsection.value->'problems', '[]'::JSONB)
-    ) AS problem(value)
-    WHERE template_id IS NOT NULL
       AND problem.value ? 'id'
   ),
   deleted_progress AS (
@@ -154,7 +136,6 @@ BEGIN
     ) THEN
       PERFORM public.delete_sheet_progress_for_owner(
         auth.uid(),
-        template_id,
         sheet_uuid,
         COALESCE(existing_sheet_data, template_data)
       );
@@ -192,64 +173,6 @@ BEGIN
       END IF;
     END IF;
 
-    WITH problems AS (
-      SELECT problem.value->>'id' AS problem_id
-      FROM jsonb_array_elements(template_data->'steps') AS step(value)
-      CROSS JOIN LATERAL jsonb_array_elements(
-        COALESCE(step.value->'subsections', '[]'::JSONB)
-      ) AS subsection(value)
-      CROSS JOIN LATERAL jsonb_array_elements(
-        COALESCE(subsection.value->'problems', '[]'::JSONB)
-      ) AS problem(value)
-      WHERE problem.value ? 'id'
-    ),
-    legacy_progress AS (
-      SELECT
-        CASE
-          WHEN template_id = 'dsa' THEN problems.problem_id
-          ELSE template_id || '::' || problems.problem_id
-        END AS legacy_problem_id,
-        'custom-' || sheet_uuid::TEXT || '::' || problems.problem_id
-          AS personal_problem_id
-      FROM problems
-    )
-    INSERT INTO public.progress AS existing_progress (
-      user_id, problem_id, state, completed_on, updated_at
-    )
-    SELECT
-      auth.uid(),
-      legacy_progress.personal_problem_id,
-      progress_row.state,
-      progress_row.completed_on,
-      progress_row.updated_at
-    FROM legacy_progress
-    JOIN public.progress AS progress_row
-      ON progress_row.user_id = auth.uid()
-     AND progress_row.problem_id = legacy_progress.legacy_problem_id
-    ON CONFLICT (user_id, problem_id) DO UPDATE
-      SET state = EXCLUDED.state,
-          completed_on = EXCLUDED.completed_on,
-          updated_at = EXCLUDED.updated_at
-      WHERE EXCLUDED.updated_at > existing_progress.updated_at;
-
-    DELETE FROM public.progress AS progress_row
-    USING (
-      SELECT
-        CASE
-          WHEN template_id = 'dsa' THEN problem.value->>'id'
-          ELSE template_id || '::' || (problem.value->>'id')
-        END AS legacy_problem_id
-      FROM jsonb_array_elements(template_data->'steps') AS step(value)
-      CROSS JOIN LATERAL jsonb_array_elements(
-        COALESCE(step.value->'subsections', '[]'::JSONB)
-      ) AS subsection(value)
-      CROSS JOIN LATERAL jsonb_array_elements(
-        COALESCE(subsection.value->'problems', '[]'::JSONB)
-      ) AS problem(value)
-      WHERE problem.value ? 'id'
-    ) AS legacy_ids
-    WHERE progress_row.user_id = auth.uid()
-      AND progress_row.problem_id = legacy_ids.legacy_problem_id;
   END LOOP;
 END;
 $$;
@@ -284,14 +207,14 @@ BEGIN
   END IF;
 
   PERFORM public.delete_sheet_progress_for_owner(
-    auth.uid(), removed_template_id, requested_sheet_id, removed_sheet_data
+    auth.uid(), requested_sheet_id, removed_sheet_data
   );
 
   RETURN TRUE;
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.delete_sheet_progress_for_owner (UUID, TEXT, UUID, JSONB)
+REVOKE ALL ON FUNCTION public.delete_sheet_progress_for_owner (UUID, UUID, JSONB)
 FROM
   PUBLIC,
   anon,

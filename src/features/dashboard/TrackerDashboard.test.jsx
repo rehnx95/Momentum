@@ -8,8 +8,8 @@ vi.mock("../../shared/components/AppHeader", () => ({ default: () => null }));
 vi.mock("./components/TrackerControls", () => ({ default: () => null }));
 vi.mock("../sheets/components/SheetSwitcher", () => ({ default: () => null }));
 vi.mock("../problem-tracker/components/ProblemTree", () => ({
-  StepRow: ({ showDifficulty }) => (
-    <div data-testid="tracker-step" data-show-difficulty={showDifficulty} />
+  StepRow: ({ showBuiltinMetadata }) => (
+    <div data-testid="tracker-step" data-show-builtin-metadata={showBuiltinMetadata} />
   ),
 }));
 
@@ -51,10 +51,10 @@ function createContext(selectedSheet) {
     setSelectedSheetId: vi.fn(),
     sheetError: "",
     sheetProblems: [
-      { id: "dsa::arrays::array-p1" },
-      { id: "dsa::arrays::array-p2" },
-      { id: "dsa::arrays::array-p17" },
-      { id: "dsa::arrays::array-p124" },
+      { id: "dsa::arrays::array-p1", difficulty: "Easy" },
+      { id: "dsa::arrays::array-p2", difficulty: "Easy" },
+      { id: "dsa::arrays::array-p17", difficulty: "Medium" },
+      { id: "dsa::arrays::array-p124", difficulty: "Hard" },
     ],
     sheets: [],
     skippedCount: 2,
@@ -70,7 +70,7 @@ function createContext(selectedSheet) {
 
 afterEach(cleanup);
 
-describe("TrackerDashboard DSA progress gauge", () => {
+describe("TrackerDashboard built-in progress gauge", () => {
   it("shows the gauge only for the built-in DSA sheet", () => {
     render(
       <TrackerDashboard context={createContext({ title: "DSA", builtinTemplateId: "dsa" })} />,
@@ -131,24 +131,36 @@ describe("TrackerDashboard DSA progress gauge", () => {
     });
   });
 
-  it.each([
-    ["DSA", { title: "DSA", builtinTemplateId: "dsa" }, "true"],
-    ["Backend", { title: "Backend", builtinTemplateId: "backend" }, "false"],
-    ["Custom", { title: "Custom", customId: "custom-1" }, "false"],
-  ])("shows tracker difficulty only for %s", (_title, selectedSheet, expectedValue) => {
-    const context = createContext(selectedSheet);
+  it("shows the same difficulty progress card for the built-in Backend sheet", () => {
+    const context = createContext({ title: "Backend", builtinTemplateId: "backend" });
     context.filteredSteps = [{ id: "step-1" }];
     render(<TrackerDashboard context={context} />);
 
-    expect(screen.getByTestId("tracker-step").getAttribute("data-show-difficulty")).toBe(
-      expectedValue,
+    expect(screen.getByRole("img", { name: "1 of 4 problems solved, 2 skipped" })).toBeTruthy();
+    expect(screen.getByRole("group", { name: "Easy: 1 solved out of 2" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Reset Backend progress" })).toBeTruthy();
+    expect(screen.getByTestId("tracker-step").getAttribute("data-show-builtin-metadata")).toBe(
+      "true",
     );
   });
 
   it.each([
-    ["Backend", { title: "Backend", builtinTemplateId: "backend" }],
-    ["Custom", { title: "Custom", customId: "custom-1" }],
-  ])("shows the two-status progress card for the %s sheet", (title, selectedSheet) => {
+    ["DSA", { title: "DSA", builtinTemplateId: "dsa" }, "true"],
+    ["Backend", { title: "Backend", builtinTemplateId: "backend" }, "true"],
+    ["Custom", { title: "Custom", customId: "custom-1" }, "false"],
+  ])("shows built-in metadata only for %s", (_title, selectedSheet, expectedValue) => {
+    const context = createContext(selectedSheet);
+    context.filteredSteps = [{ id: "step-1" }];
+    render(<TrackerDashboard context={context} />);
+
+    expect(screen.getByTestId("tracker-step").getAttribute("data-show-builtin-metadata")).toBe(
+      expectedValue,
+    );
+  });
+
+  it("shows the two-status progress card for a custom sheet", () => {
+    const title = "Custom";
+    const selectedSheet = { title, customId: "custom-1" };
     const { container } = render(<TrackerDashboard context={createContext(selectedSheet)} />);
 
     const gauge = screen.getByRole("img", { name: "1 done, 1 to do, 2 skipped" });
@@ -205,7 +217,7 @@ describe("TrackerDashboard DSA progress gauge", () => {
     );
   });
 
-  it("keeps DSA difficulty tiles out of a Backend sheet with stale template metadata", () => {
+  it("determines built-in features by template type, not its display title", () => {
     render(
       <TrackerDashboard
         context={createContext({
@@ -216,8 +228,7 @@ describe("TrackerDashboard DSA progress gauge", () => {
       />,
     );
 
-    expect(screen.queryByRole("group", { name: /^(Easy|Medium|Hard):/ })).toBeNull();
-    expect(screen.getByRole("group", { name: "Done: 1" })).toBeTruthy();
-    expect(screen.getByRole("group", { name: "To Do: 1" })).toBeTruthy();
+    expect(screen.getByRole("group", { name: "Easy: 1 solved out of 2" })).toBeTruthy();
+    expect(screen.queryByRole("group", { name: "Done: 1" })).toBeNull();
   });
 });

@@ -13,6 +13,10 @@ vi.mock("../../../shared/lib/supabase", () => ({
 
 vi.mock("../data/bootstrapBuiltInSheets", () => ({
   bootstrapBuiltInSheets: vi.fn(),
+  getBuiltInSheetOptions: vi.fn(() => [
+    { id: "dsa", title: "DSA" },
+    { id: "backend", title: "Backend" },
+  ]),
   loadBuiltInSheet: vi.fn(),
 }));
 
@@ -20,28 +24,26 @@ import { supabase } from "../../../shared/lib/supabase";
 import { bootstrapBuiltInSheets, loadBuiltInSheet } from "../data/bootstrapBuiltInSheets";
 import useSheetLibrary from "./useSheetLibrary";
 
-const dsaTemplate = {
-  id: "dsa",
-  title: "DSA",
-  sheet: {
-    steps: [
-      {
-        subsections: [{ problems: [{ id: "array-problem", title: "Array Problem" }] }],
-      },
-    ],
-  },
-};
+function createBuiltInTemplate(id, title) {
+  return {
+    id,
+    title,
+    sheet: {
+      steps: [
+        {
+          subsections: [{ problems: [{ id: "array-problem", title: "Array Problem" }] }],
+        },
+      ],
+    },
+  };
+}
 
-describe("useSheetLibrary DSA restore", () => {
+describe("useSheetLibrary built-in restore", () => {
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
     vi.mocked(bootstrapBuiltInSheets).mockResolvedValue("dsa");
-    vi.mocked(loadBuiltInSheet).mockResolvedValue(dsaTemplate);
-    vi.mocked(supabase.rpc).mockResolvedValue({
-      data: { id: "restored-dsa-id" },
-      error: null,
-    });
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: { id: "restored-sheet-id" }, error: null });
 
     const order = vi.fn().mockResolvedValue({
       data: [
@@ -60,7 +62,12 @@ describe("useSheetLibrary DSA restore", () => {
     vi.mocked(supabase.from).mockReturnValue({ select });
   });
 
-  it("restores and selects DSA while clearing only its local progress", async () => {
+  it.each([
+    ["dsa", "DSA"],
+    ["backend", "Backend"],
+  ])("restores and selects the built-in %s sheet consistently", async (templateId, title) => {
+    const template = createBuiltInTemplate(templateId, title);
+    vi.mocked(loadBuiltInSheet).mockResolvedValue(template);
     let library;
     function HookHarness() {
       library = useSheetLibrary({ id: "user-1" }, vi.fn());
@@ -75,23 +82,22 @@ describe("useSheetLibrary DSA restore", () => {
 
     const resetProgress = vi.fn().mockResolvedValue(undefined);
     await act(async () => {
-      await library.restoreDsaSheet(resetProgress);
+      await library.restoreBuiltinSheet(templateId, resetProgress);
     });
 
-    expect(supabase.rpc).toHaveBeenCalledWith("restore_builtin_dsa_sheet", {
+    expect(supabase.rpc).toHaveBeenCalledWith("restore_builtin_sheet", {
       requested_sheet: {
-        id: "dsa",
-        title: "DSA",
-        sheet_data: dsaTemplate.sheet,
+        id: templateId,
+        title,
+        sheet_data: template.sheet,
       },
     });
-    expect(resetProgress).toHaveBeenCalledWith(
-      ["array-problem", "custom-restored-dsa-id::array-problem"],
-      { persist: false },
-    );
-    expect(library.selectedSheet.id).toBe("custom-restored-dsa-id");
-    expect(library.availableSheets.map((sheet) => sheet.title)).toEqual(["DSA", "personal"]);
-    expect(library.restoringDsaSheet).toBe(false);
+    expect(resetProgress).toHaveBeenCalledWith(["custom-restored-sheet-id::array-problem"], {
+      persist: false,
+    });
+    expect(library.selectedSheet.id).toBe("custom-restored-sheet-id");
+    expect(library.availableSheets.map((sheet) => sheet.title)).toContain(title);
+    expect(library.restoringBuiltinSheetId).toBe(null);
 
     act(() => renderer.unmount());
   });

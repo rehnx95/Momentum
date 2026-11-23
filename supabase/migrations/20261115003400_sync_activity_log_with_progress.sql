@@ -1,9 +1,8 @@
-CREATE OR REPLACE FUNCTION public.sync_activity_log_from_progress ()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = pg_catalog, public, pg_temp
-AS $$
+CREATE OR REPLACE FUNCTION public.sync_activity_log_from_progress () RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
+SET
+  search_path = pg_catalog,
+  public,
+  pg_temp AS $$
 DECLARE
   old_activity_date DATE;
   new_activity_date DATE;
@@ -92,17 +91,19 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.sync_activity_log_from_progress ()
-FROM PUBLIC, anon, authenticated;
+FROM
+  PUBLIC,
+  anon,
+  authenticated;
 
 DROP TRIGGER IF EXISTS sync_activity_log_from_progress ON public.progress;
+
 CREATE TRIGGER sync_activity_log_from_progress
-AFTER INSERT OR UPDATE OR DELETE ON public.progress
-FOR EACH ROW
+AFTER INSERT OR UPDATE OR DELETE ON public.progress FOR EACH ROW
 EXECUTE FUNCTION public.sync_activity_log_from_progress ();
 
 CREATE OR REPLACE FUNCTION public.delete_sheet_progress_for_owner (
   target_user_id UUID,
-  template_id TEXT,
   sheet_uuid UUID,
   sheet_json JSONB
 ) RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER
@@ -124,23 +125,6 @@ BEGIN
     ) AS problem(value)
     WHERE sheet_uuid IS NOT NULL
       AND problem.value ? 'id'
-    UNION
-    SELECT
-      CASE
-        WHEN template_id = 'dsa' THEN problem.value->>'id'
-        ELSE template_id || '::' || (problem.value->>'id')
-      END AS problem_id
-    FROM jsonb_array_elements(
-      COALESCE(sheet_json->'steps', '[]'::JSONB)
-    ) AS step(value)
-    CROSS JOIN LATERAL jsonb_array_elements(
-      COALESCE(step.value->'subsections', '[]'::JSONB)
-    ) AS subsection(value)
-    CROSS JOIN LATERAL jsonb_array_elements(
-      COALESCE(subsection.value->'problems', '[]'::JSONB)
-    ) AS problem(value)
-    WHERE template_id IS NOT NULL
-      AND problem.value ? 'id'
   )
   DELETE FROM public.progress AS progress_row
   USING sheet_problem_ids
@@ -149,21 +133,42 @@ BEGIN
 END;
 $$;
 
-UPDATE public.activity_log
-SET count = 0
-WHERE count <> 0;
+REVOKE ALL ON FUNCTION public.delete_sheet_progress_for_owner (UUID, UUID, JSONB)
+FROM
+  PUBLIC,
+  anon,
+  authenticated;
 
-INSERT INTO public.activity_log (user_id, date, count)
+UPDATE public.activity_log
+SET
+  count = 0
+WHERE
+  count <> 0;
+
+INSERT INTO
+  public.activity_log (user_id, date, count)
 SELECT
   user_id,
-  COALESCE(completed_on, (updated_at AT TIME ZONE 'UTC')::DATE),
+  COALESCE(
+    completed_on,
+    (updated_at AT TIME ZONE 'UTC')::DATE
+  ),
   COUNT(*)::INTEGER
-FROM public.progress
-WHERE state = 'done'
-GROUP BY user_id, COALESCE(completed_on, (updated_at AT TIME ZONE 'UTC')::DATE)
+FROM
+  public.progress
+WHERE
+  state = 'done'
+GROUP BY
+  user_id,
+  COALESCE(
+    completed_on,
+    (updated_at AT TIME ZONE 'UTC')::DATE
+  )
 ON CONFLICT (user_id, date) DO UPDATE
-SET count = EXCLUDED.count,
-    updated_at = NOW();
+SET
+  count = EXCLUDED.count,
+  updated_at = NOW();
 
 DELETE FROM public.activity_log
-WHERE count = 0;
+WHERE
+  count = 0;

@@ -5,21 +5,22 @@ import TrackerControls from "./components/TrackerControls";
 import SheetSwitcher from "../sheets/components/SheetSwitcher";
 import { StepRow } from "../problem-tracker/components/ProblemTree";
 import { getProblemDifficulty } from "../problem-tracker/utils/problemDifficulty";
+import { isBuiltInSheet } from "../sheets/utils/builtinSheet";
 
-const DSA_GAUGE_FILL_TRANSITION = "stroke-dasharray 900ms cubic-bezier(0.16, 1, 0.3, 1)";
+const BUILTIN_GAUGE_FILL_TRANSITION = "stroke-dasharray 900ms cubic-bezier(0.16, 1, 0.3, 1)";
 const SHEET_STATUS_COLORS = {
   done: "hsl(160 70% 45%)",
   todo: "hsl(43 100% 50%)",
 };
-const DSA_DIFFICULTIES = [
+const BUILTIN_DIFFICULTIES = [
   { name: "Easy", label: "Easy", color: "#34D399" },
   { name: "Medium", label: "Med.", color: "#FFA116" },
   { name: "Hard", label: "Hard", color: "#FB7185" },
 ];
 
-function getDsaDifficultyStats(sheetProblems, progressState) {
+function getBuiltinDifficultyStats(sheetProblems, progressState) {
   const stats = Object.fromEntries(
-    DSA_DIFFICULTIES.map(({ name }) => [name, { done: 0, total: 0 }]),
+    BUILTIN_DIFFICULTIES.map(({ name }) => [name, { done: 0, total: 0 }]),
   );
   sheetProblems.forEach((problem) => {
     const difficulty = getProblemDifficulty(problem);
@@ -79,7 +80,7 @@ function ProgressGauge({ done, total, skipped, centerLabel, ariaLabel, segments 
                     strokeLinecap="round"
                     strokeDasharray={`${solvedLength} ${circumference - solvedLength}`}
                     strokeDashoffset="66"
-                    style={{ transition: DSA_GAUGE_FILL_TRANSITION }}
+                    style={{ transition: BUILTIN_GAUGE_FILL_TRANSITION }}
                   />
                 </g>
               ))}
@@ -110,15 +111,15 @@ function ProgressGauge({ done, total, skipped, centerLabel, ariaLabel, segments 
   );
 }
 
-function DsaProgressGauge({ done, total, skipped, difficultyStats }) {
+function BuiltInProgressGauge({ done, total, skipped, difficultyStats }) {
   const circumference = 2 * Math.PI * 42;
   const trackLength = (circumference * 254) / 360;
-  const difficultyTotal = DSA_DIFFICULTIES.reduce(
+  const difficultyTotal = BUILTIN_DIFFICULTIES.reduce(
     (sum, { name }) => sum + difficultyStats[name].total,
     0,
   );
   let rotation = 225;
-  const segments = DSA_DIFFICULTIES.map(({ name, color }) => {
+  const segments = BUILTIN_DIFFICULTIES.map(({ name, color }) => {
     const stats = difficultyStats[name];
     const segmentLength = difficultyTotal > 0 ? (trackLength * stats.total) / difficultyTotal : 0;
     const segment = {
@@ -144,10 +145,10 @@ function DsaProgressGauge({ done, total, skipped, difficultyStats }) {
   );
 }
 
-function DsaDifficultyProgress({ stats }) {
+function BuiltInDifficultyProgress({ stats }) {
   return (
     <div className="flex h-full w-[90px] flex-none flex-col gap-2">
-      {DSA_DIFFICULTIES.map(({ name, label, color }) => {
+      {BUILTIN_DIFFICULTIES.map(({ name, label, color }) => {
         const { done, total } = stats[name];
         return (
           <div
@@ -179,7 +180,7 @@ function SheetProgressGauge({ done, total, todo, skipped }) {
   ].filter(({ count }) => count > 0);
   const gapLength = (circumference * 8) / 360;
   const segmentLengthBudget =
-    trackLength + (DSA_DIFFICULTIES.length - categories.length) * gapLength;
+    trackLength + (BUILTIN_DIFFICULTIES.length - categories.length) * gapLength;
   let rotation = 225;
   const segments = categories.map(({ name, count, color }) => {
     const segmentLength = (segmentLengthBudget * count) / activeTotal;
@@ -273,16 +274,11 @@ export default function TrackerDashboard({ context }) {
     uploadSheetInput,
     uploadingSheet,
   } = context;
-  const selectedSheetName = selectedSheet?.title?.trim().toLowerCase();
-  const isDsaProgressCard =
-    selectedSheet?.builtinTemplateId === "dsa" && selectedSheetName === "dsa";
-  const isCompactProgressCard =
-    selectedSheet?.builtinTemplateId === "backend" ||
-    selectedSheetName === "backend" ||
-    Boolean(selectedSheet?.customId);
-  const canResetSheetProgress = isDsaProgressCard || isCompactProgressCard;
-  const dsaDifficultyStats = isDsaProgressCard
-    ? getDsaDifficultyStats(sheetProblems, progressState)
+  const isBuiltIn = isBuiltInSheet(selectedSheet);
+  const isCompactProgressCard = !isBuiltIn && Boolean(selectedSheet?.customId);
+  const canResetSheetProgress = isBuiltIn || Boolean(selectedSheet?.customId);
+  const builtInDifficultyStats = isBuiltIn
+    ? getBuiltinDifficultyStats(sheetProblems, progressState)
     : null;
 
   return (
@@ -398,7 +394,7 @@ export default function TrackerDashboard({ context }) {
                     onSkipProb={handleSkip}
                     hideSkipped={hideSkipped}
                     filter={activeFilter}
-                    showDifficulty={isDsaProgressCard}
+                    showBuiltinMetadata={isBuiltIn}
                   />
                 ))
               ) : (
@@ -428,12 +424,10 @@ export default function TrackerDashboard({ context }) {
                       className="grid h-5 w-5 min-h-0 place-items-center rounded text-[var(--muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
                       onClick={async () => {
                         const sheetName = selectedSheet?.title || "this sheet";
-                        const confirmationMessage = isDsaProgressCard
-                          ? "Reset progress for DSA only? Other sheets will not be affected."
-                          : `Reset progress for ${sheetName} only? Other sheets will not be affected.`;
+                        const confirmationMessage = `Reset progress for ${sheetName} only? Other sheets will not be affected.`;
                         const confirmed = await askConfirmation(
                           confirmationMessage,
-                          isDsaProgressCard ? "Reset DSA progress?" : "Reset this sheet?",
+                          `Reset ${sheetName} progress?`,
                         );
                         if (confirmed) await reset(sheetProblems.map((problem) => problem.id));
                       }}
@@ -443,15 +437,15 @@ export default function TrackerDashboard({ context }) {
                   </Tooltip>
                 )}
               </div>
-              {isDsaProgressCard ? (
+              {isBuiltIn ? (
                 <div className="flex h-[148px] w-full gap-2">
-                  <DsaProgressGauge
+                  <BuiltInProgressGauge
                     done={doneCount}
                     total={totalProblems}
                     skipped={skippedCount}
-                    difficultyStats={dsaDifficultyStats}
+                    difficultyStats={builtInDifficultyStats}
                   />
-                  <DsaDifficultyProgress stats={dsaDifficultyStats} />
+                  <BuiltInDifficultyProgress stats={builtInDifficultyStats} />
                 </div>
               ) : isCompactProgressCard ? (
                 <div className="flex h-[148px] w-full gap-2">
@@ -491,25 +485,19 @@ export default function TrackerDashboard({ context }) {
                         <div className="text-lg font-semibold text-[var(--text)] tabular-nums">
                           {doneCount}
                         </div>
-                        <div className="text-xs text-muted uppercase tracking-wide">
-                          Done
-                        </div>
+                        <div className="text-xs text-muted uppercase tracking-wide">Done</div>
                       </div>
                       <div className="text-center">
                         <div className="text-lg font-semibold text-[var(--muted)] tabular-nums">
                           {skippedCount}
                         </div>
-                        <div className="text-xs text-muted uppercase tracking-wide">
-                          Skipped
-                        </div>
+                        <div className="text-xs text-muted uppercase tracking-wide">Skipped</div>
                       </div>
                       <div className="text-center">
                         <div className="text-lg font-semibold text-[var(--text)] tabular-nums">
                           {todoCount}
                         </div>
-                        <div className="text-xs text-muted uppercase tracking-wide">
-                          To Do
-                        </div>
+                        <div className="text-xs text-muted uppercase tracking-wide">To Do</div>
                       </div>
                     </div>
                     <button

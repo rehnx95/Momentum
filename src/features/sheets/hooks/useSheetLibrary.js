@@ -3,7 +3,11 @@ import { readUserDataCache, writeUserDataCache } from "../../../shared/lib/userD
 import { supabase } from "../../../shared/lib/supabase";
 import { countSheetProblems, parseSheet, sampleSheetTemplate } from "../utils/parseSheet";
 import { getUploadedSheetTitle } from "../utils/sheetTitle";
-import { bootstrapBuiltInSheets, loadBuiltInSheet } from "../data/bootstrapBuiltInSheets";
+import {
+  bootstrapBuiltInSheets,
+  getBuiltInSheetOptions,
+  loadBuiltInSheet,
+} from "../data/bootstrapBuiltInSheets";
 
 export default function useSheetLibrary(user, askConfirmation) {
   const [cachedSheets] = useState(() => readUserDataCache(user.id, "sheets"));
@@ -20,7 +24,7 @@ export default function useSheetLibrary(user, askConfirmation) {
   );
   const [uploadingSheet, setUploadingSheet] = useState(false);
   const [deletingSheetId, setDeletingSheetId] = useState(null);
-  const [restoringDsaSheet, setRestoringDsaSheet] = useState(false);
+  const [restoringBuiltinSheetId, setRestoringBuiltinSheetId] = useState(null);
   const [sheetError, setSheetError] = useState("");
   const uploadSheetInput = useRef(null);
   const savedSheetIdRef = useRef(null);
@@ -198,17 +202,7 @@ export default function useSheetLibrary(user, askConfirmation) {
 
       const problemIds = sheet.sheet.steps.flatMap((step) =>
         step.subsections.flatMap((subsection) =>
-          subsection.problems.flatMap((problem) => {
-            const ids = [`${sheet.id}::${problem.id}`];
-            if (sheet.builtinTemplateId) {
-              ids.push(
-                sheet.builtinTemplateId === "dsa"
-                  ? problem.id
-                  : `${sheet.builtinTemplateId}::${problem.id}`,
-              );
-            }
-            return ids;
-          }),
+          subsection.problems.map((problem) => `${sheet.id}::${problem.id}`),
         ),
       );
       await resetProgress(problemIds, { persist: false });
@@ -231,18 +225,18 @@ export default function useSheetLibrary(user, askConfirmation) {
     }
   };
 
-  const restoreDsaSheet = async (resetProgress) => {
+  const restoreBuiltinSheet = async (templateId, resetProgress) => {
     if (customSheetsLoading) {
-      throw new Error("Wait for your sheets to finish loading before restoring DSA.");
+      throw new Error("Wait for your sheets to finish loading before restoring a built-in sheet.");
     }
     if (typeof resetProgress !== "function") {
       throw new Error("Progress reset is unavailable. Please reload and try again.");
     }
 
-    setRestoringDsaSheet(true);
+    setRestoringBuiltinSheetId(templateId);
     try {
-      const template = await loadBuiltInSheet("dsa");
-      const { data: restored, error } = await supabase.rpc("restore_builtin_dsa_sheet", {
+      const template = await loadBuiltInSheet(templateId);
+      const { data: restored, error } = await supabase.rpc("restore_builtin_sheet", {
         requested_sheet: {
           id: template.id,
           title: template.title,
@@ -251,34 +245,34 @@ export default function useSheetLibrary(user, askConfirmation) {
       });
       if (error) throw error;
       if (!restored || typeof restored.id !== "string") {
-        throw new Error("The restored DSA sheet could not be loaded.");
+        throw new Error(`The restored ${template.title} sheet could not be loaded.`);
       }
 
       const nextSheet = {
         id: `custom-${restored.id}`,
         customId: restored.id,
-        builtinTemplateId: "dsa",
+        builtinTemplateId: templateId,
         title: template.title,
-        sourceName: "builtin:dsa",
+        sourceName: `builtin:${templateId}`,
         sheet: template.sheet,
         problemCount: countSheetProblems(template.sheet),
       };
       const problemIds = template.sheet.steps.flatMap((step) =>
         step.subsections.flatMap((subsection) =>
-          subsection.problems.flatMap((problem) => [problem.id, `${nextSheet.id}::${problem.id}`]),
+          subsection.problems.map((problem) => `${nextSheet.id}::${problem.id}`),
         ),
       );
       await resetProgress(problemIds, { persist: false });
       setCustomSheets((current) => [
-        ...current.filter((sheet) => sheet.builtinTemplateId !== "dsa"),
+        ...current.filter((sheet) => sheet.builtinTemplateId !== templateId),
         nextSheet,
       ]);
       setSelectedSheetId(nextSheet.id);
     } catch (error) {
-      console.error("Failed to restore DSA sheet:", error);
+      console.error(`Failed to restore ${templateId} sheet:`, error);
       throw error;
     } finally {
-      setRestoringDsaSheet(false);
+      setRestoringBuiltinSheetId(null);
     }
   };
 
@@ -301,14 +295,15 @@ export default function useSheetLibrary(user, askConfirmation) {
     customSheetsLoading,
     uploadingSheet,
     deletingSheetId,
-    restoringDsaSheet,
+    builtInSheetOptions: getBuiltInSheetOptions(),
+    restoringBuiltinSheetId,
     sheetError,
     setSheetError,
     uploadSheetInput,
     data,
     handleUploadSheet,
     handleRemoveSheet,
-    restoreDsaSheet,
+    restoreBuiltinSheet,
     downloadSampleFormat,
   };
 }

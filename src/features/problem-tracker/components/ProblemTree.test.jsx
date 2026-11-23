@@ -7,14 +7,20 @@ import { ProblemRow } from "./ProblemTree";
 afterEach(cleanup);
 
 describe("ProblemRow", () => {
-  it("shows an icon-only LeetCode link before Skip without difficulty labels", () => {
+  it("shows LeetCode metadata for a built-in DSA row", () => {
     const onToggle = vi.fn();
     render(
       <ProblemRow
-        prob={{ id: "two-sum", title: "Two Sum", lc: 1 }}
+        prob={{
+          id: "two-sum",
+          title: "Two Sum",
+          difficulty: "Easy",
+          link: { type: "leetcode", url: "https://leetcode.com/problems/two-sum/" },
+        }}
         state="todo"
         onToggle={onToggle}
         onSkip={vi.fn()}
+        showBuiltinMetadata
       />,
     );
 
@@ -24,10 +30,10 @@ describe("ProblemRow", () => {
     const tooltips = Array.from(document.body.querySelectorAll('[role="tooltip"]'));
     const tooltipLabels = tooltips.map((tooltip) => tooltip.textContent);
 
-    expect(screen.queryByRole("button", { name: "Toggle Two Sum completion" })).toBeNull();
-    expect(screen.queryByText(/Easy|Medium|Hard/)).toBeNull();
-    expect(actionGroup.className).toContain("grid-cols-[1.25rem_1.25rem]");
-    expect(actionGroup.children).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "Toggle Two Sum completion" })).toBeTruthy();
+    expect(screen.getByText("Easy")).toBeTruthy();
+    expect(actionGroup.className).toContain("grid-cols-[auto_1.25rem_1.25rem]");
+    expect(actionGroup.children).toHaveLength(3);
     expect(link.textContent).toBe("");
     const leetcodeIcon = link.querySelector("svg");
     expect(leetcodeIcon?.getAttribute("viewBox")).toBe("0 0 94 111");
@@ -47,7 +53,9 @@ describe("ProblemRow", () => {
     expect(tooltipLabels).toEqual(["Open on LeetCode", "Skip"]);
     expect(tooltips.every((tooltip) => tooltip.parentElement === document.body)).toBe(true);
     expect(tooltips.every((tooltip) => tooltip.classList.contains("app-tooltip"))).toBe(true);
-    expect(tooltips.every((tooltip) => tooltip.classList.contains("app-tooltip-portal"))).toBe(true);
+    expect(tooltips.every((tooltip) => tooltip.classList.contains("app-tooltip-portal"))).toBe(
+      true,
+    );
     expect(tooltips.every((tooltip) => tooltip.style.position === "fixed")).toBe(true);
     expect(skipButton.getAttribute("aria-describedby")).toBe(tooltips[1].id);
     expect(link.hasAttribute("title")).toBe(false);
@@ -57,10 +65,15 @@ describe("ProblemRow", () => {
     expect(onToggle).toHaveBeenCalledWith("two-sum");
   });
 
-  it("does not display the LeetCode difficulty in tracker rows", () => {
+  it("keeps custom rows simple without difficulty or resource links", () => {
     render(
       <ProblemRow
-        prob={{ id: "add-two-numbers", title: "Add Two Numbers", lc: 2 }}
+        prob={{
+          id: "add-two-numbers",
+          title: "Add Two Numbers",
+          link: { type: "youtube", url: "https://youtu.be/example" },
+          difficulty: "Hard",
+        }}
         state="todo"
         onToggle={vi.fn()}
         onSkip={vi.fn()}
@@ -68,31 +81,34 @@ describe("ProblemRow", () => {
     );
 
     expect(screen.queryByText("Medium")).toBeNull();
+    expect(screen.queryByText("Hard")).toBeNull();
+    expect(screen.queryByRole("link")).toBeNull();
     expect(screen.queryByRole("button", { name: "Toggle Add Two Numbers completion" })).toBeNull();
   });
 
-  it("does not show a LeetCode link when the problem has no mapped ID", () => {
+  it("does not show a resource link when a built-in topic has none", () => {
     render(
       <ProblemRow
-        prob={{ id: "custom", title: "Custom exercise", lc: null }}
+        prob={{ id: "custom", title: "Custom exercise", link: null, difficulty: "Easy" }}
         state="todo"
         onToggle={vi.fn()}
         onSkip={vi.fn()}
+        showBuiltinMetadata
       />,
     );
 
-    expect(screen.queryByRole("link", { name: /LeetCode/ })).toBeNull();
-    expect(screen.queryByText(/Easy|Medium|Hard/)).toBeNull();
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getByText("Easy")).toBeTruthy();
   });
 
   it("shows DSA problem difficulty in DSA tracker rows", () => {
     render(
       <ProblemRow
-        prob={{ id: "s3-3.1-p65", title: "Linear Search", lc: null }}
+        prob={{ id: "s3-3.1-p65", title: "Linear Search", difficulty: "Easy", link: null }}
         state="todo"
         onToggle={vi.fn()}
         onSkip={vi.fn()}
-        showDifficulty
+        showBuiltinMetadata
       />,
     );
 
@@ -100,5 +116,29 @@ describe("ProblemRow", () => {
     expect(screen.getByRole("button", { name: "Toggle Linear Search completion" })).toBeTruthy();
     expect(screen.queryByRole("link", { name: /LeetCode/ })).toBeNull();
     expect(document.querySelector(".problem-row > div.grid").children).toHaveLength(3);
+  });
+
+  it("shows Backend difficulty and an accessible YouTube link", () => {
+    render(
+      <ProblemRow
+        prob={{
+          id: "backend-basics",
+          title: "Backend basics",
+          link: { type: "youtube", url: "https://youtu.be/example" },
+          difficulty: "Medium",
+        }}
+        state="todo"
+        onToggle={vi.fn()}
+        onSkip={vi.fn()}
+        showBuiltinMetadata
+      />,
+    );
+
+    const link = screen.getByRole("link", { name: "Open Backend basics on YouTube" });
+    expect(screen.getByText("Medium")).toBeTruthy();
+    expect(link.getAttribute("href")).toBe("https://youtu.be/example");
+    expect(link.querySelector("rect").getAttribute("fill")).toBe("#FF0000");
+    expect(link.querySelector("path").getAttribute("fill")).toBe("#FFFFFF");
+    expect(document.querySelector('[role="tooltip"]').textContent).toBe("Open on YouTube");
   });
 });

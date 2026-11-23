@@ -33,8 +33,9 @@ export default function ProfilePage({ context }) {
     publicProfileReturnPath,
     recentAccepted,
     reset,
-    restoreDsaSheet,
-    restoringDsaSheet,
+    builtInSheetOptions = [],
+    restoreBuiltinSheet,
+    restoringBuiltinSheetId,
     customSheetsLoading,
     progressLoading,
     setBackupAction,
@@ -47,6 +48,8 @@ export default function ProfilePage({ context }) {
     yearlyActiveDays,
   } = context;
   const { askConfirmation } = context;
+  const actionSheets = backupAction === "restore" ? builtInSheetOptions : availableSheets;
+
   return (
     <div className="profile-shell min-h-screen bg-page text-text font-sans transition-colors duration-300">
       <AppHeader active="profile" {...headerProps} />
@@ -137,27 +140,8 @@ export default function ProfilePage({ context }) {
                 sheets={profileSheetStats}
                 onExport={() => setBackupAction("export")}
                 onImport={() => setBackupAction("import")}
-                onRestoreDsa={async () => {
-                  try {
-                    const confirmed = await askConfirmation(
-                      "Restore the original DSA sheet? Your DSA progress will be reset. Other sheets will not be affected.",
-                      "Restore DSA?",
-                    );
-                    if (!confirmed) return;
-                    await restoreDsaSheet();
-                    showNotice(
-                      "The original DSA sheet was restored and its progress was reset.",
-                      "DSA restored",
-                    );
-                  } catch (error) {
-                    console.error("Failed to restore DSA sheet:", error);
-                    showNotice(
-                      error.message || "Could not restore the DSA sheet. Please try again.",
-                      "Restore failed",
-                    );
-                  }
-                }}
-                restoring={restoringDsaSheet}
+                onRestoreBuiltin={() => setBackupAction("restore")}
+                restoringBuiltinSheetId={restoringBuiltinSheetId}
                 restoreDisabled={customSheetsLoading || progressLoading}
                 onReset={async () => {
                   const confirmed = await askConfirmation(
@@ -202,12 +186,16 @@ export default function ProfilePage({ context }) {
               <h2 id="backup-sheet-title" className="text-lg font-semibold text-text">
                 {backupAction === "export"
                   ? "Choose a sheet to export"
-                  : "Choose a sheet to import into"}
+                  : backupAction === "restore"
+                    ? "Choose a built-in sheet to restore"
+                    : "Choose a sheet to import into"}
               </h2>
               <p id="backup-sheet-description">
                 {backupAction === "export"
                   ? "Download progress for one sheet."
-                  : "Choose the sheet you want to restore, then select its progress backup file."}
+                  : backupAction === "restore"
+                    ? "Select DSA or Backend. Progress for the selected sheet will be reset."
+                    : "Choose the sheet you want to restore, then select its progress backup file."}
               </p>
               {backupAction === "import" && (
                 <div className="mt-4 rounded-lg border border-subtle bg-panel p-3 text-sm text-text">
@@ -225,13 +213,39 @@ export default function ProfilePage({ context }) {
               <div
                 className="mt-4 max-h-72 space-y-1 overflow-y-auto"
                 role="group"
-                aria-label="Available sheets"
+                aria-label={backupAction === "restore" ? "Built-in sheets" : "Available sheets"}
               >
-                {availableSheets.map((sheet) => (
+                {actionSheets.map((sheet) => (
                   <button
                     key={sheet.id}
                     type="button"
-                    onClick={() => {
+                    aria-label={
+                      backupAction === "restore" ? `Restore ${sheet.title} sheet` : undefined
+                    }
+                    onClick={async () => {
+                      if (backupAction === "restore") {
+                        setBackupAction("");
+                        const confirmed = await askConfirmation(
+                          `Restore the original ${sheet.title} sheet? Your ${sheet.title} progress will be reset. Other sheets will not be affected.`,
+                          `Restore ${sheet.title}?`,
+                        );
+                        if (!confirmed) return;
+                        try {
+                          await restoreBuiltinSheet(sheet.id);
+                          showNotice(
+                            `The original ${sheet.title} sheet was restored and its progress was reset.`,
+                            `${sheet.title} restored`,
+                          );
+                        } catch (error) {
+                          console.error(`Failed to restore ${sheet.title} sheet:`, error);
+                          showNotice(
+                            error.message ||
+                              `Could not restore the ${sheet.title} sheet. Please try again.`,
+                            "Restore failed",
+                          );
+                        }
+                        return;
+                      }
                       if (backupAction === "export") {
                         exportProgress(sheet);
                         return;
@@ -251,7 +265,7 @@ export default function ProfilePage({ context }) {
                   >
                     <span>{sheet.title}</span>
                     <span className="text-xs text-muted tabular-nums">
-                      {sheet.problemCount} problems
+                      {backupAction === "restore" ? "Built-in" : `${sheet.problemCount} problems`}
                     </span>
                   </button>
                 ))}

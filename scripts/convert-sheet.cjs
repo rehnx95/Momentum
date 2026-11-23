@@ -3,6 +3,7 @@ const path = require("path");
 
 const SOURCE_DIR = path.join(__dirname, "../source");
 const OUTPUT_DIR = path.join(__dirname, "../src/features/sheets/data");
+const BUILTIN_SHEET_IDS = new Set(["backend", "dsa"]);
 
 // Title used for problems that sit directly under a Step (no "N.M — Title" header).
 // Set to null so the UI can simply skip rendering a subsection heading.
@@ -111,7 +112,6 @@ function parseSheetContent(source, previousSheet = null) {
 
   // Split several problems glued onto one line, e.g.
   //   "62. Left Rotate by One Place63. Left Rotate by D Places (LC 189)"
-  //   "54. ... — Video 1655. Production-grade Configuration — Video 17"
   // Instead of splitting on any "digits. " (which would misread "Video 1655." as
   // problem 1655), we only split where the *next expected* number appears.
   function splitProblems(text) {
@@ -238,19 +238,27 @@ function parseSheetContent(source, previousSheet = null) {
 }
 
 function parseSheet(sourceFile, previousSheet = null) {
+  const sheetId = path.basename(sourceFile, path.extname(sourceFile)).toLowerCase();
+  if (BUILTIN_SHEET_IDS.has(sheetId)) {
+    throw new Error(`The built-in "${sheetId}" sheet is managed separately.`);
+  }
   return parseSheetContent(fs.readFileSync(sourceFile, "utf8"), previousSheet);
 }
 
 function listSourceFiles() {
   return fs
     .readdirSync(SOURCE_DIR)
-    .filter((file) => file.toLowerCase().endsWith(".txt"))
+    .filter(
+      (file) =>
+        file.toLowerCase().endsWith(".txt") &&
+        !BUILTIN_SHEET_IDS.has(path.basename(file, path.extname(file)).toLowerCase()),
+    )
     .sort((a, b) => a.localeCompare(b));
 }
 
 async function chooseSourceFile() {
   const files = listSourceFiles();
-  if (files.length === 0) throw new Error(`No .txt source files found in ${SOURCE_DIR}`);
+  if (files.length === 0) throw new Error(`No custom .txt source files found in ${SOURCE_DIR}`);
 
   console.log("Available source sheets:");
   files.forEach((file, index) => console.log(`  ${index + 1}. ${file}`));
@@ -320,7 +328,9 @@ async function convertSourceFile(filename) {
 async function main(sourceName = process.argv[2]) {
   if (sourceName === "--all") {
     const files = listSourceFiles();
-    if (files.length === 0) throw new Error(`No .txt source files found in ${SOURCE_DIR}`);
+    if (files.length === 0) {
+      throw new Error(`No custom .txt source files found in ${SOURCE_DIR}`);
+    }
     const results = [];
     for (const filename of files) {
       results.push(await convertSourceFile(filename));

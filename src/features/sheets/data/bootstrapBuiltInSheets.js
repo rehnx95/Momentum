@@ -1,4 +1,5 @@
 import { supabase } from "../../../shared/lib/supabase";
+import { BUILT_IN_SHEET_IDS } from "../utils/builtinSheet";
 
 const sheetModules = import.meta.glob("./*.json", { import: "default" });
 const sheetAssets = import.meta.glob("./*.json", {
@@ -6,7 +7,7 @@ const sheetAssets = import.meta.glob("./*.json", {
   import: "default",
   query: "?url",
 });
-const BUILTIN_SYNC_VERSION = "sheet-metadata-v3";
+const BUILTIN_SYNC_VERSION = "sheet-metadata-v4";
 
 function getSheetManifestVersion() {
   let hash = 2166136261;
@@ -42,7 +43,14 @@ function getDefaultSheetId(sheetIds) {
       )[0];
 }
 
+export function getBuiltInSheetOptions() {
+  return BUILT_IN_SHEET_IDS.map((id) => ({ id, title: getSheetTitle(id) }));
+}
+
 export async function loadBuiltInSheet(id) {
+  if (!BUILT_IN_SHEET_IDS.includes(id)) {
+    throw new Error(`The built-in "${id}" sheet could not be found.`);
+  }
   const loadSheet = sheetModules[`./${id}.json`];
   if (!loadSheet) {
     throw new Error(`The built-in "${id}" sheet could not be found.`);
@@ -73,7 +81,10 @@ export async function bootstrapBuiltInSheets(userId, isActive = () => true) {
   );
   if (!isActive()) return undefined;
   const builtInSheets = sheetEntries
-    .filter(([, sheet]) => Array.isArray(sheet?.steps))
+    .filter(
+      ([filePath, sheet]) =>
+        BUILT_IN_SHEET_IDS.includes(getSheetId(filePath)) && Array.isArray(sheet?.steps),
+    )
     .map(([filePath, sheet]) => {
       const id = getSheetId(filePath);
       return {

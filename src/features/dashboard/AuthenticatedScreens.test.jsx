@@ -13,13 +13,18 @@ vi.mock("../profile/pages/ProfilePage", () => ({
 import AuthenticatedScreens from "./AuthenticatedScreens";
 
 describe("AuthenticatedScreens profile context", () => {
-  it("passes DSA restore controls through to the Profile page", async () => {
-    const restoreDsaSheet = vi.fn();
+  it("passes built-in restore controls through to the Profile page", async () => {
+    const restoreBuiltinSheet = vi.fn();
+    const builtInSheetOptions = [
+      { id: "dsa", title: "DSA" },
+      { id: "backend", title: "Backend" },
+    ];
     const context = {
       showProfile: true,
       renderDialog: vi.fn(() => null),
-      restoreDsaSheet,
-      restoringDsaSheet: false,
+      restoreBuiltinSheet,
+      builtInSheetOptions,
+      restoringBuiltinSheetId: null,
       customSheetsLoading: false,
       progressLoading: false,
     };
@@ -31,8 +36,9 @@ describe("AuthenticatedScreens profile context", () => {
     });
 
     expect(profilePageMock.mock.calls[0][0].context).toMatchObject({
-      restoreDsaSheet,
-      restoringDsaSheet: false,
+      restoreBuiltinSheet,
+      builtInSheetOptions,
+      restoringBuiltinSheetId: null,
       customSheetsLoading: false,
       progressLoading: false,
     });
