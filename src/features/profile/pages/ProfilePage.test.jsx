@@ -70,7 +70,12 @@ describe("ProfilePage built-in restore", () => {
       askConfirmation,
     };
 
-    render(<ProfilePageWithState context={context} />);
+    const view = render(
+      <ProfilePageWithState context={{ ...context, customSheetsLoading: true }} />,
+    );
+    expect(screen.queryByRole("button", { name: "Restore built-in sheet" })).toBeNull();
+
+    view.rerender(<ProfilePageWithState context={context} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Restore built-in sheet" }));
 

@@ -100,7 +100,6 @@
   color: var(--on-accent);
 }
 
-
 .daily-log-page-shell .daily-day-view {
   display: grid;
   gap: var(--space-2);
@@ -795,6 +794,8 @@
 
 .daily-log-page-shell .trends-chart-panel {
   padding-top: var(--space-2);
+  padding-right: 0;
+  padding-left: 0;
 }
 
 .daily-log-page-shell .sleep-study-chart-wrap {

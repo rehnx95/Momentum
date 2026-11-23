@@ -204,6 +204,12 @@ describe("TrackerDashboard built-in progress gauge", () => {
     expect(container.querySelector(".tracker-sheet-progress").textContent).toContain("25%");
   });
 
+  it("does not show stale sheet progress when no sheet is selected", () => {
+    const { container } = render(<TrackerDashboard context={createContext(null)} />);
+    expect(container.querySelector(".tracker-sheet-progress")).toBeNull();
+    expect(screen.queryByText("Sheet progress")).toBeNull();
+  });
+
   it("uses theme-aware surfaces and text in the tracker progress card", () => {
     const { container } = render(
       <TrackerDashboard context={createContext({ title: "DSA", builtinTemplateId: "dsa" })} />,

@@ -136,23 +136,25 @@ export default function ProfilePage({ context }) {
             </aside>
 
             <div className="profile-top">
-              <ProfileSheetProgress
-                sheets={profileSheetStats}
-                onExport={() => setBackupAction("export")}
-                onImport={() => setBackupAction("import")}
-                onRestoreBuiltin={() => setBackupAction("restore")}
-                restoringBuiltinSheetId={restoringBuiltinSheetId}
-                restoreDisabled={customSheetsLoading || progressLoading}
-                onReset={async () => {
-                  const confirmed = await askConfirmation(
-                    "Reset progress for ALL sheets? This cannot be undone.",
-                    "Reset all progress?",
-                  );
-                  if (confirmed) await reset();
-                }}
-                importFileInput={importFileInput}
-                importProgress={importProgress}
-              />
+              {!customSheetsLoading && (
+                <ProfileSheetProgress
+                  sheets={profileSheetStats}
+                  onExport={() => setBackupAction("export")}
+                  onImport={() => setBackupAction("import")}
+                  onRestoreBuiltin={() => setBackupAction("restore")}
+                  restoringBuiltinSheetId={restoringBuiltinSheetId}
+                  restoreDisabled={progressLoading}
+                  onReset={async () => {
+                    const confirmed = await askConfirmation(
+                      "Reset progress for ALL sheets? This cannot be undone.",
+                      "Reset all progress?",
+                    );
+                    if (confirmed) await reset();
+                  }}
+                  importFileInput={importFileInput}
+                  importProgress={importProgress}
+                />
+              )}
             </div>
           </div>
 

@@ -14,6 +14,9 @@ export default function ProfileSheetProgress({
   headingId = "profile-sheet-progress",
 }) {
   const showActions = onExport || onImport || onRestoreBuiltin || onReset;
+  const hasSheets = sheets.length > 0;
+
+  if (!hasSheets && !showActions) return null;
 
   return (
     <section
@@ -53,9 +56,7 @@ export default function ProfileSheetProgress({
             {onRestoreBuiltin && (
               <Tooltip
                 label={
-                  restoringBuiltinSheetId
-                    ? "Restoring built-in sheet..."
-                    : "Restore built-in sheet"
+                  restoringBuiltinSheetId ? "Restoring built-in sheet..." : "Restore built-in sheet"
                 }
                 portal
               >
@@ -85,35 +86,40 @@ export default function ProfileSheetProgress({
           </div>
         )}
       </header>
-      <div className="profile-sheet-grid">
-        {sheets.map((sheet) => {
-          const percentage = sheet.total ? Math.round((sheet.solved / sheet.total) * 100) : 0;
-          return (
-            <div className="profile-sheet-tile" key={sheet.id}>
-              <div className="profile-sheet-tile-heading">
-                <span className="truncate font-medium text-text">{sheet.title}</span>
-                <span className="profile-sheet-counts profile-sheet-count-breakdown">
-                  <span>
-                    {sheet.solved} / {sheet.total}
+      {hasSheets && (
+        <div className="profile-sheet-grid">
+          {sheets.map((sheet) => {
+            const percentage = sheet.total ? Math.round((sheet.solved / sheet.total) * 100) : 0;
+            return (
+              <div className="profile-sheet-tile" key={sheet.id}>
+                <div className="profile-sheet-tile-heading">
+                  <span className="truncate font-medium text-text">{sheet.title}</span>
+                  <span className="profile-sheet-counts profile-sheet-count-breakdown">
+                    <span>
+                      {sheet.solved} / {sheet.total}
+                    </span>
+                    <span>{sheet.skipped} skipped</span>
+                    <span>{percentage}%</span>
                   </span>
-                  <span>{sheet.skipped} skipped</span>
-                  <span>{percentage}%</span>
-                </span>
+                </div>
+                <div
+                  className="profile-sheet-progress-track"
+                  role="progressbar"
+                  aria-label={`${sheet.title} progress`}
+                  aria-valuemin={0}
+                  aria-valuemax={sheet.total}
+                  aria-valuenow={sheet.solved}
+                >
+                  <div
+                    className="profile-sheet-progress-fill"
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
               </div>
-              <div
-                className="profile-sheet-progress-track"
-                role="progressbar"
-                aria-label={`${sheet.title} progress`}
-                aria-valuemin={0}
-                aria-valuemax={sheet.total}
-                aria-valuenow={sheet.solved}
-              >
-                <div className="profile-sheet-progress-fill" style={{ width: `${percentage}%` }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
       {importFileInput && (
         <input
           ref={importFileInput}

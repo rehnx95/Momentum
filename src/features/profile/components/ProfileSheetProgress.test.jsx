@@ -40,6 +40,7 @@ describe("ProfileSheetProgress", () => {
       "Restore built-in sheet",
       "Reset all progress",
     ]);
+    expect(screen.queryByRole("progressbar")).toBeNull();
 
     const exportTooltip = document.body.querySelector('[role="tooltip"]');
     fireEvent.mouseEnter(buttons[0]);
@@ -59,5 +60,10 @@ describe("ProfileSheetProgress", () => {
       />,
     );
     expect(screen.getByRole("button", { name: "Restore built-in sheet" }).disabled).toBe(true);
+  });
+
+  it("does not render a progress card when there are no sheets or actions", () => {
+    const { container } = render(<ProfileSheetProgress sheets={[]} />);
+    expect(container.firstChild).toBeNull();
   });
 });

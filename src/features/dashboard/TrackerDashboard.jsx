@@ -288,7 +288,9 @@ export default function TrackerDashboard({ context }) {
         data-theme={theme === "light" ? "light" : undefined}
       >
         <AppHeader active="tracker" {...headerProps} />
-        <main className="dashboard-main app-page min-h-0">
+        <main
+          className={`dashboard-main app-page min-h-0${selectedSheet ? "" : " tracker-no-sheet"}`}
+        >
           {progressError && (
             <div
               role="alert"
@@ -404,119 +406,121 @@ export default function TrackerDashboard({ context }) {
               )}
             </div>
           </section>
-          <aside className="tracker-side block space-y-3">
-            <div className="tracker-sheet-progress surface-card rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 relative">
-              <div
-                className={`mb-2 ${canResetSheetProgress ? "flex items-center justify-between" : ""}`}
-              >
-                <h3
-                  className={`text-xs font-medium text-muted uppercase tracking-wide ${
-                    canResetSheetProgress ? "leading-5" : ""
-                  }`}
+          {selectedSheet && (
+            <aside className="tracker-side block space-y-3">
+              <div className="tracker-sheet-progress surface-card rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 relative">
+                <div
+                  className={`mb-2 ${canResetSheetProgress ? "flex items-center justify-between" : ""}`}
                 >
-                  {selectedSheet?.title || "Sheet"} progress
-                </h3>
-                {canResetSheetProgress && (
-                  <Tooltip label="Reset" className="ml-2 shrink-0" portal>
-                    <button
-                      type="button"
-                      aria-label={`Reset ${selectedSheet?.title || "sheet"} progress`}
-                      className="grid h-5 w-5 min-h-0 place-items-center rounded text-[var(--muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
-                      onClick={async () => {
-                        const sheetName = selectedSheet?.title || "this sheet";
-                        const confirmationMessage = `Reset progress for ${sheetName} only? Other sheets will not be affected.`;
-                        const confirmed = await askConfirmation(
-                          confirmationMessage,
-                          `Reset ${sheetName} progress?`,
-                        );
-                        if (confirmed) await reset(sheetProblems.map((problem) => problem.id));
-                      }}
-                    >
-                      <RefreshCcw size={14} aria-hidden="true" />
-                    </button>
-                  </Tooltip>
+                  <h3
+                    className={`text-xs font-medium text-muted uppercase tracking-wide ${
+                      canResetSheetProgress ? "leading-5" : ""
+                    }`}
+                  >
+                    {selectedSheet?.title || "Sheet"} progress
+                  </h3>
+                  {canResetSheetProgress && (
+                    <Tooltip label="Reset" className="ml-2 shrink-0" portal>
+                      <button
+                        type="button"
+                        aria-label={`Reset ${selectedSheet?.title || "sheet"} progress`}
+                        className="grid h-5 w-5 min-h-0 place-items-center rounded text-[var(--muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
+                        onClick={async () => {
+                          const sheetName = selectedSheet?.title || "this sheet";
+                          const confirmationMessage = `Reset progress for ${sheetName} only? Other sheets will not be affected.`;
+                          const confirmed = await askConfirmation(
+                            confirmationMessage,
+                            `Reset ${sheetName} progress?`,
+                          );
+                          if (confirmed) await reset(sheetProblems.map((problem) => problem.id));
+                        }}
+                      >
+                        <RefreshCcw size={14} aria-hidden="true" />
+                      </button>
+                    </Tooltip>
+                  )}
+                </div>
+                {isBuiltIn ? (
+                  <div className="flex h-[148px] w-full gap-2">
+                    <BuiltInProgressGauge
+                      done={doneCount}
+                      total={totalProblems}
+                      skipped={skippedCount}
+                      difficultyStats={builtInDifficultyStats}
+                    />
+                    <BuiltInDifficultyProgress stats={builtInDifficultyStats} />
+                  </div>
+                ) : isCompactProgressCard ? (
+                  <div className="flex h-[148px] w-full gap-2">
+                    <SheetProgressGauge
+                      done={doneCount}
+                      total={totalProblems}
+                      todo={todoCount}
+                      skipped={skippedCount}
+                    />
+                    <SheetStatusProgress done={doneCount} todo={todoCount} />
+                  </div>
+                ) : (
+                  <>
+                    <div className="mb-2">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-semibold text-[var(--text)] tabular-nums">
+                          {totalProblems > 0 ? Math.round((doneCount / totalProblems) * 100) : 0}%
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted mt-1">
+                        {doneCount} / {totalProblems} problems solved
+                      </p>
+                    </div>
+                    <div className="relative mt-3">
+                      <div className="h-2 bg-[var(--surface-hover)] rounded-full overflow-visible relative">
+                        <div
+                          className="h-full bg-[var(--progress-fill)] rounded-full transition-all duration-500 ease-out relative"
+                          style={{
+                            width: `${totalProblems > 0 ? (doneCount / totalProblems) * 100 : 0}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-[var(--border)]">
+                      <div className="grid grid-cols-3 gap-2 mb-2">
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-[var(--text)] tabular-nums">
+                            {doneCount}
+                          </div>
+                          <div className="text-xs text-muted uppercase tracking-wide">Done</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-[var(--muted)] tabular-nums">
+                            {skippedCount}
+                          </div>
+                          <div className="text-xs text-muted uppercase tracking-wide">Skipped</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-[var(--text)] tabular-nums">
+                            {todoCount}
+                          </div>
+                          <div className="text-xs text-muted uppercase tracking-wide">To Do</div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          const confirmed = await askConfirmation(
+                            `Reset progress for ${selectedSheet?.title || "this sheet"} only? Other sheets will not be affected.`,
+                            "Reset this sheet?",
+                          );
+                          if (confirmed) await reset(sheetProblems.map((problem) => problem.id));
+                        }}
+                        className="w-full border border-[var(--border)] text-xs py-2 bg-[var(--surface-hover)] hover:bg-[var(--surface-raised)] text-[var(--muted)] hover:text-[var(--text)] rounded-md transition-colors flex items-center justify-center gap-1"
+                      >
+                        <RefreshCcw size={12} /> Reset This Sheet
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
-              {isBuiltIn ? (
-                <div className="flex h-[148px] w-full gap-2">
-                  <BuiltInProgressGauge
-                    done={doneCount}
-                    total={totalProblems}
-                    skipped={skippedCount}
-                    difficultyStats={builtInDifficultyStats}
-                  />
-                  <BuiltInDifficultyProgress stats={builtInDifficultyStats} />
-                </div>
-              ) : isCompactProgressCard ? (
-                <div className="flex h-[148px] w-full gap-2">
-                  <SheetProgressGauge
-                    done={doneCount}
-                    total={totalProblems}
-                    todo={todoCount}
-                    skipped={skippedCount}
-                  />
-                  <SheetStatusProgress done={doneCount} todo={todoCount} />
-                </div>
-              ) : (
-                <>
-                  <div className="mb-2">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-semibold text-[var(--text)] tabular-nums">
-                        {totalProblems > 0 ? Math.round((doneCount / totalProblems) * 100) : 0}%
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted mt-1">
-                      {doneCount} / {totalProblems} problems solved
-                    </p>
-                  </div>
-                  <div className="relative mt-3">
-                    <div className="h-2 bg-[var(--surface-hover)] rounded-full overflow-visible relative">
-                      <div
-                        className="h-full bg-[var(--progress-fill)] rounded-full transition-all duration-500 ease-out relative"
-                        style={{
-                          width: `${totalProblems > 0 ? (doneCount / totalProblems) * 100 : 0}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-2 pt-2 border-t border-[var(--border)]">
-                    <div className="grid grid-cols-3 gap-2 mb-2">
-                      <div className="text-center">
-                        <div className="text-lg font-semibold text-[var(--text)] tabular-nums">
-                          {doneCount}
-                        </div>
-                        <div className="text-xs text-muted uppercase tracking-wide">Done</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-semibold text-[var(--muted)] tabular-nums">
-                          {skippedCount}
-                        </div>
-                        <div className="text-xs text-muted uppercase tracking-wide">Skipped</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-semibold text-[var(--text)] tabular-nums">
-                          {todoCount}
-                        </div>
-                        <div className="text-xs text-muted uppercase tracking-wide">To Do</div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={async () => {
-                        const confirmed = await askConfirmation(
-                          `Reset progress for ${selectedSheet?.title || "this sheet"} only? Other sheets will not be affected.`,
-                          "Reset this sheet?",
-                        );
-                        if (confirmed) await reset(sheetProblems.map((problem) => problem.id));
-                      }}
-                      className="w-full border border-[var(--border)] text-xs py-2 bg-[var(--surface-hover)] hover:bg-[var(--surface-raised)] text-[var(--muted)] hover:text-[var(--text)] rounded-md transition-colors flex items-center justify-center gap-1"
-                    >
-                      <RefreshCcw size={12} /> Reset This Sheet
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </aside>
+            </aside>
+          )}
         </main>
         <input
           id="import-file"

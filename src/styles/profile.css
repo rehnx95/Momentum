@@ -75,11 +75,17 @@
 
 .recent-ac-heading {
   display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--border);
+}
+
+.recent-ac-heading > :first-child {
+  min-width: 0;
 }
 
 .recent-ac-heading h2 {
@@ -95,11 +101,15 @@
 }
 
 .recent-ac-count {
-  display: grid;
-  width: 1.8rem;
-  height: 1.8rem;
+  display: inline-flex;
+  width: auto;
+  min-height: 1.8rem;
   flex: none;
-  place-items: center;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  overflow-wrap: anywhere;
+  text-align: center;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface-raised);

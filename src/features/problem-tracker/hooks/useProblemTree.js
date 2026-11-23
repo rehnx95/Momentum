@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+const STATE_FILTERS = new Set(["done", "skipped", "todo"]);
+const EMPTY_PROGRESS = {};
+
 function safeLocalStorageGet(key, fallback = "") {
   try {
     return localStorage.getItem(key) ?? fallback;
@@ -97,13 +100,25 @@ export default function useProblemTree({ data, progress, getState, update, enabl
         : 0,
     [data.steps, enabled],
   );
-  const doneCount = sheetProblems.filter((problem) => progress[problem.id] === "done").length;
-  const skippedCount = sheetProblems.filter((problem) => progress[problem.id] === "skipped").length;
+  const { doneCount, skippedCount } = useMemo(
+    () =>
+      sheetProblems.reduce(
+        (counts, problem) => {
+          if (progress[problem.id] === "done") counts.doneCount += 1;
+          else if (progress[problem.id] === "skipped") counts.skippedCount += 1;
+          return counts;
+        },
+        { doneCount: 0, skippedCount: 0 },
+      ),
+    [progress, sheetProblems],
+  );
   const todoCount = totalProblems - doneCount - skippedCount;
   const problemMap = useMemo(
     () => new Map(sheetProblems.map((problem) => [problem.id, problem])),
     [sheetProblems],
   );
+  const filterByState = hideSkipped || STATE_FILTERS.has(activeFilter);
+  const filterProgress = filterByState ? progress : EMPTY_PROGRESS;
 
   const progressState = useCallback(
     (id) => {
@@ -160,12 +175,14 @@ export default function useProblemTree({ data, progress, getState, update, enabl
   const filteredSteps = useMemo(() => {
     if (!enabled) return [];
     const query = search.trim().toLowerCase();
+    if (!query && !filterByState) return data.steps;
+
     return data.steps
       .map((step) => {
         const subsections = step.subsections
           .map((subsection) => {
             const problems = subsection.problems.filter((problem) => {
-              const state = getState(problem.id);
+              const state = filterProgress[problem.id] || "todo";
               return (
                 (!query || problem.title.toLowerCase().includes(query)) &&
                 (!hideSkipped || state !== "skipped") &&
@@ -180,7 +197,7 @@ export default function useProblemTree({ data, progress, getState, update, enabl
         return { ...step, subsections };
       })
       .filter((step) => step.subsections.length > 0);
-  }, [activeFilter, data, enabled, getState, hideSkipped, search]);
+  }, [activeFilter, data, enabled, filterByState, filterProgress, hideSkipped, search]);
 
   const chipActive = (type) =>
     (type === "skip-visibility" ? hideSkipped : activeFilter === type)

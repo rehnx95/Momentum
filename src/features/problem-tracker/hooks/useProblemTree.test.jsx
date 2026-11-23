@@ -28,8 +28,8 @@ describe("useProblemTree", () => {
     });
     const getState = vi.fn(() => "todo");
     let result;
-    function HookHarness({ enabled }) {
-      result = useProblemTree({ data, progress: {}, getState, update: vi.fn(), enabled });
+    function HookHarness({ enabled, progress = {} }) {
+      result = useProblemTree({ data, progress, getState, update: vi.fn(), enabled });
       return null;
     }
 
@@ -47,7 +47,28 @@ describe("useProblemTree", () => {
     });
 
     expect(result.totalProblems).toBe(1);
-    expect(getState).toHaveBeenCalledWith("problem-1");
+    expect(result.filteredSteps).toBe(data.steps);
+    expect(getState).not.toHaveBeenCalled();
+
+    await act(async () => {
+      renderer.update(
+        React.createElement(HookHarness, {
+          enabled: true,
+          progress: { "problem-1": "done" },
+        }),
+      );
+    });
+
+    expect(result.filteredSteps).toBe(data.steps);
+    expect(result.doneCount).toBe(1);
+    expect(result.todoCount).toBe(0);
+
+    await act(async () => {
+      result.setActiveFilter("done");
+    });
+    expect(result.filteredSteps[0].subsections[0].problems).toEqual(
+      data.steps[0].subsections[0].problems,
+    );
     await act(async () => renderer.unmount());
   });
 });

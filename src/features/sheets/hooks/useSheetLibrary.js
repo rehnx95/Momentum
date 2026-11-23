@@ -11,9 +11,7 @@ import {
 
 export default function useSheetLibrary(user, askConfirmation) {
   const [cachedSheets] = useState(() => readUserDataCache(user.id, "sheets"));
-  const [customSheetsLoading, setCustomSheetsLoading] = useState(
-    () => !Array.isArray(cachedSheets),
-  );
+  const [customSheetsLoading, setCustomSheetsLoading] = useState(true);
   const [customSheets, setCustomSheets] = useState(() =>
     Array.isArray(cachedSheets)
       ? cachedSheets.map((sheet) => ({
@@ -75,6 +73,7 @@ export default function useSheetLibrary(user, askConfirmation) {
   useEffect(() => {
     let active = true;
     const loadSheets = async () => {
+      setCustomSheetsLoading(true);
       try {
         const defaultSheetId = await bootstrapBuiltInSheets(user.id, () => active);
         if (!active) return;

@@ -28,6 +28,10 @@
     grid-template-columns: minmax(0, 1fr) 20rem;
   }
 
+  .tracker-dashboard-shell .dashboard-main.tracker-no-sheet {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .tracker-grid {
     align-items: start;
   }
