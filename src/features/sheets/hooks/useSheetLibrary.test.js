@@ -31,7 +31,17 @@ function createBuiltInTemplate(id, title) {
     sheet: {
       steps: [
         {
-          subsections: [{ problems: [{ id: "array-problem", title: "Array Problem" }] }],
+          subsections: [
+            {
+              problems: [
+                {
+                  id: "array-problem",
+                  title: "Array Problem",
+                  links: [{ type: "youtube", url: "https://youtu.be/example" }],
+                },
+              ],
+            },
+          ],
         },
       ],
     },

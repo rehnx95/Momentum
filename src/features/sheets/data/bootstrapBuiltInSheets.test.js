@@ -35,6 +35,15 @@ describe("bootstrapBuiltInSheets", () => {
     const ensuredSheets = vi.mocked(supabase.rpc).mock.calls[0][1].requested_sheets;
     const synchronizedSheets = vi.mocked(supabase.rpc).mock.calls[1][1].requested_sheets;
     expect(synchronizedSheets).toEqual(ensuredSheets);
+    const dsa = synchronizedSheets.find((sheet) => sheet.id === "dsa");
+    const twoSum = dsa.sheet_data.steps
+      .flatMap((step) => step.subsections)
+      .flatMap((subsection) => subsection.problems)
+      .find((problem) => problem.title === "Two Sum");
+    expect(twoSum.links).toEqual([
+      { type: "youtube", url: "https://youtu.be/UXDSeD9mN-k" },
+      { type: "leetcode", url: "https://leetcode.com/problems/two-sum/" },
+    ]);
   });
 
   it.each(["dsa", "backend"])("loads the built-in %s sheet directly", async (id) => {
@@ -56,13 +65,11 @@ describe("bootstrapBuiltInSheets", () => {
     const problems = sheet.sheet.steps.flatMap((step) =>
       step.subsections.flatMap((subsection) => subsection.problems),
     );
-    const expectedLinkType = id === "dsa" ? "leetcode" : "youtube";
-
     expect(
       problems.every(
         (problem) =>
           JSON.stringify(Object.keys(problem).sort()) ===
-          JSON.stringify(["difficulty", "id", "link", "title"]),
+          JSON.stringify(["difficulty", "id", "links", "title"]),
       ),
     ).toBe(true);
     let problemNumber = 0;
@@ -77,8 +84,31 @@ describe("bootstrapBuiltInSheets", () => {
       problems.every((problem) => ["Easy", "Medium", "Hard"].includes(problem.difficulty)),
     ).toBe(true);
     expect(
-      problems.every((problem) => problem.link === null || problem.link.type === expectedLinkType),
+      problems.every(
+        (problem) =>
+          Array.isArray(problem.links) &&
+          problem.links.every((link) => ["leetcode", "youtube"].includes(link.type)),
+      ),
     ).toBe(true);
+  });
+
+  it("keeps all supplied DSA videos alongside existing LeetCode links", async () => {
+    const dsa = await loadBuiltInSheet("dsa");
+    const problems = dsa.sheet.steps.flatMap((step) =>
+      step.subsections.flatMap((subsection) => subsection.problems),
+    );
+
+    expect(problems).toHaveLength(514);
+    expect(
+      problems.filter((problem) => problem.links.some((link) => link.type === "youtube")),
+    ).toHaveLength(398);
+    expect(
+      problems.filter((problem) => problem.links.some((link) => link.type === "leetcode")),
+    ).toHaveLength(304);
+    expect(problems.find((problem) => problem.title === "Two Sum").links).toEqual([
+      { type: "youtube", url: "https://youtu.be/UXDSeD9mN-k" },
+      { type: "leetcode", url: "https://leetcode.com/problems/two-sum/" },
+    ]);
   });
 
   it("includes difficulty for every Backend topic and links all playlist videos", async () => {
@@ -91,11 +121,13 @@ describe("bootstrapBuiltInSheets", () => {
     expect(
       problems.every((problem) => ["Easy", "Medium", "Hard"].includes(problem.difficulty)),
     ).toBe(true);
-    expect(problems.filter((problem) => problem.link?.type === "youtube")).toHaveLength(31);
+    expect(
+      problems.filter((problem) => problem.links.some((link) => link.type === "youtube")),
+    ).toHaveLength(31);
     expect(
       problems.find((problem) => problem.title === "Roadmap for backend from first principles"),
     ).toMatchObject({
-      link: { type: "youtube", url: "https://youtu.be/0Rwb4Xmlcwc" },
+      links: [{ type: "youtube", url: "https://youtu.be/0Rwb4Xmlcwc" }],
       difficulty: "Easy",
     });
   });

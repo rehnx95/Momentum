@@ -15,7 +15,7 @@ describe("ProblemRow", () => {
           id: "two-sum",
           title: "Two Sum",
           difficulty: "Easy",
-          link: { type: "leetcode", url: "https://leetcode.com/problems/two-sum/" },
+          links: [{ type: "leetcode", url: "https://leetcode.com/problems/two-sum/" }],
         }}
         state="todo"
         onToggle={onToggle}
@@ -32,8 +32,11 @@ describe("ProblemRow", () => {
 
     expect(screen.getByRole("button", { name: "Toggle Two Sum completion" })).toBeTruthy();
     expect(screen.getByText("Easy")).toBeTruthy();
-    expect(actionGroup.className).toContain("grid-cols-[auto_1.25rem_1.25rem]");
-    expect(actionGroup.children).toHaveLength(3);
+    expect(actionGroup.className).toContain("grid-cols-[auto_1.25rem_1.25rem_1.25rem]");
+    expect(actionGroup.children).toHaveLength(4);
+    expect(actionGroup.children[1].querySelector("a")).toBe(link);
+    expect(actionGroup.children[2].querySelector("a")).toBeNull();
+    expect(actionGroup.children[3].querySelector("button")).toBe(skipButton);
     expect(link.textContent).toBe("");
     const leetcodeIcon = link.querySelector("svg");
     expect(leetcodeIcon?.getAttribute("viewBox")).toBe("0 0 94 111");
@@ -71,7 +74,7 @@ describe("ProblemRow", () => {
         prob={{
           id: "add-two-numbers",
           title: "Add Two Numbers",
-          link: { type: "youtube", url: "https://youtu.be/example" },
+          links: [{ type: "youtube", url: "https://youtu.be/example" }],
           difficulty: "Hard",
         }}
         state="todo"
@@ -89,7 +92,7 @@ describe("ProblemRow", () => {
   it("does not show a resource link when a built-in topic has none", () => {
     render(
       <ProblemRow
-        prob={{ id: "custom", title: "Custom exercise", link: null, difficulty: "Easy" }}
+        prob={{ id: "custom", title: "Custom exercise", links: [], difficulty: "Easy" }}
         state="todo"
         onToggle={vi.fn()}
         onSkip={vi.fn()}
@@ -104,7 +107,7 @@ describe("ProblemRow", () => {
   it("shows DSA problem difficulty in DSA tracker rows", () => {
     render(
       <ProblemRow
-        prob={{ id: "s3-3.1-p65", title: "Linear Search", difficulty: "Easy", link: null }}
+        prob={{ id: "s3-3.1-p65", title: "Linear Search", difficulty: "Easy", links: [] }}
         state="todo"
         onToggle={vi.fn()}
         onSkip={vi.fn()}
@@ -115,7 +118,10 @@ describe("ProblemRow", () => {
     expect(screen.getByText("Easy")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Toggle Linear Search completion" })).toBeTruthy();
     expect(screen.queryByRole("link", { name: /LeetCode/ })).toBeNull();
-    expect(document.querySelector(".problem-row > div.grid").children).toHaveLength(3);
+    const actionGroup = document.querySelector(".problem-row > div.grid");
+    expect(actionGroup.children).toHaveLength(4);
+    expect(actionGroup.children[1].querySelector("a")).toBeNull();
+    expect(actionGroup.children[2].querySelector("a")).toBeNull();
   });
 
   it("shows Backend difficulty and an accessible YouTube link", () => {
@@ -124,7 +130,7 @@ describe("ProblemRow", () => {
         prob={{
           id: "backend-basics",
           title: "Backend basics",
-          link: { type: "youtube", url: "https://youtu.be/example" },
+          links: [{ type: "youtube", url: "https://youtu.be/example" }],
           difficulty: "Medium",
         }}
         state="todo"
@@ -135,10 +141,45 @@ describe("ProblemRow", () => {
     );
 
     const link = screen.getByRole("link", { name: "Open Backend basics on YouTube" });
+    const actionGroup = link.closest(".grid");
     expect(screen.getByText("Medium")).toBeTruthy();
     expect(link.getAttribute("href")).toBe("https://youtu.be/example");
+    expect(actionGroup.children).toHaveLength(4);
+    expect(actionGroup.children[1].querySelector("a")).toBeNull();
+    expect(actionGroup.children[2].querySelector("a")).toBe(link);
     expect(link.querySelector("rect").getAttribute("fill")).toBe("#FF0000");
     expect(link.querySelector("path").getAttribute("fill")).toBe("#FFFFFF");
     expect(document.querySelector('[role="tooltip"]').textContent).toBe("Open on YouTube");
+  });
+
+  it("shows YouTube and LeetCode links together for a built-in DSA problem", () => {
+    render(
+      <ProblemRow
+        prob={{
+          id: "two-sum",
+          title: "Two Sum",
+          difficulty: "Easy",
+          links: [
+            { type: "youtube", url: "https://youtu.be/example" },
+            { type: "leetcode", url: "https://leetcode.com/problems/two-sum/" },
+          ],
+        }}
+        state="todo"
+        onToggle={vi.fn()}
+        onSkip={vi.fn()}
+        showBuiltinMetadata
+      />,
+    );
+
+    const youtubeLink = screen.getByRole("link", { name: "Open Two Sum on YouTube" });
+    const leetcodeLink = screen.getByRole("link", { name: "Open Two Sum on LeetCode" });
+    expect(youtubeLink.getAttribute("href")).toBe("https://youtu.be/example");
+    expect(youtubeLink.querySelector("rect").getAttribute("fill")).toBe("#FF0000");
+    expect(youtubeLink.querySelector("path").getAttribute("fill")).toBe("#FFFFFF");
+    expect(leetcodeLink.getAttribute("href")).toBe("https://leetcode.com/problems/two-sum/");
+    const actionGroup = youtubeLink.closest(".grid");
+    expect(actionGroup.children[1].querySelector("a")).toBe(leetcodeLink);
+    expect(actionGroup.children[2].querySelector("a")).toBe(youtubeLink);
+    expect(actionGroup.className).toContain("grid-cols-[auto_1.25rem_1.25rem_1.25rem]");
   });
 });
