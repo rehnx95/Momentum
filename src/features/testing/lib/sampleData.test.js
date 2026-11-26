@@ -39,13 +39,15 @@ describe("test sample data", () => {
     expect(dates).toHaveLength(expectedDays);
     expect(sample.summary.dailyLogDays).toBe(expectedDays);
 
+    const studyTotals = [];
     sample.dailyLogs.forEach((entry, index) => {
       expect(entry.date).toBe(new Date(Date.UTC(2025, 0, 1 + index)).toISOString().slice(0, 10));
       expect(entry.sleep_time).toBeTruthy();
       expect(entry.wake_time).toBeTruthy();
       expect(entry.custom_tasks).toHaveLength(5);
+      let sessionCount = 0;
       entry.custom_tasks.forEach((activity) => {
-        expect(activity.slots).toHaveLength(4);
+        sessionCount += activity.slots.length;
         activity.slots.forEach((slot) => {
           expect(slot.start).toMatch(/^\d{2}:\d{2}$/);
           expect(slot.end).toMatch(/^\d{2}:\d{2}$/);
@@ -55,9 +57,16 @@ describe("test sample data", () => {
       const validation = validateDay(entry);
       expect(validation.errors).toEqual([]);
       expect(validation.warnings).toEqual([]);
-      expect(getStudyMinutes(entry)).toBeGreaterThanOrEqual(20 * 24);
+      expect(sessionCount).toBeGreaterThanOrEqual(3);
+      expect(sessionCount).toBeLessThanOrEqual(9);
+      const studyMinutes = getStudyMinutes(entry);
+      expect(studyMinutes).toBeGreaterThanOrEqual(75);
+      expect(studyMinutes).toBeLessThanOrEqual(510);
+      studyTotals.push(studyMinutes);
       expect(getSleepMinutes(entry) + getStudyMinutes(entry)).toBeLessThanOrEqual(24 * 60);
     });
+    expect(new Set(studyTotals).size).toBeGreaterThan(20);
+    expect(Math.max(...studyTotals) - Math.min(...studyTotals)).toBeGreaterThan(180);
   });
 
   it("creates dense solved history in 2025 and the current year", () => {

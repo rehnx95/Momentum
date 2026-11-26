@@ -8,8 +8,6 @@ const ACTIVITY_TEMPLATES = [
   { id: "sample-reading", name: "Reading" },
 ];
 
-const SLOTS_PER_ACTIVITY = 4;
-
 function hashString(value) {
   let hash = 2166136261;
   for (let index = 0; index < value.length; index += 1) {
@@ -80,14 +78,42 @@ function shuffle(items, random) {
 }
 
 function buildDailyLogs(userId, today) {
-  const random = createRandom(`${userId}:daily-log`);
+  return dateKeysBetween(DAILY_LOG_START, today).map((date, dayIndex) => {
+    const random = createRandom(`${userId}:daily-log:${date}`);
+    const weekday = dateFromKey(date).getUTCDay();
+    const weekendAdjustment = weekday === 0 || weekday === 6 ? -75 : 0;
+    const weeklySwing = Math.round(Math.sin((dayIndex / 5) * Math.PI * 2) * 55);
+    const studyMinutes = Math.max(
+      75,
+      Math.min(
+        510,
+        300 + randomInt(random, -135, 135) + weekendAdjustment + weeklySwing,
+      ),
+    );
+    const sessionCount = Math.max(3, Math.min(9, Math.round(studyMinutes / 55)));
+    const sleepStart = randomInt(random, 22 * 60, 24 * 60 + 15);
+    const wakeTime = randomInt(random, 6 * 60, 7 * 60 + 45);
+    let slotStart = wakeTime + randomInt(random, 25, 60);
+    let remainingMinutes = studyMinutes;
+    const customTasks = ACTIVITY_TEMPLATES.map((activity) => ({
+      id: activity.id,
+      name: activity.name,
+      slots: [],
+    }));
 
-  return dateKeysBetween(DAILY_LOG_START, today).map((date) => {
-    const sleepStart = randomInt(random, 22 * 60 + 30, 23 * 60 + 45);
-    const wakeTime = randomInt(random, 6 * 60, 7 * 60 + 30);
-    let slotStart = wakeTime + randomInt(random, 15, 20);
-    let slotIndex = 0;
-    const totalSlots = ACTIVITY_TEMPLATES.length * SLOTS_PER_ACTIVITY;
+    for (let index = 0; index < sessionCount; index += 1) {
+      const sessionsRemaining = sessionCount - index - 1;
+      const minimumDuration = Math.max(20, remainingMinutes - sessionsRemaining * 100);
+      const maximumDuration = Math.min(100, remainingMinutes - sessionsRemaining * 20);
+      const duration = randomInt(random, minimumDuration, maximumDuration);
+      const activity = customTasks[randomInt(random, 0, customTasks.length - 1)];
+      activity.slots.push({
+        start: formatTime(slotStart),
+        end: formatTime(slotStart + duration),
+      });
+      remainingMinutes -= duration;
+      slotStart += duration + randomInt(random, 10, 30);
+    }
 
     return {
       user_id: userId,
@@ -96,25 +122,7 @@ function buildDailyLogs(userId, today) {
       wake_time: formatTime(wakeTime),
       dsa_slots: [],
       backend_slots: [],
-      custom_tasks: ACTIVITY_TEMPLATES.map((activity) => {
-        const slots = Array.from({ length: SLOTS_PER_ACTIVITY }, () => {
-          const duration = randomInt(random, 24, 30);
-          const slot = {
-            start: formatTime(slotStart),
-            end: formatTime(slotStart + duration),
-          };
-          slotIndex += 1;
-          if (slotIndex < totalSlots) {
-            slotStart += duration + randomInt(random, 6, 12);
-          }
-          return slot;
-        });
-        return {
-          id: activity.id,
-          name: activity.name,
-          slots,
-        };
-      }),
+      custom_tasks: customTasks,
     };
   });
 }
