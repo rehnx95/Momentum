@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../../shared/lib/supabase";
 import { getOfflineMutations } from "../../../shared/lib/offlineMutationStore";
 import { queueOfflineMutation, syncOfflineMutations } from "../../../shared/lib/offlineSync";
+import { isNetworkUnavailable } from "../../../shared/utils/network";
 import { getActivityKey, isActivityColorValue } from "../lib/activityColor";
 
 function getColorCacheKey(userId) {
@@ -57,19 +58,24 @@ export default function useActivityColors(userId, onError) {
       return mergePendingColors(cachedColors, await getOfflineMutations(userId));
     }
 
-    await syncOfflineMutations(userId);
-    const { data, error } = await supabase
-      .from("activity_color_assignments")
-      .select("activity_key, color")
-      .eq("user_id", userId);
-    if (error) throw error;
+    try {
+      await syncOfflineMutations(userId);
+      const { data, error } = await supabase
+        .from("activity_color_assignments")
+        .select("activity_key, color")
+        .eq("user_id", userId);
+      if (error) throw error;
 
-    const colors = mergePendingColors(
-      Object.fromEntries((data || []).map(({ activity_key, color }) => [activity_key, color])),
-      await getOfflineMutations(userId),
-    );
-    writeColorCache(userId, colors);
-    return colors;
+      const colors = mergePendingColors(
+        Object.fromEntries((data || []).map(({ activity_key, color }) => [activity_key, color])),
+        await getOfflineMutations(userId),
+      );
+      writeColorCache(userId, colors);
+      return colors;
+    } catch (error) {
+      if (!isNetworkUnavailable(error)) throw error;
+      return mergePendingColors(readColorCache(userId), await getOfflineMutations(userId));
+    }
   }, [userId]);
 
   useEffect(() => {
@@ -115,6 +121,7 @@ export default function useActivityColors(userId, onError) {
         writeColorCache(userId, nextColors);
         return data;
       } catch (error) {
+        if (isNetworkUnavailable(error)) return activityColors[getActivityKey(name)] || null;
         reportError("Could not assign an activity color:", error);
         return null;
       }

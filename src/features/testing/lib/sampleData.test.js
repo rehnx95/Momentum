@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getSleepMinutes, getStudyMinutes, validateDay } from "../../../shared/utils/time";
 import { buildSampleData } from "./sampleData";
 
 function makeSheets(problemCount) {
@@ -39,20 +40,23 @@ describe("test sample data", () => {
     expect(sample.summary.dailyLogDays).toBe(expectedDays);
 
     sample.dailyLogs.forEach((entry, index) => {
-      expect(entry.date).toBe(
-        new Date(Date.UTC(2025, 0, 1 + index)).toISOString().slice(0, 10),
-      );
+      expect(entry.date).toBe(new Date(Date.UTC(2025, 0, 1 + index)).toISOString().slice(0, 10));
       expect(entry.sleep_time).toBeTruthy();
       expect(entry.wake_time).toBeTruthy();
       expect(entry.custom_tasks).toHaveLength(5);
       entry.custom_tasks.forEach((activity) => {
-        expect(activity.slots.length).toBeGreaterThanOrEqual(4);
-        expect(activity.slots.length).toBeLessThanOrEqual(5);
+        expect(activity.slots).toHaveLength(4);
         activity.slots.forEach((slot) => {
           expect(slot.start).toMatch(/^\d{2}:\d{2}$/);
           expect(slot.end).toMatch(/^\d{2}:\d{2}$/);
         });
       });
+
+      const validation = validateDay(entry);
+      expect(validation.errors).toEqual([]);
+      expect(validation.warnings).toEqual([]);
+      expect(getStudyMinutes(entry)).toBeGreaterThanOrEqual(20 * 24);
+      expect(getSleepMinutes(entry) + getStudyMinutes(entry)).toBeLessThanOrEqual(24 * 60);
     });
   });
 

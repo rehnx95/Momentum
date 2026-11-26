@@ -135,6 +135,58 @@ describe("useDailyLogPersistence", () => {
     expect(setSavedSnapshot).toHaveBeenLastCalledWith(JSON.stringify(setLog.mock.calls[0][0]));
   });
 
+  it("uses an empty editable log when an uncached request fails offline", async () => {
+    fromMock.mockImplementation(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockRejectedValue(new TypeError("Failed to fetch")),
+    }));
+
+    const date = "2025-03-14";
+    const setLoadFailed = vi.fn();
+    const setStatus = vi.fn();
+    const setMessage = vi.fn();
+    const setSavedSnapshot = vi.fn();
+    const setLog = vi.fn();
+    const logRef = { current: emptyLog(date) };
+    const savedSnapshotRef = { current: null };
+
+    function HookHarness() {
+      useDailyLogPersistence({
+        date,
+        dateRef: { current: date },
+        dirty: false,
+        loadFailed: false,
+        loadRequest: 0,
+        loading: true,
+        log: logRef.current,
+        logRef,
+        savedSnapshotRef,
+        setLoadFailed,
+        setLoading: vi.fn(),
+        setLog,
+        setMessage,
+        setSavedSnapshot,
+        setStatus,
+        userId: "uncached-offline-user",
+        validationErrors: [],
+      });
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(setLoadFailed).toHaveBeenCalledWith(false);
+    expect(setStatus).toHaveBeenCalledWith("");
+    expect(setMessage).toHaveBeenCalledWith("");
+    expect(setLog).toHaveBeenCalledWith(emptyLog(date));
+    expect(setMessage).not.toHaveBeenCalledWith("Could not load this daily log.");
+  });
+
   it("merges a built-in sheet added while an uncached log is loading", async () => {
     const date = "2025-03-14";
     let finishLoad;
@@ -649,9 +701,7 @@ describe("useDailyLogPersistence", () => {
     });
 
     expect(conflictResult).toBe(true);
-    await vi.waitFor(() =>
-      expect(setStatus).toHaveBeenCalledWith("This day changed elsewhere"),
-    );
+    await vi.waitFor(() => expect(setStatus).toHaveBeenCalledWith("This day changed elsewhere"));
     expect(upsert).toHaveBeenCalledOnce();
   });
 
@@ -883,9 +933,7 @@ describe("useDailyLogPersistence", () => {
       saveResult = await hookResult.saveLog(draft, date);
     });
     expect(saveResult).toBe(true);
-    await vi.waitFor(() =>
-      expect(setStatus).toHaveBeenCalledWith("This day changed elsewhere"),
-    );
+    await vi.waitFor(() => expect(setStatus).toHaveBeenCalledWith("This day changed elsewhere"));
 
     let overwriteResult;
     await act(async () => {

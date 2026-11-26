@@ -1,12 +1,14 @@
 const DAILY_LOG_START = "2025-01-01";
 
 const ACTIVITY_TEMPLATES = [
-  { id: "sample-dsa", name: "DSA", start: 480 },
-  { id: "sample-backend", name: "Backend", start: 630 },
-  { id: "sample-design", name: "System Design", start: 780 },
-  { id: "sample-project", name: "Project", start: 930 },
-  { id: "sample-reading", name: "Reading", start: 1080 },
+  { id: "sample-dsa", name: "DSA" },
+  { id: "sample-backend", name: "Backend" },
+  { id: "sample-design", name: "System Design" },
+  { id: "sample-project", name: "Project" },
+  { id: "sample-reading", name: "Reading" },
 ];
+
+const SLOTS_PER_ACTIVITY = 4;
 
 function hashString(value) {
   let hash = 2166136261;
@@ -82,7 +84,11 @@ function buildDailyLogs(userId, today) {
 
   return dateKeysBetween(DAILY_LOG_START, today).map((date) => {
     const sleepStart = randomInt(random, 22 * 60 + 30, 23 * 60 + 45);
-    const wakeTime = randomInt(random, 6 * 60, 8 * 60 + 45);
+    const wakeTime = randomInt(random, 6 * 60, 7 * 60 + 30);
+    let slotStart = wakeTime + randomInt(random, 15, 20);
+    let slotIndex = 0;
+    const totalSlots = ACTIVITY_TEMPLATES.length * SLOTS_PER_ACTIVITY;
+
     return {
       user_id: userId,
       date,
@@ -91,18 +97,22 @@ function buildDailyLogs(userId, today) {
       dsa_slots: [],
       backend_slots: [],
       custom_tasks: ACTIVITY_TEMPLATES.map((activity) => {
-        const slotCount = randomInt(random, 4, 5);
+        const slots = Array.from({ length: SLOTS_PER_ACTIVITY }, () => {
+          const duration = randomInt(random, 24, 30);
+          const slot = {
+            start: formatTime(slotStart),
+            end: formatTime(slotStart + duration),
+          };
+          slotIndex += 1;
+          if (slotIndex < totalSlots) {
+            slotStart += duration + randomInt(random, 6, 12);
+          }
+          return slot;
+        });
         return {
           id: activity.id,
           name: activity.name,
-          slots: Array.from({ length: slotCount }, (_, index) => {
-            const startTime = activity.start + index * 45 + randomInt(random, 0, 5);
-            const duration = randomInt(random, 25, 38);
-            return {
-              start: formatTime(startTime),
-              end: formatTime(startTime + duration),
-            };
-          }),
+          slots,
         };
       }),
     };

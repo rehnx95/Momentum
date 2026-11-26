@@ -122,6 +122,8 @@ describe("FullLog", () => {
     expect(shareSegments[0].getAttribute("aria-label")).toMatch(/^Reading /);
     expect(Number.parseFloat(shareSegments[0].style.left)).toBe(0);
     expect(Number.parseFloat(shareSegments[0].style.width)).toBeCloseTo((60 / 1440) * 100, 1);
+    expect(container.querySelector(".full-log-active-total").textContent).toContain("1h");
+    expect(container.querySelector(".full-log-active-total").textContent).not.toContain("2h");
     expect(screen.getByLabelText("Untracked 15h")).toBeTruthy();
     expect(container.querySelector(".full-log-date-button")).toBeTruthy();
   });

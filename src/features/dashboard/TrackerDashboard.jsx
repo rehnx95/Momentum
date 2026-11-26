@@ -397,6 +397,7 @@ export default function TrackerDashboard({ context }) {
                     hideSkipped={hideSkipped}
                     filter={activeFilter}
                     showBuiltinMetadata={isBuiltIn}
+                    reserveLeetCodeColumn={selectedSheet?.builtinTemplateId === "dsa"}
                   />
                 ))
               ) : (

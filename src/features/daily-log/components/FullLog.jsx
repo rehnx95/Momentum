@@ -19,6 +19,15 @@ function slotTotal(slots = []) {
   return slots.reduce((total, slot) => total + (getSlotDurationMinutes(slot) || 0), 0);
 }
 
+function activeTotalForFilter(activities, studied, filter) {
+  if (filter === "All") return studied;
+  if (filter === "Sleep" || filter === "Unlogged") return 0;
+  return activities.reduce(
+    (total, activity) => total + (activity.name === filter ? activity.minutes : 0),
+    0,
+  );
+}
+
 function sleepTotal(row) {
   if (!row.sleep_time || !row.wake_time) return 0;
   return (
@@ -286,6 +295,7 @@ export default function FullLog({ daily, sheets = [], toolbarContainer, askConfi
               <ul className="full-log-day-list">
                 {visibleEntries.map(({ row, activities, sleep, studied, problems }) => {
                   const unlogged = unloggedMinutesFor(studied, sleep);
+                  const active = activeTotalForFilter(activities, studied, activityFilter);
                   const date = new Date(`${row.date}T00:00:00`);
                   const dayLabel = date.toLocaleDateString(undefined, {
                     weekday: "short",
@@ -349,17 +359,19 @@ export default function FullLog({ daily, sheets = [], toolbarContainer, askConfi
                         <span
                           className="full-log-active-total"
                           aria-label={`Active ${
-                            activityFilter === "Sleep"
+                            activityFilter === "Sleep" || activityFilter === "Unlogged"
                               ? "time not shown"
-                              : studied > 0
-                                ? formatDuration(studied)
+                              : active > 0
+                                ? formatDuration(active)
                                 : "not recorded"
                           }`}
                         >
                           <small>Active</small>
-                          {activityFilter === "Sleep" || studied === 0
+                          {activityFilter === "Sleep" ||
+                          activityFilter === "Unlogged" ||
+                          active === 0
                             ? "—"
-                            : formatDuration(studied)}
+                            : formatDuration(active)}
                         </span>
                         <span
                           className="full-log-sleep-total"

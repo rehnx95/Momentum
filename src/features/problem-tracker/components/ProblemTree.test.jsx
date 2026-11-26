@@ -112,6 +112,7 @@ describe("ProblemRow", () => {
         onToggle={vi.fn()}
         onSkip={vi.fn()}
         showBuiltinMetadata
+        reserveLeetCodeColumn
       />,
     );
 
@@ -144,11 +145,12 @@ describe("ProblemRow", () => {
     const actionGroup = link.closest(".grid");
     expect(screen.getByText("Medium")).toBeTruthy();
     expect(link.getAttribute("href")).toBe("https://youtu.be/example");
-    expect(actionGroup.children).toHaveLength(4);
-    expect(actionGroup.children[1].querySelector("a")).toBeNull();
-    expect(actionGroup.children[2].querySelector("a")).toBe(link);
+    expect(actionGroup.children).toHaveLength(3);
+    expect(actionGroup.children[1].querySelector("a")).toBe(link);
+    expect(actionGroup.children[2].querySelector("button")).toBeTruthy();
     expect(link.querySelector("rect").getAttribute("fill")).toBe("#FF0000");
     expect(link.querySelector("path").getAttribute("fill")).toBe("#FFFFFF");
+    expect(actionGroup.className).toContain("grid-cols-[auto_1.25rem_1.25rem]");
     expect(document.querySelector('[role="tooltip"]').textContent).toBe("Open on YouTube");
   });
 

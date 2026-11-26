@@ -32,10 +32,20 @@ async function upsertRows(table, rows, conflictTarget) {
   }
 }
 
+async function deleteTrackingData(userId) {
+  for (const table of ["daily_logs", "progress", "activity_log"]) {
+    const { error } = await supabase.from(table).delete().eq("user_id", userId);
+    if (error) {
+      throw new Error(`Could not remove existing ${table} data: ${error.message}`);
+    }
+  }
+}
+
 export default async function seedSampleData({ userId, sheets }) {
   assertTestMode();
   await assertCurrentUser(userId);
   const sample = buildSampleData({ userId, sheets });
+  await deleteTrackingData(userId);
   await upsertRows("daily_logs", sample.dailyLogs, "user_id,date");
   await upsertRows("progress", sample.progress, "user_id,problem_id");
   clearDailyLogCaches(userId);
@@ -46,11 +56,6 @@ export default async function seedSampleData({ userId, sheets }) {
 export async function removeSampleData({ userId }) {
   assertTestMode();
   await assertCurrentUser(userId);
-  for (const table of ["daily_logs", "progress", "activity_log"]) {
-    const { error } = await supabase.from(table).delete().eq("user_id", userId);
-    if (error) {
-      throw new Error(`Could not remove ${table} data: ${error.message}`);
-    }
-  }
+  await deleteTrackingData(userId);
   clearDailyLogCaches(userId);
 }

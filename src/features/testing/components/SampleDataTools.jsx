@@ -13,7 +13,7 @@ export default function SampleDataTools({ userId, userEmail, sheets }) {
     const account = userEmail || "the current account";
     const message =
       action === "generate"
-        ? `Generate sample data for ${account}? Matching Daily Log and problem records may be overwritten. Verify this is your second Google account before continuing.`
+        ? `Replace ALL Daily Log entries, problem progress, and activity history for ${account} with fresh sample data? This removes manually entered tracking data too. Profile details and learning sheets remain. Continue only for your test account.`
         : `Remove ALL Daily Log entries, problem progress, and activity history for ${account}? This also clears manually entered tracking data. Profile details and learning sheets will remain. Continue only for your test account.`;
     const confirmed = window.confirm(message);
     if (!confirmed) return;
@@ -25,7 +25,7 @@ export default function SampleDataTools({ userId, userEmail, sheets }) {
       if (action === "generate") {
         const summary = await seedSampleData({ userId, sheets });
         setStatus(
-          `Created ${summary.dailyLogDays} Daily Log days and ${summary.solvedProblems} solved problems across ${summary.activeSolveDays} dates. Reloading…`,
+          `Replaced tracking data with ${summary.dailyLogDays} Daily Log days and ${summary.solvedProblems} solved problems across ${summary.activeSolveDays} dates. Reloading…`,
         );
       } else {
         await removeSampleData({ userId });

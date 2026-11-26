@@ -14,6 +14,7 @@ import {
 import { emptyLog, normalizeLog } from "../lib/dailyLogModel";
 import { isSheetActivity, normalizeActivityName } from "../lib/activityName";
 import { validateDay } from "../../../shared/utils/time";
+import { isNetworkUnavailable } from "../../../shared/utils/network";
 
 function buildDailyLogRow(userId, date, draft, updatedAt) {
   return {
@@ -497,17 +498,16 @@ export default function useDailyLogPersistence({
         savedUpdatedAtRef.current = data?.updated_at ?? null;
         setSavedSnapshot(snapshot);
         setLog(
-          hasUnsavedChanges
-            ? mergeUncachedLogDraft(nextLog, logRef.current, baselineLog)
-            : nextLog,
+          hasUnsavedChanges ? mergeUncachedLogDraft(nextLog, logRef.current, baselineLog) : nextLog,
         );
         setStatus("Saved");
         setLoadFailed(false);
       } catch (error) {
         if (!active) return;
-        console.error("Failed to load daily log:", error);
+        const networkUnavailable = isNetworkUnavailable(error);
+        if (!networkUnavailable) console.error("Failed to load daily log:", error);
         if (!cachedLog) {
-          if (typeof navigator !== "undefined" && navigator.onLine === false) {
+          if (networkUnavailable) {
             const nextLog = emptyLog(date);
             const snapshot = JSON.stringify(nextLog);
             savedSnapshotRef.current = snapshot;
@@ -523,7 +523,7 @@ export default function useDailyLogPersistence({
             setMessage("Could not load this daily log.");
           }
         } else {
-          if (typeof navigator !== "undefined" && navigator.onLine === false) {
+          if (networkUnavailable) {
             setStatus("");
             setMessage("");
           } else {

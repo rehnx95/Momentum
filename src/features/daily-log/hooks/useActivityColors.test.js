@@ -42,10 +42,7 @@ describe("useActivityColors", () => {
   });
 
   it("uses cached and queued colors offline, then refreshes after reconnecting", async () => {
-    localStorage.setItem(
-      "momentum:activity-colors:user-1",
-      JSON.stringify({ reading: "#112233" }),
-    );
+    localStorage.setItem("momentum:activity-colors:user-1", JSON.stringify({ reading: "#112233" }));
     mocks.getOfflineMutations
       .mockResolvedValueOnce([
         {
@@ -78,6 +75,23 @@ describe("useActivityColors", () => {
 
     await waitFor(() => expect(result.current.activityColors.reading).toBe("#445566"));
     expect(mocks.from).toHaveBeenCalledOnce();
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  it("keeps cached colors when the request fails with a fetch error", async () => {
+    localStorage.setItem("momentum:activity-colors:user-1", JSON.stringify({ reading: "#112233" }));
+    vi.stubGlobal("navigator", { onLine: true });
+    mocks.getOfflineMutations.mockResolvedValue([]);
+
+    const query = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockRejectedValue(new TypeError("Failed to fetch")),
+    };
+    mocks.from.mockReturnValue(query);
+    const onError = vi.fn();
+    const { result } = renderHook(() => useActivityColors("user-1", onError));
+
+    await waitFor(() => expect(result.current.activityColors.reading).toBe("#112233"));
     expect(onError).not.toHaveBeenCalled();
   });
 });

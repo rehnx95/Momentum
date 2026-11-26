@@ -73,7 +73,14 @@ function ResourceLink({ link, title }) {
   );
 }
 
-export function ProblemRow({ prob, state, onToggle, onSkip, showBuiltinMetadata = false }) {
+export function ProblemRow({
+  prob,
+  state,
+  onToggle,
+  onSkip,
+  showBuiltinMetadata = false,
+  reserveLeetCodeColumn = false,
+}) {
   const isDone = state === "done";
   const isSkip = state === "skipped";
   const links = showBuiltinMetadata
@@ -92,6 +99,7 @@ export function ProblemRow({ prob, state, onToggle, onSkip, showBuiltinMetadata 
   const leetcodeLink = resourceLinks.find((link) => link.type === "leetcode");
   const youtubeLink = resourceLinks.find((link) => link.type === "youtube");
   const difficulty = showBuiltinMetadata ? getProblemDifficulty(prob) : undefined;
+  const hasLeetCodeColumn = Boolean(leetcodeLink || reserveLeetCodeColumn);
 
   return (
     <div
@@ -128,7 +136,9 @@ export function ProblemRow({ prob, state, onToggle, onSkip, showBuiltinMetadata 
       <div
         className={`grid flex-shrink-0 items-center gap-x-1 ${
           showBuiltinMetadata
-            ? "grid-cols-[auto_1.25rem_1.25rem_1.25rem]"
+            ? hasLeetCodeColumn
+              ? "grid-cols-[auto_1.25rem_1.25rem_1.25rem]"
+              : "grid-cols-[auto_1.25rem_1.25rem]"
             : "grid-cols-[1.25rem_1.25rem]"
         }`}
       >
@@ -145,11 +155,12 @@ export function ProblemRow({ prob, state, onToggle, onSkip, showBuiltinMetadata 
 
         {showBuiltinMetadata ? (
           <>
-            {leetcodeLink ? (
-              <ResourceLink link={leetcodeLink} title={prob.title} />
-            ) : (
-              <span aria-hidden="true" />
-            )}
+            {hasLeetCodeColumn &&
+              (leetcodeLink ? (
+                <ResourceLink link={leetcodeLink} title={prob.title} />
+              ) : (
+                <span aria-hidden="true" />
+              ))}
             {youtubeLink ? (
               <ResourceLink link={youtubeLink} title={prob.title} />
             ) : (
@@ -184,6 +195,7 @@ export function SubSectionRow({
   hideSkipped,
   filter,
   showBuiltinMetadata = false,
+  reserveLeetCodeColumn = false,
 }) {
   const done = sub.problems.filter((p) => progressState(p.id) === "done").length;
   const total = sub.problems.length;
@@ -228,6 +240,7 @@ export function SubSectionRow({
                 onToggle={onToggleProb}
                 onSkip={onSkipProb}
                 showBuiltinMetadata={showBuiltinMetadata}
+                reserveLeetCodeColumn={reserveLeetCodeColumn}
               />
             ))
           ) : (
@@ -251,6 +264,7 @@ export function StepRow({
   hideSkipped,
   filter,
   showBuiltinMetadata = false,
+  reserveLeetCodeColumn = false,
 }) {
   const done = step.subsections.reduce(
     (sum, s) => sum + s.problems.filter((p) => progressState(p.id) === "done").length,
@@ -292,6 +306,7 @@ export function StepRow({
               hideSkipped={hideSkipped}
               filter={filter}
               showBuiltinMetadata={showBuiltinMetadata}
+              reserveLeetCodeColumn={reserveLeetCodeColumn}
             />
           ))}
         </div>
