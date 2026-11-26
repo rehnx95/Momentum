@@ -82,13 +82,13 @@ function buildDailyLogs(userId, today) {
     const random = createRandom(`${userId}:daily-log:${date}`);
     const weekday = dateFromKey(date).getUTCDay();
     const weekendAdjustment = weekday === 0 || weekday === 6 ? 10 : 0;
-    const untrackedMinutes = randomInt(random, 45, 55) + weekendAdjustment;
+    const untrackedMinutes = randomInt(random, 180, 290) + weekendAdjustment;
     const wakeTime = randomInt(random, 6 * 60, 7 * 60 + 45);
     const sleepDuration = randomInt(random, 7 * 60 + 30, 8 * 60 + 30);
     const sleepStart = wakeTime - sleepDuration + 24 * 60;
     const firstActivityDelay = randomInt(random, 5, 15);
     const studyMinutes = 1440 - wakeTime - untrackedMinutes;
-    const sessionCount = Math.max(18, Math.min(24, Math.round(studyMinutes / 45)));
+    const sessionCount = Math.max(15, Math.min(20, Math.round(studyMinutes / 45)));
     let slotStart = wakeTime + firstActivityDelay;
     let remainingMinutes = studyMinutes;
     let remainingIdleMinutes = untrackedMinutes - firstActivityDelay;

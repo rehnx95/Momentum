@@ -135,8 +135,15 @@
     gap: var(--space-1) var(--space-2);
   }
 
+  .recent-ac-card .recent-ac-list > .recent-ac-item {
+    display: grid;
+    grid-template-columns: 1.25rem minmax(0, 1fr) 3.5rem;
+    align-items: center;
+  }
+
   .recent-ac-card {
-    --recent-ac-grid-columns: 1.25rem minmax(0, 1fr) 3.2rem;
+    min-width: 0;
+    --recent-ac-grid-columns: 1.25rem minmax(0, 1fr) 3.5rem;
   }
 
   .recent-ac-columns span:nth-child(3) {
@@ -157,9 +164,21 @@
     grid-row: 1 / 3;
   }
 
+  .recent-ac-card .recent-ac-problem {
+    min-width: 0;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
   .recent-ac-title {
     grid-column: 2;
     grid-row: 1;
+  }
+
+  .recent-ac-card .recent-ac-sheet {
+    min-width: 0;
+    grid-column: 2;
+    grid-row: 2;
   }
 
   .recent-ac-problem {
@@ -180,6 +199,7 @@
   .recent-ac-date {
     grid-column: 3;
     grid-row: 1 / 3;
+    align-self: center;
   }
 
   .own-profile-layout .profile-progress-actions .btn-secondary {
