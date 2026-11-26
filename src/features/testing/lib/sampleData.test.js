@@ -57,16 +57,17 @@ describe("test sample data", () => {
       const validation = validateDay(entry);
       expect(validation.errors).toEqual([]);
       expect(validation.warnings).toEqual([]);
-      expect(sessionCount).toBeGreaterThanOrEqual(3);
-      expect(sessionCount).toBeLessThanOrEqual(9);
+      expect(sessionCount).toBeGreaterThanOrEqual(12);
+      expect(sessionCount).toBeLessThanOrEqual(16);
       const studyMinutes = getStudyMinutes(entry);
-      expect(studyMinutes).toBeGreaterThanOrEqual(75);
-      expect(studyMinutes).toBeLessThanOrEqual(510);
+      expect(studyMinutes).toBeGreaterThanOrEqual(720);
+      expect(studyMinutes).toBeLessThanOrEqual(840);
       studyTotals.push(studyMinutes);
       expect(getSleepMinutes(entry) + getStudyMinutes(entry)).toBeLessThanOrEqual(24 * 60);
+      expect(24 * 60 - getSleepMinutes(entry) - studyMinutes).toBeLessThanOrEqual(6 * 60);
     });
     expect(new Set(studyTotals).size).toBeGreaterThan(20);
-    expect(Math.max(...studyTotals) - Math.min(...studyTotals)).toBeGreaterThan(180);
+    expect(Math.max(...studyTotals) - Math.min(...studyTotals)).toBeGreaterThan(100);
   });
 
   it("creates dense solved history in 2025 and the current year", () => {

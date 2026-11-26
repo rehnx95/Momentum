@@ -5,6 +5,12 @@
   align-items: start;
 }
 
+@media (min-width: 1024px) {
+  .profile-layout.own-profile-layout.public-profile-layout {
+    grid-template-columns: minmax(16rem, 21rem) minmax(0, 1fr);
+  }
+}
+
 .profile-layout > *,
 .profile-layout .profile-main > * {
   min-width: 0;

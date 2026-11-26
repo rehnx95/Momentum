@@ -81,17 +81,19 @@ function buildDailyLogs(userId, today) {
   return dateKeysBetween(DAILY_LOG_START, today).map((date, dayIndex) => {
     const random = createRandom(`${userId}:daily-log:${date}`);
     const weekday = dateFromKey(date).getUTCDay();
-    const weekendAdjustment = weekday === 0 || weekday === 6 ? -75 : 0;
-    const weeklySwing = Math.round(Math.sin((dayIndex / 5) * Math.PI * 2) * 55);
+    const weekendAdjustment = weekday === 0 || weekday === 6 ? -20 : 0;
+    const weeklySwing = Math.round(Math.sin((dayIndex / 5) * Math.PI * 2) * 25);
     const studyMinutes = Math.max(
-      75,
-      Math.min(510, 300 + randomInt(random, -135, 135) + weekendAdjustment + weeklySwing),
+      720,
+      Math.min(840, 780 + randomInt(random, -45, 45) + weekendAdjustment + weeklySwing),
     );
-    const sessionCount = Math.max(3, Math.min(9, Math.round(studyMinutes / 55)));
-    const sleepStart = randomInt(random, 22 * 60, 24 * 60 + 15);
+    const sessionCount = Math.max(12, Math.min(16, Math.round(studyMinutes / 55)));
     const wakeTime = randomInt(random, 6 * 60, 7 * 60 + 45);
-    let slotStart = wakeTime + randomInt(random, 25, 60);
+    const sleepDuration = randomInt(random, 7 * 60 + 30, 8 * 60 + 30);
+    const sleepStart = wakeTime - sleepDuration + 24 * 60;
+    let slotStart = wakeTime + randomInt(random, 20, 45);
     let remainingMinutes = studyMinutes;
+    let remainingBreakMinutes = 23 * 60 + 59 - slotStart - studyMinutes;
     const customTasks = ACTIVITY_TEMPLATES.map((activity) => ({
       id: activity.id,
       name: activity.name,
@@ -109,7 +111,14 @@ function buildDailyLogs(userId, today) {
         end: formatTime(slotStart + duration),
       });
       remainingMinutes -= duration;
-      slotStart += duration + randomInt(random, 10, 30);
+      slotStart += duration;
+      if (index < sessionCount - 1) {
+        const remainingGaps = sessionCount - index - 2;
+        const maximumBreak = Math.min(20, remainingBreakMinutes - remainingGaps * 5);
+        const breakMinutes = randomInt(random, 5, maximumBreak);
+        slotStart += breakMinutes;
+        remainingBreakMinutes -= breakMinutes;
+      }
     }
 
     return {

@@ -213,12 +213,18 @@ export default function PublicProfilePage({
                             <div className="recent-ac-check" aria-hidden="true">
                               ✓
                             </div>
-                            <Tooltip label={problem.title} className="recent-ac-tooltip">
+                            <Tooltip
+                              label={problem.title}
+                              className="recent-ac-tooltip recent-ac-problem"
+                            >
                               <p className="recent-ac-title" tabIndex={0}>
                                 {problem.title}
                               </p>
                             </Tooltip>
-                            <Tooltip label={problem.sheetTitle} className="recent-ac-tooltip">
+                            <Tooltip
+                              label={problem.sheetTitle}
+                              className="recent-ac-tooltip recent-ac-sheet"
+                            >
                               <span className="recent-ac-topic" tabIndex={0}>
                                 {problem.sheetTitle}
                               </span>
