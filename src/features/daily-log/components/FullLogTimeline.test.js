@@ -24,9 +24,9 @@ describe("Full Log timeline intervals", () => {
   });
 
   it("splits generic overnight intervals at midnight", () => {
-    expect(intervalsFor({ start: "22:00", end: "06:00" }, true)).toEqual([
-      [1320, 1440],
+    expect(intervalsFor({ start: "22:00", end: "06:00" })).toEqual([
       [0, 360],
+      [1320, 1440],
     ]);
   });
 
@@ -41,7 +41,7 @@ describe("Full Log timeline intervals", () => {
   });
 
   it("does not render a zero-length interval", () => {
-    expect(intervalsFor({ start: "08:00", end: "08:00" }, true)).toEqual([]);
+    expect(intervalsFor({ start: "08:00", end: "08:00" })).toEqual([]);
   });
 
   it("finds gaps after merging overlapping activity and sleep intervals", () => {
@@ -60,7 +60,7 @@ describe("Full Log timeline intervals", () => {
       ),
     ).toEqual([
       [360, 540],
-      [720, 1320],
+      [720, 1440],
     ]);
   });
 
@@ -68,14 +68,25 @@ describe("Full Log timeline intervals", () => {
     expect(
       unloggedIntervalsFor([
         {
-          slots: [{ start: "00:00", end: "00:00", endDayOffset: 1 }],
+          slots: [{ start: "00:00", end: "00:00", endDayOffset: 1, timerId: "full-day" }],
         },
       ]),
     ).toEqual([]);
   });
 
-  it("calculates unlogged time after subtracting activity and sleep from a day", () => {
-    expect(unloggedMinutesFor(180, 420)).toBe(840);
-    expect(unloggedMinutesFor(1440, 60)).toBe(0);
+  it("calculates untracked time from interval union instead of summing overlaps", () => {
+    expect(
+      unloggedMinutesFor({
+        sleep_periods: [{ start: "22:00", end: "06:00" }],
+        custom_tasks: [
+          {
+            slots: [
+              { start: "09:00", end: "11:00" },
+              { start: "10:00", end: "12:00" },
+            ],
+          },
+        ],
+      }),
+    ).toBe(900);
   });
 });

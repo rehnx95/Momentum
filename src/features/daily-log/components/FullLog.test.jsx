@@ -64,7 +64,7 @@ describe("FullLog", () => {
 
     expect(container.querySelectorAll(".full-log-day")).toHaveLength(1);
     expect(container.querySelector(".full-log-sleep-total").getAttribute("aria-label")).toBe(
-      "Sleep 7h",
+      "Sleep 6h",
     );
   });
 
@@ -124,7 +124,7 @@ describe("FullLog", () => {
     expect(Number.parseFloat(shareSegments[0].style.width)).toBeCloseTo((60 / 1440) * 100, 1);
     expect(container.querySelector(".full-log-active-total").textContent).toContain("1h");
     expect(container.querySelector(".full-log-active-total").textContent).not.toContain("2h");
-    expect(screen.getByLabelText("Untracked 15h")).toBeTruthy();
+    expect(screen.getByLabelText("Untracked 16h")).toBeTruthy();
     expect(container.querySelector(".full-log-date-button")).toBeTruthy();
   });
 
@@ -289,7 +289,7 @@ describe("FullLog", () => {
       }),
     );
     expect(container.querySelectorAll(".full-log-day")).toHaveLength(1);
-    expect(container.querySelector(".full-log-sleep-total").textContent).toContain("7h");
+    expect(container.querySelector(".full-log-sleep-total").textContent).toContain("6h");
     fireEvent.click(container.querySelector(".full-log-expand-button"));
     expect(container.querySelector(".full-log-day-details").textContent).not.toContain("Sleep");
 
@@ -299,8 +299,8 @@ describe("FullLog", () => {
         name: "Untracked",
       }),
     );
-    expect(container.querySelectorAll(".full-log-day")).toHaveLength(1);
-    expect(container.querySelector(".full-log-unlogged-total").textContent).toContain("24h");
+    expect(container.querySelectorAll(".full-log-day")).toHaveLength(2);
+    expect(container.querySelector(".full-log-unlogged-total").textContent).toContain("1h");
   });
 
   it("includes a solved date even when no daily log was saved", () => {

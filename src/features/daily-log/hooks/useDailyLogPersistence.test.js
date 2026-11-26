@@ -8,6 +8,27 @@ import useDailyLogPersistence from "./useDailyLogPersistence";
 
 const fromMock = vi.hoisted(() => vi.fn());
 
+function withWriteMethods(query, write) {
+  query.writeBuilders = [];
+  const createWriteBuilder = (result) => {
+    const builder = {
+      eq: vi.fn(() => builder),
+      select: vi.fn(() =>
+        Promise.resolve(result).then((value) =>
+          value?.error
+            ? value
+            : { ...value, data: value?.data || [{ updated_at: "2025-03-14T12:01:00.000Z" }] },
+        ),
+      ),
+    };
+    query.writeBuilders.push(builder);
+    return builder;
+  };
+  query.update = vi.fn((values) => createWriteBuilder(write(values)));
+  query.insert = vi.fn((values) => createWriteBuilder(write(values)));
+  return query;
+}
+
 function installBrowserStubs() {
   const store = new Map();
   Object.defineProperty(globalThis, "localStorage", {
@@ -60,22 +81,26 @@ describe("useDailyLogPersistence", () => {
   beforeEach(() => {
     installBrowserStubs();
     fromMock.mockReset();
-    fromMock.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({
-        data: {
-          date: "2025-03-14",
-          sleep_time: "22:30",
-          wake_time: "06:15",
-          custom_tasks: [
-            { id: "task-1", name: "Reading", slots: [{ start: "21:00", end: "22:00" }] },
-          ],
+    fromMock.mockImplementation(() =>
+      withWriteMethods(
+        {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: {
+              date: "2025-03-14",
+              sleep_time: "22:30",
+              wake_time: "06:15",
+              custom_tasks: [
+                { id: "task-1", name: "Reading", slots: [{ start: "21:00", end: "22:00" }] },
+              ],
+            },
+            error: null,
+          }),
         },
-        error: null,
-      }),
-      upsert: vi.fn().mockResolvedValue({ error: null }),
-    }));
+        vi.fn().mockResolvedValue({ error: null }),
+      ),
+    );
   });
 
   afterEach(() => {
@@ -304,12 +329,16 @@ describe("useDailyLogPersistence", () => {
       finishUpsert = resolve;
     });
     const upsert = vi.fn(() => pendingUpsert);
-    fromMock.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-      upsert,
-    }));
+    fromMock.mockImplementation(() =>
+      withWriteMethods(
+        {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        },
+        upsert,
+      ),
+    );
     const setLoading = vi.fn();
     const setLog = vi.fn();
     const savedSnapshotRef = { current: null };
@@ -412,12 +441,16 @@ describe("useDailyLogPersistence", () => {
       finishUpsert = resolve;
     });
     const upsert = vi.fn(() => pendingUpsert);
-    fromMock.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-      upsert,
-    }));
+    fromMock.mockImplementation(() =>
+      withWriteMethods(
+        {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        },
+        upsert,
+      ),
+    );
     const logRef = { current: baseLog };
     const savedSnapshotRef = { current: JSON.stringify(baseLog) };
     const setStatus = vi.fn();
@@ -485,19 +518,21 @@ describe("useDailyLogPersistence", () => {
       date,
       sleep_time: "",
       wake_time: "",
-      dsa_slots: [],
-      backend_slots: [],
       custom_tasks: [],
     };
     const logRef = { current: baseLog };
     const savedSnapshotRef = { current: JSON.stringify(baseLog) };
     const upsert = vi.fn().mockResolvedValue({ error: null });
-    fromMock.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-      upsert,
-    }));
+    fromMock.mockImplementation(() =>
+      withWriteMethods(
+        {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        },
+        upsert,
+      ),
+    );
     let hookResult;
 
     function HookHarness() {
@@ -555,12 +590,16 @@ describe("useDailyLogPersistence", () => {
     const savedSnapshotRef = { current: JSON.stringify(logRef.current) };
     const upsert = vi.fn();
     const setStatus = vi.fn();
-    fromMock.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-      upsert,
-    }));
+    fromMock.mockImplementation(() =>
+      withWriteMethods(
+        {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        },
+        upsert,
+      ),
+    );
     let hookResult;
 
     function HookHarness() {
@@ -617,10 +656,7 @@ describe("useDailyLogPersistence", () => {
       date,
       sleep_time: "",
       wake_time: "",
-      dsa_slots: [],
-      backend_slots: [],
-      dsa_hours: null,
-      backend_hours: null,
+      sleep_periods: [],
       custom_tasks: [],
       updated_at: databaseTimestamp,
     };
@@ -630,12 +666,19 @@ describe("useDailyLogPersistence", () => {
     const upsert = vi.fn().mockResolvedValue({ error: null });
     const setMessage = vi.fn();
     const setStatus = vi.fn();
-    fromMock.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: loadedLog, error: null }),
-      upsert,
-    }));
+    const queryInstances = [];
+    fromMock.mockImplementation(() => {
+      const query = withWriteMethods(
+        {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: loadedLog, error: null }),
+        },
+        upsert,
+      );
+      queryInstances.push(query);
+      return query;
+    });
     let hookResult;
 
     function HookHarness() {
@@ -685,24 +728,8 @@ describe("useDailyLogPersistence", () => {
     expect(result).toBe(true);
     await vi.waitFor(() => expect(upsert).toHaveBeenCalledOnce());
     expect(setMessage).not.toHaveBeenCalledWith(expect.stringContaining("changed elsewhere"));
-
-    savedUpdatedAtRef.current = "2025-03-14T11:00:00.000Z";
-    let conflictResult;
-    await act(async () => {
-      conflictResult = await hookResult.saveLog(
-        {
-          ...loadedLog,
-          custom_tasks: [
-            { id: "task-1", name: "Reading", slots: [{ start: "10:00", end: "11:00" }] },
-          ],
-        },
-        date,
-      );
-    });
-
-    expect(conflictResult).toBe(true);
-    await vi.waitFor(() => expect(setStatus).toHaveBeenCalledWith("This day changed elsewhere"));
-    expect(upsert).toHaveBeenCalledOnce();
+    const updateBuilder = queryInstances.at(-1).writeBuilders[0];
+    expect(updateBuilder.eq).toHaveBeenCalledWith("updated_at", "2025-03-14T12:00:00.000Z");
   });
 
   it("includes the Supabase error code when a daily log save fails", async () => {
@@ -716,12 +743,16 @@ describe("useDailyLogPersistence", () => {
     const upsert = vi.fn().mockResolvedValue({
       error: { code: "42501", message: "new row violates row-level security policy" },
     });
-    fromMock.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-      upsert,
-    }));
+    fromMock.mockImplementation(() =>
+      withWriteMethods(
+        {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        },
+        upsert,
+      ),
+    );
     let hookResult;
 
     function HookHarness() {
@@ -776,17 +807,19 @@ describe("useDailyLogPersistence", () => {
       date,
       sleep_time: "",
       wake_time: "",
-      dsa_slots: [],
-      backend_slots: [],
       custom_tasks: [],
     };
     const upsert = vi.fn().mockResolvedValue({ error: null });
-    fromMock.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-      upsert,
-    }));
+    fromMock.mockImplementation(() =>
+      withWriteMethods(
+        {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        },
+        upsert,
+      ),
+    );
     globalThis.navigator.onLine = false;
 
     const logRef = { current: baseLog };
@@ -850,13 +883,12 @@ describe("useDailyLogPersistence", () => {
       await syncOfflineMutations("offline-user");
     });
 
-    expect(upsert).toHaveBeenCalledWith(
+    expect(upsert).toHaveBeenLastCalledWith(
       expect.objectContaining({
         date,
         user_id: "offline-user",
         custom_tasks: [expect.objectContaining({ id: "reading" })],
       }),
-      { onConflict: "user_id,date" },
     );
     expect(await getOfflineMutations("offline-user")).toHaveLength(0);
   });
@@ -868,21 +900,26 @@ describe("useDailyLogPersistence", () => {
       date,
       sleep_time: "",
       wake_time: "",
-      dsa_slots: [],
-      backend_slots: [],
       custom_tasks: [],
     };
-    const upsert = vi.fn().mockResolvedValue({ error: null });
+    const upsert = vi
+      .fn()
+      .mockResolvedValueOnce({ error: { code: "23505", message: "duplicate key" } })
+      .mockResolvedValue({ error: null });
     const maybeSingle = vi
       .fn()
       .mockResolvedValueOnce({ data: null, error: null })
       .mockResolvedValue({ data: { updated_at: remoteUpdatedAt }, error: null });
-    fromMock.mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle,
-      upsert,
-    }));
+    fromMock.mockImplementation(() =>
+      withWriteMethods(
+        {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle,
+        },
+        upsert,
+      ),
+    );
 
     const logRef = { current: baseLog };
     const savedSnapshotRef = { current: JSON.stringify(baseLog) };
@@ -943,7 +980,6 @@ describe("useDailyLogPersistence", () => {
     expect(overwriteResult).toBe(true);
     expect(upsert).toHaveBeenCalledWith(
       expect.objectContaining({ custom_tasks: [expect.objectContaining({ id: "local-task" })] }),
-      { onConflict: "user_id,date" },
     );
     expect(await getOfflineMutations("conflict-user")).toHaveLength(0);
     expect(savedUpdatedAtRef.current).toEqual(expect.any(String));

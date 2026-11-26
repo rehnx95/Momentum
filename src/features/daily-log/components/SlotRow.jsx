@@ -66,7 +66,6 @@ export default function SlotRow({
         <span className="slot-activity-description" aria-hidden={!slotDescription}>
           {slotDescription}
         </span>
-        {slot.endDayOffset === 1 && <span className="slot-next-day">+1 day</span>}
         {allowRemove && (
           <Tooltip label="Remove slot">
             <button

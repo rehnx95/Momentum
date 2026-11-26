@@ -1,6 +1,11 @@
 import { createPortal } from "react-dom";
 import { useLayoutEffect, useRef, useState } from "react";
-import { formatDuration, intervalsFor, sleepIntervalsFor } from "../../../shared/utils/time";
+import {
+  formatDuration,
+  getUntrackedMinutes,
+  intervalsFor,
+  sleepIntervalsFor,
+} from "../../../shared/utils/time";
 import { getActivityColor } from "../lib/activityColor";
 
 export { intervalsFor, sleepIntervalsFor };
@@ -12,17 +17,11 @@ function clockLabel(minutes) {
 
 export function unloggedIntervalsFor(activities = [], sleepTime, wakeTime) {
   const loggedIntervals = activities.flatMap((activity) =>
-    (activity.slots || []).flatMap((slot) => intervalsFor(slot)),
-  );
-  loggedIntervals.push(
-    ...intervalsFor(
-      {
-        start: String(sleepTime || "").slice(0, 5),
-        end: String(wakeTime || "").slice(0, 5),
-      },
-      true,
+    (activity.slots || []).flatMap((slot) =>
+      intervalsFor(slot),
     ),
   );
+  loggedIntervals.push(...sleepIntervalsFor(sleepTime, wakeTime));
 
   const sortedIntervals = loggedIntervals.sort(
     ([firstStart, firstEnd], [secondStart, secondEnd]) =>
@@ -40,17 +39,15 @@ export function unloggedIntervalsFor(activities = [], sleepTime, wakeTime) {
   return unloggedIntervals;
 }
 
-export function unloggedMinutesFor(activeMinutes, sleepMinutes) {
-  return Math.max(0, 1440 - activeMinutes - sleepMinutes);
+export function unloggedMinutesFor(log) {
+  return getUntrackedMinutes(log);
 }
 
 export default function FullLogTimeline({
   activities = [],
   activityColors,
-  totalMinutes,
   sleepMinutes = 0,
-  sleepTime,
-  wakeTime,
+  sleepPeriods,
   activityFilter = "All",
 }) {
   const [hoveredSegment, setHoveredSegment] = useState(null);
@@ -59,9 +56,12 @@ export default function FullLogTimeline({
   const visibleActivities = activities.filter(
     (activity) => activityFilter === "All" || activity.name === activityFilter,
   );
-  const unloggedSegments = unloggedIntervalsFor(activities, sleepTime, wakeTime);
-  const shareUnloggedMinutes = unloggedMinutesFor(totalMinutes, sleepMinutes);
-  const shareTotal = totalMinutes + sleepMinutes + shareUnloggedMinutes;
+  const unloggedSegments = unloggedIntervalsFor(activities, sleepPeriods);
+  const shareUnloggedMinutes = unloggedMinutesFor({
+    custom_tasks: activities,
+    sleep_periods: sleepPeriods,
+  });
+  const shareTotal = 1440;
   const activityShareSegments = visibleActivities
     .slice()
     .sort(
@@ -83,8 +83,10 @@ export default function FullLogTimeline({
     activityShareCursor += activity.share;
     return segment;
   });
-  const sleepTimeRange =
-    sleepTime && wakeTime ? `${String(sleepTime).slice(0, 5)}–${String(wakeTime).slice(0, 5)}` : "";
+  const sleepTimeRange = (sleepPeriods || [])
+    .filter((period) => period.start && period.end)
+    .map((period) => `${period.start}–${period.end}`)
+    .join(", ");
   const sleepTooltip = `Sleep ${formatDuration(sleepMinutes)}${sleepTimeRange ? ` · ${sleepTimeRange}` : ""} · ${Math.round(sleepShare)}%`;
   const unloggedTooltip = {
     title: `Untracked ${formatDuration(shareUnloggedMinutes)} · ${Math.round(unloggedShare)}%`,

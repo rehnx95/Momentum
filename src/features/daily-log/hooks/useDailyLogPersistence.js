@@ -11,7 +11,13 @@ import {
   getOfflineMutations,
   removeOfflineMutation,
 } from "../../../shared/lib/offlineMutationStore";
-import { emptyLog, normalizeLog } from "../lib/dailyLogModel";
+import {
+  emptyLog,
+  getDailyLogDraft,
+  normalizeLog,
+  removeDailyLogDraft,
+  setDailyLogDraft,
+} from "../lib/dailyLogModel";
 import { isSheetActivity, normalizeActivityName } from "../lib/activityName";
 import { validateDay } from "../../../shared/utils/time";
 import { isNetworkUnavailable } from "../../../shared/utils/network";
@@ -22,11 +28,8 @@ function buildDailyLogRow(userId, date, draft, updatedAt) {
     date,
     sleep_time: draft.sleep_time || null,
     wake_time: draft.wake_time || null,
-    dsa_slots: [],
-    backend_slots: [],
+    sleep_periods: draft.sleep_periods,
     custom_tasks: draft.custom_tasks,
-    dsa_hours: null,
-    backend_hours: null,
     updated_at: updatedAt,
   };
 }
@@ -65,9 +68,17 @@ function mergeUncachedLogDraft(remoteLog, localLog, baselineLog) {
   return {
     ...remoteLog,
     sleep_time:
-      localLog.sleep_time !== baselineLog.sleep_time ? localLog.sleep_time : remoteLog.sleep_time,
+      JSON.stringify(localLog.sleep_periods) !== JSON.stringify(baselineLog.sleep_periods)
+        ? localLog.sleep_time
+        : remoteLog.sleep_time,
     wake_time:
-      localLog.wake_time !== baselineLog.wake_time ? localLog.wake_time : remoteLog.wake_time,
+      JSON.stringify(localLog.sleep_periods) !== JSON.stringify(baselineLog.sleep_periods)
+        ? localLog.wake_time
+        : remoteLog.wake_time,
+    sleep_periods:
+      JSON.stringify(localLog.sleep_periods) !== JSON.stringify(baselineLog.sleep_periods)
+        ? localLog.sleep_periods
+        : remoteLog.sleep_periods,
     custom_tasks: customTasks,
   };
 }
@@ -95,6 +106,11 @@ export default function useDailyLogPersistence({
   const [saving, setSaving] = useState(false);
   const saveQueueRef = useRef(Promise.resolve(true));
   const autosaveTimer = useRef(null);
+
+  useEffect(() => {
+    if (loading || loadFailed || log.date !== date) return;
+    if (dirty) setDailyLogDraft(userId, date, log);
+  }, [date, dirty, loadFailed, loading, log, userId]);
 
   const saveLog = useCallback(
     (draft, targetDate) => {
@@ -126,6 +142,7 @@ export default function useDailyLogPersistence({
           entityId: nextDate,
           payload: { row, draft: nextDraft, expectedUpdatedAt: savedUpdatedAtRef.current },
         });
+        removeDailyLogDraft(userId, nextDate);
         invalidateDailyLogHistoryCache(userId);
         const normalizedLog = normalizeLog(nextDraft, nextDate);
         normalizedLog.updated_at = updatedAt;
@@ -159,7 +176,7 @@ export default function useDailyLogPersistence({
               return;
             }
             if (syncResult.syncedKeys.includes(mutation.key)) {
-              savedUpdatedAtRef.current = updatedAt;
+              savedUpdatedAtRef.current = syncResult.updatedAtByKey[mutation.key] || updatedAt;
               setStatus("Saved");
               setMessage("");
             }
@@ -229,7 +246,7 @@ export default function useDailyLogPersistence({
     try {
       const { data, error } = await supabase
         .from("daily_logs")
-        .select("date, sleep_time, wake_time, custom_tasks, updated_at")
+        .select("date, sleep_time, wake_time, sleep_periods, custom_tasks, updated_at")
         .eq("user_id", userId)
         .eq("date", targetDate)
         .maybeSingle();
@@ -255,6 +272,7 @@ export default function useDailyLogPersistence({
       setLog(nextLog);
       setStatus("Saved");
       setMessage("Loaded the latest cloud copy. Your offline edits were discarded.");
+      removeDailyLogDraft(userId, targetDate);
       setLoadFailed(false);
       return true;
     } catch (error) {
@@ -309,6 +327,7 @@ export default function useDailyLogPersistence({
           expectedUpdatedAt: existingLog?.updated_at ?? null,
         },
       });
+      removeDailyLogDraft(userId, targetDate);
       const normalizedLog = normalizeLog(draft, targetDate);
       normalizedLog.updated_at = updatedAt;
       setDailyLogCache(userId, targetDate, normalizedLog);
@@ -332,7 +351,7 @@ export default function useDailyLogPersistence({
         return false;
       }
       if (syncResult.syncedKeys.includes(mutation.key)) {
-        savedUpdatedAtRef.current = updatedAt;
+        savedUpdatedAtRef.current = syncResult.updatedAtByKey[mutation.key] || updatedAt;
         setStatus("Saved");
         setMessage("Your copy replaced the cloud version.");
       } else {
@@ -395,6 +414,7 @@ export default function useDailyLogPersistence({
   useEffect(() => {
     let active = true;
     const cachedLog = getDailyLogCache(userId, date);
+    const localDraft = getDailyLogDraft(userId, date);
     const online = typeof navigator === "undefined" || navigator.onLine !== false;
     setLoading(!cachedLog && online);
     setLoadFailed(false);
@@ -450,7 +470,8 @@ export default function useDailyLogPersistence({
                   "Your edits are preserved on this device, but this day also changed in the cloud.",
                 );
               } else if (syncResult.syncedKeys.includes(pending.key)) {
-                savedUpdatedAtRef.current = pending.payload.row.updated_at;
+                savedUpdatedAtRef.current =
+                  syncResult.updatedAtByKey[pending.key] || pending.payload.row.updated_at;
                 setStatus("Saved");
               }
             });
@@ -468,7 +489,7 @@ export default function useDailyLogPersistence({
           savedSnapshotRef.current = snapshot;
           savedUpdatedAtRef.current = cachedLog?.updated_at ?? null;
           setSavedSnapshot(snapshot);
-          setLog(hasUnsavedChanges ? logRef.current : nextLog);
+          setLog(hasUnsavedChanges ? logRef.current : localDraft || nextLog);
           setLoadFailed(false);
           setStatus("");
           setMessage("");
@@ -477,7 +498,7 @@ export default function useDailyLogPersistence({
 
         const { data, error } = await supabase
           .from("daily_logs")
-          .select("date, sleep_time, wake_time, custom_tasks, updated_at")
+          .select("date, sleep_time, wake_time, sleep_periods, custom_tasks, updated_at")
           .eq("user_id", userId)
           .eq("date", date)
           .maybeSingle();
@@ -498,38 +519,39 @@ export default function useDailyLogPersistence({
         savedUpdatedAtRef.current = data?.updated_at ?? null;
         setSavedSnapshot(snapshot);
         setLog(
-          hasUnsavedChanges ? mergeUncachedLogDraft(nextLog, logRef.current, baselineLog) : nextLog,
+          hasUnsavedChanges
+            ? mergeUncachedLogDraft(nextLog, logRef.current, baselineLog)
+            : localDraft || nextLog,
         );
-        setStatus("Saved");
+        setStatus(localDraft ? "Draft restored" : "Saved");
         setLoadFailed(false);
       } catch (error) {
         if (!active) return;
         const networkUnavailable = isNetworkUnavailable(error);
         if (!networkUnavailable) console.error("Failed to load daily log:", error);
+        if (networkUnavailable) {
+          const fallbackLog = cachedLog ? normalizeLog(cachedLog, date) : emptyLog(date);
+          const snapshot = JSON.stringify(fallbackLog);
+          const hasUnsavedChanges =
+            logRef.current.date === date &&
+            JSON.stringify(logRef.current) !==
+              (snapshotAtRequestStart || JSON.stringify(emptyLog(date)));
+          savedSnapshotRef.current = snapshot;
+          savedUpdatedAtRef.current = cachedLog?.updated_at ?? null;
+          setSavedSnapshot(snapshot);
+          setLog(hasUnsavedChanges ? logRef.current : localDraft || fallbackLog);
+          setLoadFailed(false);
+          setStatus("");
+          setMessage("");
+          return;
+        }
         if (!cachedLog) {
-          if (networkUnavailable) {
-            const nextLog = emptyLog(date);
-            const snapshot = JSON.stringify(nextLog);
-            savedSnapshotRef.current = snapshot;
-            savedUpdatedAtRef.current = null;
-            setSavedSnapshot(snapshot);
-            setLog(nextLog);
-            setLoadFailed(false);
-            setStatus("");
-            setMessage("");
-          } else {
-            setLoadFailed(true);
-            setStatus("Could not load");
-            setMessage("Could not load this daily log.");
-          }
+          setLoadFailed(true);
+          setStatus("Could not load");
+          setMessage("Could not load this daily log.");
         } else {
-          if (networkUnavailable) {
-            setStatus("");
-            setMessage("");
-          } else {
-            setStatus("Could not load");
-            setMessage("Could not load the latest Daily Log. Showing your saved copy.");
-          }
+          setStatus("Could not load");
+          setMessage("Could not load the latest Daily Log. Showing your saved copy.");
         }
       } finally {
         if (active) setLoading(false);

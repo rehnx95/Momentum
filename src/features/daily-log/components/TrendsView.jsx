@@ -2,8 +2,10 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   formatDuration,
+  getSleepPeriods,
   getSleepMinutes,
-  getSlotDurationMinutes,
+  getStudyActivityBreakdown,
+  getStudyMinutes,
 } from "../../../shared/utils/time";
 import { getLocalDateKey } from "../../../shared/utils/date";
 import Dropdown from "../../../shared/components/Dropdown";
@@ -19,16 +21,16 @@ const MOBILE_CHART_WINDOW_DAYS = 7;
 function activityEntries(log, sheets) {
   const activities = new Map();
   const tasks = Array.isArray(log?.custom_tasks) ? log.custom_tasks : [];
+  const minutesByTask = new Map(
+    getStudyActivityBreakdown(log).map((activity) => [activity.id, activity.minutes]),
+  );
 
   tasks.forEach((task) => {
     const name = isSheetActivity(task)
       ? getActivityDisplayName(task, sheets)
       : String(task.name || "").trim();
     if (!name) return;
-    const minutes = (Array.isArray(task.slots) ? task.slots : []).reduce(
-      (total, slot) => total + (getSlotDurationMinutes(slot) || 0),
-      0,
-    );
+    const minutes = minutesByTask.get(task.id) || 0;
     if (minutes <= 0) return;
 
     const sheet = isSheetActivity(task);
@@ -190,7 +192,7 @@ export default function TrendsView({ daily, sheets = [] }) {
         dateKey: key,
         label: dateLabel(date, { month: "short", day: "numeric" }),
         sleep: log ? getSleepMinutes(log) : null,
-        sleepRecorded: Boolean(log?.sleep_time && log?.wake_time),
+        sleepRecorded: getSleepPeriods(log).some((period) => period.start && period.end),
         study: log ? activeMinutes : null,
       };
     });
@@ -205,19 +207,19 @@ export default function TrendsView({ daily, sheets = [] }) {
         { key, value: values.reduce((total, value) => total + value, 0) / values.length, label },
       ];
     });
-    const sleepLogs = logsInRange.filter((log) => log.sleep_time && log.wake_time);
+    const sleepLogs = logsInRange.filter((log) =>
+      getSleepPeriods(log).some((period) => period.start && period.end),
+    );
     const averageSleep = sleepLogs.length
       ? sleepLogs.reduce((total, log) => total + getSleepMinutes(log), 0) / sleepLogs.length
       : null;
-    const totalActive = logsInRange.reduce(
-      (total, log) =>
-        total + activityEntries(log, sheets).reduce((sum, activity) => sum + activity.minutes, 0),
-      0,
-    );
+    const totalActive = logsInRange.reduce((total, log) => total + getStudyMinutes(log), 0);
     const daysLogged = new Set(
       logsInRange
         .filter(
-          (log) => activityEntries(log, sheets).length > 0 || log.sleep_time || log.wake_time,
+          (log) =>
+            getStudyMinutes(log) > 0 ||
+            getSleepPeriods(log).some((period) => period.start && period.end),
         )
         .map((log) => log.date),
     ).size;
@@ -266,11 +268,7 @@ export default function TrendsView({ daily, sheets = [] }) {
       addTotal("sleep", "Sleep", sleepMinutes);
       if (log) {
         const activeMinutes = activities.reduce((total, activity) => total + activity.minutes, 0);
-        addTotal(
-          "untracked",
-          "Untracked",
-          Math.max(0, 24 * 60 - activeMinutes - sleepMinutes),
-        );
+        addTotal("untracked", "Untracked", Math.max(0, 24 * 60 - activeMinutes - sleepMinutes));
       }
     });
 

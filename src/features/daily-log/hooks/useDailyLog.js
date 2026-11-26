@@ -104,11 +104,14 @@ export default function useDailyLog(user, activityLog = {}) {
     addCustomTask,
     addSheetActivity,
     addSlot,
+    addSleepPeriod,
     discardEmptySlot,
     removeCustomTask,
     removeSlot,
+    removeSleepPeriod,
     renameCustomTask,
     updateField,
+    updateSleepPeriod,
     updateSlot,
   } = useDailyLogActivities(logRef, setLog, assignActivityColor);
 
@@ -118,7 +121,6 @@ export default function useDailyLog(user, activityLog = {}) {
     overwriteConflict,
     reloadConflict,
     saveLog,
-    saveLogRef,
     saveQueueRef,
     saving,
   } = useDailyLogPersistence({
@@ -148,8 +150,6 @@ export default function useDailyLog(user, activityLog = {}) {
     logRef,
     setLog,
     assignActivityColor,
-    saveLogRef,
-    flushPendingSave,
     setMessage,
   });
 
@@ -254,9 +254,12 @@ export default function useDailyLog(user, activityLog = {}) {
     changeDate,
     shiftDate,
     updateField,
+    updateSleepPeriod,
     updateSlot,
     addSlot,
+    addSleepPeriod,
     removeSlot,
+    removeSleepPeriod,
     discardEmptySlot,
     addCustomTask,
     addSheetActivity,

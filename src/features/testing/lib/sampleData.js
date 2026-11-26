@@ -85,10 +85,7 @@ function buildDailyLogs(userId, today) {
     const weeklySwing = Math.round(Math.sin((dayIndex / 5) * Math.PI * 2) * 55);
     const studyMinutes = Math.max(
       75,
-      Math.min(
-        510,
-        300 + randomInt(random, -135, 135) + weekendAdjustment + weeklySwing,
-      ),
+      Math.min(510, 300 + randomInt(random, -135, 135) + weekendAdjustment + weeklySwing),
     );
     const sessionCount = Math.max(3, Math.min(9, Math.round(studyMinutes / 55)));
     const sleepStart = randomInt(random, 22 * 60, 24 * 60 + 15);
@@ -120,8 +117,13 @@ function buildDailyLogs(userId, today) {
       date,
       sleep_time: formatTime(sleepStart),
       wake_time: formatTime(wakeTime),
-      dsa_slots: [],
-      backend_slots: [],
+      sleep_periods: [
+        {
+          id: "sleep-1",
+          start: formatTime(sleepStart),
+          end: formatTime(wakeTime),
+        },
+      ],
       custom_tasks: customTasks,
     };
   });

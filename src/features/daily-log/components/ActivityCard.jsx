@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Palette, Plus, Square, Trash2 } from "lucide-react";
 import Tooltip from "../../../shared/components/Tooltip";
-import { formatDuration, getSlotDurationMinutes } from "../../../shared/utils/time";
+import { formatDuration, getSlotsDurationMinutes } from "../../../shared/utils/time";
 import SlotRow from "./SlotRow";
 import { ACTIVITY_COLOR_PALETTE, isActivityColorValue } from "../lib/activityColor";
 
@@ -46,10 +46,7 @@ export default function ActivityCard({
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [customColor, setCustomColor] = useState("");
   const visibleSlots = slots.map((slot, index) => ({ slot, index }));
-  const totalSlotMinutes = slots.reduce(
-    (total, slot) => total + (getSlotDurationMinutes(slot) || 0),
-    0,
-  );
+  const totalSlotMinutes = getSlotsDurationMinutes(slots);
   const totalSlotDuration = totalSlotMinutes > 0 ? formatDuration(totalSlotMinutes) : "";
   const timerRunningHere = runningTimer?.activityId === activityId;
 

@@ -115,7 +115,7 @@ export function useProgress(user) {
         );
       });
       return write.then(
-        () => true,
+        (saved) => saved,
         () => false,
       );
     },

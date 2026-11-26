@@ -38,6 +38,8 @@ describe("syncOfflineMutations", () => {
   it("syncs a newer daily-log edit after an in-flight local version", async () => {
     const date = "2026-11-18";
     const originalUpdatedAt = "2026-11-18T10:00:00.000Z";
+    const firstServerUpdatedAt = "2026-11-18T10:01:01.000Z";
+    const secondServerUpdatedAt = "2026-11-18T10:02:01.000Z";
     const firstUpdatedAt = "2026-11-18T10:01:00.000Z";
     const secondUpdatedAt = "2026-11-18T10:02:00.000Z";
     const makeMutation = (updatedAt, expectedUpdatedAt, minute) => ({
@@ -51,7 +53,9 @@ describe("syncOfflineMutations", () => {
           user_id: "user-1",
           date,
           updated_at: updatedAt,
-          custom_tasks: [{ id: "reading", name: "Reading", slots: [{ start: "09:00", end: `${minute}:00` }] }],
+          custom_tasks: [
+            { id: "reading", name: "Reading", slots: [{ start: "09:00", end: `${minute}:00` }] },
+          ],
         },
         expectedUpdatedAt,
       },
@@ -60,34 +64,50 @@ describe("syncOfflineMutations", () => {
     const secondMutation = makeMutation(secondUpdatedAt, originalUpdatedAt, "11");
     let queuedMutations = [firstMutation];
     let remoteUpdatedAt = originalUpdatedAt;
-    let releaseFirstUpsert;
-    let signalFirstUpsert;
+    let releaseFirstUpdate;
+    let signalFirstUpdate;
     const firstUpsertStarted = new Promise((resolve) => {
-      signalFirstUpsert = resolve;
+      signalFirstUpdate = resolve;
     });
     const firstUpsertResult = new Promise((resolve) => {
-      releaseFirstUpsert = resolve;
+      releaseFirstUpdate = resolve;
     });
-    const upsert = vi.fn((row) => {
-      if (upsert.mock.calls.length === 1) {
-        signalFirstUpsert();
+    const update = vi.fn(() => {
+      if (update.mock.calls.length === 1) {
+        signalFirstUpdate();
         return firstUpsertResult.then((result) => {
-          remoteUpdatedAt = row.updated_at;
+          remoteUpdatedAt = firstServerUpdatedAt;
           return result;
         });
       }
-      remoteUpdatedAt = row.updated_at;
-      return Promise.resolve({ error: null });
+      remoteUpdatedAt = secondServerUpdatedAt;
+      return query;
     });
     const query = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockImplementation(async () => ({
-        data: { updated_at: remoteUpdatedAt },
+      update,
+      insert: vi.fn().mockReturnThis(),
+      select: vi.fn().mockImplementation(async () => ({
+        data: [{ updated_at: remoteUpdatedAt }],
         error: null,
       })),
-      upsert,
+      eq: vi.fn().mockReturnThis(),
     };
+    update.mockImplementation(() => {
+      if (update.mock.calls.length === 1) {
+        signalFirstUpdate();
+        return {
+          ...query,
+          select: vi.fn().mockImplementation(() =>
+            firstUpsertResult.then((result) => {
+              remoteUpdatedAt = firstServerUpdatedAt;
+              return result;
+            }),
+          ),
+        };
+      }
+      remoteUpdatedAt = secondServerUpdatedAt;
+      return query;
+    });
     mocks.from.mockReturnValue(query);
     mocks.getOfflineMutations.mockImplementation(async () => [...queuedMutations]);
     mocks.removeOfflineMutation.mockImplementation(async (key, updatedAt) => {
@@ -103,13 +123,63 @@ describe("syncOfflineMutations", () => {
     await firstUpsertStarted;
     queuedMutations = [secondMutation];
     void syncOfflineMutations("user-1");
-    releaseFirstUpsert({ error: null });
+    releaseFirstUpdate({ data: [{ updated_at: firstServerUpdatedAt }], error: null });
 
     const result = await syncPromise;
 
     expect(result.conflicts).toEqual([]);
     expect(result.syncedKeys).toEqual([secondMutation.key]);
-    expect(upsert).toHaveBeenCalledTimes(2);
+    expect(update).toHaveBeenCalledTimes(2);
     expect(queuedMutations).toEqual([]);
+  });
+
+  it("reports a conflict when the atomic updated-at guard matches no row", async () => {
+    const date = "2026-11-18";
+    const mutation = {
+      key: `user-1:daily-log:${date}`,
+      userId: "user-1",
+      type: "daily-log",
+      entityId: date,
+      updatedAt: 1,
+      payload: {
+        row: {
+          user_id: "user-1",
+          date,
+          sleep_time: null,
+          wake_time: null,
+          sleep_periods: [],
+          custom_tasks: [{ id: "local", name: "Local", slots: [] }],
+          updated_at: "2026-11-18T10:01:00.000Z",
+        },
+        expectedUpdatedAt: "2026-11-18T10:00:00.000Z",
+      },
+    };
+    const updateBuilder = {
+      eq: vi.fn().mockReturnThis(),
+      select: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
+    const updateQuery = { update: vi.fn(() => updateBuilder) };
+    const readQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: {
+          sleep_time: null,
+          wake_time: null,
+          sleep_periods: [],
+          custom_tasks: [{ id: "remote", name: "Remote", slots: [] }],
+          updated_at: "2026-11-18T10:02:00.000Z",
+        },
+        error: null,
+      }),
+    };
+    mocks.from.mockReturnValueOnce(updateQuery).mockReturnValueOnce(readQuery);
+    mocks.getOfflineMutations.mockResolvedValue([mutation]);
+
+    const result = await syncOfflineMutations("user-1");
+
+    expect(updateBuilder.eq).toHaveBeenCalledWith("updated_at", "2026-11-18T10:00:00.000Z");
+    expect(result.conflicts).toEqual([{ key: mutation.key, type: "daily-log", entityId: date }]);
+    expect(mocks.removeOfflineMutation).not.toHaveBeenCalled();
   });
 });

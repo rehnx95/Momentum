@@ -6,6 +6,8 @@ import { timerStorageKey } from "../lib/dailyLogModel";
 import { getLocalDateKey } from "../../../shared/utils/date";
 import { getOfflineMutations } from "../../../shared/lib/offlineMutationStore";
 
+const fromMock = vi.hoisted(() => vi.fn());
+
 function installBrowserStubs() {
   const store = new Map();
   Object.defineProperty(globalThis, "localStorage", {
@@ -21,26 +23,20 @@ function installBrowserStubs() {
     },
     configurable: true,
   });
-
   Object.defineProperty(globalThis, "window", {
     value: {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
       setInterval: vi.fn(() => 1),
       clearInterval: vi.fn(),
-      setTimeout: vi.fn(() => 1),
-      clearTimeout: vi.fn(),
     },
     configurable: true,
   });
-
   Object.defineProperty(globalThis, "document", {
     value: {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
       visibilityState: "visible",
-      documentElement: {
-        setAttribute: vi.fn(),
-        removeAttribute: vi.fn(),
-      },
     },
     configurable: true,
   });
@@ -51,13 +47,35 @@ function installBrowserStubs() {
 }
 
 vi.mock("../../../shared/lib/supabase", () => ({
-  supabase: { from: vi.fn() },
+  supabase: { from: fromMock },
 }));
 
 describe("useDailyLogTimer", () => {
   beforeEach(() => {
     installBrowserStubs();
     localStorage.clear();
+    fromMock.mockImplementation(() => {
+      const query = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+      };
+      const createWriteBuilder = () => {
+        const builder = {
+          eq: vi.fn(() => builder),
+          select: vi.fn().mockResolvedValue({
+            data: [{ updated_at: "2025-03-15T12:00:00.000Z" }],
+            error: null,
+          }),
+          then: (resolve, reject) => Promise.resolve({ error: null }).then(resolve, reject),
+        };
+        return builder;
+      };
+      query.insert = vi.fn(createWriteBuilder);
+      query.update = vi.fn(createWriteBuilder);
+      query.delete = vi.fn(createWriteBuilder);
+      return query;
+    });
   });
 
   afterEach(() => {
@@ -71,11 +89,9 @@ describe("useDailyLogTimer", () => {
   it("starts and stops a timer without leaving a stale running state", async () => {
     const setLog = vi.fn();
     const setMessage = vi.fn();
-    const flushPendingSave = vi.fn().mockResolvedValue(true);
-    const saveLogRef = { current: vi.fn().mockResolvedValue(true) };
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const dateKey = getLocalDateKey(today);
     let hookResult;
 
     function HookHarness() {
@@ -84,51 +100,51 @@ describe("useDailyLogTimer", () => {
         dateRef: { current: dateKey },
         logRef: { current: { date: dateKey, sleep_time: "", wake_time: "", custom_tasks: [] } },
         setLog,
-        saveLogRef,
-        flushPendingSave,
         setMessage,
       });
       return null;
     }
 
+    let renderer;
     await act(async () => {
-      TestRenderer.create(React.createElement(HookHarness));
+      renderer = TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
     });
 
-    act(() => {
-      const started = hookResult.startTimer("task-1", "Reading", "#3b82f6");
-      expect(started).toBe(true);
+    let started;
+    await act(async () => {
+      started = await hookResult.startTimer("task-1", "Reading", "#3b82f6");
     });
-
-    expect(hookResult.runningTimer).toMatchObject({ activityId: "task-1" });
+    expect(started).toBe(true);
+    expect(hookResult.runningTimer).toMatchObject({ activityId: "task-1", shared: true });
     expect(localStorage.getItem(timerStorageKey("user-1"))).not.toBeNull();
 
     await act(async () => {
-      const stopped = await hookResult.stopTimer();
-      expect(stopped).toBe(true);
+      expect(await hookResult.stopTimer()).toBe(true);
     });
-
     expect(hookResult.runningTimer).toBeNull();
     expect(localStorage.getItem(timerStorageKey("user-1"))).toBeNull();
-    expect(saveLogRef.current).toHaveBeenCalled();
+    expect(await getOfflineMutations("user-1")).toHaveLength(0);
+    act(() => renderer.unmount());
   });
 
-  it("queues a timer segment from the previous day while offline", async () => {
+  it("queues timer segments for each date when stopping offline", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2025, 2, 15, 0, 30));
     globalThis.navigator.onLine = false;
     const now = new Date();
     const previousDay = new Date(2025, 2, 14, 23, 30);
     const dateKey = getLocalDateKey(now);
-    const timer = {
-      activityId: "task-1",
-      activityName: "Reading",
-      color: "#3b82f6",
-      startedAt: previousDay.toISOString(),
-    };
-    localStorage.setItem(timerStorageKey("user-offline"), JSON.stringify(timer));
+    localStorage.setItem(
+      timerStorageKey("user-offline"),
+      JSON.stringify({
+        activityId: "task-1",
+        activityName: "Reading",
+        color: "#3b82f6",
+        startedAt: previousDay.toISOString(),
+      }),
+    );
     const setLog = vi.fn();
-    const saveLogRef = { current: vi.fn().mockResolvedValue(true) };
     let hookResult;
 
     function HookHarness() {
@@ -137,55 +153,61 @@ describe("useDailyLogTimer", () => {
         dateRef: { current: dateKey },
         logRef: { current: { date: dateKey, sleep_time: "", wake_time: "", custom_tasks: [] } },
         setLog,
-        saveLogRef,
-        flushPendingSave: vi.fn().mockResolvedValue(true),
         setMessage: vi.fn(),
       });
       return null;
     }
 
+    let renderer;
     await act(async () => {
-      TestRenderer.create(React.createElement(HookHarness));
+      renderer = TestRenderer.create(React.createElement(HookHarness));
     });
     await act(async () => {
       expect(await hookResult.stopTimer()).toBe(true);
     });
 
     const pending = await getOfflineMutations("user-offline");
-    expect(pending).toHaveLength(1);
-    expect(pending[0]).toMatchObject({
-      type: "daily-log-slot",
-      payload: { date: getLocalDateKey(previousDay), task: { id: "task-1" } },
-    });
-    expect(saveLogRef.current).toHaveBeenCalledOnce();
+    const slotMutations = pending.filter((mutation) => mutation.type === "daily-log-slot");
+    expect(slotMutations).toHaveLength(2);
+    expect(slotMutations.map(({ payload }) => payload.date)).toEqual([
+      getLocalDateKey(previousDay),
+      dateKey,
+    ]);
+    expect(pending.some((mutation) => mutation.payload.operation === "stop")).toBe(true);
+    expect(setLog).toHaveBeenCalledOnce();
     expect(localStorage.getItem(timerStorageKey("user-offline"))).toBeNull();
+    act(() => renderer.unmount());
   });
 
-  it("saves a previous-day segment that ends at midnight", async () => {
+  it("stops a timer despite unrelated invalid entries in the current log", async () => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date(2025, 2, 15, 0, 30));
+    vi.setSystemTime(new Date(2025, 2, 15, 12, 0));
     globalThis.navigator.onLine = false;
-    const previousDay = new Date(2025, 2, 14, 23, 30);
-    const dateKey = getLocalDateKey(new Date());
+    const startedAt = new Date(2025, 2, 15, 11, 0).toISOString();
     localStorage.setItem(
-      timerStorageKey("user-midnight"),
+      timerStorageKey("invalid-log-user"),
       JSON.stringify({
+        timerId: "e1100000-0000-4000-8000-000000000001",
         activityId: "task-1",
         activityName: "Reading",
-        color: "#3b82f6",
-        startedAt: previousDay.toISOString(),
+        startedAt,
       }),
     );
     let hookResult;
 
     function HookHarness() {
       hookResult = useDailyLogTimer({
-        userId: "user-midnight",
-        dateRef: { current: dateKey },
-        logRef: { current: { date: dateKey, sleep_time: "", wake_time: "", custom_tasks: [] } },
+        userId: "invalid-log-user",
+        dateRef: { current: getLocalDateKey(new Date()) },
+        logRef: {
+          current: {
+            date: getLocalDateKey(new Date()),
+            sleep_time: "",
+            wake_time: "",
+            custom_tasks: [{ id: "broken", name: "Broken", slots: [{ start: "bad", end: "" }] }],
+          },
+        },
         setLog: vi.fn(),
-        saveLogRef: { current: vi.fn().mockResolvedValue(true) },
-        flushPendingSave: vi.fn().mockResolvedValue(true),
         setMessage: vi.fn(),
       });
       return null;
@@ -197,13 +219,6 @@ describe("useDailyLogTimer", () => {
     await act(async () => {
       expect(await hookResult.stopTimer()).toBe(true);
     });
-
-    const pending = await getOfflineMutations("user-midnight");
-    expect(pending).toHaveLength(1);
-    expect(pending[0].payload.slot).toMatchObject({
-      start: "23:30",
-      end: "00:00",
-      endDayOffset: 1,
-    });
+    expect(hookResult.runningTimer).toBeNull();
   });
 });

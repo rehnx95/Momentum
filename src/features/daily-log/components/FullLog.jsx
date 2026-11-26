@@ -3,8 +3,12 @@ import { useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, List, Trash2 } from "lucide-react";
 import {
   formatDuration,
+  getSleepMinutes,
+  getSleepPeriods,
+  getStudyActivityBreakdown,
+  getStudyMinutes,
+  getUntrackedMinutes,
   getSlotDurationMinutes,
-  slotMinutes,
   toMinutes,
 } from "../../../shared/utils/time";
 import Tooltip from "../../../shared/components/Tooltip";
@@ -15,10 +19,6 @@ import { getActivityColor } from "../lib/activityColor";
 
 const PAGE_SIZE = 10;
 
-function slotTotal(slots = []) {
-  return slots.reduce((total, slot) => total + (getSlotDurationMinutes(slot) || 0), 0);
-}
-
 function activeTotalForFilter(activities, studied, filter) {
   if (filter === "All") return studied;
   if (filter === "Sleep" || filter === "Unlogged") return 0;
@@ -28,20 +28,10 @@ function activeTotalForFilter(activities, studied, filter) {
   );
 }
 
-function sleepTotal(row) {
-  if (!row.sleep_time || !row.wake_time) return 0;
-  return (
-    slotMinutes(
-      {
-        start: String(row.sleep_time).slice(0, 5),
-        end: String(row.wake_time).slice(0, 5),
-      },
-      { wrap: true },
-    ) || 0
-  );
-}
-
 function activityBreakdown(row, sheets) {
+  const minutesByTask = new Map(
+    getStudyActivityBreakdown(row).map((activity) => [activity.id, activity.minutes]),
+  );
   return (Array.isArray(row.custom_tasks) ? row.custom_tasks : [])
     .map((task) => {
       const name = isSheetActivity(task)
@@ -51,7 +41,7 @@ function activityBreakdown(row, sheets) {
         id: task.id,
         name,
         slots: Array.isArray(task.slots) ? task.slots : [],
-        minutes: slotTotal(task.slots || []),
+        minutes: minutesByTask.get(task.id) || 0,
       };
     })
     .filter((activity) => activity.minutes > 0);
@@ -98,11 +88,12 @@ export default function FullLog({ daily, sheets = [], toolbarContainer, askConfi
           date,
           sleep_time: "",
           wake_time: "",
+          sleep_periods: [],
           custom_tasks: [],
         };
         const activities = activityBreakdown(row, sheets);
-        const sleep = sleepTotal(row);
-        const studied = activities.reduce((total, activity) => total + activity.minutes, 0);
+        const sleep = getSleepMinutes(row);
+        const studied = getStudyMinutes(row);
         return {
           row,
           activities,
@@ -134,10 +125,10 @@ export default function FullLog({ daily, sheets = [], toolbarContainer, askConfi
     label,
     color: getActivityColor(label, daily.activityColors),
   }));
-  const filteredEntries = entries.filter(({ activities, sleep, studied }) => {
+  const filteredEntries = entries.filter(({ row, activities, sleep }) => {
     if (activityFilter === "All") return true;
     if (activityFilter === "Sleep") return sleep > 0;
-    if (activityFilter === "Unlogged") return unloggedMinutesFor(studied, sleep) > 0;
+    if (activityFilter === "Unlogged") return unloggedMinutesFor(row) > 0;
     return activities.some((activity) => activity.name === activityFilter);
   });
   const visibleEntries = filteredEntries.slice(0, visibleCount);
@@ -294,7 +285,7 @@ export default function FullLog({ daily, sheets = [], toolbarContainer, askConfi
               </div>
               <ul className="full-log-day-list">
                 {visibleEntries.map(({ row, activities, sleep, studied, problems }) => {
-                  const unlogged = unloggedMinutesFor(studied, sleep);
+                  const unlogged = getUntrackedMinutes(row);
                   const active = activeTotalForFilter(activities, studied, activityFilter);
                   const date = new Date(`${row.date}T00:00:00`);
                   const dayLabel = date.toLocaleDateString(undefined, {
@@ -350,10 +341,8 @@ export default function FullLog({ daily, sheets = [], toolbarContainer, askConfi
                         <FullLogTimeline
                           activities={activities}
                           activityColors={daily.activityColors}
-                          totalMinutes={studied}
                           sleepMinutes={sleep}
-                          sleepTime={row.sleep_time}
-                          wakeTime={row.wake_time}
+                          sleepPeriods={getSleepPeriods(row)}
                           activityFilter={activityFilter}
                         />
                         <span
@@ -375,10 +364,20 @@ export default function FullLog({ daily, sheets = [], toolbarContainer, askConfi
                         </span>
                         <span
                           className="full-log-sleep-total"
-                          aria-label={`Sleep ${row.sleep_time || row.wake_time ? formatDuration(sleep) : "not recorded"}`}
+                          aria-label={`Sleep ${
+                            row.sleep_periods?.some((period) => period.start && period.end) ||
+                            row.sleep_time ||
+                            row.wake_time
+                              ? formatDuration(sleep)
+                              : "not recorded"
+                          }`}
                         >
                           <small>Sleep</small>
-                          {row.sleep_time || row.wake_time ? formatDuration(sleep) : "—"}
+                          {row.sleep_periods?.some((period) => period.start && period.end) ||
+                          row.sleep_time ||
+                          row.wake_time
+                            ? formatDuration(sleep)
+                            : "—"}
                         </span>
                         <span
                           className="full-log-unlogged-total"

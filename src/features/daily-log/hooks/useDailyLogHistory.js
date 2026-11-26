@@ -88,7 +88,7 @@ export default function useDailyLogHistory(userId, viewMode, setMessage) {
 
         const query = supabase
           .from("daily_logs")
-          .select("date, sleep_time, wake_time, custom_tasks")
+          .select("date, sleep_time, wake_time, sleep_periods, custom_tasks")
           .eq("user_id", userId);
         if (isTrendsView) query.gte("date", trendsStartKey);
         const result = await query
@@ -162,7 +162,7 @@ export default function useDailyLogHistory(userId, viewMode, setMessage) {
         while (more) {
           const logsResult = await supabase
             .from("daily_logs")
-            .select("date, sleep_time, wake_time, custom_tasks")
+            .select("date, sleep_time, wake_time, sleep_periods, custom_tasks")
             .eq("user_id", userId)
             .lt("date", cursor)
             .order("date", { ascending: false })

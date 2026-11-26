@@ -15,15 +15,6 @@ import {
 const syncByUser = new Map();
 const syncRequestedAgain = new Set();
 
-function sameTimestamp(first, second) {
-  const firstTime = Date.parse(first);
-  const secondTime = Date.parse(second);
-  if (Number.isFinite(firstTime) && Number.isFinite(secondTime)) {
-    return firstTime === secondTime;
-  }
-  return first === second;
-}
-
 function isOnline() {
   return typeof navigator === "undefined" || navigator.onLine !== false;
 }
@@ -64,39 +55,65 @@ async function syncProgressMutation(mutation) {
 
 async function syncDailyLogMutation(mutation, previousLocalUpdatedAt) {
   const { row, expectedUpdatedAt } = mutation.payload;
-  const { data: existingLog, error: existingError } = await supabase
-    .from("daily_logs")
-    .select("updated_at")
-    .eq("user_id", mutation.userId)
-    .eq("date", row.date)
-    .maybeSingle();
-  if (existingError) throw existingError;
-
-  const remoteUpdatedAt = existingLog?.updated_at ?? null;
-  if (sameTimestamp(remoteUpdatedAt, row.updated_at)) return { alreadySynced: true };
-
-  const followsLocalUpdate = sameTimestamp(remoteUpdatedAt, previousLocalUpdatedAt);
-  const hasConflict = expectedUpdatedAt
-    ? !remoteUpdatedAt ||
-      (!sameTimestamp(expectedUpdatedAt, remoteUpdatedAt) && !followsLocalUpdate)
-    : Boolean(remoteUpdatedAt && !followsLocalUpdate);
-  if (hasConflict) return { conflict: true };
-
-  const { error } = await supabase.from("daily_logs").upsert(row, { onConflict: "user_id,date" });
-  if (error) throw error;
-  setDailyLogCache(mutation.userId, row.date, row);
-  updateFullLogCacheEntry(mutation.userId, row);
+  const expected = previousLocalUpdatedAt || expectedUpdatedAt;
+  let savedRow;
+  if (expected) {
+    const { data, error } = await supabase
+      .from("daily_logs")
+      .update({
+        sleep_time: row.sleep_time,
+        wake_time: row.wake_time,
+        sleep_periods: row.sleep_periods,
+        custom_tasks: row.custom_tasks,
+      })
+      .eq("user_id", mutation.userId)
+      .eq("date", row.date)
+      .eq("updated_at", expected)
+      .select("updated_at");
+    if (error) throw error;
+    savedRow = data?.[0];
+    if (!savedRow) {
+      const { data: current, error: readError } = await supabase
+        .from("daily_logs")
+        .select("sleep_time, wake_time, sleep_periods, custom_tasks, updated_at")
+        .eq("user_id", mutation.userId)
+        .eq("date", row.date)
+        .maybeSingle();
+      if (readError) throw readError;
+      if (
+        current &&
+        current.sleep_time === row.sleep_time &&
+        current.wake_time === row.wake_time &&
+        JSON.stringify(current.sleep_periods || []) === JSON.stringify(row.sleep_periods || []) &&
+        JSON.stringify(current.custom_tasks || []) === JSON.stringify(row.custom_tasks || [])
+      ) {
+        return { alreadySynced: true, updatedAt: current.updated_at };
+      }
+      return { conflict: true };
+    }
+  } else {
+    const insertRow = { ...row };
+    delete insertRow.updated_at;
+    const { data, error } = await supabase
+      .from("daily_logs")
+      .insert(insertRow)
+      .select("updated_at");
+    if (error?.code === "23505") return { conflict: true };
+    if (error) throw error;
+    savedRow = data?.[0];
+  }
+  const savedLog = { ...row, updated_at: savedRow?.updated_at || row.updated_at };
+  setDailyLogCache(mutation.userId, row.date, savedLog);
+  updateFullLogCacheEntry(mutation.userId, savedLog);
   invalidateDailyLogHistoryCache(mutation.userId);
-  return {};
+  return { updatedAt: savedLog.updated_at };
 }
 
 async function syncDailyLogSlotMutation(mutation) {
   const { date, task, slot } = mutation.payload;
   const { data: existingLog, error: existingError } = await supabase
     .from("daily_logs")
-    .select(
-      "date, sleep_time, wake_time, dsa_slots, backend_slots, dsa_hours, backend_hours, custom_tasks",
-    )
+    .select("date, sleep_time, wake_time, sleep_periods, custom_tasks, updated_at")
     .eq("user_id", mutation.userId)
     .eq("date", date)
     .maybeSingle();
@@ -106,10 +123,7 @@ async function syncDailyLogSlotMutation(mutation) {
     date,
     sleep_time: null,
     wake_time: null,
-    dsa_slots: [],
-    backend_slots: [],
-    dsa_hours: null,
-    backend_hours: null,
+    sleep_periods: [],
     custom_tasks: [],
   };
   const tasks = Array.isArray(previous.custom_tasks) ? previous.custom_tasks : [];
@@ -124,35 +138,81 @@ async function syncDailyLogSlotMutation(mutation) {
   const customTasks = existingTask
     ? tasks.map((item) =>
         item.id === task.id
-            ? { ...item, slots: [...(Array.isArray(item.slots) ? item.slots : []), slot] }
+          ? { ...item, slots: [...(Array.isArray(item.slots) ? item.slots : []), slot] }
           : item,
       )
     : [...tasks, { ...task, slots: [slot] }];
   const nextLog = { ...previous, date, custom_tasks: customTasks };
   if (
     validateDay({
-        date,
-        sleep_time: "",
-        wake_time: "",
-        custom_tasks: [{ ...task, slots: [slot] }],
+      custom_tasks: [{ ...task, slots: [slot] }],
     }).errors.length
   ) {
-    throw new Error(`The existing ${date} log has validation errors.`);
+    throw new Error(`The timer slot for ${date} is invalid.`);
   }
 
-  const updatedRow = {
-    ...nextLog,
-    user_id: mutation.userId,
-    updated_at: new Date().toISOString(),
-  };
-  const { error } = await supabase
-    .from("daily_logs")
-    .upsert(updatedRow, { onConflict: "user_id,date" });
-  if (error) throw error;
+  let savedRow;
+  if (existingLog) {
+    const { data, error } = await supabase
+      .from("daily_logs")
+      .update({ custom_tasks: customTasks })
+      .eq("user_id", mutation.userId)
+      .eq("date", date)
+      .eq("updated_at", existingLog.updated_at)
+      .select("updated_at");
+    if (error) throw error;
+    savedRow = data?.[0];
+    if (!savedRow) return { conflict: true };
+  } else {
+    const { data, error } = await supabase
+      .from("daily_logs")
+      .insert({ ...nextLog, user_id: mutation.userId })
+      .select("updated_at");
+    if (error?.code === "23505") return { conflict: true };
+    if (error) throw error;
+    savedRow = data?.[0];
+  }
+  const updatedRow = { ...nextLog, user_id: mutation.userId, updated_at: savedRow?.updated_at };
   setDailyLogCache(mutation.userId, date, updatedRow);
   updateFullLogCacheEntry(mutation.userId, updatedRow);
   invalidateDailyLogHistoryCache(mutation.userId);
   return {};
+}
+
+async function syncDailyLogTimerMutation(mutation) {
+  const { operation, timer } = mutation.payload;
+  if (operation === "start") {
+    const { error } = await supabase.from("daily_log_timers").insert({
+      user_id: mutation.userId,
+      timer_id: timer.timerId,
+      activity_id: timer.activityId,
+      activity_name: timer.activityName,
+      color: timer.color || null,
+      started_at: timer.startedAt,
+    });
+    if (error?.code === "23505") {
+      const { data: current, error: readError } = await supabase
+        .from("daily_log_timers")
+        .select("timer_id")
+        .eq("user_id", mutation.userId)
+        .maybeSingle();
+      if (readError) throw readError;
+      if (current?.timer_id === timer.timerId) return { alreadySynced: true };
+      return { conflict: true };
+    }
+    if (error) throw error;
+    return {};
+  }
+  if (operation === "stop") {
+    const { error } = await supabase
+      .from("daily_log_timers")
+      .delete()
+      .eq("user_id", mutation.userId)
+      .eq("timer_id", timer.timerId);
+    if (error) throw error;
+    return {};
+  }
+  throw new Error(`Unknown daily log timer operation: ${operation}`);
 }
 
 async function applyMutation(mutation, recentDailyLogVersions) {
@@ -161,6 +221,7 @@ async function applyMutation(mutation, recentDailyLogVersions) {
     return syncDailyLogMutation(mutation, recentDailyLogVersions.get(mutation.entityId));
   }
   if (mutation.type === "daily-log-slot") return syncDailyLogSlotMutation(mutation);
+  if (mutation.type === "daily-log-timer") return syncDailyLogTimerMutation(mutation);
   if (mutation.type === "activity-color") {
     const { activityName, color } = mutation.payload;
     const { error } = await supabase.rpc("set_activity_color", {
@@ -211,6 +272,7 @@ export async function syncOfflineMutations(userId) {
       pending: 0,
       conflicts: [],
       failures: [],
+      updatedAtByKey: {},
       offline: !isOnline(),
     };
     const recentDailyLogVersions = new Map();
@@ -234,10 +296,15 @@ export async function syncOfflineMutations(userId) {
               type: mutation.type,
               entityId: mutation.entityId,
             });
+            if (mutation.type === "daily-log-timer" && mutation.payload.operation === "start") {
+              const removed = await removeOfflineMutation(mutation.key, mutation.updatedAt);
+              if (removed) result.syncedKeys.push(mutation.key);
+            }
             continue;
           }
-          if (mutation.type === "daily-log") {
-            recentDailyLogVersions.set(mutation.entityId, mutation.payload.row.updated_at);
+          if (mutation.type === "daily-log" && applyResult?.updatedAt) {
+            recentDailyLogVersions.set(mutation.entityId, applyResult.updatedAt);
+            result.updatedAtByKey[mutation.key] = applyResult.updatedAt;
           }
           const removed = await removeOfflineMutation(mutation.key, mutation.updatedAt);
           result.synced += 1;

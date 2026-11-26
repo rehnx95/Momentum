@@ -215,6 +215,47 @@ describe("useProgress", () => {
     expect(fromMock).not.toHaveBeenCalledWith("activity_log");
   });
 
+  it("reports failed progress syncs to callers such as backup import", async () => {
+    const progressUpsert = vi.fn().mockResolvedValue({
+      error: { code: "42501", message: "permission denied" },
+    });
+    fromMock.mockImplementation((table) => {
+      if (table === "progress") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          in: vi.fn().mockResolvedValue({ data: [], error: null }),
+          upsert: progressUpsert,
+        };
+      }
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+      };
+    });
+
+    let hookResult;
+    function HookHarness() {
+      hookResult = useProgress({ id: "sync-error-user" });
+      return null;
+    }
+
+    await act(async () => {
+      TestRenderer.create(React.createElement(HookHarness));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    let saved;
+    await act(async () => {
+      saved = await hookResult.bulkUpdate({ "problem-1": "done" });
+    });
+
+    expect(saved).toBe(false);
+    expect(progressUpsert).toHaveBeenCalledOnce();
+    expect(hookResult.error).toContain("permission denied");
+  });
+
   it("keeps progress edits offline and replays them after reconnecting", async () => {
     const progressUpsert = vi.fn().mockResolvedValue({ error: null });
     fromMock.mockImplementation((table) => ({

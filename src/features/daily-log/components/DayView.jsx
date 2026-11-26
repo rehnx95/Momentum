@@ -1,6 +1,11 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatDuration, getSlotDurationMinutes } from "../../../shared/utils/time";
+import {
+  formatDuration,
+  getSleepMinutes,
+  getSleepPeriods,
+  getStudyMinutes,
+} from "../../../shared/utils/time";
 import { getLocalDateKey } from "../../../shared/utils/date";
 import {
   findSheetByTitle,
@@ -12,12 +17,6 @@ import { getActivityColor, getActivityKey } from "../lib/activityColor";
 import ActivityCard from "./ActivityCard";
 import CustomDatePicker from "./CustomDatePicker";
 import SleepCard from "./SleepCard";
-
-function activityTotal(slots) {
-  return slots.reduce((total, slot) => {
-    return total + (getSlotDurationMinutes(slot) || 0);
-  }, 0);
-}
 
 function getActivitySlotFeedback(validation, activityId) {
   const activityKey = `custom:${activityId}`;
@@ -52,7 +51,11 @@ function getActivitySlotFeedback(validation, activityId) {
 function getSleepFeedback(validation) {
   const feedback = validation.errors
     .filter((error) => ["incomplete-sleep", "invalid-sleep"].includes(error.code))
-    .map((error) => ({ type: "error", message: error.message }));
+    .map((error) => ({
+      type: "error",
+      slotIndex: error.slotIndex,
+      message: error.message,
+    }));
 
   validation.warnings.forEach((warning) => {
     if (warning.code !== "overlap" || !Array.isArray(warning.slots)) return;
@@ -61,6 +64,7 @@ function getSleepFeedback(validation) {
     const otherSlot = warning.slots.find((slot) => slot !== sleepSlot);
     feedback.push({
       type: "overlap",
+      slotIndex: sleepSlot.slotIndex,
       message: `${otherSlot.activity} slot ${otherSlot.slotIndex + 1} overlaps Sleep.`,
     });
   });
@@ -83,15 +87,14 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
     [daily.activeCustomTasks, daily.log.custom_tasks, sheets],
   );
   const entryDisabled = daily.loadFailed;
-  const totalLoggedMinutes = activities.reduce(
-    (total, activity) => total + activityTotal(activity.slots),
-    0,
-  );
+  const totalLoggedMinutes = getStudyMinutes(daily.log);
   const runningTimerStart = daily.runningTimer ? Date.parse(daily.runningTimer.startedAt) : NaN;
   const runningTimerMinutes =
     Number.isFinite(runningTimerStart) && Number.isFinite(daily.timerNow)
       ? Math.max(0, Math.floor((daily.timerNow - runningTimerStart) / 60_000))
       : 0;
+  const timerRunningTooLong =
+    Number.isFinite(runningTimerStart) && daily.timerNow - runningTimerStart >= 4 * 60 * 60 * 1000;
   const summaryWarnings = daily.validation.warnings.filter((warning) => warning.code !== "overlap");
   const summaryErrors = daily.validation.errors.filter(
     (error) => !error.activityKey && !["incomplete-sleep", "invalid-sleep"].includes(error.code),
@@ -193,9 +196,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                   key={`${daily.date}-${activity.id}`}
                   activityId={activity.id}
                   activityName={activity.name}
-                  quickAddRequest={
-                    activity.id === quickAddTarget.id ? quickAddTarget.request : 0
-                  }
+                  quickAddRequest={activity.id === quickAddTarget.id ? quickAddTarget.request : 0}
                   activityDescription={
                     [activity.description, activity.details].find(
                       (value) => typeof value === "string" && value.trim(),
@@ -239,6 +240,12 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
                 ))}
               </ul>
             )}
+            {timerRunningTooLong && (
+              <p className="daily-warnings" role="status">
+                This timer has been running for over four hours. Stop it if you have finished to
+                avoid recording unintended time.
+              </p>
+            )}
           </section>
         </div>
 
@@ -281,13 +288,14 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             </div>
           </form>
           <SleepCard
-            sleepTime={daily.log.sleep_time || ""}
-            wakeTime={daily.log.wake_time || ""}
-            totalMinutes={daily.sleptMinutes}
+            sleepPeriods={getSleepPeriods(daily.log)}
+            totalMinutes={getSleepMinutes(daily.log)}
             feedback={getSleepFeedback(daily.validation)}
             disabled={entryDisabled}
             onSaveNow={daily.saveNow}
-            onChange={(field, value) => daily.updateField(field, value)}
+            onChange={daily.updateSleepPeriod}
+            onAdd={daily.addSleepPeriod}
+            onRemove={daily.removeSleepPeriod}
           />
         </aside>
       </div>

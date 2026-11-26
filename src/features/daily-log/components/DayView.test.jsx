@@ -58,8 +58,8 @@ describe("DayView activity entry", () => {
       quickLog.compareDocumentPosition(sleepPanel) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Sleep" })).toBeNull();
-    expect(screen.getByLabelText("Sleep start time hour")).toBeTruthy();
-    expect(screen.getByLabelText("Wake time hour")).toBeTruthy();
+    expect(screen.getByLabelText("Sleep period 1 start time hour")).toBeTruthy();
+    expect(screen.getByLabelText("Sleep period 1 wake time hour")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Remove Sleep/ })).toBeNull();
     expect(daily.updateField).not.toHaveBeenCalled();
   });
@@ -77,6 +77,7 @@ describe("DayView activity entry", () => {
     expect(screen.getByRole("button", { name: "Add slot to Reading" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Remove Reading activity" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Remove Reading slot 1" })).toBeTruthy();
+    expect(screen.queryByRole("checkbox", { name: /ends next day/i })).toBeNull();
     expect(
       screen.getByRole("button", { name: "Add slot to Reading" }).closest(".activity-card-actions"),
     ).toBeTruthy();
@@ -174,9 +175,7 @@ describe("DayView activity entry", () => {
   it("keeps an empty slot when a touch scroll starts outside the activity", () => {
     const task = { id: "reading-1", name: "Reading", slots: [{ start: "", end: "" }] };
     const daily = createDaily([task]);
-    const { container } = render(
-      <DayView daily={daily} sheets={[]} askConfirmation={vi.fn()} />,
-    );
+    const { container } = render(<DayView daily={daily} sheets={[]} askConfirmation={vi.fn()} />);
 
     fireEvent.pointerDown(document.body, { pointerType: "touch" });
 
@@ -381,7 +380,7 @@ describe("DayView activity entry", () => {
       {
         id: "reading-1",
         name: "Reading",
-        slots: [{ start: "12:34", end: "01:11" }],
+        slots: [{ start: "12:34", end: "12:34" }],
       },
     ]);
     daily.validation = validateDay(daily.log);
@@ -411,7 +410,7 @@ describe("DayView activity entry", () => {
       container.querySelector(".daily-sleep-time-range").classList.contains("has-slot-error"),
     ).toBe(true);
     expect(container.querySelector(".daily-sleep-feedback").textContent).toBe(
-      "Enter both sleep and wake times.",
+      "Enter both sleep and wake times for each sleep period.",
     );
   });
 
@@ -488,9 +487,7 @@ describe("DayView activity entry", () => {
     render(<DayView daily={createDaily()} sheets={[]} askConfirmation={vi.fn()} />);
 
     expect(
-      screen.getByText(
-        "Counted toward the night you wake up, so late-evening slots no longer collide.",
-      ),
+      screen.getByText("Overnight sleep is counted only from midnight to wake-up for this day."),
     ).toBeTruthy();
   });
 });

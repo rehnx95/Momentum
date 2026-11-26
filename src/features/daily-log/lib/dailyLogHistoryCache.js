@@ -115,6 +115,7 @@ export function updateFullLogCacheEntry(userId, log) {
     date: log.date,
     sleep_time: log.sleep_time || null,
     wake_time: log.wake_time || null,
+    sleep_periods: Array.isArray(log.sleep_periods) ? log.sleep_periods : [],
     custom_tasks: Array.isArray(log.custom_tasks) ? log.custom_tasks : [],
   };
   const logs = [...cached.logs.filter((entry) => entry.date !== log.date), row].sort((a, b) =>

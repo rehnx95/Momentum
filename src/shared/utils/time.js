@@ -18,35 +18,136 @@ export function slotMinutes(slot, { wrap = false } = {}) {
   return duration;
 }
 
-export function getSlotDurationMinutes(slot) {
-  if (slot?.endDayOffset === 1 && slot?.end === "00:00") {
-    const start = slotMinutes({ start: slot.start, end: "23:59" });
-    return start === null ? 1 : start + 1;
+export function mergeIntervals(intervals = []) {
+  const sorted = intervals
+    .map(([start, end]) => [Math.max(0, start), Math.min(1440, end)])
+    .filter(([start, end]) => end > start)
+    .sort(
+      ([firstStart, firstEnd], [secondStart, secondEnd]) =>
+        firstStart - secondStart || firstEnd - secondEnd,
+    );
+  const merged = [];
+  for (const [start, end] of sorted) {
+    const previous = merged[merged.length - 1];
+    if (previous && start <= previous[1]) previous[1] = Math.max(previous[1], end);
+    else merged.push([start, end]);
   }
-  return slotMinutes(slot);
+  return merged;
+}
+
+export function intervalMinutes(intervals = []) {
+  return mergeIntervals(intervals).reduce((total, [start, end]) => total + end - start, 0);
+}
+
+function subtractIntervals(intervals, exclusions) {
+  const excluded = mergeIntervals(exclusions);
+  return mergeIntervals(intervals).flatMap(([start, end]) => {
+    let remainingStart = start;
+    const pieces = [];
+    excluded.forEach(([excludedStart, excludedEnd]) => {
+      if (excludedEnd <= remainingStart || excludedStart >= end) return;
+      if (excludedStart > remainingStart) pieces.push([remainingStart, excludedStart]);
+      remainingStart = Math.max(remainingStart, excludedEnd);
+    });
+    if (remainingStart < end) pieces.push([remainingStart, end]);
+    return pieces;
+  });
+}
+
+export function getSlotDurationMinutes(slot) {
+  return intervalMinutes(intervalsFor(slot)) || null;
+}
+
+export function getSlotsDurationMinutes(slots = []) {
+  return intervalMinutes(slots.flatMap((slot) => intervalsFor(slot)));
+}
+
+export function getSleepPeriods(log) {
+  if (
+    Array.isArray(log?.sleep_periods) &&
+    (log.sleep_periods.length > 0 || (!log.sleep_time && !log.wake_time))
+  ) {
+    return log.sleep_periods;
+  }
+  if (!log?.sleep_time && !log?.wake_time) return [];
+  return [
+    {
+      id: "legacy-sleep",
+      start: String(log.sleep_time || "").slice(0, 5),
+      end: String(log.wake_time || "").slice(0, 5),
+    },
+  ];
+}
+
+function sleepPeriodIntervals(period) {
+  const start = toMinutes(period?.start);
+  const end = toMinutes(period?.end);
+  if (start === null || end === null || start === end) return [];
+  if (start < end) return [[start, end]];
+  return end > 0 ? [[0, end]] : [];
+}
+
+export function getSleepIntervals(log) {
+  return mergeIntervals(getSleepPeriods(log).flatMap(sleepPeriodIntervals));
 }
 
 export function getSleepMinutes(log) {
-  if (!log?.sleep_time || !log?.wake_time) return 0;
-  const sleepTime = String(log.sleep_time).slice(0, 5);
-  const wakeTime = String(log.wake_time).slice(0, 5);
-  return slotMinutes({ start: sleepTime, end: wakeTime }, { wrap: true }) || 0;
+  return intervalMinutes(subtractIntervals(getSleepIntervals(log), studyIntervals(log)));
+}
+
+function studyActivities(log) {
+  const customTasks = Array.isArray(log?.custom_tasks) ? log.custom_tasks : [];
+  return customTasks.map((task, index) => {
+    const id = task?.id ?? index;
+    return {
+      id: task?.id ?? `custom-${index}`,
+      key: `custom:${id}`,
+      label: task?.name || "Custom activity",
+      name: task?.name || "Custom activity",
+      slots: Array.isArray(task?.slots) ? task.slots : [],
+    };
+  });
+}
+
+function studyIntervals(log) {
+  return studyActivities(log).flatMap((activity) =>
+    activity.slots.flatMap((slot) =>
+      intervalsFor(slot),
+    ),
+  );
 }
 
 export function getStudyMinutes(log) {
-  const tasks = Array.isArray(log?.custom_tasks) ? log.custom_tasks : [];
-  return tasks.reduce((total, task) => {
-    const slots = Array.isArray(task?.slots) ? task.slots : [];
-    const taskMinutes = slots.reduce((taskTotal, slot) => {
-      const start = toMinutes(slot?.start);
-      const duration =
-        slot?.endDayOffset === 1 && slot?.end === "00:00" && start !== null
-          ? 1440 - start
-          : slotMinutes(slot);
-      return taskTotal + (duration || 0);
-    }, 0);
-    return total + taskMinutes;
-  }, 0);
+  return intervalMinutes(studyIntervals(log));
+}
+
+export function getStudyActivityBreakdown(log) {
+  const activities = studyActivities(log).map((activity) => ({
+    ...activity,
+    intervals: activity.slots.flatMap((slot) =>
+      intervalsFor(slot),
+    ),
+    minutes: 0,
+  }));
+  const boundaries = [
+    ...new Set(activities.flatMap((activity) => activity.intervals.flatMap((range) => range))),
+  ].sort((first, second) => first - second);
+
+  for (let index = 1; index < boundaries.length; index += 1) {
+    const start = boundaries[index - 1];
+    const end = boundaries[index];
+    const owner = activities.find((activity) =>
+      activity.intervals.some(([rangeStart, rangeEnd]) => rangeStart <= start && rangeEnd >= end),
+    );
+    if (owner) owner.minutes += end - start;
+  }
+
+  return activities.filter((activity) => activity.minutes > 0);
+}
+
+export function getUntrackedMinutes(log) {
+  const logged = mergeIntervals([...studyIntervals(log), ...getSleepIntervals(log)]);
+  return 1440 - intervalMinutes(logged);
 }
 
 export function formatDuration(minutes) {
@@ -60,13 +161,18 @@ export function formatDuration(minutes) {
 }
 
 export function splitIntervalByDay(startedAt, endedAt) {
-  let cursor = new Date(startedAt);
+  const cursor = new Date(startedAt);
   const end = new Date(endedAt);
   if (!Number.isFinite(cursor.getTime()) || !Number.isFinite(end.getTime())) return [];
-  cursor.setSeconds(0, 0);
-  if (end.getSeconds() || end.getMilliseconds()) end.setMinutes(end.getMinutes() + 1);
-  end.setSeconds(0, 0);
-  if (cursor >= end) return [];
+  const roundToMinute = (date) => {
+    const rounded = new Date(date);
+    if (rounded.getSeconds() >= 30) rounded.setMinutes(rounded.getMinutes() + 1);
+    rounded.setSeconds(0, 0);
+    return rounded;
+  };
+  let roundedStart = roundToMinute(cursor);
+  const roundedEnd = roundToMinute(end);
+  if (roundedStart >= roundedEnd) return [];
 
   const segments = [];
   const dateKey = (date) => {
@@ -78,51 +184,60 @@ export function splitIntervalByDay(startedAt, endedAt) {
   const time = (date) =>
     `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 
-  while (cursor < end) {
-    const midnight = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 1);
-    const segmentEnd = end < midnight ? end : midnight;
+  while (roundedStart < roundedEnd) {
+    const midnight = new Date(
+      roundedStart.getFullYear(),
+      roundedStart.getMonth(),
+      roundedStart.getDate() + 1,
+    );
+    const segmentEnd = roundedEnd < midnight ? roundedEnd : midnight;
     const endAtMidnight = segmentEnd.getTime() === midnight.getTime();
     segments.push({
-      date: dateKey(cursor),
+      date: dateKey(roundedStart),
       slot: {
-        start: time(cursor),
+        start: time(roundedStart),
         end: endAtMidnight ? "00:00" : time(segmentEnd),
         ...(endAtMidnight ? { endDayOffset: 1 } : {}),
       },
     });
-    cursor = segmentEnd;
+    roundedStart = segmentEnd;
   }
   return segments;
 }
 
-export function intervalsFor(slot, wraps) {
+export function intervalsFor(slot) {
   const start = toMinutes(slot?.start);
   const end = toMinutes(slot?.end);
   if (start === null || end === null) return [];
-  if (slot?.endDayOffset === 1 && end === 0) return [[start, 1440]];
-  if (start === end) return [];
+  if (start === end) {
+    return slot?.endDayOffset === 1 && slot?.timerId ? [[0, 1440]] : [];
+  }
+  if (slot?.endDayOffset === 1) {
+    if (end === 0) return [[start, 1440]];
+    return mergeIntervals([
+      [start, 1440],
+      [0, end],
+    ]);
+  }
   if (end > start) return [[start, end]];
-  if (!wraps) return [];
-  return [
+  return mergeIntervals([
     [start, 1440],
     [0, end],
-  ];
+  ]);
 }
 
 export function sleepIntervalsFor(sleepTime, wakeTime) {
-  const sleep = toMinutes(sleepTime);
-  const wake = toMinutes(wakeTime);
-  if (sleep === null || wake === null) return [];
-  if (sleep < wake) return [[sleep, wake]];
-  if (wake === 0) return [];
-  return [[0, wake]];
+  if (Array.isArray(sleepTime)) {
+    return mergeIntervals(sleepTime.flatMap(sleepPeriodIntervals));
+  }
+  return mergeIntervals(sleepPeriodIntervals({ start: sleepTime, end: wakeTime }));
 }
 
 export function findOverlaps(slotsByActivity) {
   const slots = [];
   Object.entries(slotsByActivity || {}).forEach(([activity, entries]) => {
     (Array.isArray(entries) ? entries : []).forEach((slot, slotIndex) => {
-      const intervals = intervalsFor(slot, Boolean(slot?.wrap));
+      const intervals = intervalsFor(slot);
       if (intervals.length) slots.push({ activity, slot, slotIndex, intervals });
     });
   });
@@ -157,36 +272,13 @@ export function findOverlaps(slotsByActivity) {
 }
 
 function collectStudyActivities(log) {
-  return [
-    {
-      key: "dsa",
-      id: null,
-      label: "DSA",
-      slots: Array.isArray(log?.dsa_slots) ? log.dsa_slots : [],
-    },
-    {
-      key: "backend",
-      id: null,
-      label: "Backend",
-      slots: Array.isArray(log?.backend_slots) ? log.backend_slots : [],
-    },
-    ...(Array.isArray(log?.custom_tasks) ? log.custom_tasks : []).map((task, index) => {
-      const id = task.id ?? index;
-      return {
-        key: `custom:${id}`,
-        id: task.id ?? null,
-        label: task.name || "Custom activity",
-        slots: Array.isArray(task.slots) ? task.slots : [],
-      };
-    }),
-  ];
+  return studyActivities(log);
 }
 
 export function validateDay(log) {
   const errors = [];
   const warnings = [];
   const activities = collectStudyActivities(log);
-  let totalMinutes = 0;
 
   activities.forEach(({ key, id, label: activity, slots }) => {
     slots.forEach((slot, slotIndex) => {
@@ -205,10 +297,11 @@ export function validateDay(log) {
         }
         return;
       }
- 
-      const endsAtMidnight =
-        slot?.endDayOffset === 1 && end === 0 && start > 0;
-      if (end <= start && !endsAtMidnight) {
+
+      const timerFullDay = start === end && slot?.endDayOffset === 1 && Boolean(slot?.timerId);
+      if (
+        (end === start && !timerFullDay)
+      ) {
         errors.push({
           code: "invalid-slot-order",
           activity,
@@ -217,45 +310,42 @@ export function validateDay(log) {
           slotIndex,
           message: `${activity} slot ${slotIndex + 1} must end after it starts.`,
         });
-        return;
       }
-      const duration = endsAtMidnight ? 24 * 60 - start : end - start;
-      totalMinutes += duration;
-     
     });
   });
 
-  const sleepStart = toMinutes(log?.sleep_time);
-  const wakeEnd = toMinutes(log?.wake_time);
+  const sleepPeriods = getSleepPeriods(log);
   const sleepSlots = [];
-  if ((log?.sleep_time && !log?.wake_time) || (!log?.sleep_time && log?.wake_time)) {
-    errors.push({
-      code: "incomplete-sleep",
-      message: "Enter both sleep and wake times.",
-    });
-  } else if (sleepStart !== null && wakeEnd !== null) {
-    if (sleepStart === wakeEnd) {
-      errors.push({ code: "invalid-sleep", message: "Sleep and wake times must differ." });
-    } else {
-      const sleep = { start: log.sleep_time, end: log.wake_time, wrap: true };
-      // A sleep that wraps past midnight belongs to the previous night; only the
-      // part after midnight (00:00 to wake time) can clash with today's slots.
-      sleepSlots.push(sleepStart < wakeEnd ? sleep : { start: "00:00", end: log.wake_time });
-      totalMinutes += slotMinutes(sleep, { wrap: true });
+  sleepPeriods.forEach((period, index) => {
+    const hasStart = Boolean(period?.start);
+    const hasEnd = Boolean(period?.end);
+    if (!hasStart && !hasEnd) return;
+    const start = toMinutes(period?.start);
+    const end = toMinutes(period?.end);
+    if (!hasStart || !hasEnd) {
+      errors.push({
+        code: "incomplete-sleep",
+        activityKey: "sleep",
+        slotIndex: index,
+        message: "Enter both sleep and wake times for each sleep period.",
+      });
+      return;
     }
-  } else if (log?.sleep_time || log?.wake_time) {
-    errors.push({
-      code: "invalid-sleep",
-      message: "Enter valid sleep and wake times.",
+    if (start === null || end === null || start === end) {
+      errors.push({
+        code: "invalid-sleep",
+        activityKey: "sleep",
+        slotIndex: index,
+        message: "Enter valid sleep and wake times that differ.",
+      });
+      return;
+    }
+    sleepSlots.push({
+      start: start < end ? period.start : "00:00",
+      end: period.end,
+      sleepPeriodIndex: index,
     });
-  }
-
-  if (totalMinutes > 24 * 60) {
-    errors.push({
-      code: "day-over-24-hours",
-      message: "Study and sleep time cannot total more than 24 hours.",
-    });
-  }
+  });
 
   const overlapActivities = Object.fromEntries(activities.map(({ key, slots }) => [key, slots]));
   const overlapLabels = new Map(activities.map(({ key, label }) => [key, label]));
@@ -290,5 +380,6 @@ export function validateDay(log) {
     });
   });
 
-  return { errors, warnings, totalMinutes };
+  const allLoggedIntervals = [...studyIntervals(log), ...getSleepIntervals(log)];
+  return { errors, warnings, totalMinutes: intervalMinutes(allLoggedIntervals) };
 }

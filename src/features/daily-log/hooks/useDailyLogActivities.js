@@ -1,4 +1,15 @@
 import { useCallback } from "react";
+import { getSleepPeriods } from "../../../shared/utils/time";
+
+function withSleepPeriods(log, sleepPeriods) {
+  const firstPeriod = sleepPeriods[0];
+  return {
+    ...log,
+    sleep_periods: sleepPeriods,
+    sleep_time: firstPeriod?.start || "",
+    wake_time: firstPeriod?.end || "",
+  };
+}
 
 export default function useDailyLogActivities(logRef, setLog, assignActivityColor) {
   const updateField = useCallback(
@@ -21,14 +32,48 @@ export default function useDailyLogActivities(logRef, setLog, assignActivityColo
                   { length: Math.max(task.slots.length, index + 1) },
                   (_, slotIndex) => {
                     const slot = task.slots[slotIndex] || { start: "", end: "" };
-                    return slotIndex === index
-                      ? { ...slot, [field]: value, endDayOffset: 0 }
-                      : slot;
+                    return slotIndex === index ? { ...slot, [field]: value } : slot;
                   },
                 ),
               },
         ),
       }));
+    },
+    [setLog],
+  );
+
+  const updateSleepPeriod = useCallback(
+    (periodId, field, value) => {
+      setLog((current) => {
+        const existingPeriods = getSleepPeriods(current);
+        const periods = existingPeriods.some((period) => period.id === periodId)
+          ? existingPeriods.map((period) =>
+              period.id === periodId ? { ...period, [field]: value } : period,
+            )
+          : [...existingPeriods, { id: periodId, start: "", end: "" }].map((period) =>
+              period.id === periodId ? { ...period, [field]: value } : period,
+            );
+        return withSleepPeriods(current, periods);
+      });
+    },
+    [setLog],
+  );
+
+  const addSleepPeriod = useCallback(() => {
+    const id = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+    setLog((current) =>
+      withSleepPeriods(current, [...getSleepPeriods(current), { id, start: "", end: "" }]),
+    );
+  }, [setLog]);
+
+  const removeSleepPeriod = useCallback(
+    (periodId) => {
+      setLog((current) =>
+        withSleepPeriods(
+          current,
+          getSleepPeriods(current).filter((period) => period.id !== periodId),
+        ),
+      );
     },
     [setLog],
   );
@@ -153,11 +198,14 @@ export default function useDailyLogActivities(logRef, setLog, assignActivityColo
     addCustomTask,
     addSheetActivity,
     addSlot,
+    addSleepPeriod,
     discardEmptySlot,
     removeCustomTask,
     removeSlot,
+    removeSleepPeriod,
     renameCustomTask,
     updateField,
+    updateSleepPeriod,
     updateSlot,
   };
 }

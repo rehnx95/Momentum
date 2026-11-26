@@ -5,7 +5,12 @@ import {
   getDailyLogHistoryCache,
   setDailyLogHistoryCache,
 } from "../../daily-log/lib/dailyLogHistoryCache";
-import { formatDuration, getSleepMinutes, getStudyMinutes } from "../../../shared/utils/time";
+import {
+  formatDuration,
+  getSleepMinutes,
+  getSleepPeriods,
+  getStudyMinutes,
+} from "../../../shared/utils/time";
 import { formatTooltipDate } from "../utils/heatmap";
 import { getSleepStudySummary } from "../utils/sleepStudySummary";
 import { getLocalDateKey } from "../../../shared/utils/date";
@@ -261,7 +266,7 @@ export default function SleepStudyChart({ userId, showSummary = false }) {
 
     const { data, error: loadError } = await supabase
       .from("daily_logs")
-      .select("date, sleep_time, wake_time, custom_tasks")
+      .select("date, sleep_time, wake_time, sleep_periods, custom_tasks")
       .eq("user_id", userId)
       .gte("date", getLocalDateKey(firstDay))
       .lte("date", getLocalDateKey(today))
@@ -322,7 +327,7 @@ export default function SleepStudyChart({ userId, showSummary = false }) {
           day: "numeric",
         }),
         logged: Boolean(log),
-        sleepRecorded: Boolean(log?.sleep_time && log?.wake_time),
+        sleepRecorded: getSleepPeriods(log).some((period) => period.start && period.end),
         sleep: log ? getSleepMinutes(log) : null,
         study: log ? getStudyMinutes(log) : null,
       };

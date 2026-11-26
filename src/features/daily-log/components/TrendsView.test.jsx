@@ -42,8 +42,8 @@ describe("TrendsView", () => {
     const sleepRow = sleepLabel.closest(".trends-time-row");
 
     expect(container.querySelector(".trends-time-total").textContent).toBe("24h total");
-    expect(sleepRow.querySelector(".trends-time-percentage").textContent).toBe("29%");
-    expect(sleepRow.querySelector("strong").textContent).toBe("7h");
+    expect(sleepRow.querySelector(".trends-time-percentage").textContent).toBe("25%");
+    expect(sleepRow.querySelector("strong").textContent).toBe("6h");
     expect(
       screen.getByText("Reading", { selector: ".trends-time-label span:last-child" }),
     ).toBeTruthy();
@@ -51,8 +51,8 @@ describe("TrendsView", () => {
       selector: ".trends-time-label span:last-child",
     });
     const untrackedRow = untrackedLabel.closest(".trends-time-row");
-    expect(untrackedRow.querySelector(".trends-time-percentage").textContent).toBe("65%");
-    expect(untrackedRow.querySelector("strong").textContent).toBe("15h 30m");
+    expect(untrackedRow.querySelector(".trends-time-percentage").textContent).toBe("69%");
+    expect(untrackedRow.querySelector("strong").textContent).toBe("16h 30m");
   });
 
   it("uses the original chart modes and only offers timed activities", () => {
@@ -124,9 +124,7 @@ describe("TrendsView", () => {
     chooseChart("Active");
     expect(screen.getByRole("img", { name: /Active hours over the last 30 days/ })).toBeTruthy();
     expect(container.querySelector(".study-average").getAttribute("data-average")).toBe("180");
-    expect(
-      screen.queryByText("Active", { selector: ".sleep-study-legend span" }),
-    ).toBeNull();
+    expect(screen.queryByText("Active", { selector: ".sleep-study-legend span" })).toBeNull();
     expect(screen.getByText("Average Active")).toBeTruthy();
     chooseChart("Sleep + Active");
     expect(
@@ -202,7 +200,7 @@ describe("TrendsView", () => {
     fireEvent.click(chartSelect);
     fireEvent.click(screen.getByRole("option", { name: "Sleep" }));
 
-    expect(container.querySelector(".sleep-average").getAttribute("data-average")).toBe("420");
+    expect(container.querySelector(".sleep-average").getAttribute("data-average")).toBe("360");
   });
 
   it("uses the current sheet title in chart and time activity labels", () => {
@@ -281,9 +279,7 @@ describe("TrendsView", () => {
         />,
       );
       expect(screen.getByRole("img", { name: /Active hours over the last 7 days/ })).toBeTruthy();
-      const chartNavigation = within(
-        screen.getByRole("group", { name: "Select chart period" }),
-      );
+      const chartNavigation = within(screen.getByRole("group", { name: "Select chart period" }));
       expect(chartNavigation.getByRole("button", { name: "Previous 7 days" })).toBeTruthy();
       expect(
         [...container.querySelectorAll(".trends-chart-summary strong")].map(
