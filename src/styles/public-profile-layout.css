@@ -1,4 +1,4 @@
-.profile-layout.own-profile-layout {
+.profile-layout.own-profile-layout.public-profile-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
