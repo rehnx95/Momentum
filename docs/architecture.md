@@ -85,6 +85,7 @@ LOADING -> UNAUTHENTICATED
 - A confirmed missing session or explicit sign-out clears Momentum-owned caches and the account cache.
 - Account switches clear caches too. The offline outbox and built-in sync markers are kept, because outbox entries are user-scoped and must still sync.
 - Email sign-up uses Supabase Auth directly and follows the project's email-confirmation setting. Username sign-in (`/api/auth/username-login`) resolves username to email server-side and returns a session only after password authentication succeeds.
+- The shared feedback control is placed in the desktop shell and mobile header. It opens Gmail's web composer with the recipient and subject prefilled; feedback is not sent through an app API.
 
 ### 4.2 Routing
 
@@ -107,7 +108,7 @@ All app screens require sign-in. `AuthenticatedApp` composes the feature hooks a
 
 ### 5.1 Learning tracks and progress
 
-- **Sources.** Built-in tracks are plain text in `source/`. `convert-sheets` parses every source into JSON under `src/features/sheets/data/`, preserving IDs by LeetCode number or unlinked title when rows move. For DSA, `create-links` generates LeetCode links and difficulty maps and `verify-links` audits them against LeetCode.
+- **Sources.** Built-in tracks are plain text in `source/`. `convert-sheets` parses every source into JSON under `src/features/sheets/data/`, preserving IDs by LeetCode number or unlinked title when rows move. DSA entries can include practice, article, YouTube, and LeetCode URLs; `create-links` generates LeetCode links and difficulty maps, and `verify-links` audits them against LeetCode.
 - **Per-user copies.** On first load per manifest version, `bootstrapBuiltInSheets` calls `ensure_builtin_sheet_copies` and `sync_builtin_sheet_data`. Copies are stored in `user_sheets` with a `builtin_template_id`. The sync updates the full track using stable problem IDs and never touches progress. A completion marker per user avoids repeating the work.
 - **Deletion.** Deleting a built-in copy records a tombstone in `user_deleted_builtin_sheets` so it is not recreated. `delete_user_sheet` removes the sheet and its progress. `restore_builtin_dsa_sheet` reinstates the DSA copy and resets its progress.
 - **Uploads.** Users can upload `.txt` tracks up to 2 MB. `parseSheet` validates and normalizes steps, subsections, titles, and `(LC n)` numbers before the sheet is saved to `user_sheets`.
@@ -115,6 +116,8 @@ All app screens require sign-in. `AuthenticatedApp` composes the feature hooks a
   - `useProgress` applies changes optimistically, writes the cache and the offline outbox, then syncs.
   - Writes are serialized through a queue.
   - Completion dates (`completed_on`, `updated_at`) are stored per solved problem.
+- **Tracker interaction.** A DSA problem title opens its TakeUForward practice page when available; resource links open separately, and the checkbox and skip control remain dedicated to progress. Difficulty labels and resource columns adapt to narrow screens.
+- **Rendering.** Problem, subsection, and step rows are memoized. Stable progress callbacks and memoized difficulty summaries avoid re-rendering unchanged tracker rows when one problem changes.
 - **Activity counts.** A database trigger maintains `activity_log` in the same transaction as progress changes. Streaks and heatmaps derive from solved progress.
 - **Backup.** Export writes `done` and `skipped` states per sheet. Import matches by namespaced ID, local ID plus title, or an unambiguous normalized title; unmatched and ambiguous records are ignored.
 
@@ -239,7 +242,7 @@ Vitest runs unit and component tests in jsdom (single worker). Coverage centers 
 | Progress or Daily Log not syncing | Sync status icon, retry, network tab, RLS policies |
 | Username search fails | `vercel dev`, bearer token, prefix length, RPC grants |
 | Deep link 404 after refresh | Vercel rewrite and function deployed |
-| Stale track title or LeetCode link | Deploy matching frontend and migrations, then sign in again |
+| Stale track title or resource link | Deploy matching frontend and migrations, then sign in again |
 | Stale app after deploy | Service worker updates on next load; a one-time chunk reload is automatic |
 
 ## 11. Maintenance rules

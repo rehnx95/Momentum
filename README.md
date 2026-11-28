@@ -15,9 +15,11 @@ connection drops.
 ## What you can do
  
 - **Learn with structure.** Mark problems `To do`, `Done`, or `Skipped`. Start
-  with the built-in **DSA** (with LeetCode links and difficulty) and
-  **Backend** tracks, or upload your own `.txt` track. Search,
-  filter, and expand or collapse groups as you work.
+  with the built-in **DSA** and **Backend** tracks, or upload your own `.txt`
+  track. DSA problems include available practice, article, YouTube, and
+  LeetCode links plus difficulty. A problem title opens its practice page when
+  one is available; use the checkbox to change its progress. Search, filter,
+  and expand or collapse groups as you work.
 - **Record your day.** Log timed activities with start/end slots, run a live
   timer, and record sleep. Daily Log autosaves, warns about overlapping or
   invalid time, and lets you pick a color for each activity.
@@ -33,6 +35,8 @@ connection drops.
 - **Move your progress.** Export and import problem states for a track, reset a
   single track, or restore the original DSA track.
 - **Sign in your way.** Google, email and password, or username and password.
+- **Send feedback.** The shared feedback control opens Gmail's web composer with
+  the recipient and subject filled in.
 - **Work offline.** Progress, Daily Log, and activity-color changes are saved on
   the device and sync when you reconnect.
 ## Screenshots

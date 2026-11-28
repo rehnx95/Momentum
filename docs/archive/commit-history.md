@@ -2,9 +2,9 @@
 
 **Repository:** [rehnx95/Momentum](https://github.com/rehnx95/Momentum)
 
-**History covered:** `8f28602` (initial app baseline, Oct 19, 2026) through `852a509` (Nov 22, 2026)
+**History covered:** `8f28602` (initial app baseline, Oct 19, 2026) through `7911e51` (Nov 29, 2026)
 
-**Commits:** 302, including the initial baseline
+**Commits:** 318, including the initial baseline
 **How to read this:** This is a product and engineering history based on the committed code, migrations, tests, and documentation. Related commits are grouped where they are iterative refinements; the descriptions explain the resulting work rather than restating commit subjects or reproducing patches.
 
 The local Git remote has historically used the name `Track-Sheet`; the product was later rebranded to **Momentum**.
@@ -25,7 +25,7 @@ The most important turning points were the October account/track foundation, the
 
 ## Activity by day
 
-The history has work on 21 dates. Commit dates and counts follow GitHub's UTC timestamps. The number of commits reflects the scale of iteration as well as feature count: several dense runs are visual tuning and bug-fix passes rather than separate features.
+The history has work on 24 dates. Commit dates and counts follow GitHub's UTC timestamps. The number of commits reflects the scale of iteration as well as feature count: several dense runs are visual tuning and bug-fix passes rather than separate features.
 
 | Date | Commits | Main focus |
 | --- | ---: | --- |
@@ -46,10 +46,13 @@ The history has work on 21 dates. Commit dates and counts follow GitHub's UTC ti
 | Nov 14 | 7 | Daily Log/Full Log/Trends cleanup and refactoring |
 | Nov 15 | 22 | Trends, activity colors, profile, mobile UI, screenshots, and tests |
 | Nov 16 | 12 | Startup/loading, sign-in, accessibility, save recovery, and history docs |
-| Nov 17 | 18 | Built-in track sync, startup reliability, PWA assets, and documentation |
-| Nov 18 | 16 | Password authentication, performance, save reliability, and profile fixes |
-| Nov 21 | 2 | Built-in DSA and Backend source/data updates |
-| Nov 22 | 3 | Production fixes, source updates, and route-specific CSS loading |
+| Nov 17 | 16 | Built-in track sync, startup reliability, PWA assets, and documentation |
+| Nov 18 | 18 | Password authentication, performance, save reliability, and profile fixes |
+| Nov 22 | 7 | Production fixes, source updates, route-specific CSS, and log refinements |
+| Nov 23 | 3 | Consistent track handling, progress layout fixes, and DSA video resources |
+| Nov 26 | 7 | Offline behavior, Daily Log integrity, profiles, and testing data |
+| Nov 28 | 1 | Integrated tracker resources and shared feedback entry point |
+| Nov 29 | 3 | Responsive tracker behavior and render-performance refinement |
 
 ## Product evolution
 
@@ -168,6 +171,13 @@ The Nov 16 commits focus on reliability and finish:
 - `893cc76`, `5c18d71`, `fab0b05`, `483c4ac`, `d459cc7`, and `1b00004` refine the heatmap scrollbar, profile progress/restore controls, Daily Log alignment, UI behavior, and loading presentation.
 - `99822e7`, `27a50f0`, and `0ca93fd` refresh screenshots and continue code consistency cleanup.
 
+### 10. Integrated tracker and product refinement — Nov 22–29
+
+- `be4f685` and `b8c7642` update documentation and hide empty dates in Full Log.
+- `c9051df`, `3e74fac`, and `be38da6` align DSA and Backend sheet handling, correct empty-sheet/progress layouts, and include YouTube resources in the DSA tracker.
+- `a001cf6`, `9e30597`, `b2b2da0`, `f9e659c`, `47f10b2`, `1868c00`, and `3150c8f` refine offline behavior, Daily Log integrity, sample data, profile layout, and related tests.
+- `d33537c`, `81cbb89`, and `75165c6` align tracker resources and progress controls, refine mobile behavior and feedback placement; `7911e51` avoids rerendering unchanged tracker rows.
+
 ## Chronological change ledger
 
 This ledger accounts for every commit in the stated range. Commits are grouped by the code area they changed; several adjacent commits are small visual or bug-fix iterations on the same implementation, so the summary describes their combined effect rather than inventing a separate feature for each one.
@@ -255,8 +265,12 @@ This ledger accounts for every commit in the stated range. Commits are grouped b
 - Nov 18 — `992d7b2`, `68f17cf`, `dfb3e10`, `1815b89`, `90f284f`, `0600058`, `e862403`, `5f69745`: refine UI and add email/password sign-in with signup validation, confirmation/error feedback, and loading behavior.
 - Nov 18 — `d45be6e`, `8fa8e84`, `cf089eb`, `e1cd8e4`: improve startup and offline/persistence performance, reduce repetitive errors, and speed up Daily Log saves.
 - Nov 18 — `88c840f`, `66bac26`, `91d7562`, `4982a1f`: remove an unused script, update README and architecture, and fix profile settings.
-- Nov 21 — `f0396f9`, `cf1859a`: update the editable source and generated DSA/Backend track data.
+- Nov 22 — `f0396f9`, `cf1859a`: update the editable source and generated DSA/Backend track data.
 - Nov 22 — `91ba032`, `15c6d7f`, `852a509`: update track sources, fix production-readiness issues (including timer midnight saves, signup confirmation, public-profile privacy, and full built-in data sync), then defer feature CSS into lazy screen chunks.
+- Nov 22 — `be4f685`, `b8c7642`: update the product documentation and hide empty dates in Full Log.
+- Nov 23 — `c9051df`, `3e74fac`, `be38da6`: align DSA and Backend sheet handling, correct empty-sheet/progress layouts, and include YouTube resources in the DSA tracker.
+- Nov 26 — `a001cf6`, `9e30597`, `b2b2da0`, `f9e659c`, `47f10b2`, `1868c00`, `3150c8f`: refine offline behavior, Daily Log integrity, sample data, profile layout, and related tests.
+- Nov 28–29 — `d33537c`, `81cbb89`, `75165c6`, `7911e51`: align tracker resources and progress controls, refine mobile behavior and feedback placement, and avoid rerendering unchanged tracker rows.
 
 ## Technical deep dives
 
@@ -361,4 +375,4 @@ Tests are introduced alongside core time helpers and later cover UI components, 
 
 ## Repository state represented by this report
 
-The endpoint is `852a509` on Nov 22, 2026. At this point the product includes account-backed learning tracks, upload/import/export workflows, searchable public profiles without email disclosure, activity history, Daily Log/Full Log/Trends, sleep/study charts, sample-data tooling, and a feature-based React structure. Built-in track updates reach existing accounts without replacing their saved progress, and route-specific CSS is loaded with its lazy screen. The report describes the changes accumulated in the recorded history; it does not claim that every intermediate experiment remained in the final application.
+The endpoint is `7911e51` on Nov 29, 2026. At this point the product includes account-backed learning tracks, upload/import/export workflows, searchable public profiles without email disclosure, activity history, Daily Log/Full Log/Trends, sleep/study charts, sample-data tooling, and a feature-based React structure. The tracker presents available learning resources alongside separate progress controls, adapts those controls to mobile layouts, and avoids rerendering unchanged rows. Built-in track updates reach existing accounts without replacing their saved progress, and route-specific CSS is loaded with its lazy screen. The report describes the changes accumulated in the recorded history; it does not claim that every intermediate experiment remained in the final application.
