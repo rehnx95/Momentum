@@ -42,7 +42,12 @@ describe("bootstrapBuiltInSheets", () => {
       .find((problem) => problem.title === "Two Sum");
     expect(twoSum.links).toEqual([
       { type: "youtube", url: "https://youtu.be/UXDSeD9mN-k" },
+      {
+        type: "article",
+        url: "https://takeuforward.org/blogs/data-structure-and-algorithm/two-sum",
+      },
       { type: "leetcode", url: "https://leetcode.com/problems/two-sum/" },
+      { type: "practice", url: "https://takeuforward.org/practice/dsa/two-sum" },
     ]);
   });
 
@@ -87,7 +92,9 @@ describe("bootstrapBuiltInSheets", () => {
       problems.every(
         (problem) =>
           Array.isArray(problem.links) &&
-          problem.links.every((link) => ["leetcode", "youtube"].includes(link.type)),
+          problem.links.every((link) =>
+            ["leetcode", "youtube", "practice", "article"].includes(link.type),
+          ),
       ),
     ).toBe(true);
   });
@@ -105,10 +112,30 @@ describe("bootstrapBuiltInSheets", () => {
     expect(
       problems.filter((problem) => problem.links.some((link) => link.type === "leetcode")),
     ).toHaveLength(304);
+    expect(
+      problems.filter((problem) => problem.links.some((link) => link.type === "practice")),
+    ).toHaveLength(407);
+    expect(
+      problems.filter((problem) => problem.links.some((link) => link.type === "article")),
+    ).toHaveLength(314);
     expect(problems.find((problem) => problem.title === "Two Sum").links).toEqual([
       { type: "youtube", url: "https://youtu.be/UXDSeD9mN-k" },
+      {
+        type: "article",
+        url: "https://takeuforward.org/blogs/data-structure-and-algorithm/two-sum",
+      },
       { type: "leetcode", url: "https://leetcode.com/problems/two-sum/" },
+      { type: "practice", url: "https://takeuforward.org/practice/dsa/two-sum" },
     ]);
+    expect(problems.find((problem) => problem.title === "Koko Eating Bananas").links).toContainEqual({
+      type: "practice",
+      url: "https://takeuforward.org/practice/dsa/koko-eating-bananas",
+    });
+    expect(
+      problems.find((problem) => problem.title === "Shortest Path in Binary Matrix").links,
+    ).not.toContainEqual(
+      expect.objectContaining({ type: "practice" }),
+    );
   });
 
   it("includes difficulty for every Backend topic and links all playlist videos", async () => {

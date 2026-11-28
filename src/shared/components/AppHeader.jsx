@@ -1,6 +1,7 @@
 import { ClipboardList, LayoutList, LogOut, Moon, Sun, User, Users } from "lucide-react";
 import MomentumBrand from "./MomentumBrand";
 import OfflineSyncStatus from "./OfflineSyncStatus";
+import FeedbackButton from "./FeedbackButton";
 import Tooltip from "./Tooltip";
 import { preloadForPath } from "../lib/preload";
 
@@ -42,6 +43,7 @@ export default function AppHeader({
         </nav>
         <div className="app-header-actions">
           {testDataTools}
+          <FeedbackButton placement="header" />
           {offlineSync && (
             <OfflineSyncStatus
               online={offlineSync.online}

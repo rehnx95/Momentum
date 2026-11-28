@@ -1,0 +1,445 @@
+# DSA Problems Missing Links
+
+Total problems: 514
+
+## No YouTube link (116)
+
+- 12. Java Collections
+- 13. Python Libraries Part 1
+- 14. Python Libraries Part 2
+- 55. Recursive Bubble Sort
+- 56. Recursive Insertion Sort
+- 131. Reverse String
+- 132. Valid Palindrome
+- 133. Remove Outermost Parentheses
+- 134. Reverse Words in a String
+- 135. Largest Odd Number in String
+- 136. Longest Common Prefix
+- 137. Isomorphic Strings
+- 138. Valid Anagram
+- 139. Sort Characters By Frequency
+- 140. Maximum Nesting Depth of the Parentheses
+- 141. Roman to Integer
+- 142. Integer to Roman
+- 143. Rotate String
+- 144. Reverse Words in a String III
+- 145. String to Integer (atoi)
+- 146. Count Number of Substrings
+- 147. Longest Palindromic Substring
+- 148. Sum of Beauty of All Substrings
+- 149. Minimum Bracket Reversals
+- 150. Count and Say
+- 201. String to Integer (atoi)
+- 204. Sort a Stack Using Recursion
+- 205. Reverse a Stack Using Recursion
+- 206. Learn All Patterns of Subsequences (Theory)
+- 207. Generate all Binary Strings
+- 208. Generate Parentheses
+- 209. Subsets
+- 210. Subsequence with Sum K
+- 211. Check if there Exists a Subsequence with Sum K
+- 212. Count all Subsequences with Sum K
+- 213. Combination Sum
+- 214. Combination Sum II
+- 215. Combination Sum III
+- 216. Subset Sum I
+- 217. Subsets II
+- 218. Letter Combinations of a Phone Number
+- 219. Permutations
+- 220. Palindrome Partitioning
+- 221. Word Search
+- 222. N-Queens
+- 223. Rat in a Maze
+- 224. M Coloring Problem
+- 225. Sudoku Solver
+- 226. Expression Add Operators
+- 227. Introduction to Bit Manipulation / Bits and Tricks
+- 228. Check if the i-th Bit is Set or Not
+- 229. Check if a Number is Odd or Even
+- 230. Power of Two
+- 231. Number of 1 Bits
+- 232. Set the Ith Bit
+- 233. Clear the Ith Bit
+- 234. Toggle the Ith Bit
+- 235. Remove the Last Set Bit
+- 236. Set/Unset the Rightmost Unset Bit
+- 237. Swap Two Numbers
+- 238. Divide Two Integers
+- 239. Minimum Bit Flips to Convert Number
+- 240. Count the Number of Set Bits in a Range
+- 241. Single Number
+- 242. Single Number II
+- 243. Single Number III
+- 244. Subsets
+- 245. XOR of Numbers in a Given Range
+- 269. Number of NGEs to the Right
+- 291. Substrings of Size Three with Distinct Characters
+- 293. Minimum Window Subsequence
+- 296. Introduction to Heap
+- 297. Heapify Algorithm
+- 298. Build Heap from a Given Array
+- 299. Min Heap and Max Heap Implementation
+- 300. Check if an Array Represents a Min Heap
+- 301. Convert Min Heap to Max Heap
+- 302. Heap Sort
+- 303. Kth Largest Element in an Array
+- 304. Kth Smallest Element in a Sorted Matrix
+- 305. Sort K Sorted Array
+- 307. Rank Transform of an Array
+- 308. Task Scheduler
+- 309. Hand of Straights
+- 310. Design Twitter
+- 311. Minimum Cost to Connect Sticks
+- 312. Kth Largest Element in a Stream
+- 313. Maximum Sum Combinations
+- 314. Find Median from Data Stream
+- 315. Top K Frequent Elements
+- 318. Greedy Algorithm to Find Minimum Number of Coins
+- 328. Largest Number
+- 371. Find Min and Max in BST
+- 420. Network Delay Time
+- 436. Swim in Rising Water
+- 440. Tarjan's Algorithm for SCC
+- 469. Palindromic Substrings
+- 476. Word Break
+- 477. Count Palindromic Subsequences
+- 498. Implement Trie (Prefix Tree)
+- 499. Implement Trie II
+- 500. Longest Word in Dictionary
+- 501. Number of Distinct Substrings in a String
+- 502. Bit Prerequisites for Problems
+- 503. Maximum XOR of Two Numbers in an Array
+- 504. Maximum XOR With an Element From Array
+- 505. Longest Common Prefix
+- 506. Subsets
+- 507. Hashing in Strings (Theory)
+- 508. Rabin Karp Algorithm
+- 509. Z-Function
+- 510. Find the Index of the First Occurrence in a String
+- 511. Find All Anagrams in a String
+- 512. Shortest Palindrome
+- 513. Longest Happy Prefix
+- 514. String to Integer (atoi)
+
+## No LeetCode link (210)
+
+- 1. User Input and Output
+- 2. Data Types
+- 3. If Else Statements
+- 4. Switch Statement
+- 5. What are Arrays and Strings
+- 6. For Loops
+- 7. While Loops
+- 8. Functions (Pass by Reference and Value)
+- 9. Time Complexity
+- 10. Patterns
+- 11. C++ STL
+- 12. Java Collections
+- 13. Python Libraries Part 1
+- 14. Python Libraries Part 2
+- 15. Count Digits
+- 16. Count Number of Odd Digits in a Number
+- 19. Return the Largest Digit in a Number
+- 20. Factorial of a Given Number
+- 21. GCD or HCF
+- 22. LCM of Two Numbers
+- 25. Print all Divisors
+- 26. Check for Prime
+- 28. Understand Recursion by Printing Something N Times
+- 29. Recursion Concepts with Parameters
+- 30. Print Name N Times Using Recursion
+- 31. Print 1 to N Using Recursion
+- 32. Print N to 1 Using Recursion
+- 33. Sum of First N Numbers Using Recursion
+- 34. Factorial of N Numbers Using Recursion
+- 35. Sum of Array Elements Using Recursion
+- 37. Reverse an Array Using Recursion
+- 38. Check if a Number is Prime Using Recursion
+- 39. Check if the Array is Sorted Using Recursion
+- 40. Sum of Digits of a Number Using Recursion
+- 43. Hashing Theory
+- 44. Counting Frequencies of Array Elements
+- 45. Highest Occurring Element
+- 46. Second Highest Occurring Element
+- 47. Sum of Highest and Lowest Frequency
+- 48. Sum of Array Elements
+- 49. Count of Odd Numbers in an Array
+- 50. Reverse an Array
+- 51. Selection Sort
+- 52. Bubble Sort
+- 53. Insertion Sort
+- 55. Recursive Bubble Sort
+- 56. Recursive Insertion Sort
+- 58. Largest Element in an Array
+- 59. Second Largest Element in an Array
+- 62. Left Rotate an Array by One Place
+- 65. Linear Search
+- 66. Union of Two Sorted Arrays
+- 76. Print Subarray with Maximum Subarray Sum
+- 80. Leaders in an Array
+- 91. Largest Subarray with 0 Sum
+- 92. Count Number of Subarrays with Given XOR K
+- 96. Count Inversions
+- 100. Implement Lower Bound
+- 103. Floor and Ceil in Sorted Array
+- 105. Count Occurrences in Sorted Array
+- 109. Find out How Many Times Array Has Been Rotated
+- 113. Find the Nth Root of a Number
+- 125. Kth Element of Two Sorted Arrays
+- 126. Find the Row with Maximum Number of 1s
+- 130. Matrix Median
+- 146. Count Number of Substrings
+- 149. Minimum Bracket Reversals
+- 151. Introduction to Linked List and struct
+- 152. Traversal in Linked List
+- 153. Inserting a Node in Linked List
+- 154. Insertion at the Head of Linked List
+- 155. Insertion at the Tail of Linked List
+- 156. Insertion at the Kth Position of Linked List
+- 157. Insertion before the Value X in Linked List
+- 158. Deleting a Node in Linked List
+- 159. Deletion of the Head of Linked List
+- 160. Deletion of the Tail of Linked List
+- 161. Deletion of the Kth Element of Linked List
+- 162. Delete the Element with Value X
+- 163. Find the Length of the Linked List
+- 164. Search an Element in the LL
+- 165. Introduction to Doubly Linked List
+- 166. Convert Array to Doubly Linked List
+- 167. Insert a Node in DLL
+- 168. Insert Node before Head in DLL
+- 169. Insert Node before Tail in DLL
+- 170. Insert Node before Kth Node in DLL
+- 171. Insert before Given Node in DLL
+- 172. Delete a Node in DLL
+- 173. Delete Head of DLL
+- 174. Delete Tail of DLL
+- 175. Delete Kth Element of DLL
+- 176. Remove Given Node in DLL
+- 177. Reverse a DLL
+- 183. Length of Loop in LL
+- 189. Sort a LL of 0s 1s and 2s
+- 193. Delete all Occurrences of a Key in DLL
+- 194. Find Pairs with Given Sum in DLL
+- 199. Flattening of a LL
+- 204. Sort a Stack Using Recursion
+- 205. Reverse a Stack Using Recursion
+- 206. Learn All Patterns of Subsequences (Theory)
+- 207. Generate all Binary Strings
+- 210. Subsequence with Sum K
+- 211. Check if there Exists a Subsequence with Sum K
+- 212. Count all Subsequences with Sum K
+- 216. Subset Sum I
+- 223. Rat in a Maze
+- 224. M Coloring Problem
+- 227. Introduction to Bit Manipulation / Bits and Tricks
+- 228. Check if the i-th Bit is Set or Not
+- 229. Check if a Number is Odd or Even
+- 232. Set the Ith Bit
+- 233. Clear the Ith Bit
+- 234. Toggle the Ith Bit
+- 235. Remove the Last Set Bit
+- 236. Set/Unset the Rightmost Unset Bit
+- 237. Swap Two Numbers
+- 240. Count the Number of Set Bits in a Range
+- 245. XOR of Numbers in a Given Range
+- 247. Print Prime Factors of a Number
+- 248. Divisors of a Number
+- 249. Count Primes in Range L to R
+- 251. Implementation Using Different Data Structures
+- 252. Implement Stack Using Arrays
+- 253. Implement Queue Using Arrays
+- 256. Implement Stack Using Linked List
+- 257. Implement Queue Using Linked List
+- 260. Infix to Postfix Conversion
+- 261. Prefix to Infix Conversion
+- 262. Prefix to Postfix Conversion
+- 263. Postfix to Prefix Conversion
+- 264. Postfix to Infix Conversion
+- 265. Infix to Prefix Conversion
+- 268. Next Smaller Element
+- 269. Number of NGEs to the Right
+- 281. Sliding Window Pattern and Template (Theory)
+- 296. Introduction to Heap
+- 297. Heapify Algorithm
+- 298. Build Heap from a Given Array
+- 299. Min Heap and Max Heap Implementation
+- 300. Check if an Array Represents a Min Heap
+- 301. Convert Min Heap to Max Heap
+- 302. Heap Sort
+- 305. Sort K Sorted Array
+- 313. Maximum Sum Combinations
+- 317. Fractional Knapsack
+- 318. Greedy Algorithm to Find Minimum Number of Coins
+- 321. N Meetings in One Room
+- 325. Job Sequencing Problem
+- 327. Program for Shortest Job First
+- 331. Introduction to Trees
+- 332. Binary Tree Representation in C++
+- 333. Binary Tree Traversals in C++
+- 342. Preorder Inorder Postorder in a Single Traversal
+- 351. Top View of Binary Tree
+- 352. Bottom View of Binary Tree
+- 355. Root to Node Path in Binary Tree
+- 358. Check for Children Sum Property
+- 362. Requirements to Construct a Unique Binary Tree
+- 366. Morris Preorder Traversal
+- 367. Morris Inorder Traversal
+- 369. Introduction to BST
+- 371. Find Min and Max in BST
+- 372. Ceil in a BST
+- 373. Floor in a BST
+- 385. Graph and Types
+- 386. Graph Representation in C++
+- 387. Graph Representation in Java
+- 388. Connected Components Logic
+- 389. BFS Traversal
+- 390. DFS Traversal
+- 395. Cycle Detection in Undirected Graph using BFS
+- 396. Cycle Detection in Undirected Graph using DFS
+- 405. Topological Sort using DFS
+- 406. Topological Sort using BFS Kahn's Algorithm
+- 407. Cycle Detection in Directed Graph using BFS
+- 408. Cycle Detection in Directed Graph using DFS
+- 413. Shortest Path in DAG
+- 414. Shortest Path in Undirected Graph with Unit Weights
+- 415. Dijkstra's Algorithm
+- 416. Print Shortest Path (Dijkstra's)
+- 422. Minimum Multiplications to Reach End
+- 423. Bellman Ford Algorithm
+- 424. Floyd Warshall Algorithm
+- 426. Minimum Spanning Tree
+- 427. Prim's Algorithm
+- 428. Disjoint Set Union by Rank and Path Compression
+- 429. Disjoint Set Union by Size
+- 430. Kruskal's Algorithm
+- 438. Articulation Points in Graph
+- 439. Kosaraju's Algorithm for SCC
+- 440. Tarjan's Algorithm for SCC
+- 441. Introduction to DP
+- 443. Frog Jump
+- 444. Frog Jump with K Distances
+- 447. Ninja's Training
+- 454. Subset Sum Equal to Target
+- 459. 0/1 Knapsack
+- 463. Unbounded Knapsack
+- 464. Rod Cutting Problem
+- 485. Print LIS
+- 489. Longest Bitonic Subsequence
+- 491. Matrix Chain Multiplication
+- 497. Evaluate Boolean Expression to True
+- 499. Implement Trie II
+- 502. Bit Prerequisites for Problems
+- 507. Hashing in Strings (Theory)
+- 508. Rabin Karp Algorithm
+- 509. Z-Function
+
+## No Practice link (107)
+
+- 1. User Input and Output
+- 2. Data Types
+- 3. If Else Statements
+- 4. Switch Statement
+- 5. What are Arrays and Strings
+- 6. For Loops
+- 7. While Loops
+- 8. Functions (Pass by Reference and Value)
+- 9. Time Complexity
+- 10. Patterns
+- 11. C++ STL
+- 12. Java Collections
+- 13. Python Libraries Part 1
+- 14. Python Libraries Part 2
+- 28. Understand Recursion by Printing Something N Times
+- 29. Recursion Concepts with Parameters
+- 30. Print Name N Times Using Recursion
+- 31. Print 1 to N Using Recursion
+- 32. Print N to 1 Using Recursion
+- 33. Sum of First N Numbers Using Recursion
+- 35. Sum of Array Elements Using Recursion
+- 43. Hashing Theory
+- 44. Counting Frequencies of Array Elements
+- 49. Count of Odd Numbers in an Array
+- 60. Check if Array Is Sorted and Rotated
+- 76. Print Subarray with Maximum Subarray Sum
+- 109. Find out How Many Times Array Has Been Rotated
+- 110. Single Element in a Sorted Array
+- 113. Find the Nth Root of a Number
+- 115. Minimum Number of Days to Make m Bouquets
+- 134. Reverse Words in a String
+- 135. Largest Odd Number in String
+- 142. Integer to Roman
+- 151. Introduction to Linked List and struct
+- 153. Inserting a Node in Linked List
+- 158. Deleting a Node in Linked List
+- 165. Introduction to Doubly Linked List
+- 167. Insert a Node in DLL
+- 172. Delete a Node in DLL
+- 204. Sort a Stack Using Recursion
+- 205. Reverse a Stack Using Recursion
+- 206. Learn All Patterns of Subsequences (Theory)
+- 207. Generate all Binary Strings
+- 209. Subsets
+- 210. Subsequence with Sum K
+- 216. Subset Sum I
+- 219. Permutations
+- 222. N-Queens
+- 227. Introduction to Bit Manipulation / Bits and Tricks
+- 232. Set the Ith Bit
+- 233. Clear the Ith Bit
+- 234. Toggle the Ith Bit
+- 235. Remove the Last Set Bit
+- 240. Count the Number of Set Bits in a Range
+- 251. Implementation Using Different Data Structures
+- 254. Implement Stack using Queues
+- 255. Implement Queue using Stacks
+- 275. Largest Rectangle in Histogram
+- 281. Sliding Window Pattern and Template (Theory)
+- 291. Substrings of Size Three with Distinct Characters
+- 296. Introduction to Heap
+- 299. Min Heap and Max Heap Implementation
+- 304. Kth Smallest Element in a Sorted Matrix
+- 305. Sort K Sorted Array
+- 313. Maximum Sum Combinations
+- 318. Greedy Algorithm to Find Minimum Number of Coins
+- 320. Valid Parenthesis String
+- 324. Meeting Rooms II
+- 328. Largest Number
+- 331. Introduction to Trees
+- 332. Binary Tree Representation in C++
+- 333. Binary Tree Traversals in C++
+- 338. Binary Tree Preorder Traversal (Iterative)
+- 339. Binary Tree Inorder Traversal (Iterative)
+- 340. Binary Tree Postorder Traversal (Iterative, 2 Stacks)
+- 341. Binary Tree Postorder Traversal (Iterative, 1 Stack)
+- 342. Preorder Inorder Postorder in a Single Traversal
+- 355. Root to Node Path in Binary Tree
+- 369. Introduction to BST
+- 370. Search in a Binary Search Tree
+- 371. Find Min and Max in BST
+- 385. Graph and Types
+- 386. Graph Representation in C++
+- 387. Graph Representation in Java
+- 389. BFS Traversal
+- 390. DFS Traversal
+- 417. Shortest Path in Binary Matrix
+- 419. Cheapest Flights Within K Stops
+- 426. Minimum Spanning Tree
+- 427. Prim's Algorithm
+- 428. Disjoint Set Union by Rank and Path Compression
+- 429. Disjoint Set Union by Size
+- 430. Kruskal's Algorithm
+- 440. Tarjan's Algorithm for SCC
+- 441. Introduction to DP
+- 446. House Robber II
+- 450. Minimum Path Sum
+- 466. Print Longest Common Subsequence
+- 469. Palindromic Substrings
+- 486. Longest Increasing Subsequence using Binary Search
+- 497. Evaluate Boolean Expression to True
+- 498. Implement Trie (Prefix Tree)
+- 499. Implement Trie II
+- 502. Bit Prerequisites for Problems
+- 506. Subsets
+- 507. Hashing in Strings (Theory)
+- 511. Find All Anagrams in a String

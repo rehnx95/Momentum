@@ -17,7 +17,18 @@ function parsePreviousMarkdown(markdown) {
 
     const difficulty = match[2].match(/\[(Easy|Medium|Hard)\]/)?.[1] ?? null;
     const note = match[2].match(/\s+↪\s+(.+)$/)?.[1] ?? null;
-    rows.set(Number(match[1]), { difficulty, note });
+    const resources = {};
+    for (const resource of match[2].matchAll(
+      /\[(YouTube|Practice|Article)\]\((?:<([^>]+)>|([^)]+))\)/gi,
+    )) {
+      resources[resource[1].toLowerCase()] = resource[2] || resource[3];
+    }
+    rows.set(Number(match[1]), {
+      difficulty,
+      note,
+      youtubeUrl: resources.youtube ?? null,
+      practiceUrl: resources.practice ?? null,
+    });
   }
   return rows;
 }
@@ -48,7 +59,7 @@ async function main() {
   const output = [
     "# Striver's A2Z DSA Sheet — LeetCode Edition",
     "",
-    "Legend: `[Easy]` `[Medium]` `[Hard]` show LeetCode difficulty for linked problems; unlinked difficulty is retained from this sheet. 🔒 = LeetCode Premium; ↪ = a related replacement.",
+    "Legend: `[Easy]` `[Medium]` `[Hard]` show LeetCode difficulty for linked problems; `[Article]`, `[YouTube]`, and `[Practice]` open related resources. 🔒 = LeetCode Premium; ↪ = a related replacement.",
     "",
   ];
   let linkedCount = 0;
@@ -86,6 +97,24 @@ async function main() {
     const reference = sourceMetadata.get(row.number);
     const noteText = reference?.note ?? prior?.note;
     const note = noteText ? ` ↪ ${noteText}` : "";
+    const existingYoutubeUrl = problem.links?.find((link) => link.type === "youtube")?.url;
+    const youtubeUrl = reference?.youtubeUrl ?? existingYoutubeUrl;
+    const existingPracticeUrl = problem.links?.find((link) => link.type === "practice")?.url;
+    const practiceUrl = reference?.practiceUrl ?? existingPracticeUrl;
+    const existingArticleUrl = problem.links?.find((link) => link.type === "article")?.url;
+    const articleUrl = reference?.articleUrl ?? existingArticleUrl;
+    const links = [];
+    if (youtubeUrl) links.push({ type: "youtube", url: youtubeUrl });
+    if (articleUrl) links.push({ type: "article", url: articleUrl });
+    const resourceMarkdown = [
+      articleUrl ? `[Article](<${articleUrl}>)` : "",
+      youtubeUrl ? `[YouTube](<${youtubeUrl}>)` : "",
+      practiceUrl ? `[Practice](<${practiceUrl}>)` : "",
+    ]
+      .filter(Boolean)
+      .map((link) => ` ${link}`)
+      .join("");
+
     if (row.leetCodeId !== null) {
       const question = catalog.byId.get(row.leetCodeId);
       if (!question) {
@@ -93,11 +122,14 @@ async function main() {
       }
       const url = `https://leetcode.com/problems/${question.titleSlug}/`;
       problem.difficulty = question.difficulty;
-      problem.link = { type: "leetcode", url };
+      links.push({ type: "leetcode", url });
+      if (practiceUrl) links.push({ type: "practice", url: practiceUrl });
+      problem.links = links;
+      delete problem.link;
       delete problem.lc;
       const premium = question.isPaidOnly ? " 🔒" : "";
       output.push(
-        `- ${row.number}. [${row.title}](${url}) [${question.difficulty}]${premium}${note}`,
+        `- ${row.number}. [${row.title}](${url}) [${question.difficulty}]${premium}${resourceMarkdown}${note}`,
       );
       linkedCount += 1;
     } else {
@@ -106,9 +138,11 @@ async function main() {
         throw new Error(`Problem ${row.number} has no difficulty in source/dsa.md.`);
       }
       problem.difficulty = difficulty;
-      problem.link = null;
+      if (practiceUrl) links.push({ type: "practice", url: practiceUrl });
+      problem.links = links;
+      delete problem.link;
       delete problem.lc;
-      output.push(`- ${row.number}. ${row.title} [${difficulty}]${note}`);
+      output.push(`- ${row.number}. ${row.title} [${difficulty}]${resourceMarkdown}${note}`);
       unlinkedCount += 1;
     }
   }

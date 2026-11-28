@@ -195,6 +195,17 @@
   display: inline-flex;
 }
 
+.app-tooltip-anchor.feedback-button-anchor {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: calc(var(--z-app-chrome) + 1);
+}
+
+.app-tooltip-anchor.feedback-button-header {
+  display: none;
+}
+
 .app-tooltip {
   position: absolute;
   top: auto;
@@ -233,6 +244,20 @@
 .app-tooltip-portal.app-tooltip-visible {
   opacity: 1;
   visibility: visible;
+}
+
+@screen mobile {
+  .app-tooltip-anchor.feedback-button-floating {
+    display: none;
+  }
+
+  .app-tooltip-anchor.feedback-button-anchor.feedback-button-header {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
+    display: inline-flex;
+  }
 }
 
 .app-tooltip-anchor:hover .app-tooltip,

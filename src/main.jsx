@@ -7,6 +7,7 @@ import "./styles/theme-and-status.css";
 import "./styles/layout.css";
 import "./styles/responsive/core.css";
 import App from "./App";
+import FeedbackButton from "./shared/components/FeedbackButton";
 import { preloadForPath } from "./shared/lib/preload";
 import { initPwaIntegration } from "./pwa/pwaIntegration";
 initPwaIntegration();
@@ -114,6 +115,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <RevealScrollbarsWhileScrolling />
     <AppErrorBoundary>
       <App />
+      <FeedbackButton placement="floating" />
     </AppErrorBoundary>
   </React.StrictMode>,
 );

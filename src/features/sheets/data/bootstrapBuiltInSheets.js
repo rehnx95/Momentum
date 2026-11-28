@@ -7,7 +7,7 @@ const sheetAssets = import.meta.glob("./*.json", {
   import: "default",
   query: "?url",
 });
-const BUILTIN_SYNC_VERSION = "sheet-metadata-v5";
+const BUILTIN_SYNC_VERSION = "sheet-metadata-v7";
 
 function getSheetManifestVersion() {
   let hash = 2166136261;

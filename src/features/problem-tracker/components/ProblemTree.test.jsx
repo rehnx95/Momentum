@@ -7,7 +7,7 @@ import { ProblemRow } from "./ProblemTree";
 afterEach(cleanup);
 
 describe("ProblemRow", () => {
-  it("shows LeetCode metadata for a built-in DSA row", () => {
+  it("opens the practice page from the title and toggles only from the checkbox", () => {
     const onToggle = vi.fn();
     render(
       <ProblemRow
@@ -15,7 +15,12 @@ describe("ProblemRow", () => {
           id: "two-sum",
           title: "Two Sum",
           difficulty: "Easy",
-          links: [{ type: "leetcode", url: "https://leetcode.com/problems/two-sum/" }],
+          links: [
+            { type: "youtube", url: "https://youtu.be/example" },
+            { type: "leetcode", url: "https://leetcode.com/problems/two-sum/" },
+            { type: "practice", url: "https://takeuforward.org/practice/dsa/two-sum" },
+            { type: "article", url: "https://takeuforward.org/blogs/data-structure-and-algorithm/two-sum" },
+          ],
         }}
         state="todo"
         onToggle={onToggle}
@@ -24,19 +29,33 @@ describe("ProblemRow", () => {
       />,
     );
 
+    const practiceLink = screen.getByRole("link", { name: "Open Two Sum on TakeUForward" });
+    const articleLink = screen.getByRole("link", { name: "Read article for Two Sum" });
     const link = screen.getByRole("link", { name: "Open Two Sum on LeetCode" });
+    const youtubeLink = screen.getByRole("link", { name: "Open Two Sum on YouTube" });
     const skipButton = screen.getByRole("button", { name: "Skip Two Sum" });
     const actionGroup = link.closest(".grid");
     const tooltips = Array.from(document.body.querySelectorAll('[role="tooltip"]'));
     const tooltipLabels = tooltips.map((tooltip) => tooltip.textContent);
 
-    expect(screen.getByRole("button", { name: "Toggle Two Sum completion" })).toBeTruthy();
+    expect(screen.getByRole("checkbox", { name: "Mark Two Sum as done" })).toBeTruthy();
+    expect(practiceLink.getAttribute("href")).toBe(
+      "https://takeuforward.org/practice/dsa/two-sum",
+    );
+    expect(practiceLink.getAttribute("target")).toBe("_blank");
+    expect(practiceLink.getAttribute("rel")).toBe("noopener noreferrer");
+    expect(practiceLink.className).not.toContain("underline");
+    expect(articleLink.getAttribute("href")).toBe(
+      "https://takeuforward.org/blogs/data-structure-and-algorithm/two-sum",
+    );
+    expect(articleLink.getAttribute("target")).toBe("_blank");
     expect(screen.getByText("Easy")).toBeTruthy();
-    expect(actionGroup.className).toContain("grid-cols-[auto_1.25rem_1.25rem_1.25rem]");
-    expect(actionGroup.children).toHaveLength(4);
-    expect(actionGroup.children[1].querySelector("a")).toBe(link);
-    expect(actionGroup.children[2].querySelector("a")).toBeNull();
-    expect(actionGroup.children[3].querySelector("button")).toBe(skipButton);
+    expect(actionGroup.className).toContain("grid-cols-[auto_1.25rem_1.25rem_1.25rem_1.25rem]");
+    expect(actionGroup.children).toHaveLength(5);
+    expect(actionGroup.children[1].querySelector("a")).toBe(articleLink);
+    expect(actionGroup.children[2].querySelector("a")).toBe(link);
+    expect(actionGroup.children[3].querySelector("a")).toBe(youtubeLink);
+    expect(actionGroup.children[4].querySelector("button")).toBe(skipButton);
     expect(link.textContent).toBe("");
     const leetcodeIcon = link.querySelector("svg");
     expect(leetcodeIcon?.getAttribute("viewBox")).toBe("0 0 94 111");
@@ -53,16 +72,19 @@ describe("ProblemRow", () => {
     ).toBeTruthy();
     expect(skipButton.textContent).toBe("");
     expect(skipButton.querySelector("svg")).not.toBeNull();
-    expect(tooltipLabels).toEqual(["Open on LeetCode", "Skip"]);
+    expect(tooltipLabels).toEqual(["Read article", "Open on LeetCode", "Open on YouTube", "Skip"]);
     expect(tooltips.every((tooltip) => tooltip.parentElement === document.body)).toBe(true);
     expect(tooltips.every((tooltip) => tooltip.classList.contains("app-tooltip"))).toBe(true);
     expect(tooltips.every((tooltip) => tooltip.classList.contains("app-tooltip-portal"))).toBe(
       true,
     );
     expect(tooltips.every((tooltip) => tooltip.style.position === "fixed")).toBe(true);
-    expect(skipButton.getAttribute("aria-describedby")).toBe(tooltips[1].id);
+    expect(skipButton.getAttribute("aria-describedby")).toBe(tooltips[3].id);
     expect(link.hasAttribute("title")).toBe(false);
     expect(skipButton.hasAttribute("title")).toBe(false);
+
+    fireEvent.click(practiceLink);
+    expect(onToggle).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Mark Two Sum as done" }));
     expect(onToggle).toHaveBeenCalledWith("two-sum");
@@ -117,12 +139,15 @@ describe("ProblemRow", () => {
     );
 
     expect(screen.getByText("Easy")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Toggle Linear Search completion" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Toggle Linear Search completion" })).toBeNull();
+    expect(screen.getByRole("checkbox", { name: "Mark Linear Search as done" })).toBeTruthy();
     expect(screen.queryByRole("link", { name: /LeetCode/ })).toBeNull();
     const actionGroup = document.querySelector(".problem-row > div.grid");
-    expect(actionGroup.children).toHaveLength(4);
+    expect(actionGroup.className).toContain("grid-cols-[auto_1.25rem_1.25rem_1.25rem_1.25rem]");
+    expect(actionGroup.children).toHaveLength(5);
     expect(actionGroup.children[1].querySelector("a")).toBeNull();
     expect(actionGroup.children[2].querySelector("a")).toBeNull();
+    expect(actionGroup.children[3].querySelector("a")).toBeNull();
   });
 
   it("shows Backend difficulty and an accessible YouTube link", () => {

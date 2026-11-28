@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, SkipForward } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, SkipForward } from "lucide-react";
 import Tooltip from "../../../shared/components/Tooltip";
 import { getProblemDifficulty } from "../utils/problemDifficulty";
 
@@ -57,17 +57,26 @@ function LeetCodeIcon() {
 }
 
 function ResourceLink({ link, title }) {
-  const resourceLabel = link.type === "youtube" ? "YouTube" : "LeetCode";
+  const resourceLabel =
+    link.type === "article" ? "Article" : link.type === "youtube" ? "YouTube" : "LeetCode";
   return (
-    <Tooltip label={`Open on ${resourceLabel}`} portal>
+    <Tooltip label={link.type === "article" ? "Read article" : `Open on ${resourceLabel}`} portal>
       <a
         href={link.url}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={`Open ${title} on ${resourceLabel}`}
+        aria-label={
+          link.type === "article" ? `Read article for ${title}` : `Open ${title} on ${resourceLabel}`
+        }
         className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md text-muted transition-colors duration-200 hover:bg-rowHover hover:text-text"
       >
-        {link.type === "youtube" ? <YouTubeIcon /> : <LeetCodeIcon />}
+        {link.type === "article" ? (
+          <FileText size={14} aria-hidden="true" />
+        ) : link.type === "youtube" ? (
+          <YouTubeIcon />
+        ) : (
+          <LeetCodeIcon />
+        )}
       </a>
     </Tooltip>
   );
@@ -92,13 +101,19 @@ export function ProblemRow({
     : [];
   const resourceLinks = links.filter(
     (link) =>
-      (link?.type === "youtube" || link?.type === "leetcode") &&
+      (link?.type === "youtube" ||
+        link?.type === "leetcode" ||
+        link?.type === "practice" ||
+        link?.type === "article") &&
       typeof link.url === "string" &&
       link.url,
   );
+  const articleLink = resourceLinks.find((link) => link.type === "article");
   const leetcodeLink = resourceLinks.find((link) => link.type === "leetcode");
   const youtubeLink = resourceLinks.find((link) => link.type === "youtube");
+  const practiceLink = resourceLinks.find((link) => link.type === "practice");
   const difficulty = showBuiltinMetadata ? getProblemDifficulty(prob) : undefined;
+  const hasArticleColumn = Boolean(articleLink || reserveLeetCodeColumn);
   const hasLeetCodeColumn = Boolean(leetcodeLink || reserveLeetCodeColumn);
 
   return (
@@ -126,35 +141,47 @@ export function ProblemRow({
         )}
       </button>
 
-      <button
-        onClick={() => onToggle(prob.id)}
-        className="flex-1 text-left text-base leading-snug text-text hover:text-text transition-colors duration-200"
-      >
-        {prob.title}
-      </button>
+      {practiceLink ? (
+        <a
+          href={practiceLink.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Open ${prob.title} on TakeUForward`}
+          className="flex-1 text-left text-base leading-snug text-text transition-colors duration-200 hover:text-accent"
+        >
+          {prob.title}
+        </a>
+      ) : (
+        <span className="flex-1 text-left text-base leading-snug text-text">{prob.title}</span>
+      )}
 
       <div
         className={`grid flex-shrink-0 items-center gap-x-1 ${
           showBuiltinMetadata
-            ? hasLeetCodeColumn
-              ? "grid-cols-[auto_1.25rem_1.25rem_1.25rem]"
-              : "grid-cols-[auto_1.25rem_1.25rem]"
+            ? hasArticleColumn && hasLeetCodeColumn
+              ? "grid-cols-[auto_1.25rem_1.25rem_1.25rem_1.25rem]"
+              : hasArticleColumn || hasLeetCodeColumn
+                ? "grid-cols-[auto_1.25rem_1.25rem_1.25rem]"
+                : "grid-cols-[auto_1.25rem_1.25rem]"
             : "grid-cols-[1.25rem_1.25rem]"
         }`}
       >
         {difficulty && (
-          <button
-            type="button"
-            onClick={() => onToggle(prob.id)}
-            aria-label={`Toggle ${prob.title} completion`}
+          <span
             className={`justify-self-start rounded-md px-1 py-1 text-xs font-medium ${difficultyStyles[difficulty]}`}
           >
             {difficulty}
-          </button>
+          </span>
         )}
 
         {showBuiltinMetadata ? (
           <>
+            {hasArticleColumn &&
+              (articleLink ? (
+                <ResourceLink link={articleLink} title={prob.title} />
+              ) : (
+                <span aria-hidden="true" />
+              ))}
             {hasLeetCodeColumn &&
               (leetcodeLink ? (
                 <ResourceLink link={leetcodeLink} title={prob.title} />
