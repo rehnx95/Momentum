@@ -109,7 +109,7 @@ textarea {
   }
 
   .app-tooltip-anchor:active .app-tooltip,
-  .app-tooltip-anchor:has(:focus) .app-tooltip {
+  .app-tooltip-anchor:has(:focus-visible) .app-tooltip {
     transform: translateY(0);
     opacity: 1;
     visibility: visible;

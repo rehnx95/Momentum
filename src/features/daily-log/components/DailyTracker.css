@@ -997,7 +997,8 @@
   white-space: nowrap;
 }
 
-.daily-slot-row .time-input {
+.daily-slot-row .time-input,
+.daily-sleep-time-range .time-input {
   display: inline-flex;
   width: auto;
   min-height: 1.55rem;
@@ -1013,7 +1014,8 @@
   gap: 0;
 }
 
-.daily-slot-row .time-input input {
+.daily-slot-row .time-input input,
+.daily-sleep-time-range .time-input input {
   width: 0.95rem;
   text-align: center;
 }
@@ -1125,11 +1127,8 @@
   max-width: 100%;
 }
 
-.daily-sleep-time-range .time-input {
-  width: 4.7rem;
-  height: var(--button-height-lg);
-  min-height: var(--button-height-lg);
-  font-size: var(--font-size-base);
+.daily-sleep-time-range .slot-remove {
+  margin-left: auto;
 }
 
 .quick-log-card h3 {

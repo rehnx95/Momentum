@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { formatDuration } from "../../../shared/utils/time";
 import TimeInput from "./TimeInput";
@@ -14,14 +14,62 @@ export default function SleepCard({
   onSaveNow,
 }) {
   const feedbackId = useId();
+  const cardRef = useRef(null);
+  const [showEmptyPeriod, setShowEmptyPeriod] = useState(true);
   const hasError = feedback.some((issue) => issue.type === "error");
   const describedBy = feedback.length ? feedbackId : undefined;
-  const visibleSleepPeriods = sleepPeriods.length
-    ? sleepPeriods
-    : [{ id: "new-sleep-period", start: "", end: "" }];
+  const visibleSleepPeriods =
+    sleepPeriods.length > 0
+      ? sleepPeriods
+      : showEmptyPeriod
+        ? [{ id: "new-sleep-period", start: "", end: "" }]
+        : [];
+
+  useEffect(() => {
+    const discardEmptyPeriods = (event) => {
+      const card = cardRef.current;
+      if (!card) return;
+
+      const addButton = event.target?.closest?.(".daily-add-slot");
+      if (addButton && card.contains(addButton)) return;
+
+      const clickedRange = event.target?.closest?.(".daily-sleep-time-range");
+      const clickedIndex =
+        clickedRange && card.contains(clickedRange)
+          ? Number(clickedRange.dataset.sleepPeriodIndex)
+          : -1;
+      const emptyPeriods = sleepPeriods.reduce((periods, period, index) => {
+        if (!String(period.start || "").trim() && !String(period.end || "").trim()) {
+          periods.push(index);
+        }
+        return periods;
+      }, []);
+
+      emptyPeriods.reverse().forEach((index) => {
+        if (index !== clickedIndex) onRemove?.(sleepPeriods[index].id);
+      });
+
+      if (clickedIndex < 0 && emptyPeriods.length === sleepPeriods.length) {
+        setShowEmptyPeriod(false);
+      }
+    };
+
+    document.addEventListener("click", discardEmptyPeriods);
+    return () => document.removeEventListener("click", discardEmptyPeriods);
+  }, [onRemove, sleepPeriods]);
+
+  const removePeriod = (periodId) => {
+    if (periodId === "new-sleep-period" && sleepPeriods.length === 0) {
+      setShowEmptyPeriod(false);
+      return;
+    }
+
+    if (sleepPeriods.length === 1) setShowEmptyPeriod(false);
+    onRemove?.(periodId);
+  };
 
   return (
-    <section className="daily-sleep-panel" aria-label="Sleep time">
+    <section className="daily-sleep-panel" aria-label="Sleep time" ref={cardRef}>
       <header className="daily-sleep-header">
         <h3>Sleep</h3>
         <span className="daily-sleep-total">
@@ -39,6 +87,7 @@ export default function SleepCard({
             <div
               className={`daily-sleep-time-range${periodHasOverlap ? " is-overlapping" : ""}${periodHasError ? " has-slot-error" : ""}`}
               aria-describedby={describedBy}
+              data-sleep-period-index={index}
               key={period.id}
             >
               <TimeInput
@@ -68,7 +117,7 @@ export default function SleepCard({
                 type="button"
                 className="slot-remove"
                 aria-label={`Remove sleep period ${index + 1}`}
-                onClick={() => onRemove(period.id)}
+                onClick={() => removePeriod(period.id)}
                 disabled={disabled}
               >
                 <X size={14} aria-hidden="true" />

@@ -32,12 +32,15 @@ function createDaily(tasks = []) {
     retryLoad: vi.fn(),
     saveNow: vi.fn(),
     updateField: vi.fn(),
+    updateSleepPeriod: vi.fn(),
     addCustomTask: vi.fn(),
     addSheetActivity: vi.fn(),
     setActivityColor: vi.fn().mockResolvedValue(true),
     addSlot: vi.fn(),
+    addSleepPeriod: vi.fn(),
     discardEmptySlot: vi.fn(),
     removeSlot: vi.fn(),
+    removeSleepPeriod: vi.fn(),
     removeCustomTask: vi.fn(),
     renameCustomTask: vi.fn(),
     stopTimer: vi.fn(),
@@ -62,6 +65,37 @@ describe("DayView activity entry", () => {
     expect(screen.getByLabelText("Sleep period 1 wake time hour")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Remove Sleep/ })).toBeNull();
     expect(daily.updateField).not.toHaveBeenCalled();
+  });
+
+  it("hides an untouched sleep period after clicking outside", () => {
+    const daily = createDaily();
+    render(<DayView daily={daily} sheets={[]} askConfirmation={vi.fn()} />);
+
+    expect(screen.getByLabelText("Sleep period 1 start time hour")).toBeTruthy();
+    fireEvent.click(document.body);
+
+    expect(screen.queryByLabelText("Sleep period 1 start time hour")).toBeNull();
+    expect(screen.getByRole("button", { name: "Add sleep period" })).toBeTruthy();
+  });
+
+  it("keeps the empty sleep period when adding another period", () => {
+    const daily = createDaily();
+    render(<DayView daily={daily} sheets={[]} askConfirmation={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Add sleep period" }));
+
+    expect(daily.addSleepPeriod).toHaveBeenCalledOnce();
+    expect(screen.getByLabelText("Sleep period 1 start time hour")).toBeTruthy();
+  });
+
+  it("discards empty saved sleep periods after clicking outside", () => {
+    const daily = createDaily();
+    daily.log.sleep_periods = [{ id: "sleep-1", start: "", end: "" }];
+    render(<DayView daily={daily} sheets={[]} askConfirmation={vi.fn()} />);
+
+    fireEvent.click(document.body);
+
+    expect(daily.removeSleepPeriod).toHaveBeenCalledWith("sleep-1");
   });
 
   it("keeps the activity header and its add/delete controls visible for one slot", () => {

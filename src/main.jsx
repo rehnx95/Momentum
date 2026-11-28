@@ -9,8 +9,18 @@ import "./styles/responsive/core.css";
 import App from "./App";
 import FeedbackButton from "./shared/components/FeedbackButton";
 import { preloadForPath } from "./shared/lib/preload";
+import { clearPointerFocusOnClick } from "./shared/utils/pointerFocus";
 import { initPwaIntegration } from "./pwa/pwaIntegration";
 initPwaIntegration();
+
+function PointerFocusReset() {
+  React.useEffect(() => {
+    document.addEventListener("click", clearPointerFocusOnClick);
+    return () => document.removeEventListener("click", clearPointerFocusOnClick);
+  }, []);
+
+  return null;
+}
 
 function RevealScrollbarsWhileScrolling() {
   React.useEffect(() => {
@@ -112,6 +122,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
+    <PointerFocusReset />
     <RevealScrollbarsWhileScrolling />
     <AppErrorBoundary>
       <App />

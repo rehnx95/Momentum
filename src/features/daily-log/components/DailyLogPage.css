@@ -555,11 +555,11 @@
 }
 
 .daily-log-page-shell .daily-sleep-time-range {
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
-  min-height: 2rem;
+  min-height: 1.8rem;
   gap: var(--space-1);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface);
@@ -1382,6 +1382,13 @@
 
   .daily-log-page-shell .full-log-timeline {
     min-width: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .daily-log-page-shell .daily-slot-row .slot-remove,
+  .daily-log-page-shell .daily-sleep-time-range .slot-remove {
+    opacity: 1;
   }
 }
 

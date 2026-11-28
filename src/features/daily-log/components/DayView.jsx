@@ -288,6 +288,7 @@ export default function DayView({ daily, sheets = [], askConfirmation }) {
             </div>
           </form>
           <SleepCard
+            key={daily.date}
             sleepPeriods={getSleepPeriods(daily.log)}
             totalMinutes={getSleepMinutes(daily.log)}
             feedback={getSleepFeedback(daily.validation)}
