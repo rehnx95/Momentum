@@ -2,7 +2,7 @@ import { MessageCircle } from "lucide-react";
 import Tooltip from "./Tooltip";
 
 const feedbackEmail = "rehan95378@gmail.com";
-const feedbackSubject = encodeURIComponent("Track Sheet feedback");
+const feedbackSubject = encodeURIComponent("Momentum feedback");
 const feedbackUrl = `https://mail.google.com/mail/u/0/?view=cm&fs=1&to=${feedbackEmail}&su=${feedbackSubject}`;
 
 export default function FeedbackButton({ placement = "floating" }) {

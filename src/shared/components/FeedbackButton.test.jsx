@@ -10,7 +10,7 @@ describe("FeedbackButton", () => {
 
     const link = screen.getByRole("link", { name: "Send feedback by email" });
     expect(link.getAttribute("href")).toBe(
-      "https://mail.google.com/mail/u/0/?view=cm&fs=1&to=rehan95378@gmail.com&su=Track%20Sheet%20feedback",
+      "https://mail.google.com/mail/u/0/?view=cm&fs=1&to=rehan95378@gmail.com&su=Momentum%20feedback",
     );
     expect(link.getAttribute("target")).toBe("_blank");
     expect(link.hasAttribute("title")).toBe(false);
@@ -53,7 +53,7 @@ describe("FeedbackButton", () => {
     expect(link.parentElement.className).toContain("feedback-button-header");
     expect(link.className).toBe("icon-btn");
     expect(link.getAttribute("href")).toBe(
-      "https://mail.google.com/mail/u/0/?view=cm&fs=1&to=rehan95378@gmail.com&su=Track%20Sheet%20feedback",
+      "https://mail.google.com/mail/u/0/?view=cm&fs=1&to=rehan95378@gmail.com&su=Momentum%20feedback",
     );
     expect(link.getAttribute("target")).toBe("_blank");
     expect(link.querySelector("svg").getAttribute("width")).toBe("18");
