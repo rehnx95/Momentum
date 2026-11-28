@@ -150,6 +150,42 @@ describe("ProblemRow", () => {
     expect(actionGroup.children[3].querySelector("a")).toBeNull();
   });
 
+  it("provides compact difficulty initials for mobile", () => {
+    render(
+      <>
+        {[
+          ["easy", "Easy", "E"],
+          ["medium", "Medium", "M"],
+          ["hard", "Hard", "H"],
+        ].map(([id, difficulty, initial]) => (
+          <ProblemRow
+            key={id}
+            prob={{ id, title: difficulty, difficulty, links: [] }}
+            state="todo"
+            onToggle={vi.fn()}
+            onSkip={vi.fn()}
+            showBuiltinMetadata
+          />
+        ))}
+      </>,
+    );
+
+    const rows = document.querySelectorAll(".problem-row");
+    for (const [index, [difficulty, initial]] of [
+      ["Easy", "E"],
+      ["Medium", "M"],
+      ["Hard", "H"],
+    ].entries()) {
+      const badge = rows[index].querySelector(".grid > span");
+      expect(badge.className).toContain("mobile:h-6");
+      expect(badge.className).toContain("mobile:w-6");
+      expect(badge.children[0].textContent).toBe(difficulty);
+      expect(badge.children[0].className).toContain("mobile:hidden");
+      expect(badge.children[1].textContent).toBe(initial);
+      expect(badge.children[1].className).toContain("mobile:inline");
+    }
+  });
+
   it("shows Backend difficulty and an accessible YouTube link", () => {
     render(
       <ProblemRow

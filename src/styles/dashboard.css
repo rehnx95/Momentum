@@ -41,7 +41,7 @@
   background-color: var(--surface-hover) !important;
 }
 
-.tracker-dashboard-shell:not([data-theme="light"]) .problem-row:not(:hover):not(:focus-within) {
+.tracker-dashboard-shell:not([data-theme="light"]) .problem-row:not(:hover):not(:has(:focus-visible)) {
   background-color: var(--page) !important;
 }
 
@@ -251,7 +251,7 @@
   pointer-events: none;
 }
 
-.problem-row:focus-within {
+.problem-row:has(:focus-visible) {
   background: var(--surface-hover);
 }
 

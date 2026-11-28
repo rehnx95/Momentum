@@ -52,6 +52,10 @@ describe("FeedbackButton", () => {
     expect(link).not.toBeNull();
     expect(link.parentElement.className).toContain("feedback-button-header");
     expect(link.className).toBe("icon-btn");
+    expect(link.getAttribute("href")).toBe(
+      "mailto:rehan95378@gmail.com?subject=Track%20Sheet%20feedback",
+    );
+    expect(link.hasAttribute("target")).toBe(false);
     expect(link.querySelector("svg").getAttribute("width")).toBe("18");
   });
 });

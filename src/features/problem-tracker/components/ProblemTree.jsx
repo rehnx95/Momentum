@@ -168,9 +168,12 @@ export function ProblemRow({
       >
         {difficulty && (
           <span
-            className={`justify-self-start rounded-md px-1 py-1 text-xs font-medium ${difficultyStyles[difficulty]}`}
+            className={`justify-self-start rounded-md px-1 py-1 text-xs font-medium mobile:inline-flex mobile:h-6 mobile:w-6 mobile:items-center mobile:justify-center mobile:px-0 mobile:py-0 ${difficultyStyles[difficulty]}`}
           >
-            {difficulty}
+            <span className="mobile:hidden">{difficulty}</span>
+            <span className="hidden mobile:inline" aria-hidden="true">
+              {difficulty[0]}
+            </span>
           </span>
         )}
 

@@ -6,6 +6,9 @@ const feedbackSubject = encodeURIComponent("Track Sheet feedback");
 
 export default function FeedbackButton({ placement = "floating" }) {
   const isHeaderButton = placement === "header";
+  const href = isHeaderButton
+    ? `mailto:${feedbackEmail}?subject=${feedbackSubject}`
+    : `https://mail.google.com/mail/?view=cm&fs=1&to=${feedbackEmail}&su=${feedbackSubject}`;
 
   return (
     <Tooltip
@@ -14,9 +17,9 @@ export default function FeedbackButton({ placement = "floating" }) {
       className={`feedback-button-anchor feedback-button-${placement}`}
     >
       <a
-        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${feedbackEmail}&su=${feedbackSubject}`}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={href}
+        target={isHeaderButton ? undefined : "_blank"}
+        rel={isHeaderButton ? undefined : "noopener noreferrer"}
         aria-label="Send feedback by email"
         className={
           isHeaderButton
