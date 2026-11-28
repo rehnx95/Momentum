@@ -41,8 +41,14 @@
   background-color: var(--surface-hover) !important;
 }
 
-.tracker-dashboard-shell:not([data-theme="light"]) .problem-row:not(:hover):not(:has(:focus-visible)) {
+.tracker-dashboard-shell:not([data-theme="light"]) .problem-row:not(:hover) {
   background-color: var(--page) !important;
+}
+
+@media (hover: hover) {
+  .problem-row:not(.bg-skippedRow):hover {
+    background-color: var(--surface-hover);
+  }
 }
 
 .tracker-dashboard-shell .tracker-alignment-container {
@@ -249,10 +255,6 @@
 
 .sheet-sidebar.sidebar-closed {
   pointer-events: none;
-}
-
-.problem-row:has(:focus-visible) {
-  background: var(--surface-hover);
 }
 
 .dashboard-main .sheet-nav-item {

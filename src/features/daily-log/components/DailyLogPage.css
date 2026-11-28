@@ -372,11 +372,11 @@
   color: var(--danger);
 }
 
-.daily-log-page-shell .daily-slot-row:hover,
-.daily-log-page-shell .daily-slot-row:focus-within,
-.daily-log-page-shell .daily-sleep-time-range:hover,
-.daily-log-page-shell .daily-sleep-time-range:focus-within {
-  background: var(--surface-hover);
+@media (hover: hover) {
+  .daily-log-page-shell .daily-slot-row:hover,
+  .daily-log-page-shell .daily-sleep-time-range:hover {
+    background: var(--surface-hover);
+  }
 }
 
 .daily-log-page-shell .slot-time-controls,

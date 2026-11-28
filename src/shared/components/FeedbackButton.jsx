@@ -3,12 +3,10 @@ import Tooltip from "./Tooltip";
 
 const feedbackEmail = "rehan95378@gmail.com";
 const feedbackSubject = encodeURIComponent("Track Sheet feedback");
+const feedbackUrl = `https://mail.google.com/mail/u/0/?view=cm&fs=1&to=${feedbackEmail}&su=${feedbackSubject}`;
 
 export default function FeedbackButton({ placement = "floating" }) {
   const isHeaderButton = placement === "header";
-  const href = isHeaderButton
-    ? `mailto:${feedbackEmail}?subject=${feedbackSubject}`
-    : `https://mail.google.com/mail/?view=cm&fs=1&to=${feedbackEmail}&su=${feedbackSubject}`;
 
   return (
     <Tooltip
@@ -17,9 +15,9 @@ export default function FeedbackButton({ placement = "floating" }) {
       className={`feedback-button-anchor feedback-button-${placement}`}
     >
       <a
-        href={href}
-        target={isHeaderButton ? undefined : "_blank"}
-        rel={isHeaderButton ? undefined : "noopener noreferrer"}
+        href={feedbackUrl}
+        target="_blank"
+        rel="noopener noreferrer"
         aria-label="Send feedback by email"
         className={
           isHeaderButton

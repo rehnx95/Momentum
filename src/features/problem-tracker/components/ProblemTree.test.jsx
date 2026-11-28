@@ -51,6 +51,7 @@ describe("ProblemRow", () => {
     expect(articleLink.getAttribute("target")).toBe("_blank");
     expect(screen.getByText("Easy")).toBeTruthy();
     expect(actionGroup.className).toContain("grid-cols-[auto_1.25rem_1.25rem_1.25rem_1.25rem]");
+    expect(actionGroup.className).toContain("mobile:gap-x-0");
     expect(actionGroup.children).toHaveLength(5);
     expect(actionGroup.children[1].querySelector("a")).toBe(articleLink);
     expect(actionGroup.children[2].querySelector("a")).toBe(link);

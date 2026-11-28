@@ -118,7 +118,7 @@ export function ProblemRow({
 
   return (
     <div
-      className={`problem-row group flex items-center gap-3 py-2 pl-3 pr-1 rounded-lg transition-colors duration-200 ${isSkip ? "opacity-50 bg-skippedRow" : "hover:bg-rowHover"}`}
+      className={`problem-row group flex items-center gap-3 py-2 pl-3 pr-1 rounded-lg transition-colors duration-200 ${isSkip ? "opacity-50 bg-skippedRow" : ""}`}
     >
       <button
         type="button"
@@ -156,7 +156,7 @@ export function ProblemRow({
       )}
 
       <div
-        className={`grid flex-shrink-0 items-center gap-x-1 ${
+        className={`grid flex-shrink-0 items-center gap-x-1 mobile:gap-x-0 ${
           showBuiltinMetadata
             ? hasArticleColumn && hasLeetCodeColumn
               ? "grid-cols-[auto_1.25rem_1.25rem_1.25rem_1.25rem]"
