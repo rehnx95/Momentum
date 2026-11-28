@@ -71,4 +71,40 @@ describe("useProblemTree", () => {
     );
     await act(async () => renderer.unmount());
   });
+
+  it("keeps progress handlers stable while reading the latest state", async () => {
+    const store = new Map();
+    vi.stubGlobal("localStorage", {
+      getItem: (key) => store.get(key) ?? null,
+      setItem: (key, value) => store.set(key, String(value)),
+    });
+    const update = vi.fn();
+    let result;
+    function HookHarness({ progress }) {
+      const getState = (id) => progress[id] || "todo";
+      result = useProblemTree({ data, progress, getState, update });
+      return null;
+    }
+
+    let renderer;
+    await act(async () => {
+      renderer = TestRenderer.create(React.createElement(HookHarness, { progress: {} }));
+    });
+    const handleToggle = result.handleToggle;
+    const handleSkip = result.handleSkip;
+
+    await act(async () => {
+      renderer.update(
+        React.createElement(HookHarness, { progress: { "problem-1": "done" } }),
+      );
+    });
+
+    expect(result.handleToggle).toBe(handleToggle);
+    expect(result.handleSkip).toBe(handleSkip);
+    act(() => result.handleToggle("problem-1"));
+    expect(update).toHaveBeenLastCalledWith("problem-1", "todo");
+    act(() => result.handleSkip("problem-1"));
+    expect(update).toHaveBeenLastCalledWith("problem-1", "skipped");
+    await act(async () => renderer.unmount());
+  });
 });

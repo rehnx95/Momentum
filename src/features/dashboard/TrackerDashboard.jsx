@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Check, RefreshCcw, Search, X } from "lucide-react";
 import AppHeader from "../../shared/components/AppHeader";
 import Tooltip from "../../shared/components/Tooltip";
@@ -277,9 +278,10 @@ export default function TrackerDashboard({ context }) {
   const isBuiltIn = isBuiltInSheet(selectedSheet);
   const isCompactProgressCard = !isBuiltIn && Boolean(selectedSheet?.customId);
   const canResetSheetProgress = isBuiltIn || Boolean(selectedSheet?.customId);
-  const builtInDifficultyStats = isBuiltIn
-    ? getBuiltinDifficultyStats(sheetProblems, progressState)
-    : null;
+  const builtInDifficultyStats = useMemo(
+    () => (isBuiltIn ? getBuiltinDifficultyStats(sheetProblems, progressState) : null),
+    [isBuiltIn, progressState, sheetProblems],
+  );
 
   return (
     <>

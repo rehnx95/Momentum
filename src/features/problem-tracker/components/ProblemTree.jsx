@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { ChevronDown, ChevronRight, FileText, SkipForward } from "lucide-react";
 import Tooltip from "../../../shared/components/Tooltip";
 import { getProblemDifficulty } from "../utils/problemDifficulty";
@@ -82,7 +83,7 @@ function ResourceLink({ link, title }) {
   );
 }
 
-export function ProblemRow({
+export const ProblemRow = memo(function ProblemRow({
   prob,
   state,
   onToggle,
@@ -213,9 +214,9 @@ export function ProblemRow({
       </div>
     </div>
   );
-}
+});
 
-export function SubSectionRow({
+export const SubSectionRow = memo(function SubSectionRow({
   sub,
   expanded,
   onToggle,
@@ -280,9 +281,9 @@ export function SubSectionRow({
       )}
     </div>
   );
-}
+});
 
-export function StepRow({
+export const StepRow = memo(function StepRow({
   step,
   progressState,
   expandedSteps,
@@ -329,7 +330,7 @@ export function StepRow({
               key={sub.id}
               sub={sub}
               expanded={expandedSubs.has(sub.id)}
-              onToggle={() => onToggleSub(sub.id)}
+              onToggle={onToggleSub}
               progressState={progressState}
               onToggleProb={onToggleProb}
               onSkipProb={onSkipProb}
@@ -343,4 +344,4 @@ export function StepRow({
       )}
     </div>
   );
-}
+});

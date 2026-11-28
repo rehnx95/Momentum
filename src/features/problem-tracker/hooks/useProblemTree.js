@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const STATE_FILTERS = new Set(["done", "skipped", "todo"]);
 const EMPTY_PROGRESS = {};
@@ -128,20 +128,22 @@ export default function useProblemTree({ data, progress, getState, update, enabl
     },
     [getState, problemMap],
   );
+  const progressStateRef = useRef(progressState);
+  progressStateRef.current = progressState;
 
   const handleToggle = useCallback(
     (id) => {
-      const current = progressState(id);
+      const current = progressStateRef.current(id);
       update(id, current === "done" ? "todo" : "done");
     },
-    [progressState, update],
+    [update],
   );
   const handleSkip = useCallback(
     (id) => {
-      const current = progressState(id);
+      const current = progressStateRef.current(id);
       update(id, current === "skipped" ? "todo" : "skipped");
     },
-    [progressState, update],
+    [update],
   );
   const toggleStep = useCallback((id) => {
     setExpandedSteps((current) => {
