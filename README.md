@@ -1,72 +1,100 @@
 # Momentum
- 
-**A personal workspace for learning, daily routines, and visible progress.**
- 
+
+### Learn, track your days, and see progress—all in one place.
+
+Momentum is a personal progress workspace for coding practice and everyday
+routines. Track what you are learning, record how you spend your time, and use
+your history to understand how your efforts add up.
+
+[**Try Momentum**](https://momentum-rehnx.vercel.app/) ·
+[Explore the features](#product-overview) ·
+[Read the architecture guide](./docs/architecture.md)
+
 [![CI](https://github.com/rehnx95/Momentum/actions/workflows/ci.yml/badge.svg)](https://github.com/rehnx95/Momentum/actions/workflows/ci.yml)
- 
-[Open the live app](https://momentum-rehnx.vercel.app/)
- 
-Momentum brings learning tracks, time tracking, and progress insights into one
-account-based workspace. Follow a built-in track, bring your own `.txt` track,
-log your activities and sleep, then review your history and habits over time.
-It installs as a progressive web app and keeps working through short
-connection drops.
- 
-## What you can do
- 
-- **Learn with structure.** Mark problems `To do`, `Done`, or `Skipped`. Start
-  with the built-in **DSA** and **Backend** tracks, or upload your own `.txt`
-  track. DSA problems include available practice, article, YouTube, and
-  LeetCode links plus difficulty. A problem title opens its practice page when
-  one is available; use the checkbox to change its progress. Search, filter,
-  and expand or collapse groups as you work.
-- **Record your day.** Log timed activities with start/end slots, run a live
-  timer, and record sleep. Daily Log autosaves, warns about overlapping or
-  invalid time, and lets you pick a color for each activity.
-- **Review your history.** Full Log shows every day as a share-of-time bar
-  (activities, sleep, and untracked time). Trends charts sleep and activity
-  hours over 7- or 30-day windows and totals where a week went.
-- **See your progress.** Completion totals, current and best streaks, a
-  one-year or per-year activity heatmap, recent accepted problems, and
-  per-track progress.
-- **Share a profile.** Find other Momentum users by username and open their
-  profile. Public profiles are visible to signed-in users and include the
-  owner's name, username, progress summaries, and activity.
-- **Move your progress.** Export and import problem states for a track, reset a
-  single track, or restore the original DSA track.
-- **Sign in your way.** Google, email and password, or username and password.
-- **Send feedback.** The shared feedback control opens Gmail's web composer with
-  the recipient and subject filled in.
-- **Work offline.** Progress, Daily Log, and activity-color changes are saved on
-  the device and sync when you reconnect.
+
+## Product overview
+
+### Learning tracks and problem solving
+
+Start with the built-in **DSA roadmap (514 problems across 18 steps)** or the
+**Backend roadmap (153 problems across 14 steps)**. You can also upload a
+plain-text problem sheet and keep progress for each track separately.
+
+- Use available practice, article, YouTube, and LeetCode links directly from
+  problem rows; difficulty is labeled Easy, Medium, or Hard.
+- Mark a problem Done or Skipped independently. The title opens its practice
+  page when available; the checkbox changes completion.
+- Find problems with search and status filters, hide skipped items, and expand
+  or collapse roadmap sections.
+- See solved and skipped totals, plus Easy/Medium/Hard progress for the built-in
+  DSA track. Import or export progress, reset a track, or restore DSA.
+
+### Daily routines and time tracking
+
+Use **Daily Log** to record study, work, exercise, sleep, and other activities.
+Add start/end time slots, run a live timer, use quick-log actions for learning
+tracks, and choose colors to make activities easy to scan. The log autosaves,
+validates times, and warns about overlaps.
+
+### History and progress insights
+
+- **Full Log** brings past days together in a time breakdown of activities,
+  sleep, and untracked time.
+- **Trends** compares sleep and activity over 7- or 30-day periods and shows
+  averages and weekly totals.
+- The tracker dashboard shows solved, to-do, skipped, and difficulty-level
+  progress. Profiles add current and best streaks, recent accepted problems,
+  and yearly activity heatmaps.
+
+### Profiles and sharing
+
+Sign in with Google, email/password, or username/password. Your profile brings
+together your track progress and activity; username search helps signed-in
+users find other Momentum members and view their public progress profiles.
+
+### Offline and personal settings
+
+Install Momentum as a PWA on desktop or mobile. After signing in online, progress
+and Daily Log changes can be saved on the device and synced after reconnecting.
+Choose a theme and activity colors, and use the feedback control to open a
+pre-addressed Gmail draft.
+
 ## Screenshots
- 
-| DSA tracker (dark) | DSA tracker (light) |
+
+| DSA tracker (light) | Expanded track (dark) |
 | --- | --- |
-| ![DSA tracker in dark theme](./docs/screenshots/tracker-dashboard.png) | ![DSA tracker in light theme](./docs/screenshots/tracker-dashboard-light.png) |
- 
-| Expanded DSA tracker (dark) | Expanded DSA tracker (light) |
+| ![DSA tracker in light theme](./docs/screenshots/tracker-dashboard-light.png) | ![Expanded DSA tracker in dark theme](./docs/screenshots/tracker-expanded-category.png) |
+
+| Backend track (dark) | Daily Log (light) |
 | --- | --- |
-| ![Expanded DSA tracker in dark theme](./docs/screenshots/tracker-expanded-category.png) | ![Expanded DSA tracker in light theme](./docs/screenshots/tracker-expanded-category-light.png) |
- 
-| Backend tracker (dark) | Backend tracker (light) |
+| ![Backend tracker in dark theme](./docs/screenshots/backend-tracker.png) | ![Daily Log in light theme](./docs/screenshots/daily-log-light.png) |
+
+| Full Log (dark) | Trends (dark) |
 | --- | --- |
-| ![Backend tracker in dark theme](./docs/screenshots/backend-tracker.png) | ![Backend tracker in light theme](./docs/screenshots/backend-tracker-light.png) |
- 
-| Daily Log (dark) | Daily Log (light) |
+| ![Full Log in dark theme](./docs/screenshots/full-log.png) | ![Trends in dark theme](./docs/screenshots/trends.png) |
+
+| Profile (light) | People search (dark) |
 | --- | --- |
-| ![Daily Log in dark theme](./docs/screenshots/daily-log.png) | ![Daily Log in light theme](./docs/screenshots/daily-log-light.png) |
- 
-| Full Log (dark) | Full Log (light) |
-| --- | --- |
-| ![Full Log in dark theme](./docs/screenshots/full-log.png) | ![Full Log in light theme](./docs/screenshots/full-log-light.png) |
- 
-| Profile (dark) | Profile (light) |
-| --- | --- |
-| ![Profile in dark theme](./docs/screenshots/profile.png) | ![Profile in light theme](./docs/screenshots/profile-light.png) |
- 
-More views are in [`docs/screenshots/`](./docs/screenshots/).
- 
+| ![Profile in light theme](./docs/screenshots/profile-light.png) | ![People search in dark theme](./docs/screenshots/people-search.png) |
+
+More views and light/dark variants are in [`docs/screenshots/`](./docs/screenshots/).
+
+## Engineering highlights
+
+- **Feature-based React architecture** keeps tracker, Daily Log, profiles, and
+  authentication code organized by product area.
+- **Responsive, installable experience** uses route-level code splitting and a
+  service worker for app-shell caching.
+- **Offline-aware persistence** queues local changes, syncs them on reconnect,
+  and surfaces conflicts instead of silently overwriting newer data.
+- **Secure data boundaries** use Supabase Auth, PostgreSQL row-level security,
+  and server-side functions for username search and sign-in.
+- **Tested workflows** use Vitest and Testing Library for unit, component, and
+  integration coverage, with ESLint for static checks.
+
+For system design, data flows, security boundaries, and deployment details, see
+the [architecture guide](./docs/architecture.md).
+
 ## Technology
  
 | Layer | Technologies |
