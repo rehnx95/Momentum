@@ -63,7 +63,11 @@ describe("UnauthenticatedView", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Create an account" }));
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Account access" })).getByRole("button", {
+        name: "Sign up",
+      }),
+    );
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "rehan@example.com" },
     });
@@ -86,7 +90,11 @@ describe("UnauthenticatedView", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Create an account" }));
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Account access" })).getByRole("button", {
+        name: "Sign up",
+      }),
+    );
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "rehan@example.com" },
     });
@@ -114,7 +122,7 @@ describe("UnauthenticatedView", () => {
 
     fireEvent.click(
       within(screen.getByRole("group", { name: "Account access" })).getByRole("button", {
-        name: "Create account",
+        name: "Sign up",
       }),
     );
 

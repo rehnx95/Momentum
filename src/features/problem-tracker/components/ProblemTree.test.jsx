@@ -158,7 +158,7 @@ describe("ProblemRow", () => {
           ["easy", "Easy", "E"],
           ["medium", "Medium", "M"],
           ["hard", "Hard", "H"],
-        ].map(([id, difficulty, initial]) => (
+        ].map(([id, difficulty]) => (
           <ProblemRow
             key={id}
             prob={{ id, title: difficulty, difficulty, links: [] }}

@@ -637,7 +637,7 @@ describe("useDailyLogPersistence", () => {
         {
           ...logRef.current,
           custom_tasks: [
-            { id: "reading", name: "Reading", slots: [{ start: "12:00", end: "11:00" }] },
+            { id: "reading", name: "Reading", slots: [{ start: "12:00", end: "12:00" }] },
           ],
         },
         date,

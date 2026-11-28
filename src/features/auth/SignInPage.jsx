@@ -90,7 +90,7 @@ export default function UnauthenticatedView({
                 disabled={isSigningIn}
                 onClick={() => switchMode("sign-up")}
               >
-                Create account
+                Sign up
               </button>
             </div>
             <form className="auth-credential-form" onSubmit={handleSubmit}>
@@ -138,10 +138,10 @@ export default function UnauthenticatedView({
                 {authAction === (mode === "sign-in" ? "password" : "sign-up")
                   ? mode === "sign-in"
                     ? "Signing in…"
-                    : "Creating account…"
+                    : "Signing up…"
                   : mode === "sign-in"
                     ? "Sign in"
-                    : "Create account"}
+                    : "Sign up"}
               </button>
             </form>
             <div className="auth-divider">
@@ -179,7 +179,7 @@ export default function UnauthenticatedView({
                 type="button"
                 onClick={() => switchMode(mode === "sign-in" ? "sign-up" : "sign-in")}
               >
-                {mode === "sign-in" ? "Create an account" : "Sign in"}
+                {mode === "sign-in" ? "Sign up" : "Sign in"}
               </button>
             </p>
           </div>
